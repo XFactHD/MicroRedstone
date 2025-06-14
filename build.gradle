@@ -1,0 +1,139 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.89'
+}
+
+version = mod_version
+group = 'io.github.xfacthd.microredstone'
+
+base {
+    archivesName = 'MicroRedstone'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neoforge_version
+
+    validateAccessTransformers = true
+
+    //interfaceInjectionData = files('src/main/resources/injected_interfaces.json')
+
+    parchment {
+        minecraftVersion = project.parchment_minecraft_version
+        mappingsVersion = project.parchment_mappings_version
+    }
+
+    runs {
+        configureEach {
+            // systemProperty  'neoforge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'framedblocks'
+            systemProperty 'terminal.ansi', 'true'
+
+            logLevel = org.slf4j.event.Level.DEBUG
+
+            sourceSet = project.sourceSets.test
+        }
+
+        client {
+            client()
+            gameDirectory = project.file('run')
+        }
+
+        server {
+            server()
+            gameDirectory = project.file('run_server')
+
+            programArgument '--nogui'
+        }
+
+        data {
+            clientData()
+            gameDirectory = project.file('run')
+
+            programArguments.addAll(
+                    '--mod', 'microredstone',
+                    '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath()
+            )
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            gameDirectory = project.file('run_gametest')
+        }
+    }
+
+    mods {
+        simpleminimap {
+            sourceSet(project.sourceSets.main)
+            sourceSet(project.sourceSets.test)
+        }
+    }
+
+    addModdingDependenciesTo(project.sourceSets.test)
+}
+
+sourceSets {
+    main.resources {
+        srcDir 'src/generated/resources'
+    }
+
+    test {
+        java {
+            srcDir "src/test/java"
+        }
+        resources {
+            srcDir "src/test/resources"
+        }
+    }
+}
+
+repositories {
+    maven {
+        name = 'CurseMaven'
+        url = 'https://www.cursemaven.com'
+        content {
+            includeGroup('curse.maven')
+        }
+    }
+}
+
+dependencies {
+    runtimeOnly("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
+}
+
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version: minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neoforge_version: neoforge_version,
+            neoforge_version_range: neoforge_version_range,
+            mod_version: mod_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
+publishing {
+    publications {
+        register ('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.compilerArgs << "-Xmaxerrs" << "10000"
+}

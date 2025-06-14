@@ -1,0 +1,34 @@
+modLoader="javafml"
+issueTrackerURL="https://www.github.com/xfacthd/microredstone"
+license="LGPL v3"
+
+[[mods]]
+    modId="microredstone"
+    version="${mod_version}"
+    displayName="MicroRedstone"
+#    displayURL="https://www.curseforge.com/minecraft/mc-mods/microredstone"
+    logoFile="logo.png"
+    logoBlur=false
+    authors="XFactHD"
+    description=''''''
+
+
+
+#[[mixins]]
+#    config="microredstone.mixin.json"
+
+
+
+[[dependencies.microredstone]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neoforge_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.microredstone]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
