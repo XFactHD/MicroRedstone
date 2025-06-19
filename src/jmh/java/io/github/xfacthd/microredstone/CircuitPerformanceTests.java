@@ -1,0 +1,62 @@
+package io.github.xfacthd.microredstone;
+
+import io.github.xfacthd.microredstone.common.circuit.Circuit;
+import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitAssembler;
+import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
+import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.util.ComplexTestCircuits;
+import io.github.xfacthd.microredstone.util.TestInterfaceAdapter;
+import net.minecraft.Util;
+import net.minecraft.util.ProblemReporter;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.infra.Blackhole;
+
+import java.util.Objects;
+
+@State(Scope.Benchmark)
+@SuppressWarnings("MethodMayBeStatic")
+public class CircuitPerformanceTests
+{
+    private static final CompoundCircuitNode BCD_7SEG_DEC_INTERP = Util.make(() ->
+    {
+        CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
+        CompoundCircuitNode assembled = CircuitAssembler.assemble(protoNode, ProblemReporter.DISCARDING);
+        return Objects.requireNonNull(assembled);
+    });
+    private static final Circuit BCD_7SEG_DEC_INTERP_CIRCUIT = new Circuit(BCD_7SEG_DEC_INTERP);
+    private static final TestInterfaceAdapter BCD_7SEG_DEC_INTERP_ADAPTER = new TestInterfaceAdapter();
+    private static final CircuitNode BCD_7SEG_DEC_COMPILED = Util.make(() ->
+    {
+        CircuitNode compiled = CircuitCompiler.getOrCompileNode(BCD_7SEG_DEC_INTERP, null, true);
+        return Objects.requireNonNull(compiled);
+    });
+    private static final Circuit BCD_7SEG_DEC_COMPILED_CIRCUIT = new Circuit(BCD_7SEG_DEC_COMPILED);
+    private static final TestInterfaceAdapter BCD_7SEG_DEC_COMPILED_ADAPTER = new TestInterfaceAdapter();
+
+    @Benchmark
+    public void runInterpreted(Blackhole bh)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            BCD_7SEG_DEC_INTERP_ADAPTER.setValue(Port.LEFT, i);
+            BCD_7SEG_DEC_INTERP_CIRCUIT.evaluate(BCD_7SEG_DEC_INTERP_ADAPTER);
+            bh.consume(BCD_7SEG_DEC_INTERP_ADAPTER.getValue(Port.RIGHT));
+        }
+    }
+
+    @Benchmark
+    public void runCompiled(Blackhole bh)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            BCD_7SEG_DEC_COMPILED_ADAPTER.setValue(Port.LEFT, i);
+            BCD_7SEG_DEC_COMPILED_CIRCUIT.evaluate(BCD_7SEG_DEC_COMPILED_ADAPTER);
+            bh.consume(BCD_7SEG_DEC_COMPILED_ADAPTER.getValue(Port.RIGHT));
+        }
+    }
+}

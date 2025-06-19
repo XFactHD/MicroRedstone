@@ -1,0 +1,219 @@
+package io.github.xfacthd.microredstone.common.circuit.assembler;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.graph.ElementOrder;
+import com.google.common.graph.Graph;
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.MutableGraph;
+import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
+import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
+import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
+import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundlePackerCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
+import io.github.xfacthd.microredstone.common.util.CountingProblemReporter;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.util.ProblemReporter;
+import net.neoforged.fml.loading.toposort.CyclePresentException;
+import net.neoforged.fml.loading.toposort.TopologicalSort;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+
+@SuppressWarnings("UnstableApiUsage")
+public final class CircuitAssembler
+{
+    private static final Port[] PORTS = Port.values();
+
+    @Nullable
+    public static CompoundCircuitNode assemble(CompoundPrototypeNode node, ProblemReporter problemReporter)
+    {
+        CountingProblemReporter reporter = CountingProblemReporter.of(problemReporter);
+
+        List<ClockPrototypeNode> clockProtoNodes = new ArrayList<>();
+        List<BufferPrototypeNode> bufferProtoNodes = new ArrayList<>();
+        Graph<PrototypeNode> nodeGraph = buildNodeGraph(node, clockProtoNodes, bufferProtoNodes, reporter);
+        if (nodeGraph == null) return null;
+
+        node.validate(reporter.forChild(() -> "root_node"));
+        if (reporter.hasIssues()) return null;
+
+        List<PrototypeNode> childProtoNodes = buildSortedNodeList(nodeGraph, reporter);
+        if (reporter.hasIssues()) return null;
+
+        WireMapper wireMapper = new WireMapper();
+
+        List<ClockCircuitNode> clockNodes = clockProtoNodes.stream()
+                .map(clock -> clock.assemble(wireMapper))
+                .toList();
+        List<BufferCircuitNode> bufferNodes = bufferProtoNodes.stream()
+                .map(buffer -> buffer.assemble(wireMapper))
+                .toList();
+
+        List<NodeEntry<CircuitNode>> childNodes = new ArrayList<>();
+        for (PrototypeNode childNode : childProtoNodes)
+        {
+            switch (childNode)
+            {
+                case ClockPrototypeNode ignored -> throw new IllegalStateException();
+                case BufferPrototypeNode ignored -> throw new IllegalStateException();
+                case CompoundPrototypeNode ignored -> throw new IllegalStateException();
+                case ReferencePrototypeNode reference ->
+                {
+                    CompoundCircuitNode assembled = reference.assemble(wireMapper);
+                    WirePair[] inputs = Arrays.stream(assembled.getInputs())
+                            .map(con ->
+                            {
+                                Wire wire = reference.getPortWire(con.port());
+                                int resolved = wireMapper.resolveWire(wire);
+                                return new WirePair(resolved, con.wire());
+                            })
+                            .toArray(WirePair[]::new);
+                    WirePair[] outputs = Arrays.stream(assembled.getOutputs())
+                            .map(con ->
+                            {
+                                Wire wire = reference.getPortWire(con.port());
+                                int resolved = wireMapper.resolveWire(wire);
+                                return new WirePair(resolved, con.wire());
+                            })
+                            .toArray(WirePair[]::new);
+                    childNodes.add(new NodeEntry<>(assembled, inputs, outputs));
+                }
+                default ->
+                {
+                    CircuitNode assembled = childNode.assemble(wireMapper);
+                    WirePair[] inputs = Arrays.stream(assembled.getInputs())
+                            .mapToInt(Connector::wire)
+                            .mapToObj(WirePair::new)
+                            .toArray(WirePair[]::new);
+                    WirePair[] outputs = Arrays.stream(assembled.getOutputs())
+                            .mapToInt(Connector::wire)
+                            .mapToObj(WirePair::new)
+                            .toArray(WirePair[]::new);
+                    childNodes.add(new NodeEntry<>(assembled, inputs, outputs));
+                }
+            }
+        }
+
+        Int2ObjectMap<List<BundlePackerCircuitNode>> packersPerWire = new Int2ObjectOpenHashMap<>();
+        for (NodeEntry<CircuitNode> childNode : childNodes)
+        {
+            if (childNode.node() instanceof BundlePackerCircuitNode packer)
+            {
+                int wire = packer.getOutputs()[0].wire();
+                packersPerWire.computeIfAbsent(wire, $ -> new ArrayList<>()).add(packer);
+            }
+        }
+        for (List<BundlePackerCircuitNode> packers : packersPerWire.values())
+        {
+            packers.getLast().markAsLast();
+        }
+
+        List<Connector> inputs = new ArrayList<>();
+        List<Connector> outputs = new ArrayList<>();
+        Connection[] connections = node.getConnections();
+        for (Port port : PORTS)
+        {
+            Connection connection = connections[port.ordinal()];
+            if (connection == null) continue;
+
+            Connector connector = connection.toConnector(port, wireMapper);
+            switch (connection.getPortDir())
+            {
+                case INPUT -> inputs.add(connector);
+                case OUTPUT -> outputs.add(connector);
+            }
+        }
+        if (wireMapper.size() != node.getWireCount())
+        {
+            reporter.report(() -> "Wire count mismatch");
+            return null;
+        }
+
+        return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, wireMapper.size(), inputs, outputs);
+    }
+
+    @Nullable
+    private static Graph<PrototypeNode> buildNodeGraph(
+            CompoundPrototypeNode node,
+            List<ClockPrototypeNode> clockProtoNodes,
+            List<BufferPrototypeNode> bufferProtoNodes,
+            ProblemReporter reporter
+    )
+    {
+        MutableGraph<PrototypeNode> graph = GraphBuilder.directed().nodeOrder(ElementOrder.insertion()).build();
+        Map<Wire, PrototypeNode> drivers = new IdentityHashMap<>();
+        Multimap<Wire, PrototypeNode> readers = HashMultimap.create();
+
+        for (PrototypeNode childNode : node.getChildNodes())
+        {
+            if (childNode instanceof ClockPrototypeNode clock)
+            {
+                clockProtoNodes.add(clock);
+                continue;
+            }
+            if (childNode instanceof BufferPrototypeNode buffer)
+            {
+                bufferProtoNodes.add(buffer);
+                continue;
+            }
+
+            graph.addNode(childNode);
+            for (Wire input : childNode.getConnectedInputWires())
+            {
+                readers.put(input, childNode);
+            }
+            for (Wire output : childNode.getConnectedOutputWires())
+            {
+                drivers.put(output, childNode);
+            }
+        }
+
+        for (Map.Entry<Wire, PrototypeNode> driver : drivers.entrySet())
+        {
+            Wire wire = driver.getKey();
+            PrototypeNode driverNode = driver.getValue();
+            for (PrototypeNode readerNode : readers.get(wire))
+            {
+                if (driverNode == readerNode)
+                {
+                    reporter.report(() -> "Immediate cyclic connection on " + driverNode);
+                    return null;
+                }
+                graph.putEdge(driverNode, readerNode);
+            }
+        }
+        return graph;
+    }
+
+    private static List<PrototypeNode> buildSortedNodeList(Graph<PrototypeNode> nodeGraph, ProblemReporter reporter)
+    {
+        try
+        {
+            return TopologicalSort.topologicalSort(nodeGraph, null);
+        }
+        catch (CyclePresentException e)
+        {
+            reporter.report(() -> "Cyclic connection");
+            return List.of();
+        }
+    }
+
+    private CircuitAssembler() { }
+}

@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.89'
+    id "me.champeau.jmh" version "0.7.3"
 }
 
 version = mod_version
@@ -103,6 +104,21 @@ repositories {
 
 dependencies {
     runtimeOnly("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+
+    workingDir = project.file('run')
+}
+
+jmh {
+    fork = 1
+    includeTests = true
+    zip64 = true
 }
 
 tasks.withType(ProcessResources).configureEach {
