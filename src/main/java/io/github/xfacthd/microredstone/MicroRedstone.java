@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone;
 
+import io.github.xfacthd.microredstone.common.MRContent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
@@ -11,6 +12,6 @@ public final class MicroRedstone
 
     public MicroRedstone(IEventBus modBus)
     {
-
+        MRContent.init(modBus);
     }
 }
