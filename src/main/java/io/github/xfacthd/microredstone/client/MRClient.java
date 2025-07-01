@@ -1,0 +1,31 @@
+package io.github.xfacthd.microredstone.client;
+
+import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.client.model.UnbakedMicrochipModel;
+import io.github.xfacthd.microredstone.client.texture.AreaMaskSource;
+import io.github.xfacthd.microredstone.common.util.Utils;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
+import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
+
+@Mod(value = MicroRedstone.MOD_ID, dist = Dist.CLIENT)
+public final class MRClient
+{
+    public MRClient(IEventBus modBus)
+    {
+        modBus.addListener(MRClient::onRegisterSpriteSourceTypes);
+        modBus.addListener(MRClient::onRegisterBlockModels);
+    }
+
+    private static void onRegisterSpriteSourceTypes(RegisterSpriteSourcesEvent event)
+    {
+        event.register(AreaMaskSource.ID, AreaMaskSource.CODEC);
+    }
+
+    private static void onRegisterBlockModels(RegisterBlockStateModels event)
+    {
+        event.registerModel(Utils.rl("microchip"), UnbakedMicrochipModel.CODEC);
+    }
+}

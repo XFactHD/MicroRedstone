@@ -1,6 +1,8 @@
 package io.github.xfacthd.microredstone.common;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.common.block.MicrochipBlock;
+import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntityRegister;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredDataComponentTypeRegister;
@@ -29,7 +31,7 @@ public final class MRContent
     // endregion
 
     // region Blocks
-
+    public static final Holder<Block> BLOCK_MICROCHIP = registerBlock("microchip", MicrochipBlock::new);
     // endregion
 
     // region Data Components
@@ -41,10 +43,14 @@ public final class MRContent
     // endregion
 
     // region BlockEntityTypes
-
+    public static final DeferredBlockEntity<MicrochipBlockEntity> BLOCK_ENTITY_MICROCHIP = registerBlockEntity(
+            "microchip", MicrochipBlockEntity::new, BLOCK_MICROCHIP
+    );
     // endregion
 
-    private static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> blockFactory)
+    private static <T extends Block> DeferredBlock<T> registerBlock(
+            String name, Function<BlockBehaviour.Properties, T> blockFactory
+    )
     {
         DeferredBlock<T> block = BLOCKS.registerBlock(name, blockFactory, BlockBehaviour.Properties.of());
         ITEMS.registerSimpleBlockItem(block);

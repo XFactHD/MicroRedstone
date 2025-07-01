@@ -1,0 +1,42 @@
+{
+  "elements": [
+    {
+      "faces": {
+        "south": {
+          "cullface": "south",
+          "texture": "#overlay",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            2.0
+          ]
+        },
+        "up": {
+          "texture": "#overlay",
+          "uv": [
+            0.0,
+            16.0,
+            16.0,
+            0.0
+          ]
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ]
+    }
+  ],
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "overlay": "microredstone:block/overlay_single",
+    "particle": "microredstone:block/overlay_single"
+  }
+}
