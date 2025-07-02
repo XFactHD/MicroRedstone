@@ -6,6 +6,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.data.PropertyHolder;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
+import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneLevelAdapter;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneType;
 import io.github.xfacthd.microredstone.common.util.SerdesUtils;
@@ -17,10 +18,15 @@ import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,8 +38,9 @@ import net.neoforged.neoforge.model.data.ModelData;
 import net.neoforged.neoforge.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
 
-public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter
+public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter, MenuProvider
 {
+    public static final Component MENU_TITLE = Utils.translate("title", "microchip");
     public static final ModelProperty<RedstoneType[]> PORT_TYPE_PROPERTY = new ModelProperty<>();
     private static final Port[] PORTS = Port.values();
     private static final Rotation[] ROTATIONS = Rotation.values();
@@ -57,6 +64,18 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         if (circuit != null)
         {
             circuit.evaluate(this);
+        }
+    }
+
+    public void setCircuit(@Nullable StoredCircuit circuit)
+    {
+        if (circuit != null && circuit.rootNode() != null)
+        {
+            setCircuit(circuit.name(), circuit.toCircuit());
+        }
+        else
+        {
+            setCircuit("", null);
         }
     }
 
@@ -111,6 +130,17 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
                 triggerSignalUpdate(portIdx);
             }
         }
+    }
+
+    @Nullable
+    public Circuit getCircuit()
+    {
+        return circuit;
+    }
+
+    public String getCircuitName()
+    {
+        return circuitName;
     }
 
     @Override
@@ -187,6 +217,18 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
+    {
+        return MicrochipMenu.createServer(containerId, inventory, this);
+    }
+
+    @Override
+    public Component getDisplayName()
+    {
+        return MENU_TITLE;
+    }
+
+    @Override
     public ModelData getModelData()
     {
         return ModelData.of(PORT_TYPE_PROPERTY, portTypes.clone());
@@ -242,8 +284,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     @Override
     protected void applyImplicitComponents(DataComponentGetter componentGetter)
     {
-        StoredCircuit circuit = componentGetter.getOrDefault(MRContent.DC_TYPE_CIRCUIT, StoredCircuit.EMPTY);
-        setCircuit(circuit.name(), circuit.toCircuit());
+        setCircuit(componentGetter.get(MRContent.DC_TYPE_CIRCUIT));
     }
 
     @Override

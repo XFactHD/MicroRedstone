@@ -7,6 +7,8 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -66,6 +68,31 @@ public final class Utils
         return holder.unwrapKey().orElseThrow(
                 () -> new IllegalArgumentException("Direct holders and unbound reference holders are not supported")
         );
+    }
+
+    public static MutableComponent translate(@Nullable String prefix, @Nullable String postfix, Object... arguments)
+    {
+        return Component.translatable(translationKey(prefix, postfix), arguments);
+    }
+
+    public static MutableComponent translate(@Nullable String prefix, @Nullable String postfix)
+    {
+        return Component.translatable(translationKey(prefix, postfix));
+    }
+
+    public static String translationKey(@Nullable String prefix, @Nullable String postfix)
+    {
+        String key = "";
+        if (prefix != null)
+        {
+            key = prefix + ".";
+        }
+        key += MicroRedstone.MOD_ID;
+        if (postfix != null)
+        {
+            key += "." + postfix;
+        }
+        return key;
     }
 
     public static Direction getDirFromCross(Vec3 hitVec, Direction hitFace)

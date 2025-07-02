@@ -16,10 +16,13 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitN
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.data.MRRegistries;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
+import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntityRegister;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredDataComponentType;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredDataComponentTypeRegister;
+import io.github.xfacthd.microredstone.common.util.registration.DeferredMenuType;
+import io.github.xfacthd.microredstone.common.util.registration.DeferredMenuTypeRegister;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
 import net.minecraft.network.codec.StreamCodec;
@@ -45,6 +48,7 @@ public final class MRContent
     private static final DeferredDataComponentTypeRegister DATA_COMPONENTS = DeferredDataComponentTypeRegister.create(MicroRedstone.MOD_ID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MicroRedstone.MOD_ID);
     private static final DeferredBlockEntityRegister BLOCK_ENTITIES = DeferredBlockEntityRegister.create(MicroRedstone.MOD_ID);
+    private static final DeferredMenuTypeRegister MENU_TYPES = DeferredMenuTypeRegister.create(MicroRedstone.MOD_ID);
     private static final DeferredRegister<CircuitNodeType<?>> CIRCUIT_NODES = DeferredRegister.create(MRRegistries.CIRCUIT_NODE_TYPES, MicroRedstone.MOD_ID);
     // endregion
 
@@ -68,6 +72,12 @@ public final class MRContent
     // region BlockEntityTypes
     public static final DeferredBlockEntity<MicrochipBlockEntity> BLOCK_ENTITY_MICROCHIP = registerBlockEntity(
             "microchip", MicrochipBlockEntity::new, BLOCK_MICROCHIP
+    );
+    // endregion
+
+    // region MenuTypes
+    public static final DeferredMenuType<MicrochipMenu> MENU_TYPE_MICROCHIP = MENU_TYPES.registerSimpleMenuType(
+            "microchip", MicrochipMenu::createClient
     );
     // endregion
 
@@ -131,6 +141,7 @@ public final class MRContent
         DATA_COMPONENTS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
+        MENU_TYPES.register(modBus);
         CIRCUIT_NODES.register(modBus);
     }
 

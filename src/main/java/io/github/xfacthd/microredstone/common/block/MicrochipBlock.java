@@ -3,14 +3,11 @@ package io.github.xfacthd.microredstone.common.block;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.data.PropertyHolder;
-import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -50,19 +47,17 @@ public final class MicrochipBlock extends PlateBlock
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
     {
-        // TODO: replace with UI interaction
-        if (stack.is(MRContent.ITEM_INTEGRATED_CIRCUIT) && level.getBlockEntity(pos) instanceof MicrochipBlockEntity be)
+        if (level.getBlockEntity(pos) instanceof MicrochipBlockEntity be)
         {
             if (!level.isClientSide())
             {
-                StoredCircuit circuit = stack.getOrDefault(MRContent.DC_TYPE_CIRCUIT, StoredCircuit.EMPTY);
-                be.setCircuit(circuit.name(), circuit.toCircuit());
+                player.openMenu(be);
             }
             return InteractionResult.SUCCESS;
         }
-        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+        return super.useWithoutItem(state, level, pos, player, hitResult);
     }
 
     @Override
