@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "microredstone:block/microchip"
+    "model": "microredstone:block/microchip_circuit"
   }
 }

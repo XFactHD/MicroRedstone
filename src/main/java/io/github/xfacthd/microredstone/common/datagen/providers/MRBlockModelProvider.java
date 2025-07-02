@@ -24,7 +24,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplate;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
@@ -44,9 +44,7 @@ public final class MRBlockModelProvider extends ModelProvider
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels)
     {
-        makeBlockModelWithZRotation(blockModels, MRContent.BLOCK_MICROCHIP, model ->
-                MultiVariant.of(new UnbakedMicrochipModelBuilder(model, Variant.SimpleModelState.DEFAULT))
-        );
+        makeMicrochipBlockModel(blockModels);
 
         for (int edge = 0; edge < 4; edge++)
         {
@@ -55,29 +53,37 @@ public final class MRBlockModelProvider extends ModelProvider
         }
     }
 
-    private static void makeBlockModelWithZRotation(BlockModelGenerators blockModels, Holder<Block> block)
+    private static void makeMicrochipBlockModel(BlockModelGenerators blockModels)
     {
-        makeBlockModelWithZRotation(blockModels, block, BlockModelGenerators::plainVariant);
-    }
-
-    private static void makeBlockModelWithZRotation(BlockModelGenerators blockModels, Holder<Block> block, VariantGenerator variantGenerator)
-    {
-        ResourceLocation name = Utils.getKeyOrThrow(block).location();
+        ResourceLocation name = Utils.getKeyOrThrow(MRContent.BLOCK_MICROCHIP).location();
         ResourceLocation baseLoc = name.withPrefix("block/");
+        ResourceLocation baseLocCircuit = baseLoc.withSuffix("_circuit");
 
-        ResourceLocation[] models = new ResourceLocation[] {
+        ResourceLocation[] modelsWithoutCircuit = new ResourceLocation[] {
                 baseLoc,
                 rotateAroundZ(blockModels, baseLoc, baseLoc.withSuffix("_cw90"), 90),
                 rotateAroundZ(blockModels, baseLoc, baseLoc.withSuffix("_cw180"), 180),
                 rotateAroundZ(blockModels, baseLoc, baseLoc.withSuffix("_ccw90"), -90)
         };
+        ResourceLocation[] modelsWithCircuit = new ResourceLocation[] {
+                baseLocCircuit,
+                rotateAroundZ(blockModels, baseLocCircuit, baseLocCircuit.withSuffix("_cw90"), 90),
+                rotateAroundZ(blockModels, baseLocCircuit, baseLocCircuit.withSuffix("_cw180"), 180),
+                rotateAroundZ(blockModels, baseLocCircuit, baseLocCircuit.withSuffix("_ccw90"), -90)
+        };
 
-        MultiVariantGenerator generator = MultiVariantGenerator.dispatch(block.value())
-                .with(PropertyDispatch.initial(PropertyHolder.ROTATION).generate(rot ->
-                        variantGenerator.apply(models[rot.ordinal()])
-                ))
-                .with(PropertyDispatch.modify(BlockStateProperties.FACING).generate(dir ->
+        MultiVariantGenerator generator = MultiVariantGenerator.dispatch(MRContent.BLOCK_MICROCHIP.value())
+                .with(PropertyDispatch.initial(BlockStateProperties.FACING, PropertyHolder.ROTATION, PropertyHolder.HAS_CIRCUIT).generate((dir, rot, hasCircuit) ->
                 {
+                    ResourceLocation[] models = hasCircuit ? modelsWithCircuit : modelsWithoutCircuit;
+                    int idx = switch (dir)
+                    {
+                        case UP -> (rot.ordinal() + 1) % 4;
+                        case DOWN -> rot == Rotation.NONE || rot == Rotation.CLOCKWISE_180 ? rot.ordinal() : ((rot.ordinal() + 2) % 4);
+                        default -> rot == Rotation.NONE || rot == Rotation.CLOCKWISE_180 ? ((rot.ordinal() + 2) % 4) : rot.ordinal();
+                    };
+                    ResourceLocation model = models[idx];
+
                     Quadrant rotX = switch (dir)
                     {
                         case UP -> Quadrant.R180;
@@ -89,17 +95,21 @@ public final class MRBlockModelProvider extends ModelProvider
                     {
                         rotY = Quadrant.values()[(int) dir.toYRot() / 90];
                     }
-                    return VariantMutator.X_ROT.withValue(rotX).then(VariantMutator.Y_ROT.withValue(rotY));
+
+                    boolean up = dir == Direction.UP;
+                    return MultiVariant.of(new UnbakedMicrochipModelBuilder(model, Variant.SimpleModelState.DEFAULT, up))
+                            .with(VariantMutator.X_ROT.withValue(rotX))
+                            .with(VariantMutator.Y_ROT.withValue(rotY));
                 }));
         blockModels.blockStateOutput.accept(generator);
 
-        blockModels.registerSimpleItemModel(block.value(), baseLoc);
+        blockModels.registerSimpleItemModel(MRContent.BLOCK_MICROCHIP.value(), baseLocCircuit);
     }
 
-    private static ResourceLocation rotateAroundZ(BlockModelGenerators blockModels, ResourceLocation converter, ResourceLocation name, int rot)
+    private static ResourceLocation rotateAroundZ(BlockModelGenerators blockModels, ResourceLocation parent, ResourceLocation name, int rot)
     {
         ModelTemplate template = ExtendedModelTemplateBuilder.builder()
-                .parent(converter)
+                .parent(parent)
                 .rootTransforms(xforms ->
                         xforms.origin(new Vector3f(.5F, 0, .5F))
                                 .rotation(0, rot, 0, true)
@@ -151,11 +161,5 @@ public final class MRBlockModelProvider extends ModelProvider
     public String getName()
     {
         return "Block Models - MicroRedstone";
-    }
-
-    @FunctionalInterface
-    private interface VariantGenerator
-    {
-        MultiVariant apply(ResourceLocation model);
     }
 }

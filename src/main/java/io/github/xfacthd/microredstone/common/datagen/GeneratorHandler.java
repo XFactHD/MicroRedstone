@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.datagen;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.common.datagen.providers.MRBlockModelProvider;
+import io.github.xfacthd.microredstone.common.datagen.providers.MRItemModelProvider;
 import io.github.xfacthd.microredstone.common.datagen.providers.MRLanguageProvider;
 import io.github.xfacthd.microredstone.common.datagen.providers.MRSpriteSourceProvider;
 import net.neoforged.bus.api.IEventBus;
@@ -19,6 +20,7 @@ public final class GeneratorHandler
     private static void onGatherData(GatherDataEvent.Client event)
     {
         event.createProvider(MRBlockModelProvider::new);
+        event.createProvider(MRItemModelProvider::new);
         event.createProvider(MRSpriteSourceProvider::new);
         event.createProvider(MRLanguageProvider::new);
     }

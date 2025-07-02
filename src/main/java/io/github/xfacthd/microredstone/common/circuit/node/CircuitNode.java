@@ -1,13 +1,23 @@
 package io.github.xfacthd.microredstone.common.circuit.node;
 
+import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
+import io.github.xfacthd.microredstone.common.data.MRRegistries;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.List;
 
 public abstract class CircuitNode
 {
+    public static final Codec<CircuitNode> CODEC = MRRegistries.CIRCUIT_NODE_TYPES.byNameCodec()
+            .dispatch(CircuitNode::type, CircuitNodeType::codec);
+    public static final StreamCodec<ByteBuf, CircuitNode> STREAM_CODEC = ByteBufCodecs.idMapper(MRRegistries.CIRCUIT_NODE_TYPES)
+            .dispatch(CircuitNode::type, CircuitNodeType::streamCodec);
+
     protected final Connector[] inputs;
     protected final Connector[] outputs;
 
@@ -40,4 +50,6 @@ public abstract class CircuitNode
     {
         return outputs;
     }
+
+    public abstract CircuitNodeType<? extends CircuitNode> type();
 }

@@ -26,7 +26,7 @@ public final class LocalWireMapper
             int contextLocal,
             int wireCount,
             List<NodeEntry<CircuitNode>> childNodes,
-            List<BufferCircuitNode> bufferNodes,
+            List<NodeEntry<BufferCircuitNode>> bufferNodes,
             Connector[] outputs
     )
     {
@@ -52,8 +52,9 @@ public final class LocalWireMapper
                 array[child.outputs()[0].external()] = true;
             }
         }
-        for (BufferCircuitNode buffer : bufferNodes)
+        for (NodeEntry<BufferCircuitNode> bufferEntry : bufferNodes)
         {
+            BufferCircuitNode buffer = bufferEntry.node();
             fromLocal[buffer.getInputWire()] = true;
             fromContext[buffer.getOutputWire()] = true; // Buffer output must always be read from context
         }

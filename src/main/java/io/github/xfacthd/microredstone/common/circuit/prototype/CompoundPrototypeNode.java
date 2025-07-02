@@ -124,7 +124,8 @@ public final class CompoundPrototypeNode extends PrototypeNode
             }
             if (driverCount != 1)
             {
-                reporter.report(() -> "Wire " + entry.getKey() + " has incorrect amount of driving outputs");
+                int count = driverCount;
+                reporter.report(() -> "Wire " + entry.getKey() + " has incorrect amount of driving outputs: " + count);
             }
         }
     }

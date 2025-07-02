@@ -25,6 +25,43 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public final class SingleNodeSingleWireTests
 {
     @Test
+    void testDirectWire()
+    {
+        TestBuilder builder = new TestBuilder();
+
+        Wire wire = builder.addWire(WireType.SINGLE);
+
+        Connection conIn = builder.addConnection(Port.LEFT, WireType.SINGLE, PortDir.INPUT);
+        conIn.connect(wire);
+
+        Connection conOut = builder.addConnection(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT);
+        conOut.connect(wire);
+
+        CompoundPrototypeNode protoNode = builder.build();
+        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+
+        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "WIRE");
+        Assertions.assertNotNull(compiled, "Compilation failed");
+
+        Circuit circuitInterp = new Circuit(node);
+        Circuit circuitCompiled = new Circuit(compiled);
+        TestInterfaceAdapter adapter = new TestInterfaceAdapter();
+
+        for (int i = 0; i < 4; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, i & 1);
+            circuitInterp.evaluate(adapter);
+            Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Interpreted WIRE input " + i);
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, i & 1);
+            circuitCompiled.evaluate(adapter);
+            Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled WIRE input " + i);
+        }
+    }
+
+    @Test
     void testClockOneTick()
     {
         TestBuilder builder = new TestBuilder();

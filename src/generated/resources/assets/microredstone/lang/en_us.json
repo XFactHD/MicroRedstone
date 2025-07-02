@@ -1,3 +1,4 @@
 {
-  "block.microredstone.microchip": "Microchip"
+  "block.microredstone.microchip": "Microchip",
+  "item.microredstone.integrated_circuit": "Integrated Circuit"
 }

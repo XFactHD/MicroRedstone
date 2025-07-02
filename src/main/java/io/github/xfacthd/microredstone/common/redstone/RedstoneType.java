@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.redstone;
 
+import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +12,8 @@ public enum RedstoneType implements StringRepresentable
     NONE,
     SINGLE,
     BUNDLED;
+
+    public static final Codec<RedstoneType> CODEC = StringRepresentable.fromEnum(RedstoneType::values);
 
     private final String name = toString().toLowerCase(Locale.ROOT);
 

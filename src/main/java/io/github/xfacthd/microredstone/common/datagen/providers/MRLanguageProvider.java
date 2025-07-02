@@ -16,5 +16,7 @@ public final class MRLanguageProvider extends LanguageProvider
     protected void addTranslations()
     {
         add(MRContent.BLOCK_MICROCHIP.value(), "Microchip");
+
+        add(MRContent.ITEM_INTEGRATED_CIRCUIT.value(), "Integrated Circuit");
     }
 }

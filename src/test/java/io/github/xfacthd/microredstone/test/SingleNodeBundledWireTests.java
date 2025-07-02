@@ -24,6 +24,43 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public final class SingleNodeBundledWireTests
 {
     @Test
+    void testDirectWire()
+    {
+        TestBuilder builder = new TestBuilder();
+
+        Wire wire = builder.addWire(WireType.BUNDLED);
+
+        Connection conIn = builder.addConnection(Port.LEFT, WireType.BUNDLED, PortDir.INPUT);
+        conIn.connect(wire);
+
+        Connection conOut = builder.addConnection(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT);
+        conOut.connect(wire);
+
+        CompoundPrototypeNode protoNode = builder.build();
+        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+
+        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "WIRE");
+        Assertions.assertNotNull(compiled, "Compilation failed");
+
+        Circuit circuitInterp = new Circuit(node);
+        Circuit circuitCompiled = new Circuit(compiled);
+        TestInterfaceAdapter adapter = new TestInterfaceAdapter();
+
+        for (int i = 0; i < 32; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b1111, 4));
+            circuitInterp.evaluate(adapter);
+            Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Interpreted WIRE input " + i);
+        }
+        for (int i = 0; i < 32; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b1111, 4));
+            circuitCompiled.evaluate(adapter);
+            Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled WIRE input " + i);
+        }
+    }
+
+    @Test
     void testBufferBundled()
     {
         TestBuilder builder = new TestBuilder();

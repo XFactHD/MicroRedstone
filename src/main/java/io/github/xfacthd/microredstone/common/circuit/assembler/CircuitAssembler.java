@@ -59,11 +59,11 @@ public final class CircuitAssembler
 
         WireMapper wireMapper = new WireMapper();
 
-        List<ClockCircuitNode> clockNodes = clockProtoNodes.stream()
-                .map(clock -> clock.assemble(wireMapper))
+        List<NodeEntry<ClockCircuitNode>> clockNodes = clockProtoNodes.stream()
+                .map(clock -> new NodeEntry<>(clock.assemble(wireMapper), clock.getPos()))
                 .toList();
-        List<BufferCircuitNode> bufferNodes = bufferProtoNodes.stream()
-                .map(buffer -> buffer.assemble(wireMapper))
+        List<NodeEntry<BufferCircuitNode>> bufferNodes = bufferProtoNodes.stream()
+                .map(buffer -> new NodeEntry<>(buffer.assemble(wireMapper), buffer.getPos()))
                 .toList();
 
         List<NodeEntry<CircuitNode>> childNodes = new ArrayList<>();
@@ -93,7 +93,7 @@ public final class CircuitAssembler
                                 return new WirePair(resolved, con.wire());
                             })
                             .toArray(WirePair[]::new);
-                    childNodes.add(new NodeEntry<>(assembled, inputs, outputs));
+                    childNodes.add(new NodeEntry<>(assembled, reference.getPos(), inputs, outputs));
                 }
                 default ->
                 {
@@ -106,13 +106,13 @@ public final class CircuitAssembler
                             .mapToInt(Connector::wire)
                             .mapToObj(WirePair::new)
                             .toArray(WirePair[]::new);
-                    childNodes.add(new NodeEntry<>(assembled, inputs, outputs));
+                    childNodes.add(new NodeEntry<>(assembled, childNode.getPos(), inputs, outputs));
                 }
             }
         }
 
         Int2ObjectMap<List<BundlePackerCircuitNode>> packersPerWire = new Int2ObjectOpenHashMap<>();
-        for (NodeEntry<CircuitNode> childNode : childNodes)
+        for (NodeEntry<? extends CircuitNode> childNode : childNodes)
         {
             if (childNode.node() instanceof BundlePackerCircuitNode packer)
             {

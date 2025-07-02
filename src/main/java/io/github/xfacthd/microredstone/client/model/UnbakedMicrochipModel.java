@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.client.model;
 
 import com.mojang.math.Transformation;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.util.Utils;
@@ -19,7 +20,8 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
 {
     public static final MapCodec<UnbakedMicrochipModel> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             ResourceLocation.CODEC.fieldOf("model").forGetter(model -> model.baseModel),
-            Variant.SimpleModelState.MAP_CODEC.forGetter(model -> model.variantState)
+            Variant.SimpleModelState.MAP_CODEC.forGetter(model -> model.variantState),
+            Codec.BOOL.optionalFieldOf("up", false).forGetter(model -> model.up)
     ).apply(inst, UnbakedMicrochipModel::new));
     private static final String[] EDGE_SUFFIXES = new String[] { "n", "e", "s", "w" };
     public static final ResourceLocation[] LOCATIONS_SINGLE = Utils.fillArray(new ResourceLocation[4], edge ->
@@ -32,12 +34,14 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
     private final ResourceLocation baseModel;
     private final Variant.SimpleModelState variantState;
     private final ModelState modelState;
+    private final boolean up;
 
-    UnbakedMicrochipModel(ResourceLocation baseModel, Variant.SimpleModelState variantState)
+    UnbakedMicrochipModel(ResourceLocation baseModel, Variant.SimpleModelState variantState, boolean up)
     {
         this.baseModel = baseModel;
         this.variantState = variantState;
         this.modelState = variantState.asModelState();
+        this.up = up;
     }
 
     @Override
@@ -52,7 +56,7 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
         ModelState xformModelState = UnbakedElementsHelper.composeRootTransformIntoModelState(modelState, xform);
         for (int edge = 0; edge < 4; edge++)
         {
-            int outEdge = (edge + 2) % 4;
+            int outEdge = (edge + (up ? 1 : 2)) % 4;
             singleModels[outEdge] = bakePart(baker, LOCATIONS_SINGLE[edge], xformModelState);
             bundledModels[outEdge] = bakePart(baker, LOCATIONS_BUNDLED[edge], xformModelState);
         }

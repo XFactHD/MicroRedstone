@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
+import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -10,8 +11,13 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLog
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -20,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 public final class PrimitivePrototypeNode extends PrototypeNode
@@ -127,9 +134,16 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         Connector outputConnector = new Connector(Port.RIGHT, outWire, PortDir.OUTPUT, wireType);
         return switch (inputCount)
         {
-            case 1 -> new NotLogicCircuitNode(this, inputConnectors, outputConnector);
-            case 2 -> new TwoInputLogicCircuitNode(this, inputConnectors, outputConnector);
-            case 3 -> new ThreeInputLogicCircuitNode(this, inputConnectors, outputConnector);
+            case 1 ->
+            {
+                if (type != PrimitivePrototypeNode.Type.NOT)
+                {
+                    throw new IllegalStateException("Invalid single-input logic op: " + type);
+                }
+                yield new NotLogicCircuitNode(isMultiBit(), inputConnectors.getFirst(), outputConnector);
+            }
+            case 2 -> new TwoInputLogicCircuitNode(type, isMultiBit(), inputConnectors, outputConnector);
+            case 3 -> new ThreeInputLogicCircuitNode(type, isMultiBit(), inputConnectors, outputConnector);
             default -> throw new IllegalStateException("Invalid input count: " + inputCount);
         };
     }
@@ -152,7 +166,7 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         return wireType;
     }
 
-    public enum Type
+    public enum Type implements StringRepresentable
     {
         NOT(false, false),
         AND(true, false),
@@ -163,6 +177,11 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         XNOR(true, true),
         ;
 
+        public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
+        private static final IntFunction<Type> BY_ID = ByIdMap.continuous(Type::ordinal, Type.values(), ByIdMap.OutOfBoundsStrategy.WRAP);
+        public static final StreamCodec<ByteBuf, Type> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Type::ordinal);
+
+        private final String name = toString().toLowerCase(Locale.ROOT);
         private final boolean multiInput;
         private final boolean invertsResult;
 
@@ -183,6 +202,12 @@ public final class PrimitivePrototypeNode extends PrototypeNode
             {
                 throw new IllegalArgumentException(String.format(Locale.ROOT, "Invalid input count %d for type %s", inputCount, this));
             }
+        }
+
+        @Override
+        public String getSerializedName()
+        {
+            return name;
         }
     }
 }

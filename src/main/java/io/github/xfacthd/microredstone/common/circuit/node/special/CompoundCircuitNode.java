@@ -1,5 +1,8 @@
 package io.github.xfacthd.microredstone.common.circuit.node.special;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.compiler.ClockFieldAppender;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
@@ -8,8 +11,13 @@ import io.github.xfacthd.microredstone.common.circuit.compiler.NodeFieldAppender
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
+import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.PrimitiveCircuitNode;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ExtraCodecs;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -18,18 +26,40 @@ import java.util.List;
 
 public final class CompoundCircuitNode extends CircuitNode
 {
-    private static final WirePair[] EMPTY_ARRAY = new WirePair[0];
+    public static final MapCodec<CompoundCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+            NodeEntry.CODEC.listOf().fieldOf("child_nodes").forGetter(CompoundCircuitNode::getChildNodes),
+            NodeEntry.codec(ClockCircuitNode.CODEC.codec()).listOf().fieldOf("clock_nodes").forGetter(node -> node.clockNodes),
+            NodeEntry.codec(BufferCircuitNode.CODEC.codec()).listOf().fieldOf("buffer_nodes").forGetter(node -> node.bufferNodes),
+            ExtraCodecs.NON_NEGATIVE_INT.fieldOf("wire_count").forGetter(CompoundCircuitNode::getWireCount),
+            Connector.CODEC.listOf().fieldOf("inputs").forGetter(node -> List.of(node.inputs)),
+            Connector.CODEC.listOf().fieldOf("outputs").forGetter(node -> List.of(node.outputs))
+    ).apply(inst, CompoundCircuitNode::new));
+    public static final StreamCodec<ByteBuf, CompoundCircuitNode> STREAM_CODEC = StreamCodec.composite(
+            NodeEntry.STREAM_CODEC.apply(ByteBufCodecs.list()),
+            CompoundCircuitNode::getChildNodes,
+            NodeEntry.streamCodec(ClockCircuitNode.STREAM_CODEC).apply(ByteBufCodecs.list()),
+            node -> node.clockNodes,
+            NodeEntry.streamCodec(BufferCircuitNode.STREAM_CODEC).apply(ByteBufCodecs.list()),
+            node -> node.bufferNodes,
+            ByteBufCodecs.VAR_INT,
+            CompoundCircuitNode::getWireCount,
+            Connector.STREAM_CODEC.apply(ByteBufCodecs.list()),
+            node -> List.of(node.inputs),
+            Connector.STREAM_CODEC.apply(ByteBufCodecs.list()),
+            node -> List.of(node.outputs),
+            CompoundCircuitNode::new
+    );
 
     private final List<NodeEntry<CircuitNode>> childNodes;
-    private final List<ClockCircuitNode> clockNodes;
-    private final List<BufferCircuitNode> bufferNodes;
+    private final List<NodeEntry<ClockCircuitNode>> clockNodes;
+    private final List<NodeEntry<BufferCircuitNode>> bufferNodes;
     private final int wireCount;
     private final EvalContext.Nested nestedContext;
 
     public CompoundCircuitNode(
             List<NodeEntry<CircuitNode>> childNodes,
-            List<ClockCircuitNode> clockNodes,
-            List<BufferCircuitNode> bufferNodes,
+            List<NodeEntry<ClockCircuitNode>> clockNodes,
+            List<NodeEntry<BufferCircuitNode>> bufferNodes,
             int wireCount,
             List<Connector> inputs,
             List<Connector> outputs
@@ -46,9 +76,9 @@ public final class CompoundCircuitNode extends CircuitNode
     @Override
     public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
     {
-        for (ClockCircuitNode clock : clockNodes)
+        for (NodeEntry<ClockCircuitNode> clock : clockNodes)
         {
-            clock.evaluate(nestedContext, EMPTY_ARRAY, EMPTY_ARRAY);
+            clock.evaluate(nestedContext);
         }
         nestedContext.prepare(context, inputs);
         for (NodeEntry<CircuitNode> child : childNodes)
@@ -56,9 +86,9 @@ public final class CompoundCircuitNode extends CircuitNode
             child.evaluate(nestedContext);
         }
         nestedContext.flush(context, outputs);
-        for (BufferCircuitNode buffer : bufferNodes)
+        for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
         {
-            buffer.evaluate(nestedContext, EMPTY_ARRAY, EMPTY_ARRAY);
+            buffer.evaluate(nestedContext);
         }
     }
 
@@ -69,17 +99,17 @@ public final class CompoundCircuitNode extends CircuitNode
 
         compileContextPrepare(methodGen, selfType, localWires);
 
-        for (ClockCircuitNode clock : clockNodes)
+        for (NodeEntry<ClockCircuitNode> clock : clockNodes)
         {
-            clock.compile(methodGen, clockFieldAppender, selfType, localWires);
+            clock.node().compile(methodGen, clockFieldAppender, selfType, localWires);
         }
 
         compileNodeEval(methodGen, fieldAppender, selfType, localWires);
         compileContextFlush(methodGen, contextLocal);
 
-        for (BufferCircuitNode buffer : bufferNodes)
+        for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
         {
-            buffer.compile(methodGen, localWires);
+            buffer.node().compile(methodGen, localWires);
         }
     }
 
@@ -182,15 +212,19 @@ public final class CompoundCircuitNode extends CircuitNode
         }
     }
 
-    @SuppressWarnings("unused") // Used in generated CompiledCircuitNode constructors
     public List<NodeEntry<CircuitNode>> getChildNodes()
     {
         return childNodes;
     }
 
-    @SuppressWarnings("unused") // Used in generated CompiledCircuitNode constructors
     public int getWireCount()
     {
         return wireCount;
+    }
+
+    @Override
+    public CircuitNodeType<? extends CircuitNode> type()
+    {
+        return MRContent.NODE_TYPE_COMPOUND.value();
     }
 }

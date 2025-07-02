@@ -68,7 +68,7 @@ public final class CircuitCompiler
     private static final MethodType CTOR_MTH_TYPE = MethodType.methodType(void.class, CompoundCircuitNode.class);
     private static final MethodType CTOR_HANDLE_MTH_TYPE = CTOR_MTH_TYPE.changeReturnType(CircuitNode.class);
     private static final Method CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class);
-    private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, int.class, Connector[].class, Connector[].class);
+    private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, int.class, Connector[].class, Connector[].class);
     private static final Type LIST_TYPE = Type.getType(List.class);
     private static final Method LIST_GET_MTH = findMethod(List.class, "get", int.class);
     private static final Type CMP_NODE_TYPE = Type.getType(CompoundCircuitNode.class);
@@ -167,6 +167,7 @@ public final class CircuitCompiler
             GeneratorAdapter ctorGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CTOR_MTH, null, null, writer);
             ctorGen.loadThis();
             ctorGen.loadArg(0);
+            ctorGen.dup();
             ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_WIRE_COUNT_MTH);
             ctorGen.loadArg(0);
             ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_INPUTS_MTH);

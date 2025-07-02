@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.util;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntity;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
@@ -9,11 +10,17 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
@@ -28,7 +35,6 @@ public final class Utils
                     (sideA, sideB) -> { throw new IllegalArgumentException("Duplicate keys"); },
                     Long2ObjectOpenHashMap::new
             ));
-    private static final Rotation[][] DIR_PAIR_TO_ROT = makeDirPairToRotMap();
 
     public static Direction getDirection(BlockPos srcPos, BlockPos destPos)
     {
@@ -94,44 +100,34 @@ public final class Utils
 
     public static Rotation getRotationFromFacingOrientation(Direction facing, Direction orientation)
     {
-        return Objects.requireNonNull(DIR_PAIR_TO_ROT[facing.ordinal()][orientation.ordinal()]);
+        int idx = MappingArrays.dirPairToRotIndex(facing, orientation);
+        return Objects.requireNonNull(MappingArrays.DIR_PAIR_TO_ROT[idx]);
     }
 
-    private static Rotation[][] makeDirPairToRotMap()
+    public static Direction getSideFromFacingRotation(Direction facing, Rotation rotation)
     {
-        Rotation[][] arr = new Rotation[6][6];
+        int idx = MappingArrays.dirRotToSideIndex(facing, rotation);
+        return MappingArrays.DIR_ROT_TO_SIDE[idx];
+    }
 
-        arr[Direction.DOWN.ordinal()][Direction.NORTH.ordinal()] = Rotation.NONE;
-        arr[Direction.DOWN.ordinal()][Direction.SOUTH.ordinal()] = Rotation.CLOCKWISE_180;
-        arr[Direction.DOWN.ordinal()][Direction.WEST.ordinal()] = Rotation.CLOCKWISE_90;
-        arr[Direction.DOWN.ordinal()][Direction.EAST.ordinal()] = Rotation.COUNTERCLOCKWISE_90;
+    public static Rotation invertRotation(Rotation rotation)
+    {
+        return switch (rotation)
+        {
+            case NONE -> Rotation.NONE;
+            case CLOCKWISE_90 -> Rotation.COUNTERCLOCKWISE_90;
+            case CLOCKWISE_180 -> Rotation.CLOCKWISE_180;
+            case COUNTERCLOCKWISE_90 -> Rotation.CLOCKWISE_90;
+        };
+    }
 
-        arr[Direction.UP.ordinal()][Direction.NORTH.ordinal()] = Rotation.CLOCKWISE_90;
-        arr[Direction.UP.ordinal()][Direction.SOUTH.ordinal()] = Rotation.COUNTERCLOCKWISE_90;
-        arr[Direction.UP.ordinal()][Direction.WEST.ordinal()] = Rotation.NONE;
-        arr[Direction.UP.ordinal()][Direction.EAST.ordinal()] = Rotation.CLOCKWISE_180;
-
-        arr[Direction.NORTH.ordinal()][Direction.DOWN.ordinal()] = Rotation.NONE;
-        arr[Direction.NORTH.ordinal()][Direction.UP.ordinal()] = Rotation.CLOCKWISE_180;
-        arr[Direction.NORTH.ordinal()][Direction.WEST.ordinal()] = Rotation.COUNTERCLOCKWISE_90;
-        arr[Direction.NORTH.ordinal()][Direction.EAST.ordinal()] = Rotation.CLOCKWISE_90;
-
-        arr[Direction.SOUTH.ordinal()][Direction.DOWN.ordinal()] = Rotation.NONE;
-        arr[Direction.SOUTH.ordinal()][Direction.UP.ordinal()] = Rotation.CLOCKWISE_180;
-        arr[Direction.SOUTH.ordinal()][Direction.WEST.ordinal()] = Rotation.CLOCKWISE_90;
-        arr[Direction.SOUTH.ordinal()][Direction.EAST.ordinal()] = Rotation.COUNTERCLOCKWISE_90;
-
-        arr[Direction.WEST.ordinal()][Direction.DOWN.ordinal()] = Rotation.NONE;
-        arr[Direction.WEST.ordinal()][Direction.UP.ordinal()] = Rotation.CLOCKWISE_180;
-        arr[Direction.WEST.ordinal()][Direction.NORTH.ordinal()] = Rotation.CLOCKWISE_90;
-        arr[Direction.WEST.ordinal()][Direction.SOUTH.ordinal()] = Rotation.COUNTERCLOCKWISE_90;
-
-        arr[Direction.EAST.ordinal()][Direction.DOWN.ordinal()] = Rotation.NONE;
-        arr[Direction.EAST.ordinal()][Direction.UP.ordinal()] = Rotation.CLOCKWISE_180;
-        arr[Direction.EAST.ordinal()][Direction.NORTH.ordinal()] = Rotation.COUNTERCLOCKWISE_90;
-        arr[Direction.EAST.ordinal()][Direction.SOUTH.ordinal()] = Rotation.CLOCKWISE_90;
-
-        return arr;
+    @Nullable
+    public static <E extends BlockEntity, A extends BlockEntity>BlockEntityTicker<A> createBlockEntityTicker(
+            BlockEntityType<A> actualType, DeferredBlockEntity<E> expectedType, Consumer<? super E> instTicker
+    )
+    {
+        BlockEntityTicker<? super E> ticker = (level, pos, state, be) -> instTicker.accept(be);
+        return BaseEntityBlock.createTickerHelper(actualType, expectedType.value(), ticker);
     }
 
     private Utils() { }

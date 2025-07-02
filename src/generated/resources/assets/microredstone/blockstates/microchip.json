@@ -1,130 +1,266 @@
 {
   "variants": {
-    "facing=down,rotation=180": {
+    "facing=down,has_circuit=false,rotation=180": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_cw180"
     },
-    "facing=down,rotation=clockwise_90": {
-      "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_cw90"
-    },
-    "facing=down,rotation=counterclockwise_90": {
+    "facing=down,has_circuit=false,rotation=clockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_ccw90"
     },
-    "facing=down,rotation=none": {
+    "facing=down,has_circuit=false,rotation=counterclockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_cw90"
+    },
+    "facing=down,has_circuit=false,rotation=none": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip"
     },
-    "facing=east,rotation=180": {
+    "facing=down,has_circuit=true,rotation=180": {
       "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_cw180",
-      "x": 90,
-      "y": 270
+      "model": "microredstone:block/microchip_circuit_cw180"
     },
-    "facing=east,rotation=clockwise_90": {
+    "facing=down,has_circuit=true,rotation=clockwise_90": {
       "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_cw90",
-      "x": 90,
-      "y": 270
+      "model": "microredstone:block/microchip_circuit_ccw90"
     },
-    "facing=east,rotation=counterclockwise_90": {
+    "facing=down,has_circuit=true,rotation=counterclockwise_90": {
       "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_ccw90",
-      "x": 90,
-      "y": 270
+      "model": "microredstone:block/microchip_circuit_cw90"
     },
-    "facing=east,rotation=none": {
+    "facing=down,has_circuit=true,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit"
+    },
+    "facing=east,has_circuit=false,rotation=180": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip",
       "x": 90,
       "y": 270
     },
-    "facing=north,rotation=180": {
-      "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_cw180",
-      "x": 90,
-      "y": 180
-    },
-    "facing=north,rotation=clockwise_90": {
+    "facing=east,has_circuit=false,rotation=clockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_cw90",
       "x": 90,
-      "y": 180
+      "y": 270
     },
-    "facing=north,rotation=counterclockwise_90": {
+    "facing=east,has_circuit=false,rotation=counterclockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_ccw90",
       "x": 90,
-      "y": 180
+      "y": 270
     },
-    "facing=north,rotation=none": {
+    "facing=east,has_circuit=false,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_cw180",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,has_circuit=true,rotation=180": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,has_circuit=true,rotation=clockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw90",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,has_circuit=true,rotation=counterclockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_ccw90",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,has_circuit=true,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw180",
+      "x": 90,
+      "y": 270
+    },
+    "facing=north,has_circuit=false,rotation=180": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip",
       "x": 90,
       "y": 180
     },
-    "facing=south,rotation=180": {
-      "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_cw180",
-      "x": 90
-    },
-    "facing=south,rotation=clockwise_90": {
+    "facing=north,has_circuit=false,rotation=clockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_cw90",
-      "x": 90
+      "x": 90,
+      "y": 180
     },
-    "facing=south,rotation=counterclockwise_90": {
+    "facing=north,has_circuit=false,rotation=counterclockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_ccw90",
-      "x": 90
+      "x": 90,
+      "y": 180
     },
-    "facing=south,rotation=none": {
+    "facing=north,has_circuit=false,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_cw180",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,has_circuit=true,rotation=180": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,has_circuit=true,rotation=clockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw90",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,has_circuit=true,rotation=counterclockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_ccw90",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,has_circuit=true,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw180",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,has_circuit=false,rotation=180": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip",
       "x": 90
     },
-    "facing=up,rotation=180": {
-      "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_cw180",
-      "x": 180
-    },
-    "facing=up,rotation=clockwise_90": {
+    "facing=south,has_circuit=false,rotation=clockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_cw90",
-      "x": 180
+      "x": 90
     },
-    "facing=up,rotation=counterclockwise_90": {
+    "facing=south,has_circuit=false,rotation=counterclockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_ccw90",
+      "x": 90
+    },
+    "facing=south,has_circuit=false,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_cw180",
+      "x": 90
+    },
+    "facing=south,has_circuit=true,rotation=180": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit",
+      "x": 90
+    },
+    "facing=south,has_circuit=true,rotation=clockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw90",
+      "x": 90
+    },
+    "facing=south,has_circuit=true,rotation=counterclockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_ccw90",
+      "x": 90
+    },
+    "facing=south,has_circuit=true,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw180",
+      "x": 90
+    },
+    "facing=up,has_circuit=false,rotation=180": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_ccw90",
+      "up": true,
       "x": 180
     },
-    "facing=up,rotation=none": {
+    "facing=up,has_circuit=false,rotation=clockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_cw180",
+      "up": true,
+      "x": 180
+    },
+    "facing=up,has_circuit=false,rotation=counterclockwise_90": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip",
+      "up": true,
       "x": 180
     },
-    "facing=west,rotation=180": {
+    "facing=up,has_circuit=false,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_cw90",
+      "up": true,
+      "x": 180
+    },
+    "facing=up,has_circuit=true,rotation=180": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_ccw90",
+      "up": true,
+      "x": 180
+    },
+    "facing=up,has_circuit=true,rotation=clockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw180",
+      "up": true,
+      "x": 180
+    },
+    "facing=up,has_circuit=true,rotation=counterclockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit",
+      "up": true,
+      "x": 180
+    },
+    "facing=up,has_circuit=true,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw90",
+      "up": true,
+      "x": 180
+    },
+    "facing=west,has_circuit=false,rotation=180": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,has_circuit=false,rotation=clockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_cw90",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,has_circuit=false,rotation=counterclockwise_90": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_ccw90",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,has_circuit=false,rotation=none": {
       "type": "microredstone:microchip",
       "model": "microredstone:block/microchip_cw180",
       "x": 90,
       "y": 90
     },
-    "facing=west,rotation=clockwise_90": {
+    "facing=west,has_circuit=true,rotation=180": {
       "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_cw90",
+      "model": "microredstone:block/microchip_circuit",
       "x": 90,
       "y": 90
     },
-    "facing=west,rotation=counterclockwise_90": {
+    "facing=west,has_circuit=true,rotation=clockwise_90": {
       "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip_ccw90",
+      "model": "microredstone:block/microchip_circuit_cw90",
       "x": 90,
       "y": 90
     },
-    "facing=west,rotation=none": {
+    "facing=west,has_circuit=true,rotation=counterclockwise_90": {
       "type": "microredstone:microchip",
-      "model": "microredstone:block/microchip",
+      "model": "microredstone:block/microchip_circuit_ccw90",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,has_circuit=true,rotation=none": {
+      "type": "microredstone:microchip",
+      "model": "microredstone:block/microchip_circuit_cw180",
       "x": 90,
       "y": 90
     }
