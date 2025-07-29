@@ -147,8 +147,8 @@ public final class SingleNodeSingleWireTests
         conOut.connect(wireOut);
 
         BufferPrototypeNode bufProtoNode = builder.addNode(new BufferPrototypeNode(WireType.SINGLE));
-        bufProtoNode.setConnection(Port.RIGHT, wireIn, true);
-        bufProtoNode.setConnection(Port.LEFT, wireOut, true);
+        bufProtoNode.setConnection(Port.LEFT, wireIn, true);
+        bufProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);

@@ -33,8 +33,8 @@ public final class BufferPrototypeNode extends PrototypeNode
 
         switch (port)
         {
-            case Port.RIGHT -> input = connect ? wire : null;
-            case Port.LEFT -> output = connect ? wire : null;
+            case Port.LEFT -> input = connect ? wire : null;
+            case Port.RIGHT -> output = connect ? wire : null;
         }
         return port == Port.LEFT || port == Port.RIGHT;
     }
@@ -53,8 +53,8 @@ public final class BufferPrototypeNode extends PrototypeNode
         int inputWire = wireMapper.resolveWire(Objects.requireNonNull(input));
         int outputWire = wireMapper.resolveWire(Objects.requireNonNull(output));
         return new BufferCircuitNode(
-                new Connector(Port.RIGHT, inputWire, PortDir.INPUT, wireType),
-                new Connector(Port.LEFT, outputWire, PortDir.OUTPUT, wireType)
+                new Connector(Port.LEFT, inputWire, PortDir.INPUT, wireType),
+                new Connector(Port.RIGHT, outputWire, PortDir.OUTPUT, wireType)
         );
     }
 
