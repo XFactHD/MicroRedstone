@@ -21,8 +21,7 @@ public final class TestBuilder
 
     public Connection addConnection(Port port, WireType wireType, PortDir portDir)
     {
-        Connection connection = new Connection();
-        connection.setWireType(wireType);
+        Connection connection = new Connection(wireType);
         connection.setPortDir(portDir);
         cmpNode.setConnection(port, connection);
         return connection;

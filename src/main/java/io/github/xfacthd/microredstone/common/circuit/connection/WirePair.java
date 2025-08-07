@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 
 /**
- * Defines a connection crossing the boundary from one circuit node into a nested circuit node
+ * Defines a node crossing the boundary from one circuit node into a nested circuit node
  *
  * @param external The wire index in the surrounding circuit node
  * @param internal The wire index in the nested circuit node

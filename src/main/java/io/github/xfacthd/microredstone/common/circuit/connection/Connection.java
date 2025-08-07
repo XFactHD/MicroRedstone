@@ -1,21 +1,43 @@
 package io.github.xfacthd.microredstone.common.circuit.connection;
 
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.prototype.IconConfig;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class Connection
+public final class Connection implements PlaceableNode
 {
+    public static final IconConfig ICON_SINGLE_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_single"));
+    private static final IconConfig ICON_SINGLE_OUT = new IconConfig(Utils.rl("part/connection_out"), Utils.rl("port/right_single"));
+    public static final IconConfig ICON_BUNDLED_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_bundled"));
+    private static final IconConfig ICON_BUNDLED_OUT = new IconConfig(Utils.rl("part/connection_out"), Utils.rl("port/right_bundled"));
+
+    private final WireType wireType;
+    private NodePos pos = new NodePos(0, 0);
+    private int rotation = 0;
     private PortDir portDir = PortDir.INPUT;
-    private WireType wireType = WireType.SINGLE;
     @Nullable
     private Wire wire;
+
+    public Connection(WireType wireType)
+    {
+        this.wireType = wireType;
+    }
 
     public void connect(@Nullable Wire wire)
     {
         this.wire = wire;
+    }
+
+    public void setPos(NodePos pos, int rotation)
+    {
+        this.pos = pos;
+        this.rotation = rotation;
     }
 
     public void setPortDir(PortDir portDir)
@@ -23,9 +45,38 @@ public final class Connection
         this.portDir = portDir;
     }
 
-    public void setWireType(WireType wireType)
+    @Override
+    public NodePos getPos()
     {
-        this.wireType = wireType;
+        return pos;
+    }
+
+    @Override
+    public int getRotation()
+    {
+        return rotation;
+    }
+
+    @Override
+    public IconConfig getIcon()
+    {
+        return switch (portDir)
+        {
+            case INPUT -> wireType.select(ICON_SINGLE_IN, ICON_BUNDLED_IN);
+            case OUTPUT -> wireType.select(ICON_SINGLE_OUT, ICON_BUNDLED_OUT);
+        };
+    }
+
+    @Override
+    public boolean hasPort(Port port, @Nullable WireType wireType)
+    {
+        return port.rotate(-rotation) == Port.RIGHT && (wireType == null || wireType == this.wireType);
+    }
+
+    @Override
+    public boolean isConnected(Port port)
+    {
+        return hasPort(port, wireType) && wire != null;
     }
 
     public PortDir getPortDir()
@@ -51,7 +102,7 @@ public final class Connection
     public Connector toConnector(Port port, WireMapper wireMapper)
     {
         int resolveWire = wireMapper.resolveWire(Objects.requireNonNull(wire));
-        return new Connector(port, resolveWire, portDir, wireType);
+        return new Connector(pos, port, resolveWire, portDir, wireType);
     }
 
     @Override

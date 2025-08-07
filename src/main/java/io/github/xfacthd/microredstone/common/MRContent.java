@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common;
 
 import com.mojang.serialization.MapCodec;
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.block.MicrochipBlock;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -16,6 +17,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitN
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.data.MRRegistries;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
+import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntityRegister;
@@ -54,6 +56,7 @@ public final class MRContent
 
     // region Blocks
     public static final Holder<Block> BLOCK_MICROCHIP = registerBlock("microchip", MicrochipBlock::new); // TODO: rename
+    public static final Holder<Block> BLOCK_CIRCUIT_WORKBENCH = registerBlock("circuit_workbench", CircuitWorkbenchBlock::new);
     // endregion
 
     // region Data Components
@@ -78,6 +81,9 @@ public final class MRContent
     // region MenuTypes
     public static final DeferredMenuType<MicrochipMenu> MENU_TYPE_MICROCHIP = MENU_TYPES.registerSimpleMenuType(
             "microchip", MicrochipMenu::createClient
+    );
+    public static final DeferredMenuType<CircuitWorkbenchMenu> MENU_TYPE_CIRCUIT_WORKBENCH = MENU_TYPES.registerSimpleMenuType(
+            "circuit_workbench", CircuitWorkbenchMenu::createClient
     );
     // endregion
 

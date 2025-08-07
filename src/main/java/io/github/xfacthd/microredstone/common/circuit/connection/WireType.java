@@ -26,4 +26,13 @@ public enum WireType implements StringRepresentable
     {
         return name;
     }
+
+    public <T> T select(T valueSingle, T valueBundled)
+    {
+        return switch (this)
+        {
+            case SINGLE -> valueSingle;
+            case BUNDLED -> valueBundled;
+        };
+    }
 }

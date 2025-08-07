@@ -11,10 +11,12 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLog
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.StringRepresentable;
@@ -27,7 +29,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.IntFunction;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 public final class PrimitivePrototypeNode extends PrototypeNode
 {
@@ -63,6 +65,7 @@ public final class PrimitivePrototypeNode extends PrototypeNode
 
     public PrimitivePrototypeNode(Type type, int inputCount, WireType wireType)
     {
+        super(type.icon(inputCount, wireType));
         type.validateInputCount(inputCount);
         this.type = type;
         this.inputCount = inputCount;
@@ -106,6 +109,47 @@ public final class PrimitivePrototypeNode extends PrototypeNode
     }
 
     @Override
+    protected boolean hasPortInternal(Port port, @Nullable WireType wireType)
+    {
+        return (inputCount == 3 || port != Port.LEFT) && (wireType == null || wireType == this.wireType);
+    }
+
+    @Override
+    protected boolean isConnectedInternal(Port port)
+    {
+        if (port == Port.RIGHT)
+        {
+            return output != null;
+        }
+        int inputIdx = INV_PORT_MAPPING[inputCount - 1][port.ordinal()];
+        return inputIdx != -1 && inputs[inputIdx] != null;
+    }
+
+    @Override
+    public void replaceWire(Wire oldWire, Wire newWire)
+    {
+        for (int i = 0; i < inputs.length; i++)
+        {
+            if (inputs[i] == oldWire)
+            {
+                inputs[i] = newWire;
+                return;
+            }
+        }
+        if (output == oldWire)
+        {
+            output = newWire;
+        }
+    }
+
+    @Override
+    public void clearWires()
+    {
+        Arrays.fill(inputs, null);
+        output = null;
+    }
+
+    @Override
     public void validate(ProblemReporter reporter)
     {
         for (int i = 0; i < inputCount; i++)
@@ -128,15 +172,15 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         {
             int wire = wireMapper.resolveWire(Objects.requireNonNull(inputs[i]));
             Port port = PORT_MAPPING[inputCount - 1][i];
-            inputConnectors.add(new Connector(port, wire, PortDir.INPUT, wireType));
+            inputConnectors.add(new Connector(getPos(), port, wire, PortDir.INPUT, wireType));
         }
         int outWire = wireMapper.resolveWire(Objects.requireNonNull(output));
-        Connector outputConnector = new Connector(Port.RIGHT, outWire, PortDir.OUTPUT, wireType);
+        Connector outputConnector = new Connector(getPos(), Port.RIGHT, outWire, PortDir.OUTPUT, wireType);
         return switch (inputCount)
         {
             case 1 ->
             {
-                if (type != PrimitivePrototypeNode.Type.NOT)
+                if (type != Type.NOT)
                 {
                     throw new IllegalStateException("Invalid single-input logic op: " + type);
                 }
@@ -151,7 +195,7 @@ public final class PrimitivePrototypeNode extends PrototypeNode
     @Override
     public Set<Wire> getConnectedInputWires()
     {
-        return Arrays.stream(inputs).peek(Objects::requireNonNull).collect(Collectors.toSet());
+        return Set.of(inputs);
     }
 
     @Override
@@ -168,13 +212,13 @@ public final class PrimitivePrototypeNode extends PrototypeNode
 
     public enum Type implements StringRepresentable
     {
-        NOT(false, false),
-        AND(true, false),
-        OR(true, false),
-        XOR(true, false),
-        NAND(true, true),
-        NOR(true, true),
-        XNOR(true, true),
+        NOT(false, false, Utils.rl("part/not")),
+        AND(true, false, Utils.rl("part/and")),
+        OR(true, false, Utils.rl("part/or")),
+        XOR(true, false, Utils.rl("part/xor")),
+        NAND(true, true, Utils.rl("part/nand")),
+        NOR(true, true, Utils.rl("part/nor")),
+        XNOR(true, true, Utils.rl("part/xnor")),
         ;
 
         public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
@@ -184,11 +228,29 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final boolean multiInput;
         private final boolean invertsResult;
+        private final IntFunction<IconConfig> iconSingle;
+        private final IntFunction<IconConfig> iconBundled;
 
-        Type(boolean multiInput, boolean invertsResult)
+        Type(boolean multiInput, boolean invertsResult, ResourceLocation icon)
         {
             this.multiInput = multiInput;
             this.invertsResult = invertsResult;
+            if (multiInput)
+            {
+                IconConfig iconSingleTwo = new IconConfig(icon, Utils.rl("port/up_down_right_single"));
+                IconConfig iconBundledTwo = new IconConfig(icon, Utils.rl("port/up_down_right_bundled"));
+                IconConfig iconSingleThree = new IconConfig(icon, Utils.rl("port/full_single"));
+                IconConfig iconBundledThree = new IconConfig(icon, Utils.rl("port/full_bundled"));
+                this.iconSingle = inputs -> inputs == 2 ? iconSingleTwo : iconSingleThree;
+                this.iconBundled = inputs -> inputs == 2 ? iconBundledTwo : iconBundledThree;
+            }
+            else
+            {
+                IconConfig iconSingle = new IconConfig(icon, Utils.rl("port/hor_single"));
+                IconConfig iconBundled = new IconConfig(icon, Utils.rl("port/hor_bundled"));
+                this.iconSingle = inputs -> iconSingle;
+                this.iconBundled = inputs -> iconBundled;
+            }
         }
 
         public boolean invertsResult()
@@ -196,11 +258,27 @@ public final class PrimitivePrototypeNode extends PrototypeNode
             return invertsResult;
         }
 
+        public IconConfig icon(int inputCount, WireType wireType)
+        {
+            validateInputCount(inputCount);
+            return wireType.select(iconSingle, iconBundled).apply(inputCount);
+        }
+
+        public Supplier<PrototypeNode> factory(int inputCount, WireType wireType)
+        {
+            validateInputCount(inputCount);
+            return () -> new PrimitivePrototypeNode(this, inputCount, wireType);
+        }
+
         private void validateInputCount(int inputCount)
         {
             if ((inputCount > 1) != multiInput)
             {
                 throw new IllegalArgumentException(String.format(Locale.ROOT, "Invalid input count %d for type %s", inputCount, this));
+            }
+            if (inputCount < 1 || inputCount > 3)
+            {
+                throw new IllegalArgumentException(String.format(Locale.ROOT, "Invalid input count %d, expected 1 <= count <= 3", inputCount));
             }
         }
 

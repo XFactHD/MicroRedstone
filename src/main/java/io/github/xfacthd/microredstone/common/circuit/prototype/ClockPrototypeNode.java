@@ -7,6 +7,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,9 +17,16 @@ import java.util.Set;
 // TODO: add inhibit input (requires support for optional connections)
 public final class ClockPrototypeNode extends PrototypeNode
 {
+    public static final IconConfig ICON = new IconConfig(Utils.rl("part/clock"), Utils.rl("port/right_single"), false);
+
     private int halfPeriodLength = 10;
     @Nullable
     private Wire output = null;
+
+    public ClockPrototypeNode()
+    {
+        super(ICON);
+    }
 
     public void setHalfPeriodLength(int halfCycleLength)
     {
@@ -37,6 +45,30 @@ public final class ClockPrototypeNode extends PrototypeNode
     }
 
     @Override
+    protected boolean hasPortInternal(Port port, @Nullable WireType wireType)
+    {
+        return port == Port.RIGHT && (wireType == null || wireType == WireType.SINGLE);
+    }
+
+    @Override
+    protected boolean isConnectedInternal(Port port)
+    {
+        return port == Port.RIGHT && output != null;
+    }
+
+    @Override
+    public void replaceWire(Wire oldWire, Wire newWire)
+    {
+        if (output == oldWire) output = newWire;
+    }
+
+    @Override
+    public void clearWires()
+    {
+        output = null;
+    }
+
+    @Override
     public void validate(ProblemReporter reporter)
     {
         if (output == null) reporter.report(() -> "Output unspecified");
@@ -46,7 +78,7 @@ public final class ClockPrototypeNode extends PrototypeNode
     public ClockCircuitNode assemble(WireMapper wireMapper)
     {
         int outputWire = wireMapper.resolveWire(Objects.requireNonNull(output));
-        Connector outCon = new Connector(Port.RIGHT, outputWire, PortDir.OUTPUT, WireType.SINGLE);
+        Connector outCon = new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, WireType.SINGLE);
         return new ClockCircuitNode(halfPeriodLength, outCon);
     }
 

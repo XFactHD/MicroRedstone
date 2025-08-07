@@ -1,0 +1,194 @@
+{
+  "sources": [
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "up": "single"
+      },
+      "sprite": "microredstone:port/up_single"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "up": "bundled"
+      },
+      "sprite": "microredstone:port/up_bundled"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "single"
+      },
+      "sprite": "microredstone:port/down_single"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "bundled"
+      },
+      "sprite": "microredstone:port/down_bundled"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "single"
+      },
+      "sprite": "microredstone:port/left_single"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "bundled"
+      },
+      "sprite": "microredstone:port/left_bundled"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "right": "single"
+      },
+      "sprite": "microredstone:port/right_single"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "right": "bundled"
+      },
+      "sprite": "microredstone:port/right_bundled"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "single",
+        "right": "single"
+      },
+      "sprite": "microredstone:port/hor_single"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "bundled",
+        "right": "bundled"
+      },
+      "sprite": "microredstone:port/hor_bundled"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "single",
+        "right": "single",
+        "up": "single"
+      },
+      "sprite": "microredstone:port/up_down_right_single"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "bundled",
+        "right": "bundled",
+        "up": "bundled"
+      },
+      "sprite": "microredstone:port/up_down_right_bundled"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "single",
+        "left": "single",
+        "right": "single",
+        "up": "single"
+      },
+      "sprite": "microredstone:port/full_single"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "bundled",
+        "left": "bundled",
+        "right": "bundled",
+        "up": "bundled"
+      },
+      "sprite": "microredstone:port/full_bundled"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "single",
+        "right": "bundled"
+      },
+      "sprite": "microredstone:port/packer"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "bundled",
+        "right": "single"
+      },
+      "sprite": "microredstone:port/unpacker"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "up": "single"
+      },
+      "sprite": "microredstone:port/border_up_single",
+      "type_prefix": "border"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "up": "bundled"
+      },
+      "sprite": "microredstone:port/border_up_bundled",
+      "type_prefix": "border"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "single"
+      },
+      "sprite": "microredstone:port/border_down_single",
+      "type_prefix": "border"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "down": "bundled"
+      },
+      "sprite": "microredstone:port/border_down_bundled",
+      "type_prefix": "border"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "single"
+      },
+      "sprite": "microredstone:port/border_left_single",
+      "type_prefix": "border"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "left": "bundled"
+      },
+      "sprite": "microredstone:port/border_left_bundled",
+      "type_prefix": "border"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "right": "single"
+      },
+      "sprite": "microredstone:port/border_right_single",
+      "type_prefix": "border"
+    },
+    {
+      "type": "microredstone:port_overlay",
+      "ports": {
+        "right": "bundled"
+      },
+      "sprite": "microredstone:port/border_right_bundled",
+      "type_prefix": "border"
+    }
+  ]
+}

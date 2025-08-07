@@ -7,6 +7,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuit
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,9 @@ import java.util.Set;
 
 public final class BufferPrototypeNode extends PrototypeNode
 {
+    public static final IconConfig ICON_SINGLE = new IconConfig(Utils.rl("part/buffer"), Utils.rl("port/hor_single"));
+    public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.rl("part/buffer"), Utils.rl("port/hor_bundled"));
+
     private final WireType wireType;
     @Nullable
     private Wire input = null;
@@ -23,6 +27,7 @@ public final class BufferPrototypeNode extends PrototypeNode
 
     public BufferPrototypeNode(WireType wireType)
     {
+        super(wireType.select(ICON_SINGLE, ICON_BUNDLED));
         this.wireType = wireType;
     }
 
@@ -40,6 +45,37 @@ public final class BufferPrototypeNode extends PrototypeNode
     }
 
     @Override
+    protected boolean hasPortInternal(Port port, @Nullable WireType wireType)
+    {
+        return (port == Port.LEFT || port == Port.RIGHT) && (wireType == null || wireType == this.wireType);
+    }
+
+    @Override
+    protected boolean isConnectedInternal(Port port)
+    {
+        return switch (port)
+        {
+            case LEFT -> input != null;
+            case RIGHT -> output != null;
+            default -> false;
+        };
+    }
+
+    @Override
+    public void replaceWire(Wire oldWire, Wire newWire)
+    {
+        if (input == oldWire) input = newWire;
+        if (output == oldWire) output = newWire;
+    }
+
+    @Override
+    public void clearWires()
+    {
+        input = null;
+        output = null;
+    }
+
+    @Override
     public void validate(ProblemReporter reporter)
     {
         if (input == null) reporter.report(() -> "Input unspecified");
@@ -53,8 +89,8 @@ public final class BufferPrototypeNode extends PrototypeNode
         int inputWire = wireMapper.resolveWire(Objects.requireNonNull(input));
         int outputWire = wireMapper.resolveWire(Objects.requireNonNull(output));
         return new BufferCircuitNode(
-                new Connector(Port.LEFT, inputWire, PortDir.INPUT, wireType),
-                new Connector(Port.RIGHT, outputWire, PortDir.OUTPUT, wireType)
+                new Connector(getPos(), Port.LEFT, inputWire, PortDir.INPUT, wireType),
+                new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, wireType)
         );
     }
 

@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.io.function.IOFunction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -155,6 +156,11 @@ public final class Utils
     {
         BlockEntityTicker<? super E> ticker = (level, pos, state, be) -> instTicker.accept(be);
         return BaseEntityBlock.createTickerHelper(actualType, expectedType.value(), ticker);
+    }
+
+    public static <T, R> Function<T, R> uncheckIO(IOFunction<T, R> function)
+    {
+        return function.asFunction();
     }
 
     private Utils() { }

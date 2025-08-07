@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "microredstone:block/circuit_workbench"
+    }
+  }
+}

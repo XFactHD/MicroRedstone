@@ -46,13 +46,13 @@ public final class CircuitAssembler
     {
         CountingProblemReporter reporter = CountingProblemReporter.of(problemReporter);
 
+        node.validate(reporter.forChild(() -> "root_node"));
+        if (reporter.hasIssues()) return null;
+
         List<ClockPrototypeNode> clockProtoNodes = new ArrayList<>();
         List<BufferPrototypeNode> bufferProtoNodes = new ArrayList<>();
         Graph<PrototypeNode> nodeGraph = buildNodeGraph(node, clockProtoNodes, bufferProtoNodes, reporter);
         if (nodeGraph == null) return null;
-
-        node.validate(reporter.forChild(() -> "root_node"));
-        if (reporter.hasIssues()) return null;
 
         List<PrototypeNode> childProtoNodes = buildSortedNodeList(nodeGraph, reporter);
         if (reporter.hasIssues()) return null;
@@ -60,10 +60,10 @@ public final class CircuitAssembler
         WireMapper wireMapper = new WireMapper();
 
         List<NodeEntry<ClockCircuitNode>> clockNodes = clockProtoNodes.stream()
-                .map(clock -> new NodeEntry<>(clock.assemble(wireMapper), clock.getPos()))
+                .map(clock -> new NodeEntry<>(clock.assemble(wireMapper), clock.getPos(), clock.getRotation()))
                 .toList();
         List<NodeEntry<BufferCircuitNode>> bufferNodes = bufferProtoNodes.stream()
-                .map(buffer -> new NodeEntry<>(buffer.assemble(wireMapper), buffer.getPos()))
+                .map(buffer -> new NodeEntry<>(buffer.assemble(wireMapper), buffer.getPos(), buffer.getRotation()))
                 .toList();
 
         List<NodeEntry<CircuitNode>> childNodes = new ArrayList<>();
@@ -93,7 +93,7 @@ public final class CircuitAssembler
                                 return new WirePair(resolved, con.wire());
                             })
                             .toArray(WirePair[]::new);
-                    childNodes.add(new NodeEntry<>(assembled, reference.getPos(), inputs, outputs));
+                    childNodes.add(new NodeEntry<>(assembled, reference.getPos(), reference.getRotation(), inputs, outputs));
                 }
                 default ->
                 {
@@ -106,7 +106,7 @@ public final class CircuitAssembler
                             .mapToInt(Connector::wire)
                             .mapToObj(WirePair::new)
                             .toArray(WirePair[]::new);
-                    childNodes.add(new NodeEntry<>(assembled, childNode.getPos(), inputs, outputs));
+                    childNodes.add(new NodeEntry<>(assembled, childNode.getPos(), childNode.getRotation(), inputs, outputs));
                 }
             }
         }
@@ -142,7 +142,7 @@ public final class CircuitAssembler
         }
         if (wireMapper.size() != node.getWireCount())
         {
-            reporter.report(() -> "Wire count mismatch");
+            reporter.report(() -> "Wire count mismatch (known: " + node.getWireCount() + ", mapped: " + wireMapper.size() + ")");
             return null;
         }
 
@@ -193,7 +193,7 @@ public final class CircuitAssembler
             {
                 if (driverNode == readerNode)
                 {
-                    reporter.report(() -> "Immediate cyclic connection on " + driverNode);
+                    reporter.report(() -> "Immediate cyclic node on " + driverNode);
                     return null;
                 }
                 graph.putEdge(driverNode, readerNode);
@@ -210,7 +210,7 @@ public final class CircuitAssembler
         }
         catch (CyclePresentException e)
         {
-            reporter.report(() -> "Cyclic connection");
+            reporter.report(() -> "Cyclic node");
             return List.of();
         }
     }

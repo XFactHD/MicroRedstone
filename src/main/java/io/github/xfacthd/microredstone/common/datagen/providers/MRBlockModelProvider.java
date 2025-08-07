@@ -24,6 +24,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplate;
@@ -44,6 +45,8 @@ public final class MRBlockModelProvider extends ModelProvider
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels)
     {
+        blockModels.createCraftingTableLike(MRContent.BLOCK_CIRCUIT_WORKBENCH.value(), Blocks.SMOOTH_STONE, TextureMapping::craftingTable);
+
         makeMicrochipBlockModel(blockModels);
 
         for (int edge = 0; edge < 4; edge++)

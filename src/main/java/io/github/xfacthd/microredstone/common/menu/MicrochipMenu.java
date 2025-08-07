@@ -3,7 +3,6 @@ package io.github.xfacthd.microredstone.common.menu;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.menu.slot.CircuitSlot;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -88,12 +87,7 @@ public final class MicrochipMenu extends AbstractContainerMenu
     @Override
     public boolean stillValid(Player player)
     {
-        return levelAccess.evaluate((level, pos) -> isValid(level, pos, player), true);
-    }
-
-    private static boolean isValid(Level level, BlockPos pos, Player player)
-    {
-        return level.getBlockState(pos).is(MRContent.BLOCK_MICROCHIP) && player.canInteractWithBlock(pos, 4D);
+        return stillValid(levelAccess, player, MRContent.BLOCK_MICROCHIP.value());
     }
 
     @FunctionalInterface

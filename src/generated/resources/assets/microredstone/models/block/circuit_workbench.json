@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "minecraft:block/smooth_stone",
+    "east": "microredstone:block/circuit_workbench_side",
+    "north": "microredstone:block/circuit_workbench_front",
+    "particle": "microredstone:block/circuit_workbench_front",
+    "south": "microredstone:block/circuit_workbench_side",
+    "up": "microredstone:block/circuit_workbench_top",
+    "west": "microredstone:block/circuit_workbench_front"
+  }
+}

@@ -16,6 +16,7 @@ import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -24,8 +25,13 @@ import java.util.Set;
 public final class CompoundPrototypeNode extends PrototypeNode
 {
     private final List<PrototypeNode> childNodes = new ArrayList<>();
-    private final Set<Wire> wires = new HashSet<>();
+    private final Set<Wire> wires = new HashSet<>(); // TODO: copy wires to the assembled node
     private final @Nullable Connection[] connections = new Connection[4];
+
+    public CompoundPrototypeNode()
+    {
+        super(null);
+    }
 
     public void addChild(PrototypeNode node)
     {
@@ -52,7 +58,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
         Connection oldConnection = connections[port.ordinal()];
         if (connection != null && oldConnection != null)
         {
-            throw new IllegalStateException("Attempted to overwrite connection for port " + port);
+            throw new IllegalStateException("Attempted to overwrite node for port " + port);
         }
         connections[port.ordinal()] = connection;
     }
@@ -74,6 +80,36 @@ public final class CompoundPrototypeNode extends PrototypeNode
 
     @Override
     protected boolean setConnectionInternal(Port port, Wire wire, boolean connect)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected boolean hasPortInternal(Port port, @Nullable WireType wireType)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected boolean isConnectedInternal(Port port)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void replaceWire(Wire oldWire, Wire newWire)
+    {
+        for (Connection connection : connections)
+        {
+            if (connection != null && connection.getWire() == oldWire)
+            {
+                connection.connect(newWire);
+            }
+        }
+    }
+
+    @Override
+    public void clearWires()
     {
         throw new UnsupportedOperationException();
     }
@@ -159,6 +195,13 @@ public final class CompoundPrototypeNode extends PrototypeNode
             }
         }
         throw new IllegalArgumentException("Unknown wire " + wire);
+    }
+
+    public void clear()
+    {
+        childNodes.clear();
+        wires.clear();
+        Arrays.fill(connections, null);
     }
 
     private static final class WireValidator
