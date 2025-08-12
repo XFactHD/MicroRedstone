@@ -48,6 +48,8 @@ public record PortOverlaySource(ResourceLocation sprite, Map<Port, WireType> por
     @Override
     public void run(ResourceManager resourceManager, Output output)
     {
+        if (portOverlays.isEmpty()) return;
+
         Map<Port, Pair<Resource, LazyLoadedImage>> portImages = new HashMap<>();
         Object2IntMap<WireType> types = new Object2IntOpenHashMap<>();
         for (WireType type : portOverlays.values())
@@ -154,6 +156,11 @@ public record PortOverlaySource(ResourceLocation sprite, Map<Port, WireType> por
         public void discard()
         {
             portImages.values().forEach(pair -> pair.getSecond().release());
+        }
+
+        public Resource getPrimaryResource()
+        {
+            return portImages.values().iterator().next().getFirst();
         }
     }
 }

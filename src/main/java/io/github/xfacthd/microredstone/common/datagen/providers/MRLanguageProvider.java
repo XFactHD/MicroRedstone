@@ -6,6 +6,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.PartsList
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
+import io.github.xfacthd.microredstone.common.compat.atlasviewer.AtlasViewerCompat;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -64,6 +65,15 @@ public final class MRLanguageProvider extends LanguageProvider
         addPart("xnor_three_bundled", "XNOR", "3-Input, Bundled", "");
         addPart("packer", "Bundle Packer", null, "");
         addPart("unpacker", "Bundle Unpacker", null, "");
+
+        add(AtlasViewerCompat.LABEL_MASK_TEXTURE, "Texture");
+        add(AtlasViewerCompat.LABEL_MASK_SPRITE, "Sprite");
+        add(AtlasViewerCompat.LABEL_MASK_AREA, "Area");
+        add(AtlasViewerCompat.VALUE_MASK_AREA, "X: %s Y: %s Width: %s Height: %s");
+        add(AtlasViewerCompat.LABEL_PORT_SPRITE, "Sprite");
+        add(AtlasViewerCompat.LABEL_PORT_ENTRIES, "Ports");
+        add(AtlasViewerCompat.VALUE_PORT_ENTRY, "  - %s = %s");
+        add(AtlasViewerCompat.LABEL_PORT_TYPE_PREFIX, "Type Prefix");
     }
 
     // TODO: add descriptions

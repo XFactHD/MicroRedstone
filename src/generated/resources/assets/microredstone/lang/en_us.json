@@ -68,6 +68,12 @@
   "label.microredstone.circuit_workbench.part_entry.xor_three_single": "XOR",
   "label.microredstone.circuit_workbench.part_entry.xor_two_bundled": "XOR",
   "label.microredstone.circuit_workbench.part_entry.xor_two_single": "XOR",
+  "label.microredstone.source_tooltip.area_mask.area": "Area",
+  "label.microredstone.source_tooltip.area_mask.sprite": "Sprite",
+  "label.microredstone.source_tooltip.area_mask.texture": "Texture",
+  "label.microredstone.source_tooltip.port_overlay.entries": "Ports",
+  "label.microredstone.source_tooltip.port_overlay.sprite": "Sprite",
+  "label.microredstone.source_tooltip.port_overlay.type_prefix": "Type Prefix",
   "subtitle.microredstone.circuit_workbench.part_entry.and_three_bundled": "3-Input, Bundled",
   "subtitle.microredstone.circuit_workbench.part_entry.and_three_single": "3-Input, Single",
   "subtitle.microredstone.circuit_workbench.part_entry.and_two_bundled": "2-Input, Bundled",
@@ -99,5 +105,7 @@
   "subtitle.microredstone.circuit_workbench.part_entry.xor_two_bundled": "2-Input, Bundled",
   "subtitle.microredstone.circuit_workbench.part_entry.xor_two_single": "2-Input, Single",
   "title.microredstone.circuit_workbench": "Circuit Workbench",
-  "title.microredstone.microchip": "Microchip"
+  "title.microredstone.microchip": "Microchip",
+  "value.microredstone.source_tooltip.area_mask.area": "X: %s Y: %s Width: %s Height: %s",
+  "value.microredstone.source_tooltip.port_overlay.entry": "  - %s = %s"
 }

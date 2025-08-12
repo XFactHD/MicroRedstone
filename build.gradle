@@ -103,7 +103,7 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
+    implementation("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
