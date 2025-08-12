@@ -272,6 +272,20 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
+    public void onLoad()
+    {
+        super.onLoad();
+        if (!level().isClientSide())
+        {
+            boolean hasCircuit = circuit != null;
+            if (getBlockState().getValue(PropertyHolder.HAS_CIRCUIT) != hasCircuit)
+            {
+                level().setBlockAndUpdate(worldPosition, getBlockState().setValue(PropertyHolder.HAS_CIRCUIT, hasCircuit));
+            }
+        }
+    }
+
+    @Override
     protected void collectImplicitComponents(DataComponentMap.Builder components)
     {
         if (circuit != null)
