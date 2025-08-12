@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.common.circuit.prototype;
+package io.github.xfacthd.microredstone.common.circuit.prototype.spec;
 
 import net.minecraft.resources.ResourceLocation;
 

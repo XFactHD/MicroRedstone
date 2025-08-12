@@ -2,7 +2,7 @@ package io.github.xfacthd.microredstone.common.circuit.connection;
 
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.IconConfig;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.util.ProblemReporter;

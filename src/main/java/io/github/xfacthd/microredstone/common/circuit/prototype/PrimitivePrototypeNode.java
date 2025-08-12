@@ -10,6 +10,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.ThreeInputL
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLogicCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

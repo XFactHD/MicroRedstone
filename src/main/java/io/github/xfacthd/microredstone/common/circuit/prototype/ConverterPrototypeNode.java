@@ -8,6 +8,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundlePacke
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundleUnpackerCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.util.ProblemReporter;
 

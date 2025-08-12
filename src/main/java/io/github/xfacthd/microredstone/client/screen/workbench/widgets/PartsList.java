@@ -8,7 +8,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.IconConfig;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;

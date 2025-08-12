@@ -9,6 +9,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
