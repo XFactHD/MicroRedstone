@@ -1,30 +1,33 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.EnumHashBiMap;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-// TODO: - move port presence, port types, port directions and port overlay RL to a PortConfig object passed to ctor
-//       - change connectedWires to BiMap<Wire, Port>
 public abstract class PrototypeNode implements PlaceableNode
 {
+    protected final PortConfig portConfig;
     @Nullable
     private final IconConfig icon;
-    private final Set<Wire> connectedWires = new ReferenceOpenHashSet<>();
+    private final BiMap<Port, Wire> connectedWires = EnumHashBiMap.create(Port.class);
     private NodePos pos = new NodePos(0, 0);
     private int rotation = 0;
 
-    protected PrototypeNode(@Nullable IconConfig icon)
+    protected PrototypeNode(PortConfig portConfig, @Nullable IconConfig icon)
     {
+        this.portConfig = portConfig;
         this.icon = icon;
     }
 
@@ -40,40 +43,46 @@ public abstract class PrototypeNode implements PlaceableNode
 
     public final void setConnection(Port port, Wire wire, boolean connect)
     {
-        if (setConnectionInternal(port.rotate(-rotation), wire, connect))
+        Port portNorm = port.rotate(-rotation);
+        if (portConfig.hasPort(portNorm, wire.getWireType()))
         {
             if (connect)
             {
-                connectedWires.add(wire);
+                connectedWires.put(portNorm, wire);
             }
             else
             {
-                connectedWires.remove(wire);
+                connectedWires.remove(portNorm);
             }
         }
     }
 
-    protected abstract boolean setConnectionInternal(Port port, Wire wire, boolean connect);
-
     @Override
     public final boolean hasPort(Port port, @Nullable WireType wireType)
     {
-        return hasPortInternal(port.rotate(-rotation), wireType);
+        return portConfig.hasPort(port.rotate(-rotation), wireType);
     }
-
-    protected abstract boolean hasPortInternal(Port port, @Nullable WireType wireType);
 
     @Override
     public final boolean isConnected(Port port)
     {
-        return isConnectedInternal(port.rotate(-rotation));
+        return connectedWires.containsKey(port.rotate(-rotation));
     }
 
-    protected abstract boolean isConnectedInternal(Port port);
+    public final Wire getWireOrThrow(Port port)
+    {
+        return Objects.requireNonNull(connectedWires.get(port));
+    }
 
-    public abstract void replaceWire(Wire oldWire, Wire newWire);
+    public final void replaceWire(Wire oldWire, Wire newWire)
+    {
+        connectedWires.replaceAll((port, wire) -> wire == oldWire ? newWire : wire);
+    }
 
-    public abstract void clearWires();
+    public final void clearWires()
+    {
+        connectedWires.clear();
+    }
 
     public abstract void validate(ProblemReporter reporter);
 
@@ -99,12 +108,21 @@ public abstract class PrototypeNode implements PlaceableNode
 
     public final Set<Wire> getConnectedWires()
     {
-        return connectedWires;
+        return connectedWires.values();
     }
 
-    public abstract Set<Wire> getConnectedInputWires();
+    public final Set<Wire> getConnectedWires(PortDir dir)
+    {
+        return portConfig.getPortsWithDir(dir)
+                .map(connectedWires::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
 
-    public abstract Set<Wire> getConnectedOutputWires();
-
-    public abstract WireType getOutputType(Wire wire);
+    public final WireType getOutputType(Wire wire)
+    {
+        Port port = connectedWires.inverse().get(wire);
+        Objects.requireNonNull(port);
+        return Objects.requireNonNull(portConfig.getPortType(port));
+    }
 }

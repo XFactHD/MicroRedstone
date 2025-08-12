@@ -7,6 +7,7 @@ import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
@@ -80,7 +81,7 @@ public final class CircuitAssembler
                     WirePair[] inputs = Arrays.stream(assembled.getInputs())
                             .map(con ->
                             {
-                                Wire wire = reference.getPortWire(con.port());
+                                Wire wire = reference.getWireOrThrow(con.port());
                                 int resolved = wireMapper.resolveWire(wire);
                                 return new WirePair(resolved, con.wire());
                             })
@@ -88,7 +89,7 @@ public final class CircuitAssembler
                     WirePair[] outputs = Arrays.stream(assembled.getOutputs())
                             .map(con ->
                             {
-                                Wire wire = reference.getPortWire(con.port());
+                                Wire wire = reference.getWireOrThrow(con.port());
                                 int resolved = wireMapper.resolveWire(wire);
                                 return new WirePair(resolved, con.wire());
                             })
@@ -175,11 +176,11 @@ public final class CircuitAssembler
             }
 
             graph.addNode(childNode);
-            for (Wire input : childNode.getConnectedInputWires())
+            for (Wire input : childNode.getConnectedWires(PortDir.INPUT))
             {
                 readers.put(input, childNode);
             }
-            for (Wire output : childNode.getConnectedOutputWires())
+            for (Wire output : childNode.getConnectedWires(PortDir.OUTPUT))
             {
                 drivers.put(output, childNode);
             }

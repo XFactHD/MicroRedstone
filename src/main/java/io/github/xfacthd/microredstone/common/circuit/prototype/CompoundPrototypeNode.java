@@ -24,13 +24,15 @@ import java.util.Set;
 
 public final class CompoundPrototypeNode extends PrototypeNode
 {
+    private static final PortConfig PORT_CONFIG = PortConfig.builder().build();
+
     private final List<PrototypeNode> childNodes = new ArrayList<>();
     private final Set<Wire> wires = new HashSet<>(); // TODO: copy wires to the assembled node
     private final @Nullable Connection[] connections = new Connection[4];
 
     public CompoundPrototypeNode()
     {
-        super(null);
+        super(PORT_CONFIG, null);
     }
 
     public void addChild(PrototypeNode node)
@@ -78,26 +80,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
         return connections;
     }
 
-    @Override
-    protected boolean setConnectionInternal(Port port, Wire wire, boolean connect)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected boolean hasPortInternal(Port port, @Nullable WireType wireType)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected boolean isConnectedInternal(Port port)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void replaceWire(Wire oldWire, Wire newWire)
+    public void replaceWireInConnections(Wire oldWire, Wire newWire)
     {
         for (Connection connection : connections)
         {
@@ -106,12 +89,6 @@ public final class CompoundPrototypeNode extends PrototypeNode
                 connection.connect(newWire);
             }
         }
-    }
-
-    @Override
-    public void clearWires()
-    {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -129,7 +106,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
             }
 
             ProblemReporter outputsReporter = childReporter.forChild(() -> "drivers");
-            Set<Wire> outputWires = childNode.getConnectedOutputWires();
+            Set<Wire> outputWires = childNode.getConnectedWires(PortDir.OUTPUT);
             int packerBit = -1;
             if (childNode instanceof ConverterPrototypeNode converter && converter.isPacker())
             {
@@ -170,31 +147,6 @@ public final class CompoundPrototypeNode extends PrototypeNode
     public CircuitNode assemble(WireMapper wireMapper)
     {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Set<Wire> getConnectedInputWires()
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Set<Wire> getConnectedOutputWires()
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public WireType getOutputType(Wire wire)
-    {
-        for (Connection connection : connections)
-        {
-            if (connection != null && connection.getWire() == wire)
-            {
-                return connection.getWireType();
-            }
-        }
-        throw new IllegalArgumentException("Unknown wire " + wire);
     }
 
     public void clear()

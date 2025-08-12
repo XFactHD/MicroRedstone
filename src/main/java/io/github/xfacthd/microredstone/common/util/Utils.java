@@ -126,6 +126,13 @@ public final class Utils
         return arr;
     }
 
+    public static <T> T[] concatArrays(T[] arrOne, T[] arrTwo)
+    {
+        T[] arrNew = Arrays.copyOf(arrOne, arrOne.length + arrTwo.length);
+        System.arraycopy(arrTwo, 0, arrNew, arrOne.length, arrTwo.length);
+        return arrNew;
+    }
+
     public static Rotation getRotationFromFacingOrientation(Direction facing, Direction orientation)
     {
         int idx = MappingArrays.dirPairToRotIndex(facing, orientation);

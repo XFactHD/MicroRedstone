@@ -69,6 +69,12 @@ public enum Port implements StringRepresentable
         return Mth.positiveModulo(ordinal() + 1, VALUES.length);
     }
 
+    public int appendMask(int mask, WireType type)
+    {
+        int offset = ordinal() + (type.ordinal() * VALUES.length);
+        return mask | (1 << offset);
+    }
+
     public static Port ofCross(double fracX, double fracY)
     {
         fracX -= .5D;

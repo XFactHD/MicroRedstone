@@ -94,7 +94,7 @@ public final class WireGrid implements Iterable<RoutedWire>
                 RoutedWire oldWire = endNode.wires.getFirst();
                 oldWire.forAllNodes(pos -> replaceWireInNode(pos, oldWire, routedWire));
                 partGrid.forEach(part -> part.replaceWire(oldWire.wire(), routedWire.wire()));
-                circuit.replaceWire(oldWire.wire(), routedWire.wire());
+                circuit.replaceWireInConnections(oldWire.wire(), routedWire.wire());
                 routedWire.sections().addAll(oldWire.sections());
                 routedWire.wire().getNodes().addAll(oldWire.wire().getNodes());
             }

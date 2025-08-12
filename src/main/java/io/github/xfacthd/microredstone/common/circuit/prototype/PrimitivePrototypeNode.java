@@ -10,67 +10,34 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.ThreeInputL
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLogicCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.Util;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 public final class PrimitivePrototypeNode extends PrototypeNode
 {
-    private static final Port[][] PORT_MAPPING = new Port[][] {
-            { Port.LEFT },
-            { Port.UP, Port.DOWN },
-            { Port.UP, Port.LEFT, Port.DOWN }
-    };
-    private static final int[][] INV_PORT_MAPPING = Util.make(() ->
-    {
-        int[][] arr = new int[PORT_MAPPING.length][];
-        for (int i = 0; i < PORT_MAPPING.length; i++)
-        {
-            int[] innerInv = new int[4];
-            Arrays.fill(innerInv, -1);
-            Port[] inner = PORT_MAPPING[i];
-            for (int j = 0; j < inner.length; j++)
-            {
-                int port = inner[j].ordinal();
-                innerInv[port] = j;
-            }
-            arr[i] = innerInv;
-        }
-        return arr;
-    });
-
     private final Type type;
     private final int inputCount;
     private final WireType wireType;
-    private final @Nullable Wire[] inputs;
-    @Nullable
-    private Wire output = null;
 
     public PrimitivePrototypeNode(Type type, int inputCount, WireType wireType)
     {
-        super(type.icon(inputCount, wireType));
+        super(type.portConfig(inputCount, wireType), type.icon(inputCount, wireType));
         type.validateInputCount(inputCount);
         this.type = type;
         this.inputCount = inputCount;
         this.wireType = wireType;
-        this.inputs = new Wire[inputCount];
     }
 
     public Type getType()
@@ -89,92 +56,28 @@ public final class PrimitivePrototypeNode extends PrototypeNode
     }
 
     @Override
-    protected boolean setConnectionInternal(Port port, Wire wire, boolean connect)
-    {
-        if (wire.getWireType() != wireType) return false;
-
-        if (port == Port.RIGHT)
-        {
-            output = connect ? wire : null;
-            return true;
-        }
-
-        int inputIdx = INV_PORT_MAPPING[inputCount - 1][port.ordinal()];
-        if (inputIdx != -1)
-        {
-            inputs[inputIdx] = connect ? wire : null;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    protected boolean hasPortInternal(Port port, @Nullable WireType wireType)
-    {
-        return (inputCount == 3 || port != Port.LEFT) && (wireType == null || wireType == this.wireType);
-    }
-
-    @Override
-    protected boolean isConnectedInternal(Port port)
-    {
-        if (port == Port.RIGHT)
-        {
-            return output != null;
-        }
-        int inputIdx = INV_PORT_MAPPING[inputCount - 1][port.ordinal()];
-        return inputIdx != -1 && inputs[inputIdx] != null;
-    }
-
-    @Override
-    public void replaceWire(Wire oldWire, Wire newWire)
-    {
-        for (int i = 0; i < inputs.length; i++)
-        {
-            if (inputs[i] == oldWire)
-            {
-                inputs[i] = newWire;
-                return;
-            }
-        }
-        if (output == oldWire)
-        {
-            output = newWire;
-        }
-    }
-
-    @Override
-    public void clearWires()
-    {
-        Arrays.fill(inputs, null);
-        output = null;
-    }
-
-    @Override
     public void validate(ProblemReporter reporter)
     {
-        for (int i = 0; i < inputCount; i++)
+        portConfig.getPortsWithDir(PortDir.INPUT).forEach(port ->
         {
-            if (inputs[i] == null)
+            if (!isConnected(port))
             {
-                int input = i;
-                reporter.report(() -> "Input " + input + " unspecified");
+                reporter.report(() -> "Input " + port + " unspecified");
             }
-            if (inputs[i] == output) reporter.report(() -> "Connected to self");
-        }
-        if (output == null) reporter.report(() -> "Output unspecified");
+        });
+        if (!isConnected(Port.RIGHT)) reporter.report(() -> "Output unspecified");
     }
 
     @Override
     public CircuitNode assemble(WireMapper wireMapper)
     {
         List<Connector> inputConnectors = new ArrayList<>();
-        for (int i = 0; i < inputs.length; i++)
+        portConfig.getPortsWithDir(PortDir.INPUT).forEach(port ->
         {
-            int wire = wireMapper.resolveWire(Objects.requireNonNull(inputs[i]));
-            Port port = PORT_MAPPING[inputCount - 1][i];
+            int wire = wireMapper.resolveWire(getWireOrThrow(port));
             inputConnectors.add(new Connector(getPos(), port, wire, PortDir.INPUT, wireType));
-        }
-        int outWire = wireMapper.resolveWire(Objects.requireNonNull(output));
+        });
+        int outWire = wireMapper.resolveWire(getWireOrThrow(Port.RIGHT));
         Connector outputConnector = new Connector(getPos(), Port.RIGHT, outWire, PortDir.OUTPUT, wireType);
         return switch (inputCount)
         {
@@ -190,24 +93,6 @@ public final class PrimitivePrototypeNode extends PrototypeNode
             case 3 -> new ThreeInputLogicCircuitNode(type, isMultiBit(), inputConnectors, outputConnector);
             default -> throw new IllegalStateException("Invalid input count: " + inputCount);
         };
-    }
-
-    @Override
-    public Set<Wire> getConnectedInputWires()
-    {
-        return Set.of(inputs);
-    }
-
-    @Override
-    public Set<Wire> getConnectedOutputWires()
-    {
-        return Set.of(Objects.requireNonNull(output));
-    }
-
-    @Override
-    public WireType getOutputType(Wire wire)
-    {
-        return wireType;
     }
 
     public enum Type implements StringRepresentable
@@ -228,6 +113,8 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final boolean multiInput;
         private final boolean invertsResult;
+        private final IntFunction<PortConfig> portsSingle;
+        private final IntFunction<PortConfig> portsBundled;
         private final IntFunction<IconConfig> iconSingle;
         private final IntFunction<IconConfig> iconBundled;
 
@@ -237,6 +124,30 @@ public final class PrimitivePrototypeNode extends PrototypeNode
             this.invertsResult = invertsResult;
             if (multiInput)
             {
+                PortConfig portsSingleTwo = PortConfig.builder()
+                        .addPort(Port.UP, WireType.SINGLE, PortDir.INPUT)
+                        .addPort(Port.DOWN, WireType.SINGLE, PortDir.INPUT)
+                        .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
+                        .build();
+                PortConfig portsSingleThree = PortConfig.builder()
+                        .addPort(Port.UP, WireType.SINGLE, PortDir.INPUT)
+                        .addPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
+                        .addPort(Port.DOWN, WireType.SINGLE, PortDir.INPUT)
+                        .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
+                        .build();
+                PortConfig portsBundledTwo = PortConfig.builder()
+                        .addPort(Port.UP, WireType.BUNDLED, PortDir.INPUT)
+                        .addPort(Port.DOWN, WireType.BUNDLED, PortDir.INPUT)
+                        .addPort(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT)
+                        .build();
+                PortConfig portsBundledThree = PortConfig.builder()
+                        .addPort(Port.UP, WireType.BUNDLED, PortDir.INPUT)
+                        .addPort(Port.LEFT, WireType.BUNDLED, PortDir.INPUT)
+                        .addPort(Port.DOWN, WireType.BUNDLED, PortDir.INPUT)
+                        .addPort(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT)
+                        .build();
+                this.portsSingle = inputs -> inputs == 2 ? portsSingleTwo : portsSingleThree;
+                this.portsBundled = inputs -> inputs == 2 ? portsBundledTwo : portsBundledThree;
                 IconConfig iconSingleTwo = new IconConfig(icon, Utils.rl("port/up_down_right_single"));
                 IconConfig iconBundledTwo = new IconConfig(icon, Utils.rl("port/up_down_right_bundled"));
                 IconConfig iconSingleThree = new IconConfig(icon, Utils.rl("port/full_single"));
@@ -246,6 +157,16 @@ public final class PrimitivePrototypeNode extends PrototypeNode
             }
             else
             {
+                PortConfig portsSingle = PortConfig.builder()
+                        .addPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
+                        .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
+                        .build();
+                PortConfig portsBundled = PortConfig.builder()
+                        .addPort(Port.LEFT, WireType.BUNDLED, PortDir.INPUT)
+                        .addPort(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT)
+                        .build();
+                this.portsSingle = inputs -> portsSingle;
+                this.portsBundled = inputs -> portsBundled;
                 IconConfig iconSingle = new IconConfig(icon, Utils.rl("port/hor_single"));
                 IconConfig iconBundled = new IconConfig(icon, Utils.rl("port/hor_bundled"));
                 this.iconSingle = inputs -> iconSingle;
@@ -256,6 +177,12 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         public boolean invertsResult()
         {
             return invertsResult;
+        }
+
+        public PortConfig portConfig(int inputCount, WireType wireType)
+        {
+            validateInputCount(inputCount);
+            return wireType.select(portsSingle, portsBundled).apply(inputCount);
         }
 
         public IconConfig icon(int inputCount, WireType wireType)
