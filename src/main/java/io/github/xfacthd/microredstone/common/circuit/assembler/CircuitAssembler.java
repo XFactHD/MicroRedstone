@@ -147,7 +147,7 @@ public final class CircuitAssembler
             return null;
         }
 
-        return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, wireMapper.size(), inputs, outputs);
+        return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, node.getWiresCopy(), inputs, outputs);
     }
 
     @Nullable

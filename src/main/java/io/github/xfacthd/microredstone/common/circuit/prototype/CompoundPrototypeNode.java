@@ -28,7 +28,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
     private static final PortConfig PORT_CONFIG = PortConfig.builder().build();
 
     private final List<PrototypeNode> childNodes = new ArrayList<>();
-    private final Set<Wire> wires = new HashSet<>(); // TODO: copy wires to the assembled node
+    private final Set<Wire> wires = new HashSet<>();
     private final @Nullable Connection[] connections = new Connection[4];
 
     public CompoundPrototypeNode()
@@ -69,6 +69,16 @@ public final class CompoundPrototypeNode extends PrototypeNode
     public List<PrototypeNode> getChildNodes()
     {
         return childNodes;
+    }
+
+    public List<Wire> getWiresCopy()
+    {
+        List<Wire> wireList = new ArrayList<>(wires.size());
+        for (Wire wire : wires)
+        {
+            wireList.add(wire.copy());
+        }
+        return wireList;
     }
 
     public int getWireCount()

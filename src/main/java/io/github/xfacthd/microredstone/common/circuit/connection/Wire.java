@@ -77,6 +77,16 @@ public final class Wire
         return nodes;
     }
 
+    public Wire copy()
+    {
+        List<Node> copiedNodes = new ArrayList<>(nodes.size());
+        for (Node node : nodes)
+        {
+            copiedNodes.add(node.copy());
+        }
+        return new Wire(wireType, color, copiedNodes);
+    }
+
     @Override
     public String toString()
     {
@@ -91,6 +101,8 @@ public final class Wire
 
         Node withNeighbor(Port dir, NodePos neighbor);
 
+        Node copy();
+
         record Dangling(NodePos pos) implements Node
         {
             @Override
@@ -103,6 +115,12 @@ public final class Wire
             public Node withNeighbor(Port dir, NodePos neighbor)
             {
                 return new Branch(pos, Set.of(dir), Set.of(neighbor));
+            }
+
+            @Override
+            public Node copy()
+            {
+                return this;
             }
         }
 
@@ -125,6 +143,12 @@ public final class Wire
                 return new Connection(pos, port, neighbor);
             }
 
+            @Override
+            public Node copy()
+            {
+                return this;
+            }
+
             private Optional<NodePos> getNeighbor()
             {
                 return Optional.ofNullable(neighbor);
@@ -142,8 +166,15 @@ public final class Wire
             @Override
             public Node withNeighbor(Port dir, NodePos neighbor)
             {
+                ports.add(dir);
                 neighbors.add(neighbor);
                 return this;
+            }
+
+            @Override
+            public Node copy()
+            {
+                return new Branch(pos, ports, neighbors);
             }
         }
     }

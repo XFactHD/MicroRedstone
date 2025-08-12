@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.compiler.ClockFieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
@@ -17,7 +18,6 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.PrimitiveCi
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -30,7 +30,7 @@ public final class CompoundCircuitNode extends CircuitNode
             NodeEntry.CODEC.listOf().fieldOf("child_nodes").forGetter(CompoundCircuitNode::getChildNodes),
             NodeEntry.codec(ClockCircuitNode.CODEC.codec()).listOf().fieldOf("clock_nodes").forGetter(node -> node.clockNodes),
             NodeEntry.codec(BufferCircuitNode.CODEC.codec()).listOf().fieldOf("buffer_nodes").forGetter(node -> node.bufferNodes),
-            ExtraCodecs.NON_NEGATIVE_INT.fieldOf("wire_count").forGetter(CompoundCircuitNode::getWireCount),
+            Wire.CODEC.listOf().fieldOf("wires").forGetter(CompoundCircuitNode::getWires),
             Connector.CODEC.listOf().fieldOf("inputs").forGetter(node -> List.of(node.inputs)),
             Connector.CODEC.listOf().fieldOf("outputs").forGetter(node -> List.of(node.outputs))
     ).apply(inst, CompoundCircuitNode::new));
@@ -41,8 +41,8 @@ public final class CompoundCircuitNode extends CircuitNode
             node -> node.clockNodes,
             NodeEntry.streamCodec(BufferCircuitNode.STREAM_CODEC).apply(ByteBufCodecs.list()),
             node -> node.bufferNodes,
-            ByteBufCodecs.VAR_INT,
-            CompoundCircuitNode::getWireCount,
+            Wire.STREAM_CODEC.apply(ByteBufCodecs.list()),
+            CompoundCircuitNode::getWires,
             Connector.STREAM_CODEC.apply(ByteBufCodecs.list()),
             node -> List.of(node.inputs),
             Connector.STREAM_CODEC.apply(ByteBufCodecs.list()),
@@ -53,14 +53,14 @@ public final class CompoundCircuitNode extends CircuitNode
     private final List<NodeEntry<CircuitNode>> childNodes;
     private final List<NodeEntry<ClockCircuitNode>> clockNodes;
     private final List<NodeEntry<BufferCircuitNode>> bufferNodes;
-    private final int wireCount;
+    private final List<Wire> wires;
     private final EvalContext.Nested nestedContext;
 
     public CompoundCircuitNode(
             List<NodeEntry<CircuitNode>> childNodes,
             List<NodeEntry<ClockCircuitNode>> clockNodes,
             List<NodeEntry<BufferCircuitNode>> bufferNodes,
-            int wireCount,
+            List<Wire> wires,
             List<Connector> inputs,
             List<Connector> outputs
     )
@@ -69,8 +69,8 @@ public final class CompoundCircuitNode extends CircuitNode
         this.childNodes = childNodes;
         this.clockNodes = clockNodes;
         this.bufferNodes = bufferNodes;
-        this.wireCount = wireCount;
-        this.nestedContext = new EvalContext.Nested(wireCount);
+        this.wires = wires;
+        this.nestedContext = new EvalContext.Nested(wires.size());
     }
 
     @Override
@@ -95,7 +95,7 @@ public final class CompoundCircuitNode extends CircuitNode
     public void compile(GeneratorAdapter methodGen, ClockFieldAppender clockFieldAppender, NodeFieldAppender fieldAppender, Type selfType)
     {
         int contextLocal = methodGen.newLocal(CircuitCompiler.NESTED_EVAL_CONTEXT_TYPE);
-        LocalWireMapper localWires = new LocalWireMapper(methodGen, contextLocal, wireCount, childNodes, bufferNodes, outputs);
+        LocalWireMapper localWires = new LocalWireMapper(methodGen, contextLocal, wires.size(), childNodes, bufferNodes, outputs);
 
         compileContextPrepare(methodGen, selfType, localWires);
 
@@ -217,9 +217,9 @@ public final class CompoundCircuitNode extends CircuitNode
         return childNodes;
     }
 
-    public int getWireCount()
+    public List<Wire> getWires()
     {
-        return wireCount;
+        return wires;
     }
 
     @Override
