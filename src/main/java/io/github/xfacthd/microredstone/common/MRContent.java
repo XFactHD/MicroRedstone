@@ -17,6 +17,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitN
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.data.MRRegistries;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
+import io.github.xfacthd.microredstone.common.item.CircuitItem;
+import io.github.xfacthd.microredstone.common.item.block.MicrochipBlockItem;
 import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntity;
@@ -28,6 +30,7 @@ import io.github.xfacthd.microredstone.common.util.registration.DeferredMenuType
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -39,6 +42,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -55,7 +59,7 @@ public final class MRContent
     // endregion
 
     // region Blocks
-    public static final Holder<Block> BLOCK_MICROCHIP = registerBlock("microchip", MicrochipBlock::new); // TODO: rename
+    public static final Holder<Block> BLOCK_MICROCHIP = registerBlock("microchip", MicrochipBlock::new, MicrochipBlockItem::new); // TODO: rename
     public static final Holder<Block> BLOCK_CIRCUIT_WORKBENCH = registerBlock("circuit_workbench", CircuitWorkbenchBlock::new);
     // endregion
 
@@ -68,7 +72,7 @@ public final class MRContent
     // region Items
     public static final Holder<Item> ITEM_INTEGRATED_CIRCUIT = ITEMS.registerItem(
             "integrated_circuit",
-            props -> new Item(props.component(DC_TYPE_CIRCUIT, StoredCircuit.EMPTY))
+            props -> new CircuitItem(props.component(DC_TYPE_CIRCUIT, StoredCircuit.EMPTY))
     );
     // endregion
 
@@ -114,12 +118,15 @@ public final class MRContent
     );
     // endregion
 
-    private static <T extends Block> DeferredBlock<T> registerBlock(
-            String name, Function<BlockBehaviour.Properties, T> blockFactory
-    )
+    private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory)
     {
-        DeferredBlock<T> block = BLOCKS.registerBlock(name, blockFactory, BlockBehaviour.Properties.of());
-        ITEMS.registerSimpleBlockItem(block);
+        return registerBlock(name, blockFactory, BlockItem::new);
+    }
+
+    private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory, BlockItemFactory<B> itemFactory)
+    {
+        DeferredBlock<B> block = BLOCKS.registerBlock(name, blockFactory, BlockBehaviour.Properties.of());
+        ITEMS.registerItem(name, props -> itemFactory.apply(block.value(), props.useBlockDescriptionPrefix()));
         return block;
     }
 
@@ -149,6 +156,20 @@ public final class MRContent
         BLOCK_ENTITIES.register(modBus);
         MENU_TYPES.register(modBus);
         CIRCUIT_NODES.register(modBus);
+    }
+
+    @FunctionalInterface
+    private interface BlockFactory<B extends Block> extends Function<BlockBehaviour.Properties, B>
+    {
+        @Override
+        B apply(BlockBehaviour.Properties properties);
+    }
+
+    @FunctionalInterface
+    private interface BlockItemFactory<B extends Block> extends BiFunction<B, Item.Properties, BlockItem>
+    {
+        @Override
+        BlockItem apply(B block, Item.Properties properties);
     }
 
     private MRContent() { }

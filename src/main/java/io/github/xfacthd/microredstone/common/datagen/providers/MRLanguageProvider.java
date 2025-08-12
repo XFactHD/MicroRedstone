@@ -7,6 +7,7 @@ import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.compat.atlasviewer.AtlasViewerCompat;
+import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -38,6 +39,8 @@ public final class MRLanguageProvider extends LanguageProvider
     private void addItemTranslations()
     {
         add(MRContent.ITEM_INTEGRATED_CIRCUIT.value(), "Integrated Circuit");
+
+        add(StoredCircuit.LABEL_CIRCUIT, "Circuit: %s");
     }
 
     private void addScreenTranslations()

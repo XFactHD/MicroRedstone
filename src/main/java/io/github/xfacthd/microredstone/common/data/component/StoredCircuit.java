@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.chat.Component;
@@ -31,6 +32,7 @@ public record StoredCircuit(String name, @Nullable CompoundCircuitNode rootNode)
             StoredCircuit::of
     );
     public static final StoredCircuit EMPTY = new StoredCircuit("", null);
+    public static final String LABEL_CIRCUIT = Utils.translationKey("label", "stored_circuit");
 
     private static StoredCircuit of(String name, Optional<CompoundCircuitNode> rootNode)
     {
@@ -51,6 +53,9 @@ public record StoredCircuit(String name, @Nullable CompoundCircuitNode rootNode)
     @Override
     public void addToTooltip(Item.TooltipContext context, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter)
     {
-        // TODO: implement tooltip
+        if (rootNode != null)
+        {
+            tooltipAdder.accept(Component.translatable(LABEL_CIRCUIT, name));
+        }
     }
 }

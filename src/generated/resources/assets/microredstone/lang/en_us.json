@@ -74,6 +74,7 @@
   "label.microredstone.source_tooltip.port_overlay.entries": "Ports",
   "label.microredstone.source_tooltip.port_overlay.sprite": "Sprite",
   "label.microredstone.source_tooltip.port_overlay.type_prefix": "Type Prefix",
+  "label.microredstone.stored_circuit": "Circuit: %s",
   "subtitle.microredstone.circuit_workbench.part_entry.and_three_bundled": "3-Input, Bundled",
   "subtitle.microredstone.circuit_workbench.part_entry.and_three_single": "3-Input, Single",
   "subtitle.microredstone.circuit_workbench.part_entry.and_two_bundled": "2-Input, Bundled",
