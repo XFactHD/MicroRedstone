@@ -3,7 +3,7 @@ package io.github.xfacthd.microredstone.client.screen.workbench.wire;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
-import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
@@ -21,11 +21,11 @@ public final class WireInProgress
 
     private final WireType type;
     private final DyeColor color = DyeColor.RED; // TODO: make configurable
-    private final List<Wire.Node> wireNodes = new ArrayList<>();
+    private final List<WireNode> wireNodes = new ArrayList<>();
     private final List<RoutedWire.Section> sections = new ArrayList<>();
     @Nullable
     private NodePos lastCursorPos = null;
-    private List<Wire.Node> floatingNodes = List.of();
+    private List<WireNode> floatingNodes = List.of();
     private long lastClick = -1;
 
     public WireInProgress(WireType wireType)
@@ -43,7 +43,7 @@ public final class WireInProgress
         return color;
     }
 
-    public List<Wire.Node> getWireNodes()
+    public List<WireNode> getWireNodes()
     {
         return wireNodes;
     }
@@ -53,7 +53,7 @@ public final class WireInProgress
         return sections;
     }
 
-    public List<Wire.Node> getFloatingNodes()
+    public List<WireNode> getFloatingNodes()
     {
         return floatingNodes;
     }
@@ -95,10 +95,10 @@ public final class WireInProgress
                 RoutedWire routed = wire.wires().getFirst();
                 RoutedWire.Section section = routed.findIntersectedSection(pos);
                 Set<NodePos> neighbors = section != null ? Set.of(section.posOne(), section.posTwo()) : Set.of();
-                wireNodes.add(new Wire.Node.Branch(pos, routed.getBlockedDirsAt(pos), neighbors));
+                wireNodes.add(new WireNode.Branch(pos, routed.getBlockedDirsAt(pos), neighbors));
                 return PlaceResult.SUCCESS;
             }
-            wireNodes.add(new Wire.Node.Dangling(pos));
+            wireNodes.add(new WireNode.Dangling(pos));
             return PlaceResult.SUCCESS;
         }
 
@@ -109,7 +109,7 @@ public final class WireInProgress
             if (floatingNodes.getLast().pos().equals(pos))
             {
                 // floatingNodes can only contain zero, one or two entries
-                Wire.Node lastNode = floatingNodes.size() > 1 ? floatingNodes.getFirst() : wireNodes.getLast();
+                WireNode lastNode = floatingNodes.size() > 1 ? floatingNodes.getFirst() : wireNodes.getLast();
                 Port dir = lastNode.pos().getDirTowards(pos);
 
                 PlaceableNode partNode = canvas.getPartGrid().getPartNode(pos);
@@ -135,7 +135,7 @@ public final class WireInProgress
                     return PlaceResult.GENERIC_FAIL;
                 }
 
-                Wire.Node node = floatingNodes.getFirst();
+                WireNode node = floatingNodes.getFirst();
                 sections.add(new RoutedWire.Section(wireNodes.getLast().pos(), node.pos()));
                 updateNodeAt(wireNodes.size() - 1, node);
                 wireNodes.add(node);
@@ -163,7 +163,7 @@ public final class WireInProgress
         if (!part.hasPort(port, type)) return PlaceResult.NO_PORT;
         if (part.isConnected(port)) return PlaceResult.BLOCKED_PORT;
 
-        Wire.Node.Connection node = new Wire.Node.Connection(pos, port, neighbor);
+        WireNode.Connection node = new WireNode.Connection(pos, port, neighbor);
         if (updateNode && !wireNodes.isEmpty())
         {
             updateNodeAt(wireNodes.size() - 1, node);
@@ -177,7 +177,7 @@ public final class WireInProgress
         int firstNewNode = wireNodes.size() - 1;
         if (firstNewNode > 0)
         {
-            Wire.Node connected = floatingNodes.isEmpty() ? wireNodes.getLast() : floatingNodes.getFirst();
+            WireNode connected = floatingNodes.isEmpty() ? wireNodes.getLast() : floatingNodes.getFirst();
             updateNodeAt(firstNewNode - 1, connected);
         }
         wireNodes.addAll(wireNodes.size() - 1, floatingNodes);
@@ -188,9 +188,9 @@ public final class WireInProgress
         completeWire(canvas);
     }
 
-    private void updateNodeAt(int index, Wire.Node connected)
+    private void updateNodeAt(int index, WireNode connected)
     {
-        Wire.Node node = wireNodes.get(index);
+        WireNode node = wireNodes.get(index);
         Port dir = node.pos().getDirTowards(connected.pos());
         wireNodes.set(index, node.withNeighbor(dir, connected.pos()));
     }
@@ -224,7 +224,7 @@ public final class WireInProgress
         {
             if (!floatingNodes.getLast().pos().equals(exactPos.pos())) return null;
 
-            Wire.Node lastNode = floatingNodes.size() > 1 ? floatingNodes.getFirst() : wireNodes.getLast();
+            WireNode lastNode = floatingNodes.size() > 1 ? floatingNodes.getFirst() : wireNodes.getLast();
             return lastNode.pos().getDirTowards(exactPos.pos()).getOpposite();
         }
         return null;

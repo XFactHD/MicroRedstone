@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.client.screen.workbench.wire;
 import com.google.common.base.Preconditions;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,15 +25,15 @@ public record RoutedWire(Wire wire, List<Section> sections)
 
     public Set<Port> getBlockedDirsAt(NodePos pos)
     {
-        for (Wire.Node node : wire.getNodes())
+        for (WireNode node : wire.getNodes())
         {
             if (node.pos().equals(pos))
             {
                 return switch (node)
                 {
-                    case Wire.Node.Branch branch -> branch.ports();
-                    case Wire.Node.Connection ignored -> EnumSet.allOf(Port.class);
-                    case Wire.Node.Dangling ignored -> Set.of();
+                    case WireNode.Branch branch -> branch.ports();
+                    case WireNode.Connection ignored -> EnumSet.allOf(Port.class);
+                    case WireNode.Dangling ignored -> Set.of();
                 };
             }
         }
@@ -55,26 +56,26 @@ public record RoutedWire(Wire wire, List<Section> sections)
 
     public void fixNodes()
     {
-        Map<NodePos, List<Wire.Node.Branch>> branchNodes = new HashMap<>();
-        List<Wire.Node> nodes = wire.getNodes();
-        for (Wire.Node node : nodes)
+        Map<NodePos, List<WireNode.Branch>> branchNodes = new HashMap<>();
+        List<WireNode> nodes = wire.getNodes();
+        for (WireNode node : nodes)
         {
-            if (node instanceof Wire.Node.Branch branch)
+            if (node instanceof WireNode.Branch branch)
             {
                 branchNodes.computeIfAbsent(node.pos(), $ -> new ArrayList<>()).add(branch);
             }
         }
-        for (List<Wire.Node.Branch> branches : branchNodes.values())
+        for (List<WireNode.Branch> branches : branchNodes.values())
         {
             if (branches.size() > 1)
             {
                 nodes.removeAll(branches);
 
-                Wire.Node.Branch firstBranch = branches.getFirst();
-                Wire.Node.Branch branch = new Wire.Node.Branch(firstBranch.pos(), firstBranch.ports(), firstBranch.neighbors());
+                WireNode.Branch firstBranch = branches.getFirst();
+                WireNode.Branch branch = new WireNode.Branch(firstBranch.pos(), firstBranch.ports(), firstBranch.neighbors());
                 for (int i = 1; i < branches.size(); i++)
                 {
-                    Wire.Node.Branch other = branches.get(i);
+                    WireNode.Branch other = branches.get(i);
                     branch.ports().addAll(other.ports());
                     branch.neighbors().addAll(other.neighbors());
                 }
@@ -91,9 +92,9 @@ public record RoutedWire(Wire wire, List<Section> sections)
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T extends Wire.Node> T findNode(NodePos pos, Class<T> type, Predicate<T> filter)
+    public <T extends WireNode> T findNode(NodePos pos, Class<T> type, Predicate<T> filter)
     {
-        for (Wire.Node node : wire.getNodes())
+        for (WireNode node : wire.getNodes())
         {
             if (node.pos().equals(pos) && type.isInstance(node) && filter.test((T) node))
             {

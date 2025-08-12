@@ -76,7 +76,7 @@ public final class WireGrid implements Iterable<RoutedWire>
         }
     }
 
-    public void addWire(WireType wireType, DyeColor color, List<Wire.Node> wireNodes, List<RoutedWire.Section> wireSections)
+    public void addWire(WireType wireType, DyeColor color, List<io.github.xfacthd.microredstone.common.circuit.connection.WireNode> wireNodes, List<RoutedWire.Section> wireSections)
     {
         if (wireNodes.size() < 2) return;
 
@@ -117,9 +117,9 @@ public final class WireGrid implements Iterable<RoutedWire>
         }
         routedWire.fixNodes();
 
-        for (Wire.Node node : wireNodes)
+        for (io.github.xfacthd.microredstone.common.circuit.connection.WireNode node : wireNodes)
         {
-            if (node instanceof Wire.Node.Connection(NodePos pos, Port port, NodePos ignored))
+            if (node instanceof io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Connection(NodePos pos, Port port, NodePos ignored))
             {
                 PlaceableNode partNode = partGrid.getPartNode(pos);
                 switch (partNode)
@@ -153,11 +153,11 @@ public final class WireGrid implements Iterable<RoutedWire>
 
             if (adjNode.wires.size() > 1)
             {
-                Wire.Node.Connection connection = null;
+                io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Connection connection = null;
                 RoutedWire conWire = null;
                 for (RoutedWire wire : adjNode.wires)
                 {
-                    if ((connection = wire.findNode(pos, Wire.Node.Connection.class, con -> con.port() == port)) != null)
+                    if ((connection = wire.findNode(pos, io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Connection.class, con -> con.port() == port)) != null)
                     {
                         conWire = wire;
                         break;
@@ -166,7 +166,7 @@ public final class WireGrid implements Iterable<RoutedWire>
                 if (conWire != null && connection.neighbor() != null)
                 {
                     conWire.wire().getNodes().remove(connection);
-                    Wire.Node.Branch branch = conWire.findNode(connection.neighbor(), Wire.Node.Branch.class, $ -> true);
+                    io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Branch branch = conWire.findNode(connection.neighbor(), io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Branch.class, $ -> true);
                     if (branch != null)
                     {
                         branch.ports().remove(port.getOpposite());
@@ -183,7 +183,7 @@ public final class WireGrid implements Iterable<RoutedWire>
             }
 
             RoutedWire wire = adjNode.wires.getFirst();
-            Wire.Node.Branch branch = wire.findNode(adjPos, Wire.Node.Branch.class, $ -> true);
+            io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Branch branch = wire.findNode(adjPos, io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Branch.class, $ -> true);
             if (branch != null)
             {
                 branch.ports().remove(port.getOpposite());
@@ -192,12 +192,12 @@ public final class WireGrid implements Iterable<RoutedWire>
                 continue;
             }
 
-            Wire.Node.Connection connection = wire.findNode(pos, Wire.Node.Connection.class, con -> con.port() == port);
+            io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Connection connection = wire.findNode(pos, io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Connection.class, con -> con.port() == port);
             if (connection != null && connection.neighbor() != null)
             {
                 wire.replaceSection(connection.neighbor(), pos, adjPos);
                 wire.wire().getNodes().remove(connection);
-                wire.wire().getNodes().add(new Wire.Node.Branch(adjPos, Set.of(port), Set.of(connection.neighbor())));
+                wire.wire().getNodes().add(new io.github.xfacthd.microredstone.common.circuit.connection.WireNode.Branch(adjPos, Set.of(port), Set.of(connection.neighbor())));
             }
         }
         grid[index(pos)] = null;

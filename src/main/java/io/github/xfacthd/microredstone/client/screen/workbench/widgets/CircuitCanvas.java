@@ -10,7 +10,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireInProgre
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
-import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
@@ -102,7 +102,7 @@ public final class CircuitCanvas
             {
                 drawWireSection(graphics, type, color, section.posOne(), section.posTwo(), canvasX, canvasY);
             }
-            for (Wire.Node node : wire.wire().getNodes())
+            for (WireNode node : wire.wire().getNodes())
             {
                 drawWireNode(graphics, type, color, node, canvasX, canvasY);
             }
@@ -122,20 +122,20 @@ public final class CircuitCanvas
                     drawWireSection(graphics, type, color, section.posOne(), section.posTwo(), canvasX, canvasY);
                 }
             }
-            List<Wire.Node> wireNodes = wireInProgress.getWireNodes();
+            List<WireNode> wireNodes = wireInProgress.getWireNodes();
             if (!wireNodes.isEmpty())
             {
-                for (Wire.Node node : wireNodes)
+                for (WireNode node : wireNodes)
                 {
                     drawWireNode(graphics, type, color, node, canvasX, canvasY);
                 }
             }
-            List<Wire.Node> floatingNodes = wireInProgress.getFloatingNodes();
+            List<WireNode> floatingNodes = wireInProgress.getFloatingNodes();
             if (!floatingNodes.isEmpty())
             {
                 // If a floating node is present, then at least one pinned node exists
                 NodePos lastPos = wireNodes.getLast().pos();
-                for (Wire.Node node : floatingNodes)
+                for (WireNode node : floatingNodes)
                 {
                     drawWireSection(graphics, type, color, lastPos, node.pos(), canvasX, canvasY);
                     drawWireNode(graphics, type, color, node, canvasX, canvasY);
@@ -261,11 +261,11 @@ public final class CircuitCanvas
         }
     }
 
-    private static void drawWireNode(GuiGraphics graphics, WireType type, DyeColor color, Wire.Node node, int canvasX, int canvasY)
+    private static void drawWireNode(GuiGraphics graphics, WireType type, DyeColor color, WireNode node, int canvasX, int canvasY)
     {
-        if (node instanceof Wire.Node.Connection) return;
+        if (node instanceof WireNode.Connection) return;
 
-        if (node instanceof Wire.Node.Branch(NodePos pos, Set<Port> ignored, Set<NodePos> neighbors))
+        if (node instanceof WireNode.Branch(NodePos pos, Set<Port> ignored, Set<NodePos> neighbors))
         {
             if (neighbors.size() == 2)
             {
