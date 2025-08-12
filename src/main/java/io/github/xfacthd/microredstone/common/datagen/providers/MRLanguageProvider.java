@@ -24,10 +24,24 @@ public final class MRLanguageProvider extends LanguageProvider
     @Override
     protected void addTranslations()
     {
+        addBlockTranslations();
+        addItemTranslations();
+        addScreenTranslations();
+        addSpecialTranslations();
+    }
+
+    private void addBlockTranslations()
+    {
         add(MRContent.BLOCK_MICROCHIP.value(), "Microchip");
+    }
 
+    private void addItemTranslations()
+    {
         add(MRContent.ITEM_INTEGRATED_CIRCUIT.value(), "Integrated Circuit");
+    }
 
+    private void addScreenTranslations()
+    {
         add(MicrochipBlockEntity.MENU_TITLE, "Microchip");
 
         add(CircuitWorkbenchBlock.MENU_TITLE, "Circuit Workbench");
@@ -65,7 +79,10 @@ public final class MRLanguageProvider extends LanguageProvider
         addPart("xnor_three_bundled", "XNOR", "3-Input, Bundled", "");
         addPart("packer", "Bundle Packer", null, "");
         addPart("unpacker", "Bundle Unpacker", null, "");
+    }
 
+    private void addSpecialTranslations()
+    {
         add(AtlasViewerCompat.LABEL_MASK_TEXTURE, "Texture");
         add(AtlasViewerCompat.LABEL_MASK_SPRITE, "Sprite");
         add(AtlasViewerCompat.LABEL_MASK_AREA, "Area");
