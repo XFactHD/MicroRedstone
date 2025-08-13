@@ -2,11 +2,13 @@ package io.github.xfacthd.microredstone.common.blockentity;
 
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
+import io.github.xfacthd.microredstone.common.circuit.ExternalInterfaceAdapter;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.data.PropertyHolder;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
+import io.github.xfacthd.microredstone.common.redstone.BundledWireSupport;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneLevelAdapter;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneType;
 import io.github.xfacthd.microredstone.common.util.SerdesUtils;
@@ -38,7 +40,7 @@ import net.neoforged.neoforge.model.data.ModelData;
 import net.neoforged.neoforge.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
 
-public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter, MenuProvider
+public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter, ExternalInterfaceAdapter, MenuProvider
 {
     public static final Component MENU_TITLE = Utils.translate("title", "microchip");
     public static final ModelProperty<RedstoneType[]> PORT_TYPE_PROPERTY = new ModelProperty<>();
@@ -161,7 +163,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
-    public RedstoneType getRedstoneType(Direction facing, Direction side)
+    public RedstoneType getRedstoneType(Direction side)
     {
         return portTypes[getSideRotation(facing, side).ordinal()];
     }
@@ -197,8 +199,8 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         return switch (portType)
         {
             case NONE -> 0;
-            case SINGLE -> (short) (level().getSignal(adjPos, side) > 0 ? 1 : 0);
-            case BUNDLED -> (short) level().getSignal(adjPos, side); // TODO: replace with proper bundled wire support
+            case SINGLE -> (short) (level().hasSignal(adjPos, side) ? 1 : 0);
+            case BUNDLED -> BundledWireSupport.getBundledInput(level(), worldPosition, adjPos, side);
         };
     }
 
@@ -210,9 +212,8 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         switch (portTypes[port])
         {
             case NONE -> { }
-            case SINGLE, BUNDLED -> level().neighborChanged(adjPos, getBlockState().getBlock(), null);
-            // TODO: re-enable when proper bundled wire support is implemented
-            //case BUNDLED -> level().getBlockState(adjPos).onNeighborChange(level(), adjPos, worldPosition);
+            case SINGLE -> level().neighborChanged(adjPos, getBlockState().getBlock(), null);
+            case BUNDLED -> BundledWireSupport.updateNeighbor(level(), worldPosition, adjPos, side);
         }
     }
 

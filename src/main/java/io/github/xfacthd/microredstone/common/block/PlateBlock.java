@@ -62,7 +62,7 @@ public abstract class PlateBlock extends Block implements EntityBlock
         if (dir != null && dir.getAxis() != facing.getAxis() && level.getBlockEntity(pos) instanceof RedstoneLevelAdapter be)
         {
             Direction side = dir.getOpposite(); // The given direction is from the wire's view
-            return be.getRedstoneType(facing, side) == RedstoneType.SINGLE;
+            return be.getRedstoneType(side) == RedstoneType.SINGLE;
         }
         return false;
     }
