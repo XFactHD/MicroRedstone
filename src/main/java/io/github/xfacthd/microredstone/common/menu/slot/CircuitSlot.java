@@ -58,7 +58,7 @@ public final class CircuitSlot extends Slot
                 if (circuit != null)
                 {
                     ItemStack stack = new ItemStack(MRContent.ITEM_INTEGRATED_CIRCUIT);
-                    CompoundCircuitNode rootNode = circuit.getRootNodeForSerialization();
+                    CompoundCircuitNode rootNode = circuit.getSerializableRootNode();
                     StoredCircuit storedCircuit = new StoredCircuit(blockEntity.getCircuitName(), rootNode);
                     stack.set(MRContent.DC_TYPE_CIRCUIT, storedCircuit);
                     cachedStack = stack;

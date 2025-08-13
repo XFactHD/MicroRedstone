@@ -5,8 +5,9 @@ import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 
-public abstract class CompiledCircuitNode extends CircuitNode
+public abstract class CompiledCircuitNode extends RootCircuitNode
 {
     private final CompoundCircuitNode originalNode;
     protected final EvalContext.Nested nestedContext;
@@ -18,7 +19,8 @@ public abstract class CompiledCircuitNode extends CircuitNode
         this.nestedContext = new EvalContext.Nested(wireCount);
     }
 
-    public CompoundCircuitNode getOriginalNode()
+    @Override
+    public CompoundCircuitNode serializable()
     {
         return originalNode;
     }

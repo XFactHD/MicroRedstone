@@ -56,7 +56,6 @@ public final class LocalWireMapper
         {
             BufferCircuitNode buffer = bufferEntry.node();
             fromLocal[buffer.getInputWire()] = true;
-            fromContext[buffer.getOutputWire()] = true; // Buffer output must always be read from context
         }
         for (Connector out : outputs)
         {

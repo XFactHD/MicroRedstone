@@ -7,8 +7,8 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
@@ -30,7 +30,7 @@ public final class ComplexCircuitTest
         CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "BCD_2_7SEG");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "BCD_2_7SEG");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         int[] expectedOutputs = new int[] {
@@ -104,7 +104,7 @@ public final class ComplexCircuitTest
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
         CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);

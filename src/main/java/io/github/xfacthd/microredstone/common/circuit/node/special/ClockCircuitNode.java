@@ -3,7 +3,7 @@ package io.github.xfacthd.microredstone.common.circuit.node.special;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
-import io.github.xfacthd.microredstone.common.circuit.compiler.ClockFieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
@@ -61,10 +61,10 @@ public final class ClockCircuitNode extends CircuitNode
         context.storeOutput(outputWire, state);
     }
 
-    public void compile(GeneratorAdapter methodGen, ClockFieldAppender clockFieldAppender, Type selfType, LocalWireMapper localWires)
+    public void compile(GeneratorAdapter methodGen, FieldAppender fieldAppender, Type selfType, LocalWireMapper localWires)
     {
         boolean needCounter = halfPeriodLength > 1;
-        Fields clockFields = clockFieldAppender.addNewField(needCounter, halfPeriodLength - 1);
+        Fields clockFields = fieldAppender.addClockField(needCounter, halfPeriodLength - 1);
         String stateField = clockFields.stateField;
         Label avoidToggleLabel = new Label();
         // Preload state field onto stack

@@ -7,8 +7,8 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
 import io.github.xfacthd.microredstone.util.DebugExportConfigExtension;
@@ -45,7 +45,7 @@ public final class SingleNodeBundlePackUnpackTests
             CompoundPrototypeNode protoNode = builder.build();
             CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-            CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "PACK_bit" + bit);
+            RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "PACK_bit" + bit);
             Assertions.assertNotNull(compiled, "Compilation failed");
 
             Circuit circuitInterp = new Circuit(node);
@@ -90,7 +90,7 @@ public final class SingleNodeBundlePackUnpackTests
             CompoundPrototypeNode protoNode = builder.build();
             CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-            CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "UNPACK_bit" + bit);
+            RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "UNPACK_bit" + bit);
             Assertions.assertNotNull(compiled, "Compilation failed");
 
             Circuit circuitInterp = new Circuit(node);

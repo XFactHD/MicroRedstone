@@ -4,8 +4,8 @@ import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitAssembler;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.util.ComplexTestCircuits;
 import io.github.xfacthd.microredstone.util.TestInterfaceAdapter;
@@ -30,9 +30,9 @@ public class CircuitPerformanceTests
     });
     private static final Circuit BCD_7SEG_DEC_INTERP_CIRCUIT = new Circuit(BCD_7SEG_DEC_INTERP);
     private static final TestInterfaceAdapter BCD_7SEG_DEC_INTERP_ADAPTER = new TestInterfaceAdapter();
-    private static final CircuitNode BCD_7SEG_DEC_COMPILED = Util.make(() ->
+    private static final RootCircuitNode BCD_7SEG_DEC_COMPILED = Util.make(() ->
     {
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(BCD_7SEG_DEC_INTERP, null, true);
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(BCD_7SEG_DEC_INTERP, null, true);
         return Objects.requireNonNull(compiled);
     });
     private static final Circuit BCD_7SEG_DEC_COMPILED_CIRCUIT = new Circuit(BCD_7SEG_DEC_COMPILED);

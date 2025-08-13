@@ -3,12 +3,12 @@ package io.github.xfacthd.microredstone.common.circuit.node.special;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
-import io.github.xfacthd.microredstone.common.circuit.compiler.ClockFieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.compiler.EvalMethodCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
-import io.github.xfacthd.microredstone.common.circuit.compiler.NodeFieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
@@ -24,7 +24,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import java.util.Arrays;
 import java.util.List;
 
-public final class CompoundCircuitNode extends CircuitNode
+public final class CompoundCircuitNode extends RootCircuitNode
 {
     public static final MapCodec<CompoundCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             NodeEntry.CODEC.listOf().fieldOf("child_nodes").forGetter(CompoundCircuitNode::getChildNodes),
@@ -92,25 +92,29 @@ public final class CompoundCircuitNode extends CircuitNode
         }
     }
 
-    public void compile(GeneratorAdapter methodGen, ClockFieldAppender clockFieldAppender, NodeFieldAppender fieldAppender, Type selfType)
+    public void compile(EvalMethodCompiler compiler)
     {
-        int contextLocal = methodGen.newLocal(CircuitCompiler.NESTED_EVAL_CONTEXT_TYPE);
-        LocalWireMapper localWires = new LocalWireMapper(methodGen, contextLocal, wires.size(), childNodes, bufferNodes, outputs);
-
-        compileContextPrepare(methodGen, selfType, localWires);
-
-        for (NodeEntry<ClockCircuitNode> clock : clockNodes)
+        compiler.compileRootEval(wires.size(), childNodes, bufferNodes, outputs, (generator, selfType, fieldAppender, localWires) ->
         {
-            clock.node().compile(methodGen, clockFieldAppender, selfType, localWires);
-        }
+            compileContextPrepare(generator, selfType, localWires);
 
-        compileNodeEval(methodGen, fieldAppender, selfType, localWires);
-        compileContextFlush(methodGen, contextLocal);
+            for (NodeEntry<ClockCircuitNode> clock : clockNodes)
+            {
+                clock.node().compile(generator, fieldAppender, selfType, localWires);
+            }
+            for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
+            {
+                buffer.node().compileReadBack(generator, selfType, fieldAppender, localWires);
+            }
 
-        for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
-        {
-            buffer.node().compile(methodGen, localWires);
-        }
+            compileNodeEval(generator, fieldAppender, selfType, localWires);
+            compileContextFlush(generator, localWires.getContextLocal());
+
+            for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
+            {
+                buffer.node().compileCapture(generator, selfType, fieldAppender, localWires);
+            }
+        });
     }
 
     private void compileContextPrepare(GeneratorAdapter methodGen, Type selfType, LocalWireMapper localWires)
@@ -154,7 +158,7 @@ public final class CompoundCircuitNode extends CircuitNode
         methodGen.invokeVirtual(CircuitCompiler.NESTED_EVAL_CONTEXT_TYPE, CircuitCompiler.NESTED_EVAL_CONTEXT_FLUSH_MTH);
     }
 
-    private void compileNodeEval(GeneratorAdapter methodGen, NodeFieldAppender fieldAppender, Type selfType, LocalWireMapper localWires)
+    private void compileNodeEval(GeneratorAdapter methodGen, FieldAppender fieldAppender, Type selfType, LocalWireMapper localWires)
     {
         for (NodeEntry<CircuitNode> child : childNodes)
         {
@@ -176,13 +180,13 @@ public final class CompoundCircuitNode extends CircuitNode
     //                with respect to buffer nodes
     private static void compileComplexNodeEval(
             GeneratorAdapter methodGen,
-            NodeFieldAppender fieldAppender,
+            FieldAppender fieldAppender,
             Type selfType,
             LocalWireMapper localWires,
             NodeEntry<CircuitNode> child
     )
     {
-        String fieldName = fieldAppender.addNewField();
+        String fieldName = fieldAppender.addNodeField();
         int contextLocal = localWires.getContextLocal();
 
         methodGen.loadThis();
@@ -226,6 +230,12 @@ public final class CompoundCircuitNode extends CircuitNode
     public int getWireCount()
     {
         return wires.size();
+    }
+
+    @Override
+    public CompoundCircuitNode serializable()
+    {
+        return this;
     }
 
     @Override

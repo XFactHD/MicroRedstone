@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.circuit.node.special;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
@@ -11,6 +12,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
@@ -48,12 +50,23 @@ public final class BufferCircuitNode extends CircuitNode
         context.copyState(inputWire, outputWire);
     }
 
-    public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
+    public void compileReadBack(GeneratorAdapter methodGen, Type selfType, FieldAppender fieldAppender, LocalWireMapper localWires)
     {
-        int inputLocal = localWires.getLocal(inputWire);
+        String stateField = fieldAppender.getOrAddBufferField(this);
 
-        methodGen.loadLocal(inputLocal);
+        methodGen.loadThis();
+        methodGen.getField(selfType, stateField, Type.SHORT_TYPE);
         localWires.generateStore(outputWire);
+    }
+
+    public void compileCapture(GeneratorAdapter methodGen, Type selfType, FieldAppender fieldAppender, LocalWireMapper localWires)
+    {
+        String stateField = fieldAppender.getOrAddBufferField(this);
+
+        int inputLocal = localWires.getLocal(inputWire);
+        methodGen.loadThis();
+        methodGen.loadLocal(inputLocal);
+        methodGen.putField(selfType, stateField, Type.SHORT_TYPE);
     }
 
     public int getInputWire()

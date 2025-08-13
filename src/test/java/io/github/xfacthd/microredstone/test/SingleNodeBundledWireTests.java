@@ -7,8 +7,8 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
@@ -39,7 +39,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "WIRE");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "WIRE");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -80,7 +80,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "BUFFER_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "BUFFER_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -125,7 +125,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NOT_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NOT_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -170,7 +170,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "AND_two_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "AND_two_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -221,7 +221,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "AND_three_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "AND_three_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -270,7 +270,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "OR_two_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "OR_two_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -321,7 +321,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "OR_three_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "OR_three_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -370,7 +370,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XOR_two_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XOR_two_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -421,7 +421,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XOR_three_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XOR_three_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -470,7 +470,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NAND_two_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NAND_two_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -521,7 +521,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NAND_three_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NAND_three_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -570,7 +570,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NOR_two_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NOR_two_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -621,7 +621,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NOR_three_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "NOR_three_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -670,7 +670,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XNOR_two_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XNOR_two_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -721,7 +721,7 @@ public final class SingleNodeBundledWireTests
         CompoundPrototypeNode protoNode = builder.build();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        CircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XNOR_three_bundled");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "XNOR_three_bundled");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);

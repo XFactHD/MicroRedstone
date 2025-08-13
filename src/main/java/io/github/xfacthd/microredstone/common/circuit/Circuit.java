@@ -1,31 +1,27 @@
 package io.github.xfacthd.microredstone.common.circuit;
 
-import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 
 import java.util.Arrays;
 
+// TODO: serialize retained state (clock counter and state, buffer state)
 public final class Circuit
 {
-    public static final Codec<Circuit> CODEC = CircuitNode.CODEC.xmap(Circuit::new, Circuit::getRootNodeForSerialization);
+    public static final Codec<Circuit> CODEC = CompoundCircuitNode.CODEC.codec().xmap(Circuit::new, Circuit::getSerializableRootNode);
 
-    private final CircuitNode rootNode;
+    private final RootCircuitNode rootNode;
     private final WirePair[] inputs;
     private final WirePair[] outputs;
     private final EvalContext.Root evalContext;
 
-    public Circuit(CircuitNode rootNode)
+    public Circuit(RootCircuitNode rootNode)
     {
-        Preconditions.checkArgument(
-                rootNode instanceof CompoundCircuitNode || rootNode instanceof CompiledCircuitNode,
-                "Circuit can only contain compound and compiled circuit nodes"
-        );
         this.rootNode = rootNode;
         this.inputs = Arrays.stream(rootNode.getInputs())
                 .map(con -> new WirePair(con.port().ordinal(), con.wire()))
@@ -48,13 +44,9 @@ public final class Circuit
         return rootNode;
     }
 
-    public CompoundCircuitNode getRootNodeForSerialization()
+    public CompoundCircuitNode getSerializableRootNode()
     {
-        if (rootNode instanceof CompiledCircuitNode compiled)
-        {
-            return compiled.getOriginalNode();
-        }
-        return (CompoundCircuitNode) rootNode;
+        return rootNode.serializable();
     }
 
     public Connector[] getInputs()

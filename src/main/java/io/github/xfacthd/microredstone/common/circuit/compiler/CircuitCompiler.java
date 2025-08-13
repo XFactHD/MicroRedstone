@@ -8,8 +8,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -32,7 +32,6 @@ import java.lang.invoke.MethodType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ public final class CircuitCompiler
     public static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
     private static final String CLASS_NAME_PREFIX = SUPER_CLASS + "$";
     private static final MethodType CTOR_MTH_TYPE = MethodType.methodType(void.class, CompoundCircuitNode.class);
-    private static final MethodType CTOR_HANDLE_MTH_TYPE = CTOR_MTH_TYPE.changeReturnType(CircuitNode.class);
+    private static final MethodType CTOR_HANDLE_MTH_TYPE = CTOR_MTH_TYPE.changeReturnType(RootCircuitNode.class);
     private static final Method CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class);
     private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, int.class, Connector[].class, Connector[].class);
     private static final Type LIST_TYPE = Type.getType(List.class);
@@ -89,13 +88,13 @@ public final class CircuitCompiler
     private static final Map<CompilationKey, Optional<MethodHandle>> COMPILATION_CACHE = new Object2ObjectOpenHashMap<>();
 
     @Nullable
-    public static CircuitNode getOrCompileNode(CompoundCircuitNode node, @Nullable String name)
+    public static RootCircuitNode getOrCompileNode(CompoundCircuitNode node, @Nullable String name)
     {
         return getOrCompileNode(node, name, false);
     }
 
     @Nullable
-    public static CircuitNode getOrCompileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
+    public static RootCircuitNode getOrCompileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
     {
         CompilationKey cacheKey = new CompilationKey(node);
         Optional<MethodHandle> nodeConstructor = COMPILATION_CACHE.get(cacheKey);
@@ -108,7 +107,7 @@ public final class CircuitCompiler
         {
             if (nodeConstructor.isPresent())
             {
-                return (CircuitNode) nodeConstructor.get().invokeExact(node);
+                return (RootCircuitNode) nodeConstructor.get().invokeExact(node);
             }
         }
         catch (Throwable t)
@@ -134,79 +133,12 @@ public final class CircuitCompiler
             Type selfType = Type.getType("L" + className + ";");
             writer.visit(Opcodes.V21, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, className, null, SUPER_CLASS, null);
 
-            record ClockFieldSpec(@Nullable String counterName, String stateName, int counterInit) {}
-            record NodeFieldSpec(String name, int nodeIdx) {}
-
-            List<ClockFieldSpec> clockFields = new ArrayList<>();
-            List<NodeFieldSpec> nodeFields = new ArrayList<>();
-            GeneratorAdapter evalGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, NODE_EVAL_MTH, null, null, writer);
-            ClockFieldAppender clockFieldAppender = (needCounter, counterInit) ->
-            {
-                int index = clockFields.size();
-                String counterName = needCounter ? ("clockCounter" + index) : null;
-                String stateName = "clockState" + index;
-                if (counterName != null)
-                {
-                    writer.visitField(Opcodes.ACC_PRIVATE, counterName, Type.INT_TYPE.getDescriptor(), null, null);
-                }
-                writer.visitField(Opcodes.ACC_PRIVATE, stateName, Type.INT_TYPE.getDescriptor(), null, null);
-                clockFields.add(new ClockFieldSpec(counterName, stateName, counterInit));
-                return new ClockCircuitNode.Fields(counterName, stateName);
-            };
-            NodeFieldAppender nodeFieldAppender = () ->
-            {
-                String fieldName = "complexNode" + nodeFields.size();
-                writer.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, fieldName, NODE_ENTRY_TYPE.getDescriptor(), null, null);
-                nodeFields.add(new NodeFieldSpec(fieldName, nodeFields.size()));
-                return fieldName;
-            };
-            node.compile(evalGen, clockFieldAppender, nodeFieldAppender, selfType);
-            evalGen.returnValue();
-            evalGen.endMethod();
-
             GeneratorAdapter ctorGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CTOR_MTH, null, null, writer);
-            ctorGen.loadThis();
-            ctorGen.loadArg(0);
-            ctorGen.dup();
-            ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_WIRE_COUNT_MTH);
-            ctorGen.loadArg(0);
-            ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_INPUTS_MTH);
-            ctorGen.loadArg(0);
-            ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_OUTPUTS_MTH);
-            ctorGen.invokeConstructor(SUPER_TYPE, SUPER_CTOR_MTH);
-            if (!nodeFields.isEmpty())
-            {
-                int listLocal = ctorGen.newLocal(LIST_TYPE);
-                ctorGen.loadArg(0);
-                ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_CHILDREN_MTH);
-                ctorGen.storeLocal(listLocal);
-                for (NodeFieldSpec field : nodeFields)
-                {
-                    ctorGen.loadThis();
-                    ctorGen.loadLocal(listLocal);
-                    ctorGen.push(field.nodeIdx);
-                    ctorGen.invokeInterface(LIST_TYPE, LIST_GET_MTH);
-                    ctorGen.checkCast(NODE_ENTRY_TYPE);
-                    ctorGen.putField(selfType, field.name, NODE_ENTRY_TYPE);
-                }
-            }
-            if (!clockFields.isEmpty())
-            {
-                for (ClockFieldSpec field : clockFields)
-                {
-                    if (field.counterName != null)
-                    {
-                        ctorGen.loadThis();
-                        ctorGen.push(field.counterInit);
-                        ctorGen.putField(selfType, field.counterName, Type.INT_TYPE);
-                    }
-                    ctorGen.loadThis();
-                    ctorGen.push(0);
-                    ctorGen.putField(selfType, field.stateName, Type.INT_TYPE);
-                }
-            }
-            ctorGen.returnValue();
-            ctorGen.endMethod();
+
+            EvalMethodCompiler evalCompiler = new EvalMethodCompiler(writer, selfType);
+            node.compile(evalCompiler);
+
+            compileConstructor(ctorGen, selfType, evalCompiler.getNodeFields(), evalCompiler.getClockFields());
 
             byte[] bytes = writer.toByteArray();
             if (!suppressExport)
@@ -223,6 +155,58 @@ public final class CircuitCompiler
             return null;
         }
     }
+
+    private static void compileConstructor(GeneratorAdapter ctorGen, Type selfType, List<NodeFieldSpec> nodeFields, List<ClockFieldSpec> clockFields)
+    {
+        ctorGen.loadThis();
+        ctorGen.loadArg(0);
+        ctorGen.dup();
+        ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_WIRE_COUNT_MTH);
+        ctorGen.loadArg(0);
+        ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_INPUTS_MTH);
+        ctorGen.loadArg(0);
+        ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_OUTPUTS_MTH);
+        ctorGen.invokeConstructor(SUPER_TYPE, SUPER_CTOR_MTH);
+        if (!nodeFields.isEmpty())
+        {
+            int listLocal = ctorGen.newLocal(LIST_TYPE);
+            ctorGen.loadArg(0);
+            ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_CHILDREN_MTH);
+            ctorGen.storeLocal(listLocal);
+            for (NodeFieldSpec field : nodeFields)
+            {
+                ctorGen.loadThis();
+                ctorGen.loadLocal(listLocal);
+                ctorGen.push(field.nodeIdx);
+                ctorGen.invokeInterface(LIST_TYPE, LIST_GET_MTH);
+                ctorGen.checkCast(NODE_ENTRY_TYPE);
+                ctorGen.putField(selfType, field.name, NODE_ENTRY_TYPE);
+            }
+        }
+        if (!clockFields.isEmpty())
+        {
+            for (ClockFieldSpec field : clockFields)
+            {
+                if (field.counterName != null)
+                {
+                    ctorGen.loadThis();
+                    ctorGen.push(field.counterInit);
+                    ctorGen.putField(selfType, field.counterName, Type.INT_TYPE);
+                }
+                ctorGen.loadThis();
+                ctorGen.push(0);
+                ctorGen.putField(selfType, field.stateName, Type.INT_TYPE);
+            }
+        }
+        ctorGen.returnValue();
+        ctorGen.endMethod();
+    }
+
+    record NodeFieldSpec(String name, int nodeIdx) {}
+
+    record BufferFieldSpec(String name) {}
+
+    record ClockFieldSpec(@Nullable String counterName, String stateName, int counterInit) {}
 
     private static Method findMethod(Class<?> owner, String methodName, Class<?>... parameterTypes)
     {
@@ -241,7 +225,7 @@ public final class CircuitCompiler
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static Method method(String name, Type retType, Class<?>... paramTypes)
+    static Method method(String name, Type retType, Class<?>... paramTypes)
     {
         return new Method(name, retType, Arrays.stream(paramTypes).map(Type::getType).toArray(Type[]::new));
     }

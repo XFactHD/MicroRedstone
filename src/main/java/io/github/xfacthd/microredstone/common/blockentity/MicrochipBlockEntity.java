@@ -291,7 +291,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     {
         if (circuit != null)
         {
-            StoredCircuit storedCircuit = new StoredCircuit(circuitName, circuit.getRootNodeForSerialization());
+            StoredCircuit storedCircuit = new StoredCircuit(circuitName, circuit.getSerializableRootNode());
             components.set(MRContent.DC_TYPE_CIRCUIT, storedCircuit);
         }
     }
