@@ -222,6 +222,12 @@ public final class CompoundCircuitNode extends CircuitNode
         return wires;
     }
 
+    @SuppressWarnings("unused") // Used in CircuitCompiler
+    public int getWireCount()
+    {
+        return wires.size();
+    }
+
     @Override
     public CircuitNodeType<? extends CircuitNode> type()
     {
