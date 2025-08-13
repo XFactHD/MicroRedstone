@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.circuit.node.special;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
+import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.compiler.EvalMethodCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
@@ -16,6 +17,10 @@ import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.PrimitiveCircuitNode;
 import io.netty.buffer.ByteBuf;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntIterators;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntListIterator;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import org.objectweb.asm.Type;
@@ -89,6 +94,70 @@ public final class CompoundCircuitNode extends RootCircuitNode
         for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
         {
             buffer.evaluate(nestedContext);
+        }
+    }
+
+    @Override
+    public CircuitState serializeState()
+    {
+        IntList bufferStates = new IntArrayList();
+        IntList clockCounters = new IntArrayList();
+        IntList clockStates = new IntArrayList();
+        serializeState(bufferStates, clockCounters, clockStates);
+        return new CircuitState(bufferStates.toIntArray(), clockCounters.toIntArray(), clockStates.toIntArray());
+    }
+
+    private void serializeState(IntList bufferStates, IntList clockCounters, IntList clockStates)
+    {
+        for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
+        {
+            bufferStates.add(nestedContext.loadInput(buffer.node().getOutputWire()));
+        }
+        for (NodeEntry<ClockCircuitNode> clockNode : clockNodes)
+        {
+            ClockCircuitNode clock = clockNode.node();
+            clockCounters.add(clock.getCounter());
+            clockStates.add(clock.getState());
+        }
+        for (NodeEntry<CircuitNode> node : childNodes)
+        {
+            if (node.node() instanceof CompoundCircuitNode compound)
+            {
+                compound.serializeState(bufferStates, clockCounters, clockStates);
+            }
+        }
+    }
+
+    @Override
+    public void applyState(CircuitState state)
+    {
+        IntListIterator bufferStates = IntIterators.wrap(state.bufferStates());
+        IntListIterator clockCounters = IntIterators.wrap(state.clockCounters());
+        IntListIterator clockStates = IntIterators.wrap(state.clockStates());
+        applyState(bufferStates, clockCounters, clockStates);
+    }
+
+    private void applyState(IntListIterator bufferStates, IntListIterator clockCounters, IntListIterator clockStates)
+    {
+        for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
+        {
+            nestedContext.storeOutput(buffer.node().getOutputWire(), (short) bufferStates.nextInt());
+        }
+        for (NodeEntry<ClockCircuitNode> clockNode : clockNodes)
+        {
+            clockNode.node().applyState(clockCounters.nextInt(), clockStates.nextInt());
+        }
+
+        // Abort when this state was written by a compiled node as it doesn't write nested node state
+        // TODO: remove when nested nodes are merged into the root compiled node
+        if (!bufferStates.hasNext() && !clockCounters.hasNext() && !clockStates.hasNext()) return;
+
+        for (NodeEntry<CircuitNode> node : childNodes)
+        {
+            if (node.node() instanceof CompoundCircuitNode compound)
+            {
+                compound.applyState(bufferStates, clockCounters, clockStates);
+            }
         }
     }
 

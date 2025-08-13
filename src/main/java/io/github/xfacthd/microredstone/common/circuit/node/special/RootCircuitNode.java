@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.node.special;
 
+import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 
@@ -18,4 +19,8 @@ public abstract class RootCircuitNode extends CircuitNode
     }
 
     public abstract CompoundCircuitNode serializable();
+
+    public abstract CircuitState serializeState();
+
+    public abstract void applyState(CircuitState state);
 }

@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.test;
 
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
+import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -64,6 +65,13 @@ public final class SingleNodeBundlePackUnpackTests
                 circuitCompiled.evaluate(adapter);
                 Assertions.assertEquals(left << bit, adapter.getValue(Port.RIGHT), "Compiled PACK bit " + bit + " input " + left);
             }
+
+            CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted PACK serialize state");
+            CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled PACK serialize state");
+            Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted PACK apply interpreted state");
+            Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted PACK apply compiled state");
+            Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled PACK apply compiled state");
+            Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled PACK apply interpreted state");
         }
     }
 
@@ -109,6 +117,13 @@ public final class SingleNodeBundlePackUnpackTests
                 circuitCompiled.evaluate(adapter);
                 Assertions.assertEquals(i == bit ? 1 : 0, adapter.getValue(Port.RIGHT), "Compiled UNPACK bit " + bit + " input " + left);
             }
+
+            CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted UNPACK serialize state");
+            CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled UNPACK serialize state");
+            Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted UNPACK apply interpreted state");
+            Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted UNPACK apply compiled state");
+            Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled UNPACK apply compiled state");
+            Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled UNPACK apply interpreted state");
         }
     }
 }

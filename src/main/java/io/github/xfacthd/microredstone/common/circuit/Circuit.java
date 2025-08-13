@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.circuit;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
@@ -10,15 +11,23 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNo
 
 import java.util.Arrays;
 
-// TODO: serialize retained state (clock counter and state, buffer state)
 public final class Circuit
 {
-    public static final Codec<Circuit> CODEC = CompoundCircuitNode.CODEC.codec().xmap(Circuit::new, Circuit::getSerializableRootNode);
+    public static final Codec<Circuit> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+            CompoundCircuitNode.CODEC.codec().fieldOf("root_node").forGetter(Circuit::getSerializableRootNode),
+            CircuitState.CODEC.fieldOf("state").forGetter(Circuit::serializeState)
+    ).apply(inst, Circuit::new));
 
     private final RootCircuitNode rootNode;
     private final WirePair[] inputs;
     private final WirePair[] outputs;
     private final EvalContext.Root evalContext;
+
+    private Circuit(RootCircuitNode rootNode, CircuitState state)
+    {
+        this(rootNode);
+        rootNode.applyState(state);
+    }
 
     public Circuit(RootCircuitNode rootNode)
     {
@@ -37,6 +46,11 @@ public final class Circuit
         evalContext.prepare(adapter);
         rootNode.evaluate(evalContext, inputs, outputs);
         evalContext.flush(adapter);
+    }
+
+    private CircuitState serializeState()
+    {
+        return rootNode.serializeState();
     }
 
     public CircuitNode getRootNode()

@@ -6,6 +6,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -13,14 +14,13 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class EvalMethodCompiler
 {
     private final List<CircuitCompiler.NodeFieldSpec> nodeFields = new ArrayList<>();
-    private final Map<BufferCircuitNode, String> bufferFields = new IdentityHashMap<>();
+    private final Map<BufferCircuitNode, CircuitCompiler.BufferFieldSpec> bufferFields = new Reference2ObjectLinkedOpenHashMap<>();
     private final List<CircuitCompiler.ClockFieldSpec> clockFields = new ArrayList<>();
     private final FieldAppender fieldAppender;
     private final ClassWriter classWriter;
@@ -78,6 +78,11 @@ public final class EvalMethodCompiler
         return nodeFields;
     }
 
+    List<CircuitCompiler.BufferFieldSpec> getBufferFields()
+    {
+        return List.copyOf(bufferFields.values());
+    }
+
     List<CircuitCompiler.ClockFieldSpec> getClockFields()
     {
         return clockFields;
@@ -99,14 +104,15 @@ public final class EvalMethodCompiler
             @Override
             public String getOrAddBufferField(BufferCircuitNode buffer)
             {
-                String fieldName = bufferFields.get(buffer);
-                if (fieldName == null)
+                CircuitCompiler.BufferFieldSpec fieldSpec = bufferFields.get(buffer);
+                if (fieldSpec == null)
                 {
-                    fieldName = "bufferNode" + bufferFields.size();
+                    String fieldName = "bufferNode" + bufferFields.size();
                     classWriter.visitField(Opcodes.ACC_PRIVATE, fieldName, Type.SHORT_TYPE.getDescriptor(), null, 0);
-                    bufferFields.put(buffer, fieldName);
+                    fieldSpec = new CircuitCompiler.BufferFieldSpec(fieldName);
+                    bufferFields.put(buffer, fieldSpec);
                 }
-                return fieldName;
+                return fieldSpec.name();
             }
 
             @Override

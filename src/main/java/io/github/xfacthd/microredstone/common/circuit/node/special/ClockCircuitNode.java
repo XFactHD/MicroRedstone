@@ -105,6 +105,22 @@ public final class ClockCircuitNode extends CircuitNode
         localWires.generateStore(outputWire);
     }
 
+    public int getCounter()
+    {
+        return periodCounter;
+    }
+
+    public short getState()
+    {
+        return state;
+    }
+
+    public void applyState(int counter, int state)
+    {
+        this.periodCounter = counter;
+        this.state = (short) state;
+    }
+
     @Override
     public CircuitNodeType<? extends CircuitNode> type()
     {

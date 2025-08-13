@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.test;
 
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
+import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -61,6 +62,13 @@ public final class ComplexCircuitTest
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(expectedOutputs[i], adapter.getValue(Port.RIGHT), "Compiled BCD_TO_7SEG input " + i);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted BCD_TO_7SEG serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled BCD_TO_7SEG serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted BCD_TO_7SEG apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted BCD_TO_7SEG apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled BCD_TO_7SEG apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled BCD_TO_7SEG apply interpreted state");
     }
 
     @Test
@@ -123,5 +131,12 @@ public final class ComplexCircuitTest
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled NESTED input " + i);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(outerNode::serializeState, "Interpreted NESTED serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NESTED serialize state");
+        Assertions.assertDoesNotThrow(() -> outerNode.applyState(stateInterp), "Interpreted NESTED apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> outerNode.applyState(stateCompiled), "Interpreted NESTED apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NESTED apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NESTED apply interpreted state");
     }
 }

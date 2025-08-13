@@ -6,9 +6,12 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.List;
 import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
 public final class SerdesUtils
 {
+    public static final Codec<int[]> INT_ARRAY_CODEC = Codec.INT_STREAM.xmap(IntStream::toArray, IntStream::of);
+
     public static <T> void readTypedArray(ValueInput input, String key, Codec<T> codec, T[] array)
     {
         int[] index = new int[] { 0 };

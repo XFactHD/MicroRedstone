@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.circuit.compiler;
 
 import com.mojang.logging.LogUtils;
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -68,6 +69,14 @@ public final class CircuitCompiler
     private static final MethodType CTOR_HANDLE_MTH_TYPE = CTOR_MTH_TYPE.changeReturnType(RootCircuitNode.class);
     private static final Method CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class);
     private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, int.class, Connector[].class, Connector[].class);
+    private static final Type INT_ARRAY_TYPE = Type.getType(int[].class);
+    private static final Type CIRCUIT_STATE_TYPE = Type.getType(CircuitState.class);
+    private static final Method CIRCUIT_STATE_CTOR_MTH = method("<init>", Type.VOID_TYPE, int[].class, int[].class, int[].class);
+    private static final Method STATE_SERIALIZE_MTH = method("serializeState", CIRCUIT_STATE_TYPE);
+    private static final Method STATE_DESERIALIZE_MTH = method("applyState", Type.VOID_TYPE, CircuitState.class);
+    private static final Method STATE_BUFFER_STATES_MTH = findMethod(CircuitState.class, "bufferStates");
+    private static final Method STATE_CLOCK_COUNTERS_MTH = findMethod(CircuitState.class, "clockCounters");
+    private static final Method STATE_CLOCK_STATES_MTH = findMethod(CircuitState.class, "clockStates");
     private static final Type LIST_TYPE = Type.getType(List.class);
     private static final Method LIST_GET_MTH = findMethod(List.class, "get", int.class);
     private static final Type CMP_NODE_TYPE = Type.getType(CompoundCircuitNode.class);
@@ -139,6 +148,7 @@ public final class CircuitCompiler
             node.compile(evalCompiler);
 
             compileConstructor(ctorGen, selfType, evalCompiler.getNodeFields(), evalCompiler.getClockFields());
+            compileStateSerdes(writer, selfType, evalCompiler.getBufferFields(), evalCompiler.getClockFields());
 
             byte[] bytes = writer.toByteArray();
             if (!suppressExport)
@@ -200,6 +210,118 @@ public final class CircuitCompiler
         }
         ctorGen.returnValue();
         ctorGen.endMethod();
+    }
+
+    private static void compileStateSerdes(ClassWriter writer, Type selfType, List<BufferFieldSpec> bufferFields, List<ClockFieldSpec> clockFields)
+    {
+        GeneratorAdapter serGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, STATE_SERIALIZE_MTH, null, null, writer);
+        GeneratorAdapter desGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, STATE_DESERIALIZE_MTH, null, null, writer);
+
+        boolean hasBuffers = !bufferFields.isEmpty();
+        boolean hasClocks = !clockFields.isEmpty();
+        boolean hasClocksWithCounters = hasClocks && clockFields.stream().anyMatch(clock -> clock.counterName != null);
+
+        if (hasBuffers || hasClocks)
+        {
+            serGen.newInstance(CIRCUIT_STATE_TYPE);
+            serGen.dup();
+
+            int serBufStateLocal = serGen.newLocal(INT_ARRAY_TYPE);
+            int desBufStateLocal = hasBuffers ? desGen.newLocal(INT_ARRAY_TYPE) : -1;
+            serGen.push(bufferFields.size());
+            serGen.newArray(Type.INT_TYPE);
+            serGen.storeLocal(serBufStateLocal);
+            if (hasBuffers)
+            {
+                desGen.loadArg(0);
+                desGen.invokeVirtual(CIRCUIT_STATE_TYPE, STATE_BUFFER_STATES_MTH);
+                desGen.storeLocal(desBufStateLocal);
+            }
+            for (int i = 0; i < bufferFields.size(); i++)
+            {
+                BufferFieldSpec buffer = bufferFields.get(i);
+
+                serGen.loadLocal(serBufStateLocal);
+                serGen.push(i);
+                serGen.loadThis();
+                serGen.getField(selfType, buffer.name, Type.SHORT_TYPE);
+                serGen.arrayStore(Type.INT_TYPE);
+
+                desGen.loadThis();
+                desGen.loadLocal(desBufStateLocal);
+                desGen.push(i);
+                desGen.arrayLoad(Type.INT_TYPE);
+                desGen.putField(selfType, buffer.name, Type.SHORT_TYPE);
+            }
+
+            int serClockCountLocal = serGen.newLocal(INT_ARRAY_TYPE);
+            int desClockCountLocal = hasClocksWithCounters ? desGen.newLocal(INT_ARRAY_TYPE) : -1;
+            int serClockStateLocal = serGen.newLocal(INT_ARRAY_TYPE);
+            int desClockStateLocal = hasClocks ? desGen.newLocal(INT_ARRAY_TYPE) : -1;
+            serGen.push(clockFields.size());
+            serGen.dup();
+            serGen.newArray(Type.INT_TYPE);
+            serGen.storeLocal(serClockCountLocal);
+            serGen.newArray(Type.INT_TYPE);
+            serGen.storeLocal(serClockStateLocal);
+            if (hasClocksWithCounters)
+            {
+                desGen.loadArg(0);
+                desGen.invokeVirtual(CIRCUIT_STATE_TYPE, STATE_CLOCK_COUNTERS_MTH);
+                desGen.storeLocal(desClockCountLocal);
+            }
+            if (hasClocks)
+            {
+                desGen.loadArg(0);
+                desGen.invokeVirtual(CIRCUIT_STATE_TYPE, STATE_CLOCK_STATES_MTH);
+                desGen.storeLocal(desClockStateLocal);
+            }
+            for (int i = 0; i < clockFields.size(); i++)
+            {
+                ClockFieldSpec clock = clockFields.get(i);
+
+                if (clock.counterName != null)
+                {
+                    serGen.loadLocal(serClockCountLocal);
+                    serGen.push(i);
+                    serGen.loadThis();
+                    serGen.getField(selfType, clock.counterName, Type.INT_TYPE);
+                    serGen.arrayStore(Type.INT_TYPE);
+
+                    desGen.loadThis();
+                    desGen.loadLocal(desClockCountLocal);
+                    desGen.push(i);
+                    desGen.arrayLoad(Type.INT_TYPE);
+                    desGen.putField(selfType, clock.counterName, Type.INT_TYPE);
+                }
+
+                serGen.loadLocal(serClockStateLocal);
+                serGen.push(i);
+                serGen.loadThis();
+                serGen.getField(selfType, clock.stateName, Type.INT_TYPE);
+                serGen.arrayStore(Type.INT_TYPE);
+
+                desGen.loadThis();
+                desGen.loadLocal(desClockStateLocal);
+                desGen.push(i);
+                desGen.arrayLoad(Type.INT_TYPE);
+                desGen.putField(selfType, clock.stateName, Type.INT_TYPE);
+            }
+
+            serGen.loadLocal(serBufStateLocal);
+            serGen.loadLocal(serClockCountLocal);
+            serGen.loadLocal(serClockStateLocal);
+            serGen.invokeConstructor(CIRCUIT_STATE_TYPE, CIRCUIT_STATE_CTOR_MTH);
+        }
+        else
+        {
+            serGen.getStatic(CIRCUIT_STATE_TYPE, "EMPTY", CIRCUIT_STATE_TYPE);
+        }
+
+        serGen.returnValue();
+        serGen.endMethod();
+        desGen.returnValue();
+        desGen.endMethod();
     }
 
     record NodeFieldSpec(String name, int nodeIdx) {}

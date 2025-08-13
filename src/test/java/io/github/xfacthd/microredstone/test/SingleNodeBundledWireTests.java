@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.test;
 
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
+import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -58,6 +59,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled WIRE input " + i);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted WIRE serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled WIRE serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted WIRE apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted WIRE apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled WIRE apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled WIRE apply interpreted state");
     }
 
     @Test
@@ -103,6 +111,13 @@ public final class SingleNodeBundledWireTests
             Assertions.assertEquals(lastInput, adapter.getValue(Port.RIGHT), "Compiled BUFFER last cycle input " + lastInput);
             lastInput = left;
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted BUFFER serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled BUFFER serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted BUFFER apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted BUFFER apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled BUFFER apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled BUFFER apply interpreted state");
     }
 
     @Test
@@ -144,6 +159,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(~left & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NOT input " + i);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted NOT serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NOT serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted NOT apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted NOT apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NOT apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NOT apply interpreted state");
     }
 
     @Test
@@ -191,6 +213,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(up & down, adapter.getValue(Port.RIGHT), "Compiled AND input " + up + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted AND serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled AND serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted AND apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted AND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled AND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled AND apply interpreted state");
     }
 
     @Test
@@ -244,6 +273,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(up & left & down, adapter.getValue(Port.RIGHT), "Compiled AND input " + up + "," + left + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted AND serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled AND serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted AND apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted AND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled AND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled AND apply interpreted state");
     }
 
     @Test
@@ -291,6 +327,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(up | down, adapter.getValue(Port.RIGHT), "Compiled OR input " + up + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted OR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled OR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted OR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted OR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled OR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled OR apply interpreted state");
     }
 
     @Test
@@ -344,6 +387,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(up | left | down, adapter.getValue(Port.RIGHT), "Compiled OR input " + up + "," + left + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted OR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled OR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted OR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted OR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled OR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled OR apply interpreted state");
     }
 
     @Test
@@ -391,6 +441,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(up ^ down, adapter.getValue(Port.RIGHT), "Compiled XOR input " + up + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted XOR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled XOR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted XOR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted XOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled XOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled XOR apply interpreted state");
     }
 
     @Test
@@ -444,6 +501,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(up ^ left ^ down, adapter.getValue(Port.RIGHT), "Compiled XOR input " + up + "," + left + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted XOR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled XOR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted XOR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted XOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled XOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled XOR apply interpreted state");
     }
 
     @Test
@@ -491,6 +555,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(~(up & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NAND input " + up + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted NAND serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NAND serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted NAND apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted NAND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NAND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NAND apply interpreted state");
     }
 
     @Test
@@ -544,6 +615,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(~(up & left & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NAND input " + up + "," + left + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted NAND serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NAND serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted NAND apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted NAND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NAND apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NAND apply interpreted state");
     }
 
     @Test
@@ -591,6 +669,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(~(up | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NOR input " + up + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted NOR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NOR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted NOR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted NOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NOR apply interpreted state");
     }
 
     @Test
@@ -644,6 +729,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(~(up | left | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NOR input " + up + "," + left + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted NOR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NOR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted NOR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted NOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NOR apply interpreted state");
     }
 
     @Test
@@ -691,6 +783,13 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(~(up ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled XNOR input " + up + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted XNOR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled XNOR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted XNOR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted XNOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled XNOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled XNOR apply interpreted state");
     }
 
     @Test
@@ -744,5 +843,12 @@ public final class SingleNodeBundledWireTests
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(~(up ^ left ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled XNOR input " + up + "," + left + "," + down);
         }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted XNOR serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled XNOR serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted XNOR apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted XNOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled XNOR apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled XNOR apply interpreted state");
     }
 }
