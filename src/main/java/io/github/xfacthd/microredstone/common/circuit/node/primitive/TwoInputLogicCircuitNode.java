@@ -79,9 +79,6 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
     @Override
     public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
     {
-        int inputOneLocal = localWires.getLocal(inputOneWire);
-        int inputTwoLocal = localWires.getLocal(inputTwoWire);
-
         int opcode = switch (type)
         {
             case AND, NAND -> GeneratorAdapter.AND;
@@ -90,8 +87,8 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
             default -> throw new UnsupportedOperationException("Invalid logic op: " + type);
         };
 
-        methodGen.loadLocal(inputOneLocal);
-        methodGen.loadLocal(inputTwoLocal);
+        localWires.generateLoad(inputOneWire);
+        localWires.generateLoad(inputTwoWire);
         methodGen.math(opcode, Type.SHORT_TYPE);
         if (invertResult)
         {

@@ -1,79 +1,36 @@
 package io.github.xfacthd.microredstone.common.circuit.compiler;
 
-import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
-import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundlePackerCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.primitive.PrimitiveCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.Arrays;
-import java.util.List;
 
 public final class LocalWireMapper
 {
     private final GeneratorAdapter methodGen;
-    private final int contextLocal;
+    private final int[] wireParams;
     private final int[] wireLocals;
-    private final boolean[] fromLocal;
-    private final boolean[] fromContext;
 
-    public LocalWireMapper(
-            GeneratorAdapter methodGen,
-            int contextLocal,
-            int wireCount,
-            List<NodeEntry<CircuitNode>> childNodes,
-            List<NodeEntry<BufferCircuitNode>> bufferNodes,
-            Connector[] outputs
-    )
+    LocalWireMapper(GeneratorAdapter methodGen, int wireCount)
     {
         this.methodGen = methodGen;
-        this.contextLocal = contextLocal;
+        this.wireParams = new int[wireCount];
+        Arrays.fill(wireParams, -1);
         this.wireLocals = new int[wireCount];
         Arrays.fill(wireLocals, -1);
-        this.fromLocal = new boolean[wireCount];
-        this.fromContext = new boolean[wireCount];
-        // Determine which ioPorts are read from a local var and which ioPorts are read from the context.
-        // This is used to decide where results of inlined nodes need to be written and whether results from complex
-        // nodes also need to be copied to local variables
-        for (NodeEntry<CircuitNode> child : childNodes)
-        {
-            boolean[] array = child.node() instanceof PrimitiveCircuitNode ? fromLocal : fromContext;
-            for (WirePair input : child.inputs())
-            {
-                array[input.external()] = true;
-            }
-            // Special-case the bundle packer since it does a read-modify-write on its output
-            if (child.node() instanceof BundlePackerCircuitNode)
-            {
-                array[child.outputs()[0].external()] = true;
-            }
-        }
-        for (NodeEntry<BufferCircuitNode> bufferEntry : bufferNodes)
-        {
-            BufferCircuitNode buffer = bufferEntry.node();
-            fromLocal[buffer.getInputWire()] = true;
-        }
-        for (Connector out : outputs)
-        {
-            fromContext[out.wire()] = true;
-        }
     }
 
-    public int getContextLocal()
+    void captureParam(int wire, int param)
     {
-        return contextLocal;
+        wireParams[wire] = param;
     }
 
-    public boolean hasLocal(int wire)
+    public boolean hasLocalOrParam(int wire)
     {
-        return wireLocals[wire] != -1;
+        return wireLocals[wire] != -1 || wireParams[wire] != -1;
     }
 
-    public int getLocal(int wire)
+    private int getLocal(int wire)
     {
         int local = wireLocals[wire];
         if (local == -1)
@@ -83,39 +40,27 @@ public final class LocalWireMapper
         return local;
     }
 
-    public boolean isReadFromLocal(int wire)
+    public void generateLoad(int inputWire)
     {
-        return fromLocal[wire];
+        int param = wireParams[inputWire];
+        if (param != -1)
+        {
+            methodGen.loadArg(param);
+        }
+        else
+        {
+            methodGen.loadLocal(getLocal(inputWire));
+        }
     }
 
-    public boolean isReadFromContext(int wire)
-    {
-        return fromContext[wire];
-    }
-
-    /**
-     * Generates instructions for storing an on-stack value to a local variable and/or to the context
-     */
     public void generateStore(int outputWire)
     {
-        boolean writeToLocal = isReadFromLocal(outputWire);
-        boolean writeToContext = isReadFromContext(outputWire);
-        if (writeToLocal && writeToContext)
+        int param = wireParams[outputWire];
+        if (param != -1)
         {
-            methodGen.dup();
+            // TODO: verify that bundle packers cannot write into wires driven by other non-packer sources
+            throw new IllegalStateException("Cannot store into input parameter");
         }
-        if (writeToLocal)
-        {
-            int outputLocal = getLocal(outputWire);
-            methodGen.storeLocal(outputLocal);
-        }
-        if (writeToContext)
-        {
-            methodGen.loadLocal(contextLocal);
-            methodGen.swap();
-            methodGen.push(outputWire);
-            methodGen.swap();
-            methodGen.invokeVirtual(CircuitCompiler.EVAL_CONTEXT_TYPE, CircuitCompiler.EVAL_CONTEXT_STORE_MTH);
-        }
+        methodGen.storeLocal(getLocal(outputWire));
     }
 }

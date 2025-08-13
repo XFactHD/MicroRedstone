@@ -11,6 +11,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
 import io.github.xfacthd.microredstone.util.ComplexTestCircuits;
@@ -72,7 +73,7 @@ public final class ComplexCircuitTest
     }
 
     @Test
-    void testNestedCircuit()
+    void testNestedCircuit_OneInOneOut()
     {
         TestBuilder innerBuilder = new TestBuilder();
 
@@ -112,7 +113,7 @@ public final class ComplexCircuitTest
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
         CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
 
-        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED");
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED_OneInOneOut");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);
@@ -130,6 +131,182 @@ public final class ComplexCircuitTest
             int left = adapter.setValue(Port.LEFT, i & 1);
             circuitCompiled.evaluate(adapter);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled NESTED input " + i);
+        }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(outerNode::serializeState, "Interpreted NESTED serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NESTED serialize state");
+        Assertions.assertDoesNotThrow(() -> outerNode.applyState(stateInterp), "Interpreted NESTED apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> outerNode.applyState(stateCompiled), "Interpreted NESTED apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NESTED apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NESTED apply interpreted state");
+    }
+
+    @Test
+    void testNestedCircuit_OneInTwoOut()
+    {
+        TestBuilder innerBuilder = new TestBuilder();
+
+        Wire innerWireIn = innerBuilder.addWire(WireType.SINGLE);
+        Wire innerWireOut = innerBuilder.addWire(WireType.SINGLE);
+
+        Connection innerConIn = innerBuilder.addConnection(Port.LEFT, WireType.SINGLE, PortDir.INPUT);
+        innerConIn.connect(innerWireIn);
+        Connection innerConOutOne = innerBuilder.addConnection(Port.UP, WireType.SINGLE, PortDir.OUTPUT);
+        innerConOutOne.connect(innerWireOut);
+        Connection innerConOutTwo = innerBuilder.addConnection(Port.DOWN, WireType.SINGLE, PortDir.OUTPUT);
+        innerConOutTwo.connect(innerWireOut);
+
+        PrimitivePrototypeNode innerNotProtoNode = innerBuilder.addNode(new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, WireType.SINGLE));
+        innerNotProtoNode.setConnection(Port.LEFT, innerWireIn, true);
+        innerNotProtoNode.setConnection(Port.RIGHT, innerWireOut, true);
+
+        CompoundPrototypeNode innerProtoNode = innerBuilder.build();
+        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode);
+
+        TestBuilder outerBuilder = new TestBuilder();
+
+        Wire outerWireIn = outerBuilder.addWire(WireType.SINGLE);
+        Wire outerWireOut = outerBuilder.addWire(WireType.BUNDLED);
+        Wire outerWireCon = outerBuilder.addWire(WireType.SINGLE);
+        Wire outerWireConOne = outerBuilder.addWire(WireType.SINGLE);
+        Wire outerWireConTwo = outerBuilder.addWire(WireType.SINGLE);
+
+        Connection outerConIn = outerBuilder.addConnection(Port.LEFT, WireType.SINGLE, PortDir.INPUT);
+        outerConIn.connect(outerWireIn);
+        Connection outerConOut = outerBuilder.addConnection(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT);
+        outerConOut.connect(outerWireOut);
+
+        PrimitivePrototypeNode outerNotProtoNode = outerBuilder.addNode(new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, WireType.SINGLE));
+        outerNotProtoNode.setConnection(Port.LEFT, outerWireIn, true);
+        outerNotProtoNode.setConnection(Port.RIGHT, outerWireCon, true);
+        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode));
+        outerRefProtoNode.setConnection(Port.LEFT, outerWireCon, true);
+        outerRefProtoNode.setConnection(Port.UP, outerWireConOne, true);
+        outerRefProtoNode.setConnection(Port.DOWN, outerWireConTwo, true);
+        ConverterPrototypeNode outerBundlerProtoNodeOne = outerBuilder.addNode(new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK));
+        outerBundlerProtoNodeOne.setBitIndex(0);
+        outerBundlerProtoNodeOne.setConnection(Port.LEFT, outerWireConOne, true);
+        outerBundlerProtoNodeOne.setConnection(Port.RIGHT, outerWireOut, true);
+        ConverterPrototypeNode outerBundlerProtoNodeTwo = outerBuilder.addNode(new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK));
+        outerBundlerProtoNodeTwo.setBitIndex(1);
+        outerBundlerProtoNodeTwo.setConnection(Port.LEFT, outerWireConTwo, true);
+        outerBundlerProtoNodeTwo.setConnection(Port.RIGHT, outerWireOut, true);
+
+        CompoundPrototypeNode outerProtoNode = outerBuilder.build();
+        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
+
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED_OneInTwoOut");
+        Assertions.assertNotNull(compiled, "Compilation failed");
+
+        Circuit circuitInterp = new Circuit(outerNode);
+        Circuit circuitCompiled = new Circuit(compiled);
+        TestInterfaceAdapter adapter = new TestInterfaceAdapter();
+
+        for (int i = 0; i < 4; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, i & 1);
+            int right = (left << 1) | left;
+            circuitInterp.evaluate(adapter);
+            Assertions.assertEquals(right, adapter.getValue(Port.RIGHT), "Interpreted NESTED input " + i);
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, i & 1);
+            int right = (left << 1) | left;
+            circuitCompiled.evaluate(adapter);
+            Assertions.assertEquals(right, adapter.getValue(Port.RIGHT), "Compiled NESTED input " + i);
+        }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(outerNode::serializeState, "Interpreted NESTED serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled NESTED serialize state");
+        Assertions.assertDoesNotThrow(() -> outerNode.applyState(stateInterp), "Interpreted NESTED apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> outerNode.applyState(stateCompiled), "Interpreted NESTED apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled NESTED apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled NESTED apply interpreted state");
+    }
+
+    @Test
+    void testNestedCircuit_OneInThreeOut()
+    {
+        TestBuilder innerBuilder = new TestBuilder();
+
+        Wire innerWireIn = innerBuilder.addWire(WireType.SINGLE);
+        Wire innerWireOut = innerBuilder.addWire(WireType.SINGLE);
+
+        Connection innerConIn = innerBuilder.addConnection(Port.LEFT, WireType.SINGLE, PortDir.INPUT);
+        innerConIn.connect(innerWireIn);
+        Connection innerConOutOne = innerBuilder.addConnection(Port.UP, WireType.SINGLE, PortDir.OUTPUT);
+        innerConOutOne.connect(innerWireOut);
+        Connection innerConOutTwo = innerBuilder.addConnection(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT);
+        innerConOutTwo.connect(innerWireOut);
+        Connection innerConOutThree = innerBuilder.addConnection(Port.DOWN, WireType.SINGLE, PortDir.OUTPUT);
+        innerConOutThree.connect(innerWireOut);
+
+        PrimitivePrototypeNode innerNotProtoNode = innerBuilder.addNode(new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, WireType.SINGLE));
+        innerNotProtoNode.setConnection(Port.LEFT, innerWireIn, true);
+        innerNotProtoNode.setConnection(Port.RIGHT, innerWireOut, true);
+
+        CompoundPrototypeNode innerProtoNode = innerBuilder.build();
+        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode);
+
+        TestBuilder outerBuilder = new TestBuilder();
+
+        Wire outerWireIn = outerBuilder.addWire(WireType.SINGLE);
+        Wire outerWireOut = outerBuilder.addWire(WireType.BUNDLED);
+        Wire outerWireCon = outerBuilder.addWire(WireType.SINGLE);
+        Wire outerWireConOne = outerBuilder.addWire(WireType.SINGLE);
+        Wire outerWireConTwo = outerBuilder.addWire(WireType.SINGLE);
+        Wire outerWireConThree = outerBuilder.addWire(WireType.SINGLE);
+
+        Connection outerConIn = outerBuilder.addConnection(Port.LEFT, WireType.SINGLE, PortDir.INPUT);
+        outerConIn.connect(outerWireIn);
+        Connection outerConOut = outerBuilder.addConnection(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT);
+        outerConOut.connect(outerWireOut);
+
+        PrimitivePrototypeNode outerNotProtoNode = outerBuilder.addNode(new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, WireType.SINGLE));
+        outerNotProtoNode.setConnection(Port.LEFT, outerWireIn, true);
+        outerNotProtoNode.setConnection(Port.RIGHT, outerWireCon, true);
+        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode));
+        outerRefProtoNode.setConnection(Port.LEFT, outerWireCon, true);
+        outerRefProtoNode.setConnection(Port.UP, outerWireConOne, true);
+        outerRefProtoNode.setConnection(Port.RIGHT, outerWireConTwo, true);
+        outerRefProtoNode.setConnection(Port.DOWN, outerWireConThree, true);
+        ConverterPrototypeNode outerBundlerProtoNodeOne = outerBuilder.addNode(new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK));
+        outerBundlerProtoNodeOne.setBitIndex(0);
+        outerBundlerProtoNodeOne.setConnection(Port.LEFT, outerWireConOne, true);
+        outerBundlerProtoNodeOne.setConnection(Port.RIGHT, outerWireOut, true);
+        ConverterPrototypeNode outerBundlerProtoNodeTwo = outerBuilder.addNode(new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK));
+        outerBundlerProtoNodeTwo.setBitIndex(1);
+        outerBundlerProtoNodeTwo.setConnection(Port.LEFT, outerWireConTwo, true);
+        outerBundlerProtoNodeTwo.setConnection(Port.RIGHT, outerWireOut, true);
+        ConverterPrototypeNode outerBundlerProtoNodeThree = outerBuilder.addNode(new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK));
+        outerBundlerProtoNodeThree.setBitIndex(2);
+        outerBundlerProtoNodeThree.setConnection(Port.LEFT, outerWireConThree, true);
+        outerBundlerProtoNodeThree.setConnection(Port.RIGHT, outerWireOut, true);
+
+        CompoundPrototypeNode outerProtoNode = outerBuilder.build();
+        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
+
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED_OneInThreeOut");
+        Assertions.assertNotNull(compiled, "Compilation failed");
+
+        Circuit circuitInterp = new Circuit(outerNode);
+        Circuit circuitCompiled = new Circuit(compiled);
+        TestInterfaceAdapter adapter = new TestInterfaceAdapter();
+
+        for (int i = 0; i < 4; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, i & 1);
+            int right = (left << 2) | (left << 1) | left;
+            circuitInterp.evaluate(adapter);
+            Assertions.assertEquals(right, adapter.getValue(Port.RIGHT), "Interpreted NESTED input " + i);
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            int left = adapter.setValue(Port.LEFT, i & 1);
+            int right = (left << 2) | (left << 1) | left;
+            circuitCompiled.evaluate(adapter);
+            Assertions.assertEquals(right, adapter.getValue(Port.RIGHT), "Compiled NESTED input " + i);
         }
 
         CircuitState stateInterp = Assertions.assertDoesNotThrow(outerNode::serializeState, "Interpreted NESTED serialize state");

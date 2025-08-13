@@ -63,9 +63,8 @@ public final class BufferCircuitNode extends CircuitNode
     {
         String stateField = fieldAppender.getOrAddBufferField(this);
 
-        int inputLocal = localWires.getLocal(inputWire);
         methodGen.loadThis();
-        methodGen.loadLocal(inputLocal);
+        localWires.generateLoad(inputWire);
         methodGen.putField(selfType, stateField, Type.SHORT_TYPE);
     }
 

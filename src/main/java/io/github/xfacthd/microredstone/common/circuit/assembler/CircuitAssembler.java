@@ -121,10 +121,6 @@ public final class CircuitAssembler
                 packersPerWire.computeIfAbsent(wire, $ -> new ArrayList<>()).add(packer);
             }
         }
-        for (List<BundlePackerCircuitNode> packers : packersPerWire.values())
-        {
-            packers.getLast().markAsLast();
-        }
 
         List<Connector> inputs = new ArrayList<>();
         List<Connector> outputs = new ArrayList<>();

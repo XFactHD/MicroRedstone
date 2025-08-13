@@ -1,6 +1,5 @@
 package io.github.xfacthd.microredstone.common.circuit.node.compiled;
 
-import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
@@ -10,13 +9,11 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNo
 public abstract class CompiledCircuitNode extends RootCircuitNode
 {
     private final CompoundCircuitNode originalNode;
-    protected final EvalContext.Nested nestedContext;
 
-    CompiledCircuitNode(CompoundCircuitNode originalNode, int wireCount, Connector[] inputs, Connector[] outputs)
+    CompiledCircuitNode(CompoundCircuitNode originalNode, Connector[] inputs, Connector[] outputs)
     {
         super(inputs, outputs);
         this.originalNode = originalNode;
-        this.nestedContext = new EvalContext.Nested(wireCount);
     }
 
     @Override

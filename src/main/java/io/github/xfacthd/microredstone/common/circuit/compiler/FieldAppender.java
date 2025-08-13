@@ -5,8 +5,6 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitN
 
 public interface FieldAppender
 {
-    String addNodeField();
-
     String getOrAddBufferField(BufferCircuitNode buffer);
 
     ClockCircuitNode.Fields addClockField(boolean needCounter, int counterInit);

@@ -57,9 +57,7 @@ public final class NotLogicCircuitNode extends PrimitiveCircuitNode
     @Override
     public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
     {
-        int inputLocal = localWires.getLocal(inputWire);
-
-        methodGen.loadLocal(inputLocal);
+        localWires.generateLoad(inputWire);
         methodGen.push(inversionMask);
         methodGen.math(GeneratorAdapter.XOR, Type.SHORT_TYPE);
         localWires.generateStore(outputWire);

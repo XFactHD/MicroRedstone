@@ -58,11 +58,12 @@ public final class BundleUnpackerCircuitNode extends PrimitiveCircuitNode
     @Override
     public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
     {
-        int inputLocal = localWires.getLocal(inputWire);
-
-        methodGen.loadLocal(inputLocal);
-        methodGen.push(bitIndex);
-        methodGen.math(GeneratorAdapter.USHR, Type.SHORT_TYPE);
+        localWires.generateLoad(inputWire);
+        if (bitIndex > 0)
+        {
+            methodGen.push(bitIndex);
+            methodGen.math(GeneratorAdapter.USHR, Type.SHORT_TYPE);
+        }
         methodGen.push(0x1);
         methodGen.math(GeneratorAdapter.AND, Type.SHORT_TYPE);
         localWires.generateStore(outputWire);

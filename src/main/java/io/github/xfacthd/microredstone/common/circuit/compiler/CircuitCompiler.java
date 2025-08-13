@@ -7,7 +7,6 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
-import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
@@ -63,12 +62,12 @@ public final class CircuitCompiler
     private static final Lazy<Path> EXPORT_PATH = Lazy.of(() -> FMLPaths.GAMEDIR.get().resolve(MicroRedstone.MOD_ID));
 
     private static final String SUPER_CLASS = CompiledCircuitNode.class.getName().replace(".", "/");
-    public static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
+    private static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
     private static final String CLASS_NAME_PREFIX = SUPER_CLASS + "$";
     private static final MethodType CTOR_MTH_TYPE = MethodType.methodType(void.class, CompoundCircuitNode.class);
     private static final MethodType CTOR_HANDLE_MTH_TYPE = CTOR_MTH_TYPE.changeReturnType(RootCircuitNode.class);
     private static final Method CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class);
-    private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, int.class, Connector[].class, Connector[].class);
+    private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, Connector[].class, Connector[].class);
     private static final Type INT_ARRAY_TYPE = Type.getType(int[].class);
     private static final Type CIRCUIT_STATE_TYPE = Type.getType(CircuitState.class);
     private static final Method CIRCUIT_STATE_CTOR_MTH = method("<init>", Type.VOID_TYPE, int[].class, int[].class, int[].class);
@@ -77,22 +76,15 @@ public final class CircuitCompiler
     private static final Method STATE_BUFFER_STATES_MTH = findMethod(CircuitState.class, "bufferStates");
     private static final Method STATE_CLOCK_COUNTERS_MTH = findMethod(CircuitState.class, "clockCounters");
     private static final Method STATE_CLOCK_STATES_MTH = findMethod(CircuitState.class, "clockStates");
-    private static final Type LIST_TYPE = Type.getType(List.class);
-    private static final Method LIST_GET_MTH = findMethod(List.class, "get", int.class);
     private static final Type CMP_NODE_TYPE = Type.getType(CompoundCircuitNode.class);
     private static final Method CMP_NODE_INPUTS_MTH = findMethod(CircuitNode.class, "getInputs");
     private static final Method CMP_NODE_OUTPUTS_MTH = findMethod(CircuitNode.class, "getOutputs");
-    private static final Method CMP_NODE_WIRE_COUNT_MTH = findMethod(CompoundCircuitNode.class, "getWireCount");
-    private static final Method CMP_NODE_CHILDREN_MTH = findMethod(CompoundCircuitNode.class, "getChildNodes");
-    public static final Method NODE_EVAL_MTH = findMethod(CircuitNode.class, "evaluate", EvalContext.class, WirePair[].class, WirePair[].class);
-    public static final Type NODE_ENTRY_TYPE = Type.getType(NodeEntry.class);
-    public static final Method NODE_ENTRY_EVAL_MTH = findMethod(NodeEntry.class, "evaluate", EvalContext.class);
-    public static final Type EVAL_CONTEXT_TYPE = Type.getType(EvalContext.class);
-    public static final Type NESTED_EVAL_CONTEXT_TYPE = Type.getType(EvalContext.Nested.class);
-    public static final Method EVAL_CONTEXT_LOAD_MTH = findMethod(EvalContext.class, "loadInput", int.class);
-    public static final Method EVAL_CONTEXT_STORE_MTH = findMethod(EvalContext.class, "storeOutput", int.class, short.class);
-    public static final Method NESTED_EVAL_CONTEXT_PREPARE_MTH = findMethod(EvalContext.Nested.class, "prepare", EvalContext.class, WirePair[].class);
-    public static final Method NESTED_EVAL_CONTEXT_FLUSH_MTH = findMethod(EvalContext.Nested.class, "flush", EvalContext.class, WirePair[].class);
+    static final Method NODE_EVAL_MTH = findMethod(CircuitNode.class, "evaluate", EvalContext.class, WirePair[].class, WirePair[].class);
+    static final Type EVAL_CONTEXT_TYPE = Type.getType(EvalContext.class);
+    static final Method EVAL_CONTEXT_LOAD_MTH = findMethod(EvalContext.class, "loadInput", int.class);
+    static final Method EVAL_CONTEXT_STORE_MTH = findMethod(EvalContext.class, "storeOutput", int.class, short.class);
+    static final Type WIRE_PAIR_TYPE = Type.getType(WirePair.class);
+    static final Method WIRE_PAIR_EXTERNAL_MTH = findMethod(WirePair.class, "external");
 
     private static final Map<CompilationKey, Optional<MethodHandle>> COMPILATION_CACHE = new Object2ObjectOpenHashMap<>();
 
@@ -147,7 +139,7 @@ public final class CircuitCompiler
             EvalMethodCompiler evalCompiler = new EvalMethodCompiler(writer, selfType);
             node.compile(evalCompiler);
 
-            compileConstructor(ctorGen, selfType, evalCompiler.getNodeFields(), evalCompiler.getClockFields());
+            compileConstructor(ctorGen, selfType, evalCompiler.getClockFields());
             compileStateSerdes(writer, selfType, evalCompiler.getBufferFields(), evalCompiler.getClockFields());
 
             byte[] bytes = writer.toByteArray();
@@ -166,33 +158,15 @@ public final class CircuitCompiler
         }
     }
 
-    private static void compileConstructor(GeneratorAdapter ctorGen, Type selfType, List<NodeFieldSpec> nodeFields, List<ClockFieldSpec> clockFields)
+    private static void compileConstructor(GeneratorAdapter ctorGen, Type selfType, List<ClockFieldSpec> clockFields)
     {
         ctorGen.loadThis();
         ctorGen.loadArg(0);
         ctorGen.dup();
-        ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_WIRE_COUNT_MTH);
-        ctorGen.loadArg(0);
         ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_INPUTS_MTH);
         ctorGen.loadArg(0);
         ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_OUTPUTS_MTH);
         ctorGen.invokeConstructor(SUPER_TYPE, SUPER_CTOR_MTH);
-        if (!nodeFields.isEmpty())
-        {
-            int listLocal = ctorGen.newLocal(LIST_TYPE);
-            ctorGen.loadArg(0);
-            ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_CHILDREN_MTH);
-            ctorGen.storeLocal(listLocal);
-            for (NodeFieldSpec field : nodeFields)
-            {
-                ctorGen.loadThis();
-                ctorGen.loadLocal(listLocal);
-                ctorGen.push(field.nodeIdx);
-                ctorGen.invokeInterface(LIST_TYPE, LIST_GET_MTH);
-                ctorGen.checkCast(NODE_ENTRY_TYPE);
-                ctorGen.putField(selfType, field.name, NODE_ENTRY_TYPE);
-            }
-        }
         if (!clockFields.isEmpty())
         {
             for (ClockFieldSpec field : clockFields)
@@ -323,8 +297,6 @@ public final class CircuitCompiler
         desGen.returnValue();
         desGen.endMethod();
     }
-
-    record NodeFieldSpec(String name, int nodeIdx) {}
 
     record BufferFieldSpec(String name) {}
 

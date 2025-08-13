@@ -7,7 +7,6 @@ import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.compiler.EvalMethodCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
-import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
@@ -26,28 +25,27 @@ import net.minecraft.network.codec.StreamCodec;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import java.util.Arrays;
 import java.util.List;
 
 public final class CompoundCircuitNode extends RootCircuitNode
 {
     public static final MapCodec<CompoundCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-            NodeEntry.CODEC.listOf().fieldOf("child_nodes").forGetter(CompoundCircuitNode::getChildNodes),
+            NodeEntry.CODEC.listOf().fieldOf("child_nodes").forGetter(node -> node.childNodes),
             NodeEntry.codec(ClockCircuitNode.CODEC.codec()).listOf().fieldOf("clock_nodes").forGetter(node -> node.clockNodes),
             NodeEntry.codec(BufferCircuitNode.CODEC.codec()).listOf().fieldOf("buffer_nodes").forGetter(node -> node.bufferNodes),
-            Wire.CODEC.listOf().fieldOf("wires").forGetter(CompoundCircuitNode::getWires),
+            Wire.CODEC.listOf().fieldOf("wires").forGetter(node -> node.wires),
             Connector.CODEC.listOf().fieldOf("inputs").forGetter(node -> List.of(node.inputs)),
             Connector.CODEC.listOf().fieldOf("outputs").forGetter(node -> List.of(node.outputs))
     ).apply(inst, CompoundCircuitNode::new));
     public static final StreamCodec<ByteBuf, CompoundCircuitNode> STREAM_CODEC = StreamCodec.composite(
             NodeEntry.STREAM_CODEC.apply(ByteBufCodecs.list()),
-            CompoundCircuitNode::getChildNodes,
+            node -> node.childNodes,
             NodeEntry.streamCodec(ClockCircuitNode.STREAM_CODEC).apply(ByteBufCodecs.list()),
             node -> node.clockNodes,
             NodeEntry.streamCodec(BufferCircuitNode.STREAM_CODEC).apply(ByteBufCodecs.list()),
             node -> node.bufferNodes,
             Wire.STREAM_CODEC.apply(ByteBufCodecs.list()),
-            CompoundCircuitNode::getWires,
+            node -> node.wires,
             Connector.STREAM_CODEC.apply(ByteBufCodecs.list()),
             node -> List.of(node.inputs),
             Connector.STREAM_CODEC.apply(ByteBufCodecs.list()),
@@ -148,10 +146,6 @@ public final class CompoundCircuitNode extends RootCircuitNode
             clockNode.node().applyState(clockCounters.nextInt(), clockStates.nextInt());
         }
 
-        // Abort when this state was written by a compiled node as it doesn't write nested node state
-        // TODO: remove when nested nodes are merged into the root compiled node
-        if (!bufferStates.hasNext() && !clockCounters.hasNext() && !clockStates.hasNext()) return;
-
         for (NodeEntry<CircuitNode> node : childNodes)
         {
             if (node.node() instanceof CompoundCircuitNode compound)
@@ -163,139 +157,43 @@ public final class CompoundCircuitNode extends RootCircuitNode
 
     public void compile(EvalMethodCompiler compiler)
     {
-        compiler.compileRootEval(wires.size(), childNodes, bufferNodes, outputs, (generator, selfType, fieldAppender, localWires) ->
-        {
-            compileContextPrepare(generator, selfType, localWires);
-
-            for (NodeEntry<ClockCircuitNode> clock : clockNodes)
-            {
-                clock.node().compile(generator, fieldAppender, selfType, localWires);
-            }
-            for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
-            {
-                buffer.node().compileReadBack(generator, selfType, fieldAppender, localWires);
-            }
-
-            compileNodeEval(generator, fieldAppender, selfType, localWires);
-            compileContextFlush(generator, localWires.getContextLocal());
-
-            for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
-            {
-                buffer.node().compileCapture(generator, selfType, fieldAppender, localWires);
-            }
-        });
+        compiler.compileRootEval(this, CompoundCircuitNode::compileNodeEval);
     }
 
-    private void compileContextPrepare(GeneratorAdapter methodGen, Type selfType, LocalWireMapper localWires)
+    private static void compileNodeEval(
+            EvalMethodCompiler compiler,
+            GeneratorAdapter generator,
+            Type selfType,
+            FieldAppender fieldAppender,
+            LocalWireMapper localWires,
+            CompoundCircuitNode compoundNode
+    )
     {
-        int contextLocal = localWires.getContextLocal();
-
-        methodGen.loadThis();
-        methodGen.getField(selfType, "nestedContext", CircuitCompiler.NESTED_EVAL_CONTEXT_TYPE);
-        methodGen.dup();
-        methodGen.storeLocal(contextLocal);
-        methodGen.loadArg(0); // EvalContext
-        methodGen.loadArg(1); // int[] inputs
-        methodGen.invokeVirtual(CircuitCompiler.NESTED_EVAL_CONTEXT_TYPE, CircuitCompiler.NESTED_EVAL_CONTEXT_PREPARE_MTH);
-
-        int[] inWires = Arrays.stream(inputs)
-                .mapToInt(Connector::wire)
-                .filter(localWires::isReadFromLocal)
-                .toArray();
-        if (inWires.length > 0)
+        for (NodeEntry<ClockCircuitNode> clock : compoundNode.clockNodes)
         {
-            methodGen.loadLocal(contextLocal);
-
-            int max = inWires.length - 1;
-            for (int i = 0; i <= max; i++)
-            {
-                if (i < max) methodGen.dup();
-
-                int wire = inWires[i];
-                methodGen.push(wire);
-                methodGen.invokeVirtual(CircuitCompiler.EVAL_CONTEXT_TYPE, CircuitCompiler.EVAL_CONTEXT_LOAD_MTH);
-                methodGen.storeLocal(localWires.getLocal(wire));
-            }
+            clock.node().compile(generator, fieldAppender, selfType, localWires);
         }
-    }
-
-    private static void compileContextFlush(GeneratorAdapter methodGen, int contextLocal)
-    {
-        methodGen.loadLocal(contextLocal);
-        methodGen.loadArg(0); // EvalContext
-        methodGen.loadArg(2); // int[] outputs
-        methodGen.invokeVirtual(CircuitCompiler.NESTED_EVAL_CONTEXT_TYPE, CircuitCompiler.NESTED_EVAL_CONTEXT_FLUSH_MTH);
-    }
-
-    private void compileNodeEval(GeneratorAdapter methodGen, FieldAppender fieldAppender, Type selfType, LocalWireMapper localWires)
-    {
-        for (NodeEntry<CircuitNode> child : childNodes)
+        for (NodeEntry<BufferCircuitNode> buffer : compoundNode.bufferNodes)
+        {
+            buffer.node().compileReadBack(generator, selfType, fieldAppender, localWires);
+        }
+        for (NodeEntry<CircuitNode> child : compoundNode.childNodes)
         {
             if (child.node() instanceof PrimitiveCircuitNode primitive)
             {
-                primitive.compile(methodGen, localWires);
+                primitive.compile(generator, localWires);
             }
-            else
+            else if (child.node() instanceof CompoundCircuitNode nested)
             {
-                compileComplexNodeEval(methodGen, fieldAppender, selfType, localWires, child);
+                compiler.compileNestedEval(generator, localWires, nested, child.inputs(), child.outputs(), CompoundCircuitNode::compileNodeEval);
             }
         }
-    }
-
-    // TODO: Stage 1: "Inline" nested nodes by compiling them into separate methods with associated nested contexts stored in fields
-    //                instead of calling into entirely separate nodes stored in a field
-    //       Stage 2: If feasible, merge contexts of the nested nodes into this node's context, pass input locals as method params and return output
-    //                locals as a packed int (probably easiest to unify the root eval method by giving it the same treatment) - requires special care
-    //                with respect to buffer nodes
-    private static void compileComplexNodeEval(
-            GeneratorAdapter methodGen,
-            FieldAppender fieldAppender,
-            Type selfType,
-            LocalWireMapper localWires,
-            NodeEntry<CircuitNode> child
-    )
-    {
-        String fieldName = fieldAppender.addNodeField();
-        int contextLocal = localWires.getContextLocal();
-
-        methodGen.loadThis();
-        methodGen.getField(selfType, fieldName, CircuitCompiler.NODE_ENTRY_TYPE);
-        methodGen.loadLocal(contextLocal);
-        methodGen.invokeVirtual(CircuitCompiler.NODE_ENTRY_TYPE, CircuitCompiler.NODE_ENTRY_EVAL_MTH);
-
-        int[] outWires = Arrays.stream(child.outputs())
-                .mapToInt(WirePair::external)
-                .filter(localWires::isReadFromLocal)
-                .toArray();
-
-        if (outWires.length > 0)
+        for (NodeEntry<BufferCircuitNode> buffer : compoundNode.bufferNodes)
         {
-            methodGen.loadLocal(contextLocal);
-
-            int max = outWires.length - 1;
-            for (int i = 0; i <= max; i++)
-            {
-                if (i < max) methodGen.dup();
-
-                int wire = outWires[i];
-                methodGen.push(wire);
-                methodGen.invokeVirtual(CircuitCompiler.EVAL_CONTEXT_TYPE, CircuitCompiler.EVAL_CONTEXT_LOAD_MTH);
-                methodGen.storeLocal(localWires.getLocal(wire));
-            }
+            buffer.node().compileCapture(generator, selfType, fieldAppender, localWires);
         }
     }
 
-    public List<NodeEntry<CircuitNode>> getChildNodes()
-    {
-        return childNodes;
-    }
-
-    public List<Wire> getWires()
-    {
-        return wires;
-    }
-
-    @SuppressWarnings("unused") // Used in CircuitCompiler
     public int getWireCount()
     {
         return wires.size();
