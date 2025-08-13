@@ -185,7 +185,7 @@ public final class CircuitCompiler
                     ctorGen.loadThis();
                     ctorGen.loadLocal(listLocal);
                     ctorGen.push(field.nodeIdx);
-                    ctorGen.invokeVirtual(LIST_TYPE, LIST_GET_MTH);
+                    ctorGen.invokeInterface(LIST_TYPE, LIST_GET_MTH);
                     ctorGen.checkCast(NODE_ENTRY_TYPE);
                     ctorGen.putField(selfType, field.name, NODE_ENTRY_TYPE);
                 }
