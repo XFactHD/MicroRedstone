@@ -1,7 +1,5 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.EnumHashBiMap;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -14,6 +12,8 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,7 +23,7 @@ public abstract class PrototypeNode implements PlaceableNode
     protected final PortConfig portConfig;
     @Nullable
     private final IconConfig icon;
-    private final BiMap<Port, Wire> connectedWires = EnumHashBiMap.create(Port.class);
+    private final Map<Port, Wire> connectedWires = new EnumMap<>(Port.class);
     private NodePos pos = new NodePos(0, 0);
     private int rotation = 0;
 
@@ -110,7 +110,7 @@ public abstract class PrototypeNode implements PlaceableNode
 
     public final Set<Wire> getConnectedWires()
     {
-        return connectedWires.values();
+        return Set.copyOf(connectedWires.values());
     }
 
     public final Set<Wire> getConnectedWires(PortDir dir)
@@ -119,12 +119,5 @@ public abstract class PrototypeNode implements PlaceableNode
                 .map(connectedWires::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-    }
-
-    public final WireType getOutputType(Wire wire)
-    {
-        Port port = connectedWires.inverse().get(wire);
-        Objects.requireNonNull(port);
-        return Objects.requireNonNull(portConfig.getPortType(port));
     }
 }

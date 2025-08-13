@@ -126,7 +126,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
             for (Wire wire : childNode.getConnectedWires())
             {
                 boolean driver = outputWires.contains(wire);
-                wireValidator.check(wire, childNode.getOutputType(wire), driver, packerBit, outputsReporter);
+                wireValidator.check(wire, wire.getWireType(), driver, packerBit, outputsReporter);
             }
         }
         for (Connection connection : connections)
