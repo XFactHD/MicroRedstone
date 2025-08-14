@@ -12,10 +12,10 @@ import java.util.Objects;
 
 public final class Connection implements PlaceableNode
 {
-    public static final IconConfig ICON_SINGLE_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_single"));
-    private static final IconConfig ICON_SINGLE_OUT = new IconConfig(Utils.rl("part/connection_out"), Utils.rl("port/right_single"));
-    public static final IconConfig ICON_BUNDLED_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_bundled"));
-    private static final IconConfig ICON_BUNDLED_OUT = new IconConfig(Utils.rl("part/connection_out"), Utils.rl("port/right_bundled"));
+    public static final IconConfig ICON_SINGLE_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_single"), false);
+    private static final IconConfig ICON_SINGLE_OUT = new IconConfig(Utils.rl("part/connection_out"), Utils.rl("port/right_single"), false);
+    public static final IconConfig ICON_BUNDLED_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_bundled"), false);
+    private static final IconConfig ICON_BUNDLED_OUT = new IconConfig(Utils.rl("part/connection_out"), Utils.rl("port/right_bundled"), false);
 
     private final WireType wireType;
     private NodePos pos = new NodePos(0, 0);
