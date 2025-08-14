@@ -70,25 +70,24 @@ public final class ClockCircuitNode extends CircuitNode
         // Preload state field onto stack
         methodGen.loadThis();
         methodGen.getField(selfType, stateField, Type.INT_TYPE);
+        int counterLocal = -1;
         if (needCounter)
         {
             String counterField = Objects.requireNonNull(clockFields.counterField);
+            counterLocal = methodGen.newLocal(Type.INT_TYPE);
             methodGen.loadThis();
-            methodGen.dup();
-            methodGen.dup();
             // periodCounter++
             methodGen.getField(selfType, counterField, Type.INT_TYPE);
             methodGen.push(1);
             methodGen.math(GeneratorAdapter.ADD, Type.INT_TYPE);
-            methodGen.putField(selfType, counterField, Type.INT_TYPE);
+            methodGen.dup();
+            methodGen.storeLocal(counterLocal);
             // periodCounter >= halfPeriodMax
-            methodGen.getField(selfType, counterField, Type.INT_TYPE);
             methodGen.push(halfPeriodLength);
             methodGen.ifICmp(GeneratorAdapter.LT, avoidToggleLabel);
             // periodCounter = 0
-            methodGen.loadThis();
             methodGen.push(0);
-            methodGen.putField(selfType, counterField, Type.INT_TYPE);
+            methodGen.storeLocal(counterLocal);
         }
         // state ^= 1
         methodGen.push(1);
@@ -99,7 +98,11 @@ public final class ClockCircuitNode extends CircuitNode
         methodGen.putField(selfType, stateField, Type.INT_TYPE);
         if (needCounter)
         {
+            String counterField = Objects.requireNonNull(clockFields.counterField);
             methodGen.mark(avoidToggleLabel);
+            methodGen.loadThis();
+            methodGen.loadLocal(counterLocal);
+            methodGen.putField(selfType, counterField, Type.INT_TYPE);
         }
         // wireLocal/context[wire] = state
         localWires.generateStore(outputWire);
