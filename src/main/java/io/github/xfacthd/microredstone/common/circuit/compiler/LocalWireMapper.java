@@ -58,7 +58,6 @@ public final class LocalWireMapper
         int param = wireParams[outputWire];
         if (param != -1)
         {
-            // TODO: verify that bundle packers cannot write into wires driven by other non-packer sources
             throw new IllegalStateException("Cannot store into input parameter");
         }
         methodGen.storeLocal(getLocal(outputWire));

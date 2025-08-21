@@ -76,6 +76,58 @@ public final class SingleNodeBundlePackUnpackTests
     }
 
     @Test
+    void testBundleMultiPack()
+    {
+        TestBuilder builder = new TestBuilder();
+
+        Wire wireInOne = builder.addWire(WireType.SINGLE);
+        Wire wireInTwo = builder.addWire(WireType.SINGLE);
+        Wire wireOut = builder.addWire(WireType.BUNDLED);
+
+        Connection conInOne = builder.addConnection(Port.UP, WireType.SINGLE, PortDir.INPUT);
+        conInOne.connect(wireInOne);
+        Connection conInTwo = builder.addConnection(Port.DOWN, WireType.SINGLE, PortDir.INPUT);
+        conInTwo.connect(wireInTwo);
+        Connection conOut = builder.addConnection(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT);
+        conOut.connect(wireOut);
+
+        ConverterPrototypeNode packProtoNodeOne = builder.addNode(new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK));
+        packProtoNodeOne.setBitIndex(0);
+        packProtoNodeOne.setConnection(Port.LEFT, wireInOne, true);
+        packProtoNodeOne.setConnection(Port.RIGHT, wireOut, true);
+
+        ConverterPrototypeNode packProtoNodeTwo = builder.addNode(new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK));
+        packProtoNodeTwo.setBitIndex(1);
+        packProtoNodeTwo.setConnection(Port.LEFT, wireInTwo, true);
+        packProtoNodeTwo.setConnection(Port.RIGHT, wireOut, true);
+
+        CompoundPrototypeNode protoNode = builder.build();
+        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+
+        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "PACK_MULTI");
+        Assertions.assertNotNull(compiled, "Compilation failed");
+
+        Circuit circuitInterp = new Circuit(node);
+        Circuit circuitCompiled = new Circuit(compiled);
+        TestInterfaceAdapter adapter = new TestInterfaceAdapter();
+
+        for (int i = 0; i <= 0b11; i++)
+        {
+            int up = adapter.setValue(Port.UP, i & 1);
+            int down = adapter.setValue(Port.DOWN, (i >> 1) & 1);
+            circuitInterp.evaluate(adapter);
+            Assertions.assertEquals(i, adapter.getValue(Port.RIGHT), "Interpreted PACK_MULTI input " + up + ", " + down);
+        }
+        for (int i = 0; i <= 0b11; i++)
+        {
+            int up = adapter.setValue(Port.UP, i & 1);
+            int down = adapter.setValue(Port.DOWN, (i >> 1) & 1);
+            circuitCompiled.evaluate(adapter);
+            Assertions.assertEquals(i, adapter.getValue(Port.RIGHT), "Compiled PACK_MULTI input " + up + ", " + down);
+        }
+    }
+
+    @Test
     void testBundleUnpack()
     {
         for (int bit = 0; bit < 16; bit++)

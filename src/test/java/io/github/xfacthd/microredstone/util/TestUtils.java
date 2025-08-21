@@ -16,6 +16,14 @@ public final class TestUtils
         return node;
     }
 
+    public static ProblemReporter.Collector assertAssemblyFails(CompoundPrototypeNode protoNode)
+    {
+        ProblemReporter.Collector reporter = new ProblemReporter.Collector();
+        CompoundCircuitNode node = CircuitAssembler.assemble(protoNode, reporter);
+        Assertions.assertNull(node, "Assembler returned non-null");
+        return reporter;
+    }
+
     public static int expandToShort(int bits, int bitCount)
     {
         int value = 0;
