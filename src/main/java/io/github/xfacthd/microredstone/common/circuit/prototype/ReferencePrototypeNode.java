@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.circuit.prototype;
 
 import io.github.xfacthd.microredstone.client.util.PortOverlays;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
@@ -35,7 +36,7 @@ public final class ReferencePrototypeNode extends PrototypeNode
         {
             if (!isConnected(connector.port()))
             {
-                reporter.report(() -> "Port " + connector.port() + " unspecified");
+                reporter.report(new UnspecifiedConnectionProblem(connector.port(), connector.dir()));
             }
         }
     }

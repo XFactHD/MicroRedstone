@@ -1,6 +1,13 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
+import com.google.common.collect.Sets;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.pathelement.ChildNodePathElement;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.pathelement.ConnectionPathElement;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.BundledWireDrivingPackerProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnknownWiresProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WireDriverCountProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WirePortTypeMismatchProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
@@ -20,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 public final class CompoundPrototypeNode extends PrototypeNode
@@ -108,32 +114,32 @@ public final class CompoundPrototypeNode extends PrototypeNode
         WireValidator wireValidator = new WireValidator();
         for (PrototypeNode childNode : childNodes)
         {
-            ProblemReporter childReporter = reporter.forChild(childNode::toString);
+            ProblemReporter childReporter = reporter.forChild(new ChildNodePathElement(childNode));
             childNode.validate(childReporter);
 
-            if (!wires.containsAll(childNode.getConnectedWires()))
+            Set<Wire> childWires = childNode.getConnectedWires();
+            if (!wires.containsAll(childWires))
             {
-                childReporter.report(() -> "Unknown wires");
+                childReporter.report(new UnknownWiresProblem(Sets.difference(childWires, wires)));
             }
 
-            ProblemReporter outputsReporter = childReporter.forChild(() -> "drivers");
             Set<Wire> outputWires = childNode.getConnectedWires(PortDir.OUTPUT);
             int packerBit = -1;
             if (childNode instanceof ConverterPrototypeNode converter && converter.isPacker())
             {
                 packerBit = converter.getBitIndex();
             }
-            for (Wire wire : childNode.getConnectedWires())
+            for (Wire wire : childWires)
             {
                 boolean driver = outputWires.contains(wire);
-                wireValidator.check(wire, wire.getWireType(), driver, packerBit, outputsReporter);
+                wireValidator.check(wire, wire.getWireType(), driver, packerBit, childReporter);
             }
         }
         for (Connection connection : connections)
         {
             if (connection != null)
             {
-                ProblemReporter conReporter = reporter.forChild(connection::toString);
+                ProblemReporter conReporter = reporter.forChild(new ConnectionPathElement(connection));
                 connection.validate(conReporter);
                 boolean driver = connection.getPortDir() == PortDir.INPUT;
                 wireValidator.check(connection.getWire(), connection.getWireType(), driver, -1, conReporter);
@@ -148,8 +154,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
             }
             if (driverCount != 1)
             {
-                int count = driverCount;
-                reporter.report(() -> "Wire " + entry.getKey() + " has incorrect amount of driving outputs: " + count);
+                reporter.report(new WireDriverCountProblem(entry.getKey(), driverCount));
             }
         }
     }
@@ -189,7 +194,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
                 int packerMask = packers.getInt(wire);
                 if ((packerMask & bitMask) != 0)
                 {
-                    reporter.report(() -> "Wire " + wire + " has multiple packers driving bit " + packerBit);
+                    reporter.report(new BundledWireDrivingPackerProblem(wire, packerBit));
                 }
                 packerMask |= bitMask;
                 packers.put(wire, packerMask);
@@ -198,7 +203,7 @@ public final class CompoundPrototypeNode extends PrototypeNode
             WireType prevType = types.put(wire, type);
             if (prevType != null && prevType != type)
             {
-                reporter.report(() -> String.format(Locale.ROOT, "Wire %s has mismatched port types (prev: %s, new: %s)", wire, prevType, type));
+                reporter.report(new WirePortTypeMismatchProblem(wire, prevType, type));
             }
         }
 

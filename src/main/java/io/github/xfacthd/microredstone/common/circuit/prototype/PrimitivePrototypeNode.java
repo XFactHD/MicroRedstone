@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.circuit.prototype;
 
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
@@ -64,10 +65,10 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         {
             if (!isConnected(port))
             {
-                reporter.report(() -> "Input " + port + " unspecified");
+                reporter.report(UnspecifiedConnectionProblem.input(port));
             }
         });
-        if (!isConnected(Port.RIGHT)) reporter.report(() -> "Output unspecified");
+        if (!isConnected(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
     }
 
     @Override

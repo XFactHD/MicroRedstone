@@ -6,6 +6,10 @@ import com.google.common.graph.ElementOrder;
 import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.pathelement.RootNodePathElement;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.DirectCyclicConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.IndirectCyclicConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WireCountMismatchProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
@@ -36,6 +40,7 @@ import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class CircuitAssembler
@@ -47,7 +52,7 @@ public final class CircuitAssembler
     {
         CountingProblemReporter reporter = CountingProblemReporter.of(problemReporter);
 
-        node.validate(reporter.forChild(() -> "root_node"));
+        node.validate(reporter.forChild(new RootNodePathElement(node)));
         if (reporter.hasIssues()) return null;
 
         List<ClockPrototypeNode> clockProtoNodes = new ArrayList<>();
@@ -139,7 +144,7 @@ public final class CircuitAssembler
         }
         if (wireMapper.size() != node.getWireCount())
         {
-            reporter.report(() -> "Wire count mismatch (known: " + node.getWireCount() + ", mapped: " + wireMapper.size() + ")");
+            reporter.report(new WireCountMismatchProblem(node.getWireCount(), wireMapper.size()));
             return null;
         }
 
@@ -190,10 +195,10 @@ public final class CircuitAssembler
             {
                 if (driverNode == readerNode)
                 {
-                    reporter.report(() -> "Immediate cyclic node on " + driverNode);
+                    reporter.report(new DirectCyclicConnectionProblem(driverNode));
                     return null;
                 }
-                graph.putEdge(driverNode, readerNode);
+                graph.putEdge(driverNode, Objects.requireNonNull(readerNode));
             }
         }
         return graph;
@@ -207,7 +212,7 @@ public final class CircuitAssembler
         }
         catch (CyclePresentException e)
         {
-            reporter.report(() -> "Cyclic node");
+            reporter.report(new IndirectCyclicConnectionProblem(e.getCycles()));
             return List.of();
         }
     }

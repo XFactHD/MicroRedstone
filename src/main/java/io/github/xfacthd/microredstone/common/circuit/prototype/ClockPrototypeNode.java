@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -35,7 +36,7 @@ public final class ClockPrototypeNode extends PrototypeNode
     @Override
     public void validate(ProblemReporter reporter)
     {
-        if (!isConnected(Port.RIGHT)) reporter.report(() -> "Output unspecified");
+        if (!isConnected(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
     }
 
     @Override

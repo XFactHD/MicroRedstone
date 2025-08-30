@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.circuit.connection;
 
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.DanglingConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
@@ -96,7 +97,7 @@ public final class Connection implements PlaceableNode
 
     public void validate(ProblemReporter conReporter)
     {
-        if (wire == null) conReporter.report(() -> "Connection unspecified");
+        if (wire == null) conReporter.report(DanglingConnectionProblem.INSTANCE);
     }
 
     public Connector toConnector(Port port, WireMapper wireMapper)
