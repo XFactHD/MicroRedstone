@@ -7,6 +7,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,8 +19,6 @@ import java.util.function.Supplier;
 
 public final class WireInProgress
 {
-    private static final long DOUBLE_CLICK_DELAY = 250;
-
     private final WireType type;
     private final DyeColor color;
     private final WireType.Icon icon;
@@ -81,7 +80,7 @@ public final class WireInProgress
 
     public PlaceResult placeNextNode(CircuitCanvas canvas, double mouseX, double mouseY)
     {
-        boolean doubleClick = System.currentTimeMillis() - lastClick < DOUBLE_CLICK_DELAY;
+        boolean doubleClick = System.currentTimeMillis() - lastClick < GuiEventListener.DOUBLE_CLICK_THRESHOLD_MS;
         lastClick = System.currentTimeMillis();
 
         if (wireNodes.isEmpty())
