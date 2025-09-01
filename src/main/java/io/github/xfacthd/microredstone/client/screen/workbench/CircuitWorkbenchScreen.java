@@ -1,16 +1,22 @@
 package io.github.xfacthd.microredstone.client.screen.workbench;
 
-import com.mojang.datafixers.util.Either;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.PartsList;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
+import io.github.xfacthd.microredstone.common.menu.slot.ToggleableSlot;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -22,7 +28,9 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
+// TODO: add "modified" flag to prevent data loss when accidentally closing the screen (can be re-used to cache assembly result)
 public final class CircuitWorkbenchScreen extends AbstractContainerScreen<CircuitWorkbenchMenu>
 {
     private static final ResourceLocation BACKGROUND = Utils.rl("background");
@@ -32,14 +40,18 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public static final int BORDER_RIGHT = PADDING * 2 + 1;
     public static final int OFFSET_TOP = 20;
     private static final int BORDER_BOTTOM = PADDING * 2 + 1;
-    public static final int NON_CIRCUIT_WIDTH = BORDER_LEFT + BORDER_RIGHT + PartsList.FULL_WIDTH + PADDING;
+    public static final int NON_CIRCUIT_WIDTH = BORDER_LEFT + BORDER_RIGHT + ToolPaneTabWidget.TOOL_PANE_WIDTH + PADDING;
     public static final int NON_CIRCUIT_HEIGHT = OFFSET_TOP + BORDER_BOTTOM + CircuitCanvas.CELL_COORD_TEXT_HEIGHT;
     private static final long ARROW_REPEAT_DELAY_INITIAL = 300;
 
     private final CircuitCanvas canvas = new CircuitCanvas(this);
     private final PartsList partsList = new PartsList(this);
+    private final ToolsTab toolsTab = new ToolsTab(this);
+    private final LibraryBrowser libraryBrowser = new LibraryBrowser(this);
+    private final ToolPaneTabWidget[] tabWidgets = { partsList, toolsTab, libraryBrowser };
+    private ToolPaneTab toolPaneTab = ToolPaneTab.PARTS;
     @Nullable
-    private Either<NodePos, Integer> dragStart = null;
+    private DragStart dragStart = null;
     @Nullable
     private FloatingNode floatingNode = null;
     @Nullable
@@ -48,25 +60,50 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public CircuitWorkbenchScreen(CircuitWorkbenchMenu menu, Inventory inventory, Component title)
     {
         super(menu, inventory, title);
-        inventoryLabelY = -20; // TODO: set proper position
         // TODO: consider making the canvas size configurable in the workbench screen (requires storing the size in the assembled circuit for reconstruction)
         canvas.setCanvasSize(CircuitCanvas.MAX_WIDTH, CircuitCanvas.MAX_HEIGHT);
+        for (ToolPaneTabWidget widget : tabWidgets)
+        {
+            widget.updateWidgetVisibility(false);
+        }
     }
 
     @Override
     protected void init()
     {
+        for (ToolPaneTabWidget widget : tabWidgets)
+        {
+            widget.init(this::addRenderableWidget);
+        }
+        super.init();
+        repositionElements();
+    }
+
+    @Override
+    protected void repositionElements()
+    {
         canvas.computeWindowSize(width, height);
         imageWidth = canvas.getWindowWidth() + NON_CIRCUIT_WIDTH;
         imageHeight = canvas.getWindowHeight() + NON_CIRCUIT_HEIGHT;
 
-        super.init();
+        leftPos = (width - imageWidth) / 2;
+        topPos = (height - imageHeight) / 2;
 
         canvas.computeWindowPos(leftPos, topPos);
-        partsList.computeDimensions(leftPos, topPos, imageWidth, height);
+
+        int toolPaneX = leftPos + imageWidth - BORDER_RIGHT - ToolPaneTabWidget.TOOL_PANE_WIDTH;
+        int toolPaneY = topPos + OFFSET_TOP;
+        for (ToolPaneTabWidget widget : tabWidgets)
+        {
+            widget.computeLayout(leftPos, topPos, imageWidth, imageHeight, toolPaneX, toolPaneY, height);
+        }
+
+        inventoryLabelX = libraryBrowser.getInvLabelX() - leftPos;
+        inventoryLabelY = libraryBrowser.getInvLabelY() - topPos;
 
         canvas.drag(0, 0); // Clamp canvas offset
-        partsList.scroll(0); // Clamp parts list offset
+        partsList.getScrollableWidget().scroll(0); // Clamp parts list offset
+        libraryBrowser.getScrollableWidget().scroll(0); // Clamp import list offset
     }
 
     @Override
@@ -82,7 +119,13 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
 
         canvas.render(graphics, mouseX, mouseY);
-        partsList.render(graphics, mouseX, mouseY);
+        getActiveTabWidget().render(graphics, mouseX, mouseY);
+    }
+
+    @Override
+    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    {
+        super.renderContents(graphics, mouseX, mouseY, partialTick);
 
         if (floatingNode != null)
         {
@@ -90,8 +133,18 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         }
         if (canvas.isPullingWire() && Objects.requireNonNull(canvas.getWireInProgress()).isEmpty())
         {
-            // TODO: render indicator on the cursor
-            //graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, mouseX - 4, mouseY - 8, 8, 8);
+            WireType.Icon icon = canvas.getWireInProgress().getIcon();
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.texture(), mouseX - 4, mouseY - 8, 8, 8, icon.color());
+        }
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY)
+    {
+        graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
+        if (toolPaneTab == ToolPaneTab.LIBRARY && libraryBrowser.isInExportMode())
+        {
+            graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
         }
     }
 
@@ -100,19 +153,30 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     {
         if (!isDragging() && button == GLFW.GLFW_MOUSE_BUTTON_1)
         {
+            GuiEventListener focused = getFocused();
+            if (focused != null && !focused.isMouseOver(mouseX, mouseY))
+            {
+                setFocused(null);
+            }
+
             if (canvas.isPullingWire())
             {
                 canvas.pullWire((int) mouseX, (int) mouseY);
                 return true;
             }
+
             NodePos nodePos = canvas.getNodePos((int) mouseX, (int) mouseY);
             if (nodePos != null)
             {
-                dragStart = Either.left(nodePos);
+                dragStart = DragStart.canvas(nodePos);
             }
-            else if (partsList.isMouseOverList(mouseX, mouseY))
+            else if (toolPaneTab == ToolPaneTab.PARTS && partsList.getScrollableWidget().isMouseOverList(mouseX, mouseY))
             {
                 dragStart = partsList.getClickedPartIdx(mouseY);
+            }
+            else if (toolPaneTab == ToolPaneTab.LIBRARY && libraryBrowser.isMouseOverImportList(mouseX, mouseY))
+            {
+                dragStart = libraryBrowser.getClickedEntryIdx(mouseY);
             }
             if (dragStart != null)
             {
@@ -120,7 +184,15 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        if (super.mouseClicked(mouseX, mouseY, button))
+        {
+            if (getFocused() instanceof DropFocusAfterClick && getFocused().isMouseOver(mouseX, mouseY))
+            {
+                setFocused(null);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -132,10 +204,10 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         }
         if (dragStart != null)
         {
-            PlaceableNode node = getDraggedNode(dragStart);
+            PlaceableNode node = dragStart.resolve(this);
             if (node != null)
             {
-                NodePos lastPos = dragStart.left().orElse(null);
+                NodePos lastPos = dragStart.canvas().orElse(null);
                 floatingNode = FloatingNode.of(node, lastPos);
             }
             dragStart = null;
@@ -146,10 +218,11 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             canvas.drag((float) -dragX, (float) -dragY);
             return true;
         }
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && (partsList.isDragging() || partsList.isMouseOverScrollBar(mouseX, mouseY)))
+        ScrollableWidget scrollable = getActiveTabWidget().getScrollableWidget();
+        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(mouseX, mouseY)))
         {
-            partsList.dragScrollBar(mouseY);
-            partsList.setDragging(true);
+            scrollable.dragScrollBar(mouseY);
+            scrollable.setDragging(true);
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
@@ -158,11 +231,13 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
-        if (partsList.isDragging())
+        ScrollableWidget scrollable = getActiveTabWidget().getScrollableWidget();
+        if (scrollable != null && scrollable.isDragging())
         {
-            partsList.setDragging(false);
+            scrollable.setDragging(false);
             return true;
         }
+
         if (isDragging())
         {
             if (floatingNode != null)
@@ -194,9 +269,10 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
-        if (partsList.isMouseOver(mouseX, mouseY))
+        ScrollableWidget scrollable = getActiveTabWidget().getScrollableWidget();
+        if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY))
         {
-            partsList.scroll(-scrollY);
+            scrollable.scroll(-scrollY);
             return true;
         }
         if (floatingNode != null)
@@ -222,16 +298,18 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             canvas.cancelWirePull();
             return true;
         }
-        // TODO: augment with UI button
-        if (!canvas.isPullingWire() && keyCode == GLFW.GLFW_KEY_W)
+        if (!hasActiveEditAction())
         {
-            canvas.startWirePull(WireType.SINGLE);
-            return true;
-        }
-        if (!canvas.isPullingWire() && keyCode == GLFW.GLFW_KEY_B)
-        {
-            canvas.startWirePull(WireType.BUNDLED);
-            return true;
+            if (keyCode == GLFW.GLFW_KEY_W)
+            {
+                ToolsTab.ToolAction.CREATE_SINGLE_WIRE.execute(toolsTab);
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_B)
+            {
+                ToolsTab.ToolAction.CREATE_BUNDLED_WIRE.execute(toolsTab);
+                return true;
+            }
         }
         if (floatingNode != null && keyCode == GLFW.GLFW_KEY_R)
         {
@@ -266,12 +344,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Nullable
-    private PlaceableNode getDraggedNode(Either<NodePos, Integer> dragStart)
-    {
-        return dragStart.map(canvas.getPartGrid()::getPartNode, listSlot -> PartsList.getEntryAt(listSlot).create());
-    }
-
-    @Nullable
     public FloatingNode getFloatingNode()
     {
         return floatingNode;
@@ -280,5 +352,65 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public boolean isNodeFloating(PlaceableNode node)
     {
         return floatingNode != null && floatingNode.node() == node;
+    }
+
+    public boolean hasActiveEditAction()
+    {
+        return floatingNode != null || canvas.isPullingWire();
+    }
+
+    public void setToolPaneTab(ToolPaneTab tab)
+    {
+        if (tab != toolPaneTab)
+        {
+            toolPaneTab = tab;
+            for (ToolPaneTabWidget widget : tabWidgets)
+            {
+                widget.updateWidgetVisibility(tab == widget.getType());
+            }
+        }
+    }
+
+    public ToolPaneTab getToolPaneTab()
+    {
+        return toolPaneTab;
+    }
+
+    public Stream<ToggleableSlot> getSlots()
+    {
+        return menu.slots.stream()
+                .filter(ToggleableSlot.class::isInstance)
+                .map(ToggleableSlot.class::cast);
+    }
+
+    private ToolPaneTabWidget getActiveTabWidget()
+    {
+        return switch (toolPaneTab)
+        {
+            case PARTS -> partsList;
+            case TOOLS -> toolsTab;
+            case LIBRARY -> libraryBrowser;
+        };
+    }
+
+    public void assembleAndExport(ExportTarget target)
+    {
+        // TODO: implement circuit assembly, error handling, overwrite handling and target storage
+    }
+
+    public CircuitCanvas getCanvas()
+    {
+        return canvas;
+    }
+
+    public LibraryBrowser getLibraryBrowser()
+    {
+        return libraryBrowser;
+    }
+
+    public enum ExportTarget
+    {
+        LIBRARY,
+        CIRCUIT_ITEM,
     }
 }

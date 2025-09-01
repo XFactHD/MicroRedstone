@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -20,7 +21,8 @@ public final class WireInProgress
     private static final long DOUBLE_CLICK_DELAY = 250;
 
     private final WireType type;
-    private final DyeColor color = DyeColor.RED; // TODO: make configurable
+    private final DyeColor color;
+    private final WireType.Icon icon;
     private final List<WireNode> wireNodes = new ArrayList<>();
     private final List<RoutedWire.Section> sections = new ArrayList<>();
     @Nullable
@@ -28,9 +30,11 @@ public final class WireInProgress
     private List<WireNode> floatingNodes = List.of();
     private long lastClick = -1;
 
-    public WireInProgress(WireType wireType)
+    public WireInProgress(WireType wireType, @Nullable DyeColor color)
     {
         this.type = wireType;
+        this.color = Objects.requireNonNullElse(color, DyeColor.RED);
+        this.icon = wireType.getIcon().withColor(color);
     }
 
     public WireType getType()
@@ -41,6 +45,11 @@ public final class WireInProgress
     public DyeColor getColor()
     {
         return color;
+    }
+
+    public WireType.Icon getIcon()
+    {
+        return icon;
     }
 
     public List<WireNode> getWireNodes()

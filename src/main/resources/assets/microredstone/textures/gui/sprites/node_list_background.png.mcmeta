@@ -2,14 +2,15 @@
     "gui": {
         "scaling": {
             "type": "nine_slice",
-            "width": 8,
+            "width": 64,
             "height": 64,
             "border": {
-                "left": 0,
-                "right": 0,
+                "left": 1,
+                "right": 1,
                 "top": 1,
                 "bottom": 1
-            }
+            },
+            "stretch_inner": true
         }
     }
 }

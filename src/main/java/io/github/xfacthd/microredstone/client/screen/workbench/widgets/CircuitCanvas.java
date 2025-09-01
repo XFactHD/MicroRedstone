@@ -68,6 +68,7 @@ public final class CircuitCanvas
     private final CompoundPrototypeNode circuit = new CompoundPrototypeNode();
     private final PartGrid partGrid = new PartGrid(this);
     private final WireGrid wireGrid = new WireGrid(this);
+    private final ErrorAnnotations errorAnnotations = new ErrorAnnotations(this);
     private int x;
     private int y;
     private int width;
@@ -236,7 +237,7 @@ public final class CircuitCanvas
         drawPartNode(graphics, icon, x, y, rotation, PART_SIZE);
     }
 
-    static void drawPartNode(GuiGraphics graphics, IconConfig icon, int x, int y, int rotation, int partSize)
+    public static void drawPartNode(GuiGraphics graphics, IconConfig icon, int x, int y, int rotation, int partSize)
     {
         if (!icon.rotateTexture())
         {
@@ -327,6 +328,7 @@ public final class CircuitCanvas
     public NodePos getNodePos(int mouseX, int mouseY)
     {
         if (!isMouseOver(mouseX, mouseY)) return null;
+        if (owner.getLibraryBrowser().isCoveredByInventory(mouseX, mouseY)) return null;
 
         int relX = mouseX - x + (int) canvasOffX - BORDER_TOP_LEFT;
         int relY = mouseY - y + (int) canvasOffY - BORDER_TOP_LEFT;
@@ -376,9 +378,9 @@ public final class CircuitCanvas
         return wireInProgress != null;
     }
 
-    public void startWirePull(WireType wireType)
+    public void startWirePull(WireType wireType, @Nullable DyeColor color)
     {
-        wireInProgress = new WireInProgress(wireType);
+        wireInProgress = new WireInProgress(wireType, color);
     }
 
     public void cancelWirePull()
@@ -397,6 +399,11 @@ public final class CircuitCanvas
     public WireInProgress getWireInProgress()
     {
         return wireInProgress;
+    }
+
+    public ErrorAnnotations getErrorAnnotations()
+    {
+        return errorAnnotations;
     }
 
     public void computeWindowSize(int width, int height)

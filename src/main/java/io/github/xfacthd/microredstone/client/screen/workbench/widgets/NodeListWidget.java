@@ -1,0 +1,179 @@
+package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
+
+import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
+import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.IntFunction;
+import java.util.function.IntSupplier;
+
+public final class NodeListWidget extends ScrollableWidget
+{
+    private static final ResourceLocation BACKGROUND = Utils.rl("node_list_background");
+    private static final ResourceLocation BUTTON = Utils.rl("minecraft", "widget/button");
+    private static final ResourceLocation BUTTON_HOVER = Utils.rl("minecraft", "widget/button_highlighted");
+    private static final ResourceLocation SCROLLER_HANDLE = Utils.rl("minecraft", "container/villager/scroller");
+
+    private static final int PADDING = 5;
+    private static final int BORDER = 5;
+    private static final int SCROLLER_HANDLE_WIDTH = 6;
+    private static final int SCROLLER_BG_WIDTH = SCROLLER_HANDLE_WIDTH + 2;
+    private static final int WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH - SCROLLER_BG_WIDTH;
+    private static final int INNER_WIDTH = WIDTH - (BORDER * 2);
+    private static final int ENTRY_WIDTH = WIDTH - (BORDER * 2);
+    private static final int ENTRY_ICON_SIZE = 16;
+    private static final int ENTRY_HEIGHT = 30;
+    private static final int ICON_OFF_Y = (ENTRY_HEIGHT / 2) - (ENTRY_ICON_SIZE / 2);
+    private static final int ENTRY_NAME_OFF_X = ENTRY_ICON_SIZE + (PADDING * 2);
+    private static final int ENTRY_NAME_OFF_Y = 11;
+    private static final int ENTRY_NAME_BORDER_RIGHT = 3;
+    private static final int FULL_INNER_WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH - (BORDER * 2);
+
+    private final CircuitWorkbenchScreen owner;
+    private final IntSupplier entryCount;
+    private final IntFunction<Entry> entryGetter;
+    private int scrollbarX;
+    private int innerListX;
+    private int innerScrollbarX;
+    private int innerY;
+    private int innerHeight;
+
+    public NodeListWidget(CircuitWorkbenchScreen owner, IntSupplier entryCount, IntFunction<Entry> entryGetter)
+    {
+        this.owner = owner;
+        this.entryCount = entryCount;
+        this.entryGetter = entryGetter;
+    }
+
+    public void render(GuiGraphics graphics, int mouseX, int mouseY)
+    {
+        int minX = innerListX;
+        int maxX = minX + ENTRY_WIDTH;
+        int minY = innerY;
+        int maxY = minY + innerHeight;
+        int entriesHeight = getEntriesHeight();
+        boolean mouseOverX = mouseX >= minX && mouseX < maxX;
+        boolean mouseOverY = mouseY >= minY && mouseY < maxY;
+        boolean canScroll = entriesHeight > innerHeight;
+
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, minX - 1, minY - 1, ENTRY_WIDTH + 2, innerHeight + 2);
+
+        graphics.enableScissor(minX, minY, maxX, maxY);
+
+        int count = entryCount.getAsInt();
+        for (int i = 0; i < count; i++)
+        {
+            int y = minY + i * ENTRY_HEIGHT - getScrollOffset();
+            if (y + ENTRY_HEIGHT < minY || y > maxY)
+            {
+                continue;
+            }
+
+            Entry entry = entryGetter.apply(i);
+
+            boolean hovered = mouseOverX && mouseOverY && mouseY >= y && mouseY < y + ENTRY_HEIGHT;
+            ResourceLocation sprite = hovered ? BUTTON_HOVER : BUTTON;
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, minX, y, ENTRY_WIDTH, ENTRY_HEIGHT);
+
+            CircuitCanvas.drawPartNode(graphics, entry.icon(), minX + CircuitWorkbenchScreen.PADDING, y + ICON_OFF_Y, 0, ENTRY_ICON_SIZE);
+
+            int nameX = minX + ENTRY_NAME_OFF_X;
+            int nameY = y + ENTRY_NAME_OFF_Y;
+            // FIXME: the scrolling helper passes the wrong max Y to the actual scrolling string helper (missing +1 pixel)
+            Component subTitle = entry.subTitle();
+            if (subTitle != null)
+            {
+                graphics.drawScrollingString(owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY - 6, 0xFFFFFFFF);
+                graphics.drawScrollingString(owner.getFont(), subTitle, nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY + 5, 0xFFFFFFFF);
+            }
+            else
+            {
+                graphics.drawScrollingString(owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY, 0xFFFFFFFF);
+            }
+        }
+
+        graphics.disableScissor();
+
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, scrollbarX, minY - 1, SCROLLER_BG_WIDTH, innerHeight + 2);
+        if (canScroll)
+        {
+            float scrollFactor = (float) getScrollOffset() / (entriesHeight - innerHeight);
+            int scrollerY = minY + (int) (scrollFactor * (innerHeight - SCROLLER_HANDLE_HEIGHT));
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_HANDLE, innerScrollbarX, scrollerY, SCROLLER_HANDLE_WIDTH, SCROLLER_HANDLE_HEIGHT);
+        }
+    }
+
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY)
+    {
+        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
+        return mouseX >= innerListX && mouseX < (innerListX + FULL_INNER_WIDTH);
+    }
+
+    @Override
+    public boolean isMouseOverList(double mouseX, double mouseY)
+    {
+        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
+        return mouseX >= innerListX && mouseX < (innerListX + NodeListWidget.INNER_WIDTH);
+    }
+
+    @Override
+    public boolean isMouseOverScrollBar(double mouseX, double mouseY)
+    {
+        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
+        return mouseX >= innerScrollbarX && mouseX < (innerScrollbarX + SCROLLER_HANDLE_WIDTH);
+    }
+
+    @Override
+    protected int getInnerY()
+    {
+        return innerY;
+    }
+
+    @Override
+    protected int getInnerHeight()
+    {
+        return innerHeight;
+    }
+
+    @Override
+    protected int getEntriesHeight()
+    {
+        return entryCount.getAsInt() * ENTRY_HEIGHT;
+    }
+
+    @Nullable
+    public <T> T getClickedEntryIdx(double mouseY, IntFunction<T> resultFactory)
+    {
+        int relY = (int) (mouseY - innerY + getScrollOffset());
+        return relY >= 0 ? resultFactory.apply(relY / NodeListWidget.ENTRY_HEIGHT) : null;
+    }
+
+    public void computeLayout(int height, int paneX, int paneY)
+    {
+        innerHeight = height - (BORDER * 2);
+        scrollbarX = paneX + WIDTH - BORDER + 1;
+        innerListX = paneX + BORDER;
+        innerScrollbarX = scrollbarX + 1;
+        innerY = paneY + BORDER;
+    }
+
+    public interface Entry
+    {
+        IconConfig icon();
+
+        Component title();
+
+        @Nullable
+        Component subTitle();
+
+        PlaceableNode instantiate();
+    }
+}

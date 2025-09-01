@@ -1,10 +1,12 @@
-package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
+package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
-import com.mojang.datafixers.util.Either;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
+import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
+import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
@@ -14,41 +16,16 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototy
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class PartsList
+public final class PartsList extends ToolPaneTabWidget
 {
-    private static final ResourceLocation BUTTON = Utils.rl("minecraft", "widget/button");
-    private static final ResourceLocation BUTTON_HOVER = Utils.rl("minecraft", "widget/button_highlighted");
-    private static final ResourceLocation SCROLLER_BACKGROUND = Utils.rl("scroller_background");
-    private static final ResourceLocation SCROLLER_HANDLE = Utils.rl("minecraft", "container/villager/scroller");
-
-    private static final int PADDING = 5;
-    private static final int BORDER = 1;
-    private static final int WIDTH = 120;
-    static final int INNER_WIDTH = WIDTH - (BORDER * 2);
-    private static final int MAX_HEIGHT = CircuitCanvas.MAX_HEIGHT;
-    private static final int ENTRY_WIDTH = WIDTH - (BORDER * 2);
-    static final int ENTRY_HEIGHT = 30;
-    private static final int ENTRY_ICON_SIZE = 16;
-    private static final int ICON_OFF_Y = (ENTRY_HEIGHT / 2) - (ENTRY_ICON_SIZE / 2);
-    private static final int ENTRY_NAME_OFF_X = ENTRY_ICON_SIZE + (PADDING * 2);
-    private static final int ENTRY_NAME_OFF_Y = 11;
-    private static final int ENTRY_NAME_BORDER_RIGHT = 3;
-    private static final int SCROLLER_HANDLE_WIDTH = 6;
-    private static final int SCROLLER_HANDLE_HEIGHT = 27;
-    static final int SCROLLER_BG_WIDTH = SCROLLER_HANDLE_WIDTH + 2;
-    public static final int FULL_WIDTH = WIDTH + SCROLLER_BG_WIDTH;
-    private static final int FULL_INNER_WIDTH = FULL_WIDTH - (BORDER * 2);
-    private static final int SCROLL_SPEED = 10;
-
     private static final Entry[] ENTRIES = new Entry[] {
             entry("connection_single").spec(Connection.ICON_SINGLE_IN, WireType.SINGLE).build(),
             entry("connection_bundled").spec(Connection.ICON_BUNDLED_IN, WireType.BUNDLED).build(),
@@ -84,152 +61,71 @@ public final class PartsList
             entry("packer").spec(ConverterPrototypeNode.Type.PACK.getIcon(), () -> new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK)).withoutSubtitle().build(),
             entry("unpacker").spec(ConverterPrototypeNode.Type.UNPACK.getIcon(), () -> new ConverterPrototypeNode(ConverterPrototypeNode.Type.UNPACK)).withoutSubtitle().build(),
     };
-    private static final int ENTRIES_HEIGHT = ENTRIES.length * ENTRY_HEIGHT;
+    private static final int ENTRY_COUNT = ENTRIES.length;
 
-    private final CircuitWorkbenchScreen owner;
-    private int listX;
-    private int scrollbarX;
-    private int y;
-    private int height;
-    private int innerListX;
-    private int innerScrollbarX;
-    private int innerY;
-    private int innerHeight;
-    private int scrollOffset = 0;
-    private boolean dragging = false;
+    private final NodeListWidget listWidget;
 
     public PartsList(CircuitWorkbenchScreen owner)
     {
-        this.owner = owner;
+        super(owner);
+        this.listWidget = new NodeListWidget(owner, () -> ENTRY_COUNT, idx -> ENTRIES[idx]);
     }
 
-    public void render(GuiGraphics graphics, int mouseX, int mouseY)
+    @Override
+    protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY)
     {
-        int minX = innerListX;
-        int maxX = minX + ENTRY_WIDTH;
-        int minY = innerY;
-        int maxY = minY + innerHeight;
-        boolean mouseOverX = mouseX >= minX && mouseX < maxX;
-        boolean mouseOverY = mouseY >= minY && mouseY < maxY;
-
-        graphics.fill(minX, minY, maxX, maxY, 0xFF333333);
-
-        graphics.enableScissor(minX, minY, maxX, maxY);
-
-        for (int i = 0; i < ENTRIES.length; i++)
-        {
-            int y = minY + i * ENTRY_HEIGHT - scrollOffset;
-            if (y + ENTRY_HEIGHT < minY || y > maxY)
-            {
-                continue;
-            }
-
-            Entry entry = ENTRIES[i];
-
-            boolean hovered = mouseOverX && mouseOverY && mouseY >= y && mouseY < y + ENTRY_HEIGHT;
-            ResourceLocation sprite = hovered ? BUTTON_HOVER : BUTTON;
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, minX, y, ENTRY_WIDTH, ENTRY_HEIGHT);
-
-            CircuitCanvas.drawPartNode(graphics, entry.icon, minX + CircuitWorkbenchScreen.PADDING, y + ICON_OFF_Y, 0, ENTRY_ICON_SIZE);
-
-            int nameX = minX + ENTRY_NAME_OFF_X;
-            int nameY = y + ENTRY_NAME_OFF_Y;
-            // FIXME: the scrolling helper passes the wrong max Y to the actual scrolling string helper (missing +1 pixel)
-            EntryTexts texts = entry.texts;
-            if (texts.subTitle != null)
-            {
-                graphics.drawScrollingString(owner.getFont(), texts.title, nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY - 6, 0xFFFFFFFF);
-                graphics.drawScrollingString(owner.getFont(), texts.subTitle, nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY + 5, 0xFFFFFFFF);
-            }
-            else
-            {
-                graphics.drawScrollingString(owner.getFont(), texts.title, nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY, 0xFFFFFFFF);
-            }
-        }
-
-        graphics.disableScissor();
-
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, CircuitWorkbenchScreen.WINDOW_FRAME, listX, y, WIDTH, height);
-
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_BACKGROUND, scrollbarX, y, SCROLLER_BG_WIDTH, height);
-        float scrollFactor = (float) scrollOffset / (ENTRIES_HEIGHT - innerHeight);
-        int scrollerY = minY + (int)(scrollFactor * (innerHeight - SCROLLER_HANDLE_HEIGHT));
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_HANDLE, innerScrollbarX, scrollerY, SCROLLER_HANDLE_WIDTH, SCROLLER_HANDLE_HEIGHT);
-    }
-
-    public boolean isMouseOver(double mouseX, double mouseY)
-    {
-        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
-        return mouseX >= innerListX && mouseX < (innerListX + FULL_INNER_WIDTH);
-    }
-
-    public boolean isMouseOverList(double mouseX, double mouseY)
-    {
-        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
-        return mouseX >= innerListX && mouseX < (innerListX + INNER_WIDTH);
-    }
-
-    public boolean isMouseOverScrollBar(double mouseX, double mouseY)
-    {
-        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
-        return mouseX >= innerScrollbarX && mouseX < (innerScrollbarX + SCROLLER_HANDLE_WIDTH);
+        listWidget.render(graphics, mouseX, mouseY);
     }
 
     @Nullable
-    public Either<NodePos, Integer> getClickedPartIdx(double mouseY)
+    public DragStart getClickedPartIdx(double mouseY)
     {
-        int relY = (int) (mouseY - innerY + scrollOffset);
-        return relY >= 0 ? Either.right(relY / ENTRY_HEIGHT) : null;
+        return listWidget.getClickedEntryIdx(mouseY, DragStart::partsList);
     }
 
-    public void scroll(double yDiff)
+    @Override
+    public ScrollableWidget getScrollableWidget()
     {
-        int offset = (int) (yDiff * SCROLL_SPEED);
-        scrollOffset = Mth.clamp(scrollOffset + offset, 0, ENTRIES_HEIGHT - innerHeight);
+        return listWidget;
     }
 
-    public void dragScrollBar(double mouseY)
+    @Override
+    public void init(Consumer<AbstractWidget> widgetAdder)
     {
-        int maxOffset = ENTRIES_HEIGHT - innerHeight;
-        double offset = (mouseY - innerY - (SCROLLER_HANDLE_HEIGHT / 2F)) / (innerHeight - SCROLLER_HANDLE_HEIGHT);
-        scrollOffset = (int) Mth.clamp(offset * maxOffset, 0, maxOffset);
+        super.init(widgetAdder);
     }
 
-    public void setDragging(boolean dragging)
+    @Override
+    public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight)
     {
-        this.dragging = dragging;
+        super.computeLayout(screenX, screenY, screenWidth, screenHeight, toolPaneX, toolPaneY, windowHeight);
+        listWidget.computeLayout(height, paneX, paneY);
     }
 
-    public boolean isDragging()
+    @Override
+    public void updateWidgetVisibility(boolean active)
     {
-        return dragging;
+
     }
 
-    public void computeDimensions(int leftPos, int topPos, int imageWidth, int height)
+    @Override
+    public ToolPaneTab getType()
     {
-        int windowPadding = CircuitWorkbenchScreen.PADDING * 2;
-        this.height = Math.min(MAX_HEIGHT, height - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_HEIGHT);
-        innerHeight = this.height - (BORDER * 2);
-        listX = leftPos + imageWidth - CircuitWorkbenchScreen.BORDER_RIGHT - WIDTH - SCROLLER_BG_WIDTH;
-        scrollbarX = listX + WIDTH;
-        y = topPos + CircuitWorkbenchScreen.OFFSET_TOP;
-        innerListX = listX + BORDER;
-        innerScrollbarX = scrollbarX + BORDER;
-        innerY = y + BORDER;
+        return ToolPaneTab.PARTS;
     }
 
-    public static Entry getEntryAt(int index)
+    public static PlaceableNode createNode(int index)
     {
-        return ENTRIES[index];
+        return ENTRIES[index].instantiate();
     }
 
-    public static EntryTexts getEntryName(String componentName)
+    public static Entry getEntryByName(String componentName)
     {
         for (Entry entry : ENTRIES)
         {
             if (entry.name.equals(componentName))
             {
-                return entry.texts;
+                return entry;
             }
         }
         throw new IllegalArgumentException("Unknown component: " + componentName);
@@ -240,15 +136,21 @@ public final class PartsList
         return new EntryBuilder(name);
     }
 
-    public record Entry(String name, EntryTexts texts, IconConfig icon, Supplier<? extends PlaceableNode> factory)
+    public record Entry(
+            String name,
+            Component title,
+            @Nullable Component subTitle,
+            Component description,
+            IconConfig icon,
+            Supplier<? extends PlaceableNode> factory
+    ) implements NodeListWidget.Entry
     {
-        public PlaceableNode create()
+        @Override
+        public PlaceableNode instantiate()
         {
             return factory.get();
         }
     }
-
-    public record EntryTexts(Component title, @Nullable Component subTitle, Component description) { }
 
     private static final class EntryBuilder
     {
@@ -298,7 +200,7 @@ public final class PartsList
             Component title = Utils.translate("label", translationSuffix);
             Component subTitle = hasSubtitle ? Utils.translate("subtitle", translationSuffix) : null;
             Component description = Utils.translate("desc", translationSuffix);
-            return new Entry(name, new EntryTexts(title, subTitle, description), icon, factory);
+            return new Entry(name, title, subTitle, description, icon, factory);
         }
     }
 

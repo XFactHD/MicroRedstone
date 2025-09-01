@@ -1,13 +1,18 @@
 package io.github.xfacthd.microredstone.common.datagen.providers;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.PartsList;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.compat.atlasviewer.AtlasViewerCompat;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
+import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -49,6 +54,24 @@ public final class MRLanguageProvider extends LanguageProvider
 
         add(CircuitWorkbenchBlock.MENU_TITLE, "Circuit Workbench");
         add(CircuitCanvas.CELL_COORD_TRANSLATION, "Cell: %s, %s");
+        add(ToolPaneTab.PARTS.getTitle(), "Parts");
+        add(ToolPaneTab.TOOLS.getTitle(), "Tools");
+        add(ToolPaneTab.LIBRARY.getTitle(), "Library");
+        add(LibraryBrowser.LABEL_MODE, "Mode:");
+        add(LibraryBrowser.LABEL_FILTER, "Filter:");
+        add(LibraryBrowser.Mode.IMPORT.getTitle(), "Import");
+        add(LibraryBrowser.Mode.EXPORT.getTitle(), "Export");
+        add(LibraryBrowser.ExportAction.EXPORT_TO_LIBRARY.getTitle(), "Export to Library");
+        add(LibraryBrowser.ExportAction.EXPORT_TO_ITEM.getTitle(), "Export to Item");
+        add(LibraryBrowser.ExportAction.CLEAR_ERROR_ANNOTATIONS.getTitle(), "Clear Error Annotations");
+        add(ShareType.PRIVATE.getTitle(), "Private");
+        add(ShareType.SHARED.getTitle(), "Shared");
+        add(ShareType.PUBLIC.getTitle(), "Public");
+        add(ShareType.BUILTIN.getTitle(), "Built-In");
+        add(FilterToggleButton.TOOLTIP_OFF, "%s Circuits: Hidden");
+        add(FilterToggleButton.TOOLTIP_ON, "%s Circuits: Shown");
+        add(ToolsTab.ToolAction.CREATE_SINGLE_WIRE.getTitle(), "Add Wire");
+        add(ToolsTab.ToolAction.CREATE_BUNDLED_WIRE.getTitle(), "Add Bundled Wire");
         addPart("connection_single", "Connector", "Single", "");
         addPart("connection_bundled", "Connector", "Bundled", "");
         addPart("clock", "Clock", null, "");
@@ -99,13 +122,13 @@ public final class MRLanguageProvider extends LanguageProvider
     // TODO: add descriptions
     private void addPart(String partName, String title, @Nullable String subTitle, String description)
     {
-        PartsList.EntryTexts texts = PartsList.getEntryName(partName);
-        add(texts.title(), title);
-        if (texts.subTitle() != null && subTitle != null)
+        PartsList.Entry entry = PartsList.getEntryByName(partName);
+        add(entry.title(), title);
+        if (entry.subTitle() != null && subTitle != null)
         {
-            add(texts.subTitle(), subTitle);
+            add(entry.subTitle(), subTitle);
         }
-        add(texts.description(), description);
+        add(entry.description(), description);
     }
 
     private void add(Component key, String value)
