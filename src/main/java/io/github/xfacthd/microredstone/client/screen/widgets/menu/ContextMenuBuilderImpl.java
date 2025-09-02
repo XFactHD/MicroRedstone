@@ -2,8 +2,10 @@ package io.github.xfacthd.microredstone.client.screen.widgets.menu;
 
 import net.minecraft.network.chat.Component;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 final class ContextMenuBuilderImpl implements ContextMenuBuilder
@@ -12,6 +14,7 @@ final class ContextMenuBuilderImpl implements ContextMenuBuilder
     private final int desiredX;
     private final OptionalInt fallbackX;
     private final int desiredY;
+    private final Set<SubMenuKey> encounteredSubMenus = new HashSet<>();
 
     ContextMenuBuilderImpl(ContextMenu owner, int desiredX, OptionalInt fallbackX, int desiredY)
     {
@@ -42,6 +45,10 @@ final class ContextMenuBuilderImpl implements ContextMenuBuilder
     @Override
     public ContextMenuBuilder addSubMenuEntry(Component text, SubMenuKey subMenuKey)
     {
+        if (!encounteredSubMenus.add(subMenuKey))
+        {
+            throw new IllegalStateException("Duplicate sub-menu: " + subMenuKey);
+        }
         addEntry(MenuEntryButton.create(owner, text, subMenuKey));
         return this;
     }
