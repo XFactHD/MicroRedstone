@@ -2,6 +2,8 @@ package io.github.xfacthd.microredstone.client.screen.workbench.widgets.button;
 
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProviderProxy;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;

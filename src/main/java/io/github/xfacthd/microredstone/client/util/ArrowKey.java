@@ -7,20 +7,16 @@ public record ArrowKey(Direction dir, long startTime)
 {
     public enum Direction
     {
-        UP(GLFW.GLFW_KEY_UP, 0, -1),
-        DOWN(GLFW.GLFW_KEY_DOWN, 0, 1),
-        LEFT(GLFW.GLFW_KEY_LEFT, -1, 0),
-        RIGHT(GLFW.GLFW_KEY_RIGHT, 1, 0);
+        UP(0, -1),
+        DOWN(0, 1),
+        LEFT(-1, 0),
+        RIGHT(1, 0);
 
-        private static final Direction[] DIRECTIONS = values();
-
-        private final int keyCode;
         private final int xDiff;
         private final int yDiff;
 
-        Direction(int keyCode, int xDiff, int yDiff)
+        Direction(int xDiff, int yDiff)
         {
-            this.keyCode = keyCode;
             this.xDiff = xDiff;
             this.yDiff = yDiff;
         }
@@ -38,14 +34,14 @@ public record ArrowKey(Direction dir, long startTime)
         @Nullable
         public static Direction of(int keyCode)
         {
-            for (Direction direction : DIRECTIONS)
+            return switch (keyCode)
             {
-                if (keyCode == direction.keyCode)
-                {
-                    return direction;
-                }
-            }
-            return null;
+                case GLFW.GLFW_KEY_UP -> UP;
+                case GLFW.GLFW_KEY_DOWN -> DOWN;
+                case GLFW.GLFW_KEY_LEFT -> LEFT;
+                case GLFW.GLFW_KEY_RIGHT -> RIGHT;
+                default -> null;
+            };
         }
     }
 }

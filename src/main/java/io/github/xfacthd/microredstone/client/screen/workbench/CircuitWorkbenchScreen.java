@@ -4,10 +4,13 @@ import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenu;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProviderProxy;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
@@ -28,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 // TODO: add "modified" flag to prevent data loss when accidentally closing the screen (can be re-used to cache assembly result)
@@ -49,6 +53,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     private final ToolsTab toolsTab = new ToolsTab(this);
     private final LibraryBrowser libraryBrowser = new LibraryBrowser(this);
     private final ToolPaneTabWidget[] tabWidgets = { partsList, toolsTab, libraryBrowser };
+    private final ContextMenu contextMenu = new ContextMenu(this);
     private ToolPaneTab toolPaneTab = ToolPaneTab.PARTS;
     @Nullable
     private DragStart dragStart = null;
@@ -82,6 +87,11 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     @Override
     protected void repositionElements()
     {
+        if (contextMenu.isOpen())
+        {
+            contextMenu.close();
+        }
+
         canvas.computeWindowSize(width, height);
         imageWidth = canvas.getWindowWidth() + NON_CIRCUIT_WIDTH;
         imageHeight = canvas.getWindowHeight() + NON_CIRCUIT_HEIGHT;
@@ -109,7 +119,9 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
-        super.render(graphics, mouseX, mouseY, partialTick);
+        boolean overMenu = contextMenu.isOpen() && contextMenu.isMouseOver(mouseX, mouseY);
+        super.render(graphics, overMenu ? -1 : mouseX, overMenu ? -1 : mouseY, partialTick);
+        contextMenu.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
     }
 
@@ -151,6 +163,29 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button)
     {
+        if (contextMenu.isOpen())
+        {
+            if (!contextMenu.shouldKeepMenuOpen((int) mouseX, (int) mouseY, true))
+            {
+                contextMenu.close();
+            }
+            else if (contextMenu.isMouseOver(mouseX, mouseY))
+            {
+                return contextMenu.mouseClicked(mouseX, mouseY, button);
+            }
+        }
+        else if (!hasActiveEditAction() && button == GLFW.GLFW_MOUSE_BUTTON_2)
+        {
+            ContextMenuProvider provider = getContextMenuProviderAt(mouseX, mouseY);
+            if (provider != null)
+            {
+                if (contextMenu.open((int) mouseX, (int) mouseY, provider))
+                {
+                    setFocused(contextMenu);
+                }
+                return true;
+            }
+        }
         if (!isDragging() && button == GLFW.GLFW_MOUSE_BUTTON_1)
         {
             GuiEventListener focused = getFocused();
@@ -286,6 +321,15 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
+        if (contextMenu.isOpen())
+        {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE)
+            {
+                contextMenu.close();
+                return true;
+            }
+            return contextMenu.keyPressed(keyCode, scanCode, modifiers);
+        }
         ArrowKey.Direction arrowDir = ArrowKey.Direction.of(keyCode);
         if (arrowDir != null)
         {
@@ -328,6 +372,17 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             return true;
         }
         return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY)
+    {
+        if (contextMenu.isOpen())
+        {
+            Optional<GuiEventListener> child = contextMenu.getChildAt(mouseX, mouseY);
+            if (child.isPresent()) return child;
+        }
+        return super.getChildAt(mouseX, mouseY);
     }
 
     @Override
@@ -391,6 +446,24 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             case TOOLS -> toolsTab;
             case LIBRARY -> libraryBrowser;
         };
+    }
+
+    @Nullable
+    private ContextMenuProvider getContextMenuProviderAt(double mouseX, double mouseY)
+    {
+        Optional<GuiEventListener> child = getChildAt(mouseX, mouseY);
+        if (child.isEmpty()) return null;
+
+        GuiEventListener listener = child.get();
+        if (listener instanceof ContextMenuProvider provider)
+        {
+            return provider;
+        }
+        if (listener instanceof ContextMenuProviderProxy proxy)
+        {
+            return proxy.getContextMenuProvider();
+        }
+        return null;
     }
 
     public void assembleAndExport(ExportTarget target)
