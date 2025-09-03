@@ -4,7 +4,6 @@ import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
-import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
@@ -33,7 +32,7 @@ public final class WireInProgress
     public WireInProgress(WireType wireType)
     {
         this.type = wireType;
-        this.color = wireType.select(WorkbenchConfig.INSTANCE.getWireColor(), Wire.DEFAULT_COLOR);
+        this.color = wireType.getColor(WorkbenchConfig.INSTANCE.getWireColor());
         this.icon = wireType.getIcon().withColor(color);
     }
 

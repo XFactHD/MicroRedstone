@@ -17,8 +17,8 @@ import java.util.function.IntFunction;
 
 public enum WireType implements StringRepresentable
 {
-    SINGLE,
-    BUNDLED;
+    SINGLE(DyeColor.RED),
+    BUNDLED(DyeColor.WHITE);
 
     public static final Codec<WireType> CODEC = StringRepresentable.fromEnum(WireType::values);
     private static final IntFunction<WireType> BY_ID = ByIdMap.continuous(WireType::ordinal, WireType.values(), ByIdMap.OutOfBoundsStrategy.WRAP);
@@ -26,6 +26,12 @@ public enum WireType implements StringRepresentable
 
     private final String name = toString().toLowerCase(Locale.ROOT);
     private final Icon icon = new Icon(Utils.rl("wire/icon_" + name));
+    private final DyeColor defaultColor;
+
+    WireType(DyeColor defaultColor)
+    {
+        this.defaultColor = defaultColor;
+    }
 
     @Override
     public String getSerializedName()
@@ -36,6 +42,20 @@ public enum WireType implements StringRepresentable
     public Icon getIcon()
     {
         return icon;
+    }
+
+    public DyeColor getColor(DyeColor color)
+    {
+        return switch (this)
+        {
+            case SINGLE -> color;
+            case BUNDLED -> DyeColor.WHITE;
+        };
+    }
+
+    public DyeColor getDefaultColor()
+    {
+        return defaultColor;
     }
 
     @Nullable

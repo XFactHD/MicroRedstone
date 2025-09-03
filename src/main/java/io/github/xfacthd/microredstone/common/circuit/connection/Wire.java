@@ -9,15 +9,15 @@ import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public final class Wire
 {
-    public static final DyeColor DEFAULT_COLOR = DyeColor.RED;
     public static final Codec<Wire> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             WireType.CODEC.fieldOf("type").forGetter(Wire::getWireType),
-            DyeColor.CODEC.optionalFieldOf("color", DEFAULT_COLOR).forGetter(Wire::getColor),
+            DyeColor.CODEC.optionalFieldOf("color").forGetter(Wire::getColorForSerialization),
             WireNode.CODEC.listOf().fieldOf("nodes").forGetter(Wire::getNodes)
-    ).apply(inst, Wire::new));
+    ).apply(inst, Wire::deserialize));
     public static final StreamCodec<ByteBuf, Wire> STREAM_CODEC = StreamCodec.composite(
             WireType.STREAM_CODEC,
             Wire::getWireType,
@@ -32,21 +32,21 @@ public final class Wire
     private final DyeColor color;
     private final List<WireNode> nodes = new ArrayList<>();
 
-    public Wire(WireType wireType)
-    {
-        this(wireType, DEFAULT_COLOR);
-    }
-
     public Wire(WireType wireType, DyeColor color)
     {
         this.wireType = wireType;
-        this.color = color;
+        this.color = wireType.getColor(color);
     }
 
     private Wire(WireType wireType, DyeColor color, List<WireNode> nodes)
     {
         this(wireType, color);
         this.nodes.addAll(nodes);
+    }
+
+    private static Wire deserialize(WireType wireType, Optional<DyeColor> color, List<WireNode> nodes)
+    {
+        return new Wire(wireType, color.orElse(wireType.getDefaultColor()), nodes);
     }
 
     public WireType getWireType()
@@ -57,6 +57,11 @@ public final class Wire
     public DyeColor getColor()
     {
         return color;
+    }
+
+    private Optional<DyeColor> getColorForSerialization()
+    {
+        return color == wireType.getDefaultColor() ? Optional.empty() : Optional.of(color);
     }
 
     public void addNodes(List<WireNode> nodes)

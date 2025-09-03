@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench;
 
-import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import net.minecraft.world.item.DyeColor;
 
 // TODO: consider persisting the workbench config
@@ -8,7 +8,7 @@ public final class WorkbenchConfig
 {
     public static final WorkbenchConfig INSTANCE = new WorkbenchConfig();
 
-    private DyeColor wireColor = Wire.DEFAULT_COLOR;
+    private DyeColor wireColor = WireType.SINGLE.getDefaultColor();
     private boolean routeLongWireSectionFirst = true;
 
     public DyeColor getWireColor()

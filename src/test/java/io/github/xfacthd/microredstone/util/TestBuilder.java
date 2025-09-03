@@ -14,7 +14,7 @@ public final class TestBuilder
 
     public Wire addWire(WireType wireType)
     {
-        Wire wire = new Wire(wireType);
+        Wire wire = new Wire(wireType, wireType.getDefaultColor());
         cmpNode.addWire(wire);
         return wire;
     }
