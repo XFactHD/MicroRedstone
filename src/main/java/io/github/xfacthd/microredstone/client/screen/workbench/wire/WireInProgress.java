@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.client.screen.workbench.wire;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
+import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
@@ -21,7 +22,7 @@ public final class WireInProgress
 {
     private final WireType type;
     private final DyeColor color;
-    private final WireType.Icon icon;
+    private final Icon icon;
     private final List<WireNode> wireNodes = new ArrayList<>();
     private final List<RoutedWire.Section> sections = new ArrayList<>();
     @Nullable
@@ -46,7 +47,7 @@ public final class WireInProgress
         return color;
     }
 
-    public WireType.Icon getIcon()
+    public Icon getIcon()
     {
         return icon;
     }

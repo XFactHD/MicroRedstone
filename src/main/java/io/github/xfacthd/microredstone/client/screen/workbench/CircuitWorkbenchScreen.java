@@ -12,6 +12,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.Dr
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProviderProxy;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
+import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
@@ -149,7 +150,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         }
         if (canvas.isPullingWire() && Objects.requireNonNull(canvas.getWireInProgress()).isEmpty())
         {
-            WireType.Icon icon = canvas.getWireInProgress().getIcon();
+            Icon icon = canvas.getWireInProgress().getIcon();
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.texture(), mouseX - 4, mouseY - 8, 8, 8, icon.color());
         }
     }

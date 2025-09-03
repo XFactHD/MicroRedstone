@@ -1,11 +1,11 @@
 package io.github.xfacthd.microredstone.common.circuit.connection;
 
 import com.mojang.serialization.Codec;
+import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.DyeColor;
@@ -67,23 +67,5 @@ public enum WireType implements StringRepresentable
             case SINGLE -> valueSingle;
             case BUNDLED -> valueBundled;
         };
-    }
-
-    public record Icon(ResourceLocation texture, int color)
-    {
-        private Icon(ResourceLocation texture)
-        {
-            this(texture, 0xFFFFFFFF);
-        }
-
-        public Icon withColor(@Nullable DyeColor color)
-        {
-            return withColor(color != null ? color.getTextureDiffuseColor() : 0xFFFFFFFF);
-        }
-
-        public Icon withColor(int color)
-        {
-            return new Icon(texture, color);
-        }
     }
 }

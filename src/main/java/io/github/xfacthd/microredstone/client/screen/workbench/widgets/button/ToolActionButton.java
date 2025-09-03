@@ -4,6 +4,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWi
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProviderProxy;
+import io.github.xfacthd.microredstone.client.util.Icon;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;
@@ -49,7 +50,7 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
 
         int iconX = getX() + ICON_PADDING;
         int iconY = getY() + ICON_PADDING;
-        ToolsTab.ToolIcon icon = action.getIcon();
+        Icon icon = action.getIcon();
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.texture(), iconX, iconY, ICON_SIZE, ICON_SIZE, icon.color());
     }
 
