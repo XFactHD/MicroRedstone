@@ -4,10 +4,12 @@ import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.WireToolActionContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
+import io.github.xfacthd.microredstone.client.util.ColorNames;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
@@ -18,7 +20,9 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.neoforge.common.data.LanguageProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 public final class MRLanguageProvider extends LanguageProvider
@@ -77,6 +81,8 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ToolsTab.TITLE_CONFIRM_CLEAR, "Confirm Clear Canvas");
         add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_ONE, "Are you sure you want to clear the canvas?");
         add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_TWO, "All unsaved changes will be lost.");
+        add(WireToolActionContextMenuProvider.ENTRY_WIRE_COLOR, "Wire Color");
+        add(WireToolActionContextMenuProvider.ENTRY_WIRE_ROUTE_PREF, "Route Long Section First");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
@@ -118,6 +124,16 @@ public final class MRLanguageProvider extends LanguageProvider
 
     private void addSpecialTranslations()
     {
+        for (DyeColor color : DyeColor.values())
+        {
+            StringBuilder name = new StringBuilder();
+            for (String part : color.getName().split("_"))
+            {
+                name.append(StringUtils.capitalize(part)).append(" ");
+            }
+            add(ColorNames.getName(color), name.toString().trim());
+        }
+
         add(AtlasViewerCompat.LABEL_MASK_TEXTURE, "Texture");
         add(AtlasViewerCompat.LABEL_MASK_SPRITE, "Sprite");
         add(AtlasViewerCompat.LABEL_MASK_AREA, "Area");

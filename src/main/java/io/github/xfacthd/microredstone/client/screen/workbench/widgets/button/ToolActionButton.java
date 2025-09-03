@@ -8,9 +8,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.RenderPipelines;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-public final class ToolActionButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ToolsTab.ToolAction>
+public final class ToolActionButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ToolsTab.ToolAction>, ContextMenuProviderProxy
 {
     private static final int WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH - 10;
     public static final int HEIGHT = 20;
@@ -48,7 +49,7 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
 
         int iconX = getX() + ICON_PADDING;
         int iconY = getY() + ICON_PADDING;
-        ToolsTab.ToolIcon icon = action.getIcon(owner);
+        ToolsTab.ToolIcon icon = action.getIcon();
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.texture(), iconX, iconY, ICON_SIZE, ICON_SIZE, icon.color());
     }
 
@@ -71,6 +72,13 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     public void onPress()
     {
         action.execute(owner);
+    }
+
+    @Override
+    @Nullable
+    public ContextMenuProvider getContextMenuProvider()
+    {
+        return action.getContextMenuProvider();
     }
 
     @Override

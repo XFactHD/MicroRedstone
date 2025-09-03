@@ -1,8 +1,11 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.WireToolActionContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireInProgress;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
@@ -13,6 +16,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
@@ -28,7 +32,6 @@ public final class ToolsTab extends ToolPaneTabWidget
     private static final int TOOL_BTN_PADDING = 2;
 
     private final List<ToolActionButton> actionButtons;
-    private DyeColor wireColor = DyeColor.RED; // TODO: make configurable via context menu
 
     public ToolsTab(CircuitWorkbenchScreen owner)
     {
@@ -74,9 +77,23 @@ public final class ToolsTab extends ToolPaneTabWidget
 
     public enum ToolAction
     {
-        CREATE_SINGLE_WIRE(new ToolIcon(WireType.SINGLE.getIcon().texture())),
-        CREATE_BUNDLED_WIRE(new ToolIcon(WireType.BUNDLED.getIcon().texture())),
-        CLEAR_CANVAS(new ToolIcon(Utils.rl("minecraft", "spectator/close")))
+        CREATE_SINGLE_WIRE(
+                new ToolIcon(WireType.SINGLE.getIcon().texture()),
+                WireToolActionContextMenuProvider.INSTANCE_SINGLE
+        )
+        {
+            @Override
+            public ToolIcon getIcon()
+            {
+                DyeColor wireColor = WorkbenchConfig.INSTANCE.getWireColor();
+                return super.getIcon().withColor(wireColor.getTextureDiffuseColor());
+            }
+        },
+        CREATE_BUNDLED_WIRE(
+                new ToolIcon(WireType.BUNDLED.getIcon().texture()),
+                WireToolActionContextMenuProvider.INSTANCE_BUNDLED
+        ),
+        CLEAR_CANVAS(new ToolIcon(Utils.rl("minecraft", "spectator/close")), null)
         {
             @Override
             int computeButtonY(int paneY, int paneHeight)
@@ -90,10 +107,13 @@ public final class ToolsTab extends ToolPaneTabWidget
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final Component title = Utils.translate("label", "circuit_workbench.tools_tab.tool_action." + name);
         private final ToolIcon icon;
+        @Nullable
+        private final ContextMenuProvider menuProvider;
 
-        ToolAction(ToolIcon icon)
+        ToolAction(ToolIcon icon, @Nullable ContextMenuProvider menuProvider)
         {
             this.icon = icon;
+            this.menuProvider = menuProvider;
         }
 
         int computeButtonY(int paneY, int paneHeight)
@@ -136,14 +156,14 @@ public final class ToolsTab extends ToolPaneTabWidget
                 {
                     if (wire == null || (wire.getType() == WireType.BUNDLED && wire.isEmpty()))
                     {
-                        tab.owner.getCanvas().startWirePull(WireType.SINGLE, tab.wireColor);
+                        tab.owner.getCanvas().startWirePull(WireType.SINGLE);
                     }
                 }
                 case CREATE_BUNDLED_WIRE ->
                 {
                     if (wire == null || (wire.getType() == WireType.SINGLE && wire.isEmpty()))
                     {
-                        tab.owner.getCanvas().startWirePull(WireType.BUNDLED, null);
+                        tab.owner.getCanvas().startWirePull(WireType.BUNDLED);
                     }
                 }
                 case CLEAR_CANVAS ->
@@ -159,19 +179,20 @@ public final class ToolsTab extends ToolPaneTabWidget
             }
         }
 
-        public ToolIcon getIcon(ToolsTab tab)
+        public ToolIcon getIcon()
         {
-            ToolIcon toolIcon = icon;
-            if (this == CREATE_SINGLE_WIRE)
-            {
-                toolIcon = toolIcon.withColor(tab.wireColor.getTextureDiffuseColor());
-            }
-            return toolIcon;
+            return icon;
         }
 
         public Component getTitle()
         {
             return title;
+        }
+
+        @Nullable
+        public ContextMenuProvider getContextMenuProvider()
+        {
+            return menuProvider;
         }
     }
 

@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.wire;
 
 import com.google.common.collect.Sets;
+import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartGrid;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -79,14 +80,19 @@ final class WireRouter
         };
     }
 
-    // TODO: add option to invert preference
     private static SequencedSet<Port> sortDirsByLength(NodePos startPos, NodePos endPos, Set<Port> dirsToEnd)
     {
         NodePos diff = endPos.subtract(startPos);
         List<Port> sortedDirs = new ArrayList<>(dirsToEnd);
         sortedDirs.removeIf(dir -> dir.getLengthAlong(diff) == 0);
-        sortedDirs.sort(Comparator.<Port>comparingInt(dir -> dir.getLengthAlong(diff)).reversed());
+        sortedDirs.sort(makeSectionComparator(diff));
         return new LinkedHashSet<>(sortedDirs);
+    }
+
+    private static Comparator<Port> makeSectionComparator(NodePos diff)
+    {
+        Comparator<Port> comparator = Comparator.comparingInt(dir -> dir.getLengthAlong(diff));
+        return WorkbenchConfig.INSTANCE.isRouteLongWireSectionFirst() ? comparator.reversed() : comparator;
     }
 
     private static List<WireNode> routeWithReverse(

@@ -378,9 +378,9 @@ public final class CircuitCanvas
         return wireInProgress != null;
     }
 
-    public void startWirePull(WireType wireType, @Nullable DyeColor color)
+    public void startWirePull(WireType wireType)
     {
-        wireInProgress = new WireInProgress(wireType, color);
+        wireInProgress = new WireInProgress(wireType);
     }
 
     public void cancelWirePull()

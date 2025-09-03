@@ -1,8 +1,10 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.wire;
 
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
+import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
@@ -13,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -29,10 +30,10 @@ public final class WireInProgress
     private List<WireNode> floatingNodes = List.of();
     private long lastClick = -1;
 
-    public WireInProgress(WireType wireType, @Nullable DyeColor color)
+    public WireInProgress(WireType wireType)
     {
         this.type = wireType;
-        this.color = Objects.requireNonNullElse(color, DyeColor.RED);
+        this.color = wireType.select(WorkbenchConfig.INSTANCE.getWireColor(), Wire.DEFAULT_COLOR);
         this.icon = wireType.getIcon().withColor(color);
     }
 

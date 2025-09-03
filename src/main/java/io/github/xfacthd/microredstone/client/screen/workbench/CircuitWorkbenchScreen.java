@@ -350,12 +350,12 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         {
             if (keyCode == GLFW.GLFW_KEY_W)
             {
-                ToolsTab.ToolAction.CREATE_SINGLE_WIRE.execute(toolsTab);
+                canvas.startWirePull(WireType.SINGLE);
                 return true;
             }
             if (keyCode == GLFW.GLFW_KEY_B)
             {
-                ToolsTab.ToolAction.CREATE_BUNDLED_WIRE.execute(toolsTab);
+                canvas.startWirePull(WireType.BUNDLED);
                 return true;
             }
         }

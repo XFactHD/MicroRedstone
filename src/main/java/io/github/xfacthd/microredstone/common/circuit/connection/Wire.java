@@ -12,9 +12,10 @@ import java.util.List;
 
 public final class Wire
 {
+    public static final DyeColor DEFAULT_COLOR = DyeColor.RED;
     public static final Codec<Wire> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             WireType.CODEC.fieldOf("type").forGetter(Wire::getWireType),
-            DyeColor.CODEC.fieldOf("color").forGetter(Wire::getColor),
+            DyeColor.CODEC.optionalFieldOf("color", DEFAULT_COLOR).forGetter(Wire::getColor),
             WireNode.CODEC.listOf().fieldOf("nodes").forGetter(Wire::getNodes)
     ).apply(inst, Wire::new));
     public static final StreamCodec<ByteBuf, Wire> STREAM_CODEC = StreamCodec.composite(
@@ -33,7 +34,7 @@ public final class Wire
 
     public Wire(WireType wireType)
     {
-        this(wireType, DyeColor.RED);
+        this(wireType, DEFAULT_COLOR);
     }
 
     public Wire(WireType wireType, DyeColor color)

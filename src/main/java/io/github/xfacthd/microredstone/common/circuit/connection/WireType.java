@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.DyeColor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -37,7 +38,9 @@ public enum WireType implements StringRepresentable
         return icon;
     }
 
-    public <T> T select(T valueSingle, T valueBundled)
+    @Nullable
+    @Contract("!null,!null->!null")
+    public <T> T select(@Nullable T valueSingle, @Nullable T valueBundled)
     {
         return switch (this)
         {
