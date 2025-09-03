@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.datagen.providers;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
@@ -72,6 +73,10 @@ public final class MRLanguageProvider extends LanguageProvider
         add(FilterToggleButton.TOOLTIP_ON, "%s Circuits: Shown");
         add(ToolsTab.ToolAction.CREATE_SINGLE_WIRE.getTitle(), "Add Wire");
         add(ToolsTab.ToolAction.CREATE_BUNDLED_WIRE.getTitle(), "Add Bundled Wire");
+        add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
+        add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
+        add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
+        add(DialogScreen.Type.CONFIRM.getDefaultTitle(), "Confirm");
         addPart("connection_single", "Connector", "Single", "");
         addPart("connection_bundled", "Connector", "Bundled", "");
         addPart("clock", "Clock", null, "");
