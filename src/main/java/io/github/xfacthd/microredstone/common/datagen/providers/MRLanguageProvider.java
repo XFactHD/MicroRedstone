@@ -67,8 +67,10 @@ public final class MRLanguageProvider extends LanguageProvider
         add(LibraryBrowser.LABEL_FILTER, "Filter:");
         add(LibraryBrowser.Mode.IMPORT.getTitle(), "Import");
         add(LibraryBrowser.Mode.EXPORT.getTitle(), "Export");
+        add(LibraryBrowser.IMPORT_BTN_TITLE, "Import from Clipboard");
         add(LibraryBrowser.ExportAction.EXPORT_TO_LIBRARY.getTitle(), "Export to Library");
         add(LibraryBrowser.ExportAction.EXPORT_TO_ITEM.getTitle(), "Export to Item");
+        add(LibraryBrowser.ExportAction.EXPORT_TO_JSON.getTitle(), "Export to Clipboard");
         add(LibraryBrowser.ExportAction.CLEAR_ERROR_ANNOTATIONS.getTitle(), "Clear Error Annotations");
         add(ShareType.PRIVATE.getTitle(), "Private");
         add(ShareType.SHARED.getTitle(), "Shared");

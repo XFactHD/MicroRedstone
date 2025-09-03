@@ -1,9 +1,10 @@
 package io.github.xfacthd.microredstone.client.screen.widgets.button;
 
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
 
-public final class BasicButton extends SimpleButton
+public final class BasicButton extends SimpleButton implements DropFocusAfterClick
 {
     private final Runnable onPress;
 

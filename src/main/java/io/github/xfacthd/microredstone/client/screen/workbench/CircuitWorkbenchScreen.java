@@ -476,6 +476,11 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         // TODO: implement circuit assembly, error handling, overwrite handling and target storage
     }
 
+    public void importCircuitFromClipboard()
+    {
+
+    }
+
     public CircuitCanvas getCanvas()
     {
         return canvas;
@@ -490,5 +495,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     {
         LIBRARY,
         CIRCUIT_ITEM,
+        JSON_IN_CLIPBOARD,
     }
 }

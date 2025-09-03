@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
+import io.github.xfacthd.microredstone.client.screen.widgets.button.BasicButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
@@ -36,6 +37,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
 {
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.library_browser.mode");
     public static final Component LABEL_FILTER = Utils.translate("label", "circuit_workbench.library_browser.filter");
+    public static final Component IMPORT_BTN_TITLE = Utils.translate("label", "circuit_workbench.library_browser.import_from_clipboard");
     private static final ResourceLocation INVENTORY = Utils.rl("workbench_inventory");
     private static final ResourceLocation SLOT = Utils.rl("minecraft", "container/slot");
     private static final ShareType[] SHARE_TYPES = ShareType.values();
@@ -49,6 +51,9 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     private static final int MODE_BTN_Y = MODE_LABEL_Y - 4;
     private static final int FILTER_BTN_X = 35;
     private static final int FILTER_BTN_Y = FILTER_LABEL_Y - 4;
+    private static final int IMPORT_BTN_X = 5;
+    private static final int IMPORT_BTN_WIDTH = TOOL_PANE_WIDTH - 10;
+    private static final int IMPORT_BTN_HEIGHT = 20;
     private static final int EXPORT_NAME_EDIT_X = 5;
     private static final int EXPORT_NAME_EDIT_Y = 26;
     private static final int EXPORT_NAME_EDIT_WIDTH = TOOL_PANE_WIDTH - 10;
@@ -63,6 +68,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     private final LibraryModeButton modeBtnImport;
     private final LibraryModeButton modeBtnExport;
     private final List<FilterToggleButton> filterButtons;
+    private final BasicButton importJsonButton;
     private final List<ExportActionButton> actionButtons;
     private final EditBox exportNameEditBox;
     private final List<Entry> importEntries;
@@ -83,6 +89,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         this.modeBtnImport = new LibraryModeButton(this, Mode.IMPORT, 0, 0);
         this.modeBtnExport = new LibraryModeButton(this, Mode.EXPORT, 0, 0);
         this.filterButtons = makeActionButtons(this, SHARE_TYPES, FilterToggleButton::new);
+        this.importJsonButton = new BasicButton(0, 0, IMPORT_BTN_WIDTH, IMPORT_BTN_HEIGHT, IMPORT_BTN_TITLE, owner::importCircuitFromClipboard);
         this.actionButtons = makeActionButtons(this, ExportAction.ACTIONS, ExportActionButton::new);
         this.exportNameEditBox = new EditBox(Minecraft.getInstance().font, EXPORT_NAME_EDIT_WIDTH, EXPORT_NAME_EDIT_HEIGHT, Component.empty());
         this.importEntries = new ArrayList<>();
@@ -202,6 +209,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         widgetAdder.accept(modeBtnImport);
         widgetAdder.accept(modeBtnExport);
         filterButtons.forEach(widgetAdder);
+        widgetAdder.accept(importJsonButton);
         actionButtons.forEach(widgetAdder);
         widgetAdder.accept(exportNameEditBox);
     }
@@ -224,13 +232,14 @@ public final class LibraryBrowser extends ToolPaneTabWidget
             int btnX = paneX + FILTER_BTN_X + FilterToggleButton.SIZE * i;
             filterButtons.get(i).setPosition(btnX, paneY + FILTER_BTN_Y);
         }
+        importJsonButton.setPosition(paneX + IMPORT_BTN_X, paneY + height - 5 - IMPORT_BTN_HEIGHT);
         actionButtons.forEach((button) ->
         {
             int btnY = paneY + EXPORT_BTN_Y + (ExportActionButton.HEIGHT + EXPORT_BTN_PADDING) * button.getAction().ordinal();
             button.setPosition(paneX + EXPORT_BTN_X, btnY);
         });
 
-        importListWidget.computeLayout(height - 40, paneX, paneY + 40);
+        importListWidget.computeLayout(height - 65, paneX, paneY + 40);
 
         owner.getSlots().forEach(slot ->
         {
@@ -259,6 +268,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         if (wasImport != isImport)
         {
             filterButtons.forEach(btn -> btn.visible = isImport);
+            importJsonButton.visible = isImport;
             wasImport = isImport;
         }
         boolean isExport = active && isInExportMode();
@@ -305,6 +315,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     {
         EXPORT_TO_LIBRARY,
         EXPORT_TO_ITEM,
+        EXPORT_TO_JSON,
         CLEAR_ERROR_ANNOTATIONS,
         ;
 
@@ -317,7 +328,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         {
             return !browser.owner.hasActiveEditAction() && switch (this)
             {
-                case EXPORT_TO_LIBRARY -> !browser.exportNameEditBox.getValue().isEmpty();
+                case EXPORT_TO_LIBRARY, EXPORT_TO_JSON -> !browser.exportNameEditBox.getValue().isEmpty();
                 case EXPORT_TO_ITEM -> !browser.exportNameEditBox.getValue().isEmpty() && browser.owner.getMenu().getCircuitSlot().hasItem();
                 case CLEAR_ERROR_ANNOTATIONS -> !browser.owner.getCanvas().getErrorAnnotations().isEmpty();
             };
@@ -329,6 +340,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
             {
                 case EXPORT_TO_LIBRARY -> browser.owner.assembleAndExport(CircuitWorkbenchScreen.ExportTarget.LIBRARY);
                 case EXPORT_TO_ITEM -> browser.owner.assembleAndExport(CircuitWorkbenchScreen.ExportTarget.CIRCUIT_ITEM);
+                case EXPORT_TO_JSON -> browser.owner.assembleAndExport(CircuitWorkbenchScreen.ExportTarget.JSON_IN_CLIPBOARD);
                 case CLEAR_ERROR_ANNOTATIONS -> browser.owner.getCanvas().getErrorAnnotations().clear();
             }
         }
