@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SequencedSet;
@@ -201,6 +202,12 @@ public final class WireGrid implements Iterable<RoutedWire>
             }
         }
         grid[index(pos)] = null;
+    }
+
+    public void clear()
+    {
+        Arrays.fill(grid, null);
+        wires.clear();
     }
 
     @Override

@@ -456,4 +456,12 @@ public final class CircuitCanvas
         canvasOffX = Mth.clamp(canvasOffX + xDiff, 0, canvasWidth - width);
         canvasOffY = Mth.clamp(canvasOffY + yDiff, 0, canvasHeight - height);
     }
+
+    public void clear()
+    {
+        circuit.clear();
+        partGrid.clear();
+        wireGrid.clear();
+        errorAnnotations.clear();
+    }
 }

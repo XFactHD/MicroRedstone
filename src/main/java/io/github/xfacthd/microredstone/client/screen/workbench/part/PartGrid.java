@@ -8,6 +8,7 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public final class PartGrid
@@ -77,6 +78,11 @@ public final class PartGrid
                 consumer.accept(node);
             }
         }
+    }
+
+    public void clear()
+    {
+        Arrays.fill(partGrid, null);
     }
 
     private static int index(NodePos pos)
