@@ -82,7 +82,7 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_ONE, "Are you sure you want to clear the canvas?");
         add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_TWO, "All unsaved changes will be lost.");
         add(WireToolActionContextMenuProvider.ENTRY_WIRE_COLOR, "Wire Color");
-        add(WireToolActionContextMenuProvider.ENTRY_WIRE_ROUTE_PREF, "Route Long Section First");
+        add(WireToolActionContextMenuProvider.ENTRY_WIRE_ROUTE_PREF, "Long Section First");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");

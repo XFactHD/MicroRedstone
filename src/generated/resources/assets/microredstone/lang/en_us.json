@@ -83,7 +83,7 @@
   "label.microredstone.circuit_workbench.tab.parts": "Parts",
   "label.microredstone.circuit_workbench.tab.tools": "Tools",
   "label.microredstone.circuit_workbench.tools_tab.menu.wire.wire_color": "Wire Color",
-  "label.microredstone.circuit_workbench.tools_tab.menu.wire.wire_route_pref": "Route Long Section First",
+  "label.microredstone.circuit_workbench.tools_tab.menu.wire.wire_route_pref": "Long Section First",
   "label.microredstone.circuit_workbench.tools_tab.tool_action.clear_canvas": "Clear Canvas",
   "label.microredstone.circuit_workbench.tools_tab.tool_action.create_bundled_wire": "Add Bundled Wire",
   "label.microredstone.circuit_workbench.tools_tab.tool_action.create_single_wire": "Add Wire",

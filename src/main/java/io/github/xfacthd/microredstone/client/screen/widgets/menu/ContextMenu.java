@@ -25,7 +25,7 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     private static final ResourceLocation BACKGROUND = Utils.rl("context_menu_background");
     static final int HIGHLIGHT_COLOR = CommonColors.LIGHT_GRAY;
     static final int MIN_WIDTH = 70;
-    static final int MAX_WIDTH = 200;
+    static final int MAX_WIDTH = 160;
 
     final Screen owner;
     @Nullable
