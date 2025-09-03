@@ -29,6 +29,7 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
 
     final ContextMenu owner;
     private final FormattedCharSequence text;
+    private final boolean ellipsized;
     private final Action action;
     private final int requiredWidth;
     private final int markerWidth;
@@ -36,17 +37,17 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
     private boolean wasHovered = false;
     private long hoverStart = -1;
 
-    static MenuEntryButton create(ContextMenu owner, FormattedText text, Runnable task, Optional<BooleanSupplier> stateSupplier)
+    static MenuEntryButton create(ContextMenu owner, Component text, Runnable task, Optional<BooleanSupplier> stateSupplier)
     {
         return create(owner, text, new TaskAction(task, stateSupplier));
     }
 
-    static MenuEntryButton create(ContextMenu owner, FormattedText text, SubMenuKey subMenuKey)
+    static MenuEntryButton create(ContextMenu owner, Component text, SubMenuKey subMenuKey)
     {
         return create(owner, text, new SubMenuAction(subMenuKey));
     }
 
-    private static MenuEntryButton create(ContextMenu owner, FormattedText text, Action action)
+    private static MenuEntryButton create(ContextMenu owner, Component text, Action action)
     {
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(text);
@@ -59,19 +60,23 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
             paddedMarkerWidth = markerWidth + MARKER_PADDING;
             availableWidth -= paddedMarkerWidth;
         }
+        FormattedText buttonTitle = text;
+        boolean ellipsized = false;
         if (textWidth > availableWidth)
         {
-            text = font.ellipsize(text, availableWidth);
+            buttonTitle = font.ellipsize(text, availableWidth);
+            ellipsized = true;
         }
         int requiredWidth = Math.min(textWidth + paddedMarkerWidth + HOR_PADDING * 2, ContextMenu.MAX_WIDTH);
-        return new MenuEntryButton(owner, text, action, requiredWidth, markerWidth, font);
+        return new MenuEntryButton(owner, text, buttonTitle, ellipsized, action, requiredWidth, markerWidth, font);
     }
 
-    private MenuEntryButton(ContextMenu owner, FormattedText text, Action action, int requiredWidth, int markerWidth, Font font)
+    private MenuEntryButton(ContextMenu owner, Component text, FormattedText buttonTitle, boolean ellipsized, Action action, int requiredWidth, int markerWidth, Font font)
     {
-        super(0, 0, 0, HEIGHT, Component.empty());
+        super(0, 0, 0, HEIGHT, text);
         this.owner = owner;
-        this.text = Language.getInstance().getVisualOrder(text);
+        this.text = Language.getInstance().getVisualOrder(buttonTitle);
+        this.ellipsized = ellipsized;
         this.action = action;
         this.requiredWidth = requiredWidth;
         this.markerWidth = markerWidth;
@@ -87,6 +92,11 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
         }
         renderString(graphics, font, ARGB.color(alpha, active ? 0xFFFFFFFF : 0xFFA0A0A0));
         handleSubMenuState(mouseX, mouseY);
+
+        if (isHovered && ellipsized)
+        {
+            graphics.setTooltipForNextFrame(getMessage(), mouseX, mouseY);
+        }
     }
 
     @Override
