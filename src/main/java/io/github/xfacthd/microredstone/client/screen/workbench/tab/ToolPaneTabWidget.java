@@ -4,14 +4,19 @@ import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchS
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolPaneTabButton;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, LibraryBrowser
@@ -41,10 +46,12 @@ public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, Libr
 
     protected abstract void renderContent(GuiGraphics graphics, int mouseX, int mouseY);
 
-    public void init(Consumer<AbstractWidget> widgetAdder)
+    public final void initHeader(Consumer<AbstractWidget> widgetAdder)
     {
         widgetAdder.accept(tabButton);
     }
+
+    public abstract void init(Consumer<AbstractWidget> widgetAdder);
 
     public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight)
     {
@@ -67,4 +74,13 @@ public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, Libr
     }
 
     public abstract ToolPaneTab getType();
+
+    protected static <T extends ToolPaneTabWidget, E extends Enum<E>, B extends AbstractButton & ActionButton<E>> List<B> makeActionButtons(
+            T tab, E[] actions, BiFunction<T, E, B> buttonFactory
+    )
+    {
+        return Arrays.stream(actions)
+                .map(action -> buttonFactory.apply(tab, action))
+                .toList();
+    }
 }

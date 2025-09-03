@@ -10,7 +10,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.RenderPipelines;
 import org.lwjgl.glfw.GLFW;
 
-public final class ToolActionButton extends SimpleButton implements DropFocusAfterClick
+public final class ToolActionButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ToolsTab.ToolAction>
 {
     private static final int WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH - 10;
     public static final int HEIGHT = 20;
@@ -21,9 +21,9 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     private final ToolsTab owner;
     private final ToolsTab.ToolAction action;
 
-    public ToolActionButton(ToolsTab owner, ToolsTab.ToolAction action, int x, int y)
+    public ToolActionButton(ToolsTab owner, ToolsTab.ToolAction action)
     {
-        super(x, y, WIDTH, HEIGHT, action.getTitle());
+        super(0, 0, WIDTH, HEIGHT, action.getTitle());
         this.owner = owner;
         this.action = action;
     }
@@ -73,6 +73,7 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
         action.execute(owner);
     }
 
+    @Override
     public ToolsTab.ToolAction getAction()
     {
         return action;

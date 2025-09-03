@@ -1,9 +1,9 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
-import com.mojang.datafixers.util.Pair;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ExportActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.LibraryModeButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
@@ -19,7 +19,6 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -28,11 +27,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public final class LibraryBrowser extends ToolPaneTabWidget
@@ -61,14 +58,12 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     private static final int EXPORT_SLOT_SIZE = 18;
     private static final int EXPORT_BTN_X = 5;
     private static final int EXPORT_BTN_Y = 72;
-    private static final int EXPORT_BTN_WIDTH = TOOL_PANE_WIDTH - 10;
-    private static final int EXPORT_BTN_HEIGHT = 20;
     private static final int EXPORT_BTN_PADDING = 2;
 
     private final LibraryModeButton modeBtnImport;
     private final LibraryModeButton modeBtnExport;
     private final List<FilterToggleButton> filterButtons;
-    private final Map<ExportAction, Button> actionButtons;
+    private final List<ExportActionButton> actionButtons;
     private final EditBox exportNameEditBox;
     private final List<Entry> importEntries;
     private final NodeListWidget importListWidget;
@@ -87,15 +82,8 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         super(owner);
         this.modeBtnImport = new LibraryModeButton(this, Mode.IMPORT, 0, 0);
         this.modeBtnExport = new LibraryModeButton(this, Mode.EXPORT, 0, 0);
-        this.filterButtons = Arrays.stream(SHARE_TYPES).map(filter -> new FilterToggleButton(this, filter, 0, 0)).toList();
-        this.actionButtons = Arrays.stream(ExportAction.ACTIONS)
-                .map(action -> Pair.of(
-                        action,
-                        Button.builder(action.title, (btn) -> action.execute(this))
-                                .size(EXPORT_BTN_WIDTH, EXPORT_BTN_HEIGHT)
-                                .build()
-                ))
-                .collect(Pair.toMap());
+        this.filterButtons = makeActionButtons(this, SHARE_TYPES, FilterToggleButton::new);
+        this.actionButtons = makeActionButtons(this, ExportAction.ACTIONS, ExportActionButton::new);
         this.exportNameEditBox = new EditBox(Minecraft.getInstance().font, EXPORT_NAME_EDIT_WIDTH, EXPORT_NAME_EDIT_HEIGHT, Component.empty());
         this.importEntries = new ArrayList<>();
         this.importListWidget = new NodeListWidget(owner, importEntries::size, importEntries::get);
@@ -123,7 +111,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
             importListWidget.render(graphics, mouseX, mouseY);
         }
 
-        actionButtons.forEach((action, button) -> button.active = action.isActive(this));
+        actionButtons.forEach((button) -> button.active = button.getAction().isActive(this));
     }
 
     public boolean isMouseOverImportList(double mouseX, double mouseY)
@@ -211,12 +199,10 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     @Override
     public void init(Consumer<AbstractWidget> widgetAdder)
     {
-        super.init(widgetAdder);
-
         widgetAdder.accept(modeBtnImport);
         widgetAdder.accept(modeBtnExport);
         filterButtons.forEach(widgetAdder);
-        actionButtons.values().forEach(widgetAdder);
+        actionButtons.forEach(widgetAdder);
         widgetAdder.accept(exportNameEditBox);
     }
 
@@ -238,9 +224,9 @@ public final class LibraryBrowser extends ToolPaneTabWidget
             int btnX = paneX + FILTER_BTN_X + FilterToggleButton.SIZE * i;
             filterButtons.get(i).setPosition(btnX, paneY + FILTER_BTN_Y);
         }
-        actionButtons.forEach((action, button) ->
+        actionButtons.forEach((button) ->
         {
-            int btnY = paneY + EXPORT_BTN_Y + (EXPORT_BTN_HEIGHT + EXPORT_BTN_PADDING) * action.ordinal();
+            int btnY = paneY + EXPORT_BTN_Y + (ExportActionButton.HEIGHT + EXPORT_BTN_PADDING) * button.getAction().ordinal();
             button.setPosition(paneX + EXPORT_BTN_X, btnY);
         });
 
@@ -279,7 +265,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         if (wasExport != isExport)
         {
             exportNameEditBox.visible = isExport;
-            actionButtons.values().forEach(btn -> btn.visible = isExport);
+            actionButtons.forEach(btn -> btn.visible = isExport);
             owner.getSlots().forEach(slot -> slot.setActive(isExport));
             wasExport = isExport;
         }
@@ -337,7 +323,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
             };
         }
 
-        private void execute(LibraryBrowser browser)
+        public void execute(LibraryBrowser browser)
         {
             switch (this)
             {

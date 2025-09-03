@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
-public final class FilterToggleButton extends SimpleButton implements DropFocusAfterClick
+public final class FilterToggleButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ShareType>
 {
     public static final int SIZE = 16;
     private static final int ICON_OFFSET = 2;
@@ -23,9 +23,9 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     private final LibraryBrowser owner;
     private final ShareType filter;
 
-    public FilterToggleButton(LibraryBrowser owner, ShareType filter, int x, int y)
+    public FilterToggleButton(LibraryBrowser owner, ShareType filter)
     {
-        super(x, y, SIZE, SIZE, filter.getTitle());
+        super(0, 0, SIZE, SIZE, filter.getTitle());
         this.owner = owner;
         this.filter = filter;
         updateTooltip();
@@ -55,5 +55,11 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     {
         String key = owner.isFilterEnabled(filter) ? TOOLTIP_ON : TOOLTIP_OFF;
         setTooltip(Tooltip.create(Component.translatable(key, filter.getTitle())));
+    }
+
+    @Override
+    public ShareType getAction()
+    {
+        return filter;
     }
 }

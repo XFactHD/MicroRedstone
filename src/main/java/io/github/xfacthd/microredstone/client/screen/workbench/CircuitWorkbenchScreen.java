@@ -78,6 +78,10 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     {
         for (ToolPaneTabWidget widget : tabWidgets)
         {
+            widget.initHeader(this::addRenderableWidget);
+        }
+        for (ToolPaneTabWidget widget : tabWidgets)
+        {
             widget.init(this::addRenderableWidget);
         }
         super.init();

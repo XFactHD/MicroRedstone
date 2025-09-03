@@ -13,12 +13,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public final class ToolsTab extends ToolPaneTabWidget
 {
@@ -26,29 +23,25 @@ public final class ToolsTab extends ToolPaneTabWidget
     private static final int TOOL_BTN_Y = 5;
     private static final int TOOL_BTN_PADDING = 2;
 
-    private final Map<ToolAction, ToolActionButton> actionButtons;
+    private final List<ToolActionButton> actionButtons;
     private DyeColor wireColor = DyeColor.RED; // TODO: make configurable via context menu
 
     public ToolsTab(CircuitWorkbenchScreen owner)
     {
         super(owner);
-        this.actionButtons = Arrays.stream(ToolAction.ACTIONS)
-                .map(action -> new ToolActionButton(this, action, 0, 0))
-                .collect(Collectors.toUnmodifiableMap(ToolActionButton::getAction, Function.identity()));
+        this.actionButtons = makeActionButtons(this, ToolAction.ACTIONS, ToolActionButton::new);
     }
 
     @Override
     protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY)
     {
-        actionButtons.forEach((action, button) -> button.active = action.isActive(this));
+        actionButtons.forEach((button) -> button.active = button.getAction().isActive(this));
     }
 
     @Override
     public void init(Consumer<AbstractWidget> widgetAdder)
     {
-        super.init(widgetAdder);
-
-        actionButtons.values().forEach(widgetAdder);
+        actionButtons.forEach(widgetAdder);
     }
 
     @Override
@@ -56,9 +49,9 @@ public final class ToolsTab extends ToolPaneTabWidget
     {
         super.computeLayout(screenX, screenY, screenWidth, screenHeight, toolPaneX, toolPaneY, windowHeight);
 
-        actionButtons.forEach((action, button) ->
+        actionButtons.forEach((button) ->
         {
-            int btnY = paneY + TOOL_BTN_Y + (ToolActionButton.HEIGHT + TOOL_BTN_PADDING) * action.ordinal();
+            int btnY = paneY + TOOL_BTN_Y + (ToolActionButton.HEIGHT + TOOL_BTN_PADDING) * button.getAction().ordinal();
             button.setPosition(paneX + TOOL_BTN_X, btnY);
         });
     }
@@ -66,7 +59,7 @@ public final class ToolsTab extends ToolPaneTabWidget
     @Override
     public void updateWidgetVisibility(boolean active)
     {
-        actionButtons.values().forEach(btn -> btn.visible = active);
+        actionButtons.forEach(btn -> btn.visible = active);
     }
 
     @Override

@@ -92,7 +92,7 @@ public final class PartsList extends ToolPaneTabWidget
     @Override
     public void init(Consumer<AbstractWidget> widgetAdder)
     {
-        super.init(widgetAdder);
+
     }
 
     @Override
