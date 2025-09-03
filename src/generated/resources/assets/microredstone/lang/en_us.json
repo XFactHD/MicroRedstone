@@ -87,6 +87,7 @@
   "label.microredstone.circuit_workbench.tools_tab.tool_action.clear_canvas": "Clear Canvas",
   "label.microredstone.circuit_workbench.tools_tab.tool_action.create_bundled_wire": "Add Bundled Wire",
   "label.microredstone.circuit_workbench.tools_tab.tool_action.create_single_wire": "Add Wire",
+  "label.microredstone.context_menu.key_hint": "[%s]",
   "label.microredstone.dye_color.black": "Black",
   "label.microredstone.dye_color.blue": "Blue",
   "label.microredstone.dye_color.brown": "Brown",

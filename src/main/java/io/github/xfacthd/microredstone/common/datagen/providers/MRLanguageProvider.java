@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.datagen.providers;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.WireToolActionContextMenuProvider;
@@ -87,6 +88,7 @@ public final class MRLanguageProvider extends LanguageProvider
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
         add(DialogScreen.Type.CONFIRM.getDefaultTitle(), "Confirm");
+        add(KeyHint.WRAPPER, "[%s]");
         addPart("connection_single", "Connector", "Single", "");
         addPart("connection_bundled", "Connector", "Bundled", "");
         addPart("clock", "Clock", null, "");

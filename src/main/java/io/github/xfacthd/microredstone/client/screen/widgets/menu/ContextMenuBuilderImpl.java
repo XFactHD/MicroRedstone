@@ -27,18 +27,30 @@ final class ContextMenuBuilderImpl implements ContextMenuBuilder
     @Override
     public ContextMenuBuilder addActionEntry(Component text, Runnable action)
     {
-        return addActionEntry(text, action, Optional.empty());
+        return addActionEntry(text, KeyHint.NO_HINT, action);
+    }
+
+    @Override
+    public ContextMenuBuilder addActionEntry(Component text, KeyHint keyHint, Runnable action)
+    {
+        return addActionEntry(text, keyHint, action, Optional.empty());
     }
 
     @Override
     public ContextMenuBuilder addActionEntry(Component text, Runnable action, BooleanSupplier stateSupplier)
     {
-        return addActionEntry(text, action, Optional.of(stateSupplier));
+        return addActionEntry(text, KeyHint.NO_HINT, action, stateSupplier);
     }
 
-    private ContextMenuBuilder addActionEntry(Component text, Runnable action, Optional<BooleanSupplier> stateSupplier)
+    @Override
+    public ContextMenuBuilder addActionEntry(Component text, KeyHint keyHint, Runnable action, BooleanSupplier stateSupplier)
     {
-        addEntry(MenuEntryButton.create(owner, text, action, stateSupplier));
+        return addActionEntry(text, keyHint, action, Optional.of(stateSupplier));
+    }
+
+    private ContextMenuBuilder addActionEntry(Component text, KeyHint keyHint, Runnable action, Optional<BooleanSupplier> stateSupplier)
+    {
+        addEntry(MenuEntryButton.create(owner, text, keyHint.format(), action, stateSupplier));
         return this;
     }
 
