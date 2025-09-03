@@ -1,9 +1,9 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolPaneTabButton;
 import io.github.xfacthd.microredstone.common.util.Utils;

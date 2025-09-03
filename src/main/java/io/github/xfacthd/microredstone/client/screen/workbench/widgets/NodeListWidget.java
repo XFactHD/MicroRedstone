@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;

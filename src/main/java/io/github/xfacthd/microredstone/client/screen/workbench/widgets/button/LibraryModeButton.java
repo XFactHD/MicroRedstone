@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets.button;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.button.SimpleButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.components.WidgetSprites;

@@ -1,19 +1,19 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;

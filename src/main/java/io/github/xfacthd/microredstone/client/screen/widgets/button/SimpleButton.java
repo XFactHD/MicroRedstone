@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.client.screen.workbench.widgets.button;
+package io.github.xfacthd.microredstone.client.screen.widgets.button;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

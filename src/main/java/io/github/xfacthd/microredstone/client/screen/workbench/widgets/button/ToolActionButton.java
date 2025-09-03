@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets.button;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.button.SimpleButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;

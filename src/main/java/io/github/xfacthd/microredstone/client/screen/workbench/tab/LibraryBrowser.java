@@ -1,13 +1,13 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ExportActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.LibraryModeButton;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.util.ScreenUtils;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;

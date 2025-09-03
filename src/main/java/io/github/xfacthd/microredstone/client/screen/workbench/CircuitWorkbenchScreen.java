@@ -1,16 +1,16 @@
 package io.github.xfacthd.microredstone.client.screen.workbench;
 
-import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
+import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenu;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ScrollableWidget;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProviderProxy;
+import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;

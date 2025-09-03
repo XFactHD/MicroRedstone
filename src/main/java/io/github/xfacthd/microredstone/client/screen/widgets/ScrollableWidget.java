@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
+package io.github.xfacthd.microredstone.client.screen.widgets;
 
 import net.minecraft.util.Mth;
 
