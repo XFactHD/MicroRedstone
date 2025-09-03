@@ -73,6 +73,10 @@ public final class MRLanguageProvider extends LanguageProvider
         add(FilterToggleButton.TOOLTIP_ON, "%s Circuits: Shown");
         add(ToolsTab.ToolAction.CREATE_SINGLE_WIRE.getTitle(), "Add Wire");
         add(ToolsTab.ToolAction.CREATE_BUNDLED_WIRE.getTitle(), "Add Bundled Wire");
+        add(ToolsTab.ToolAction.CLEAR_CANVAS.getTitle(), "Clear Canvas");
+        add(ToolsTab.TITLE_CONFIRM_CLEAR, "Confirm Clear Canvas");
+        add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_ONE, "Are you sure you want to clear the canvas?");
+        add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_TWO, "All unsaved changes will be lost.");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");

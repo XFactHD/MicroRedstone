@@ -1,12 +1,13 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
+import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolActionButton;
-import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireInProgress;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
@@ -19,6 +20,9 @@ import java.util.function.Consumer;
 
 public final class ToolsTab extends ToolPaneTabWidget
 {
+    public static final Component TITLE_CONFIRM_CLEAR = Utils.translate("title", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm");
+    public static final Component MESSAGE_CONFIRM_CLEAR_LINE_ONE = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_one");
+    public static final Component MESSAGE_CONFIRM_CLEAR_LINE_TWO = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_two");
     private static final int TOOL_BTN_X = 5;
     private static final int TOOL_BTN_Y = 5;
     private static final int TOOL_BTN_PADDING = 2;
@@ -51,7 +55,7 @@ public final class ToolsTab extends ToolPaneTabWidget
 
         actionButtons.forEach((button) ->
         {
-            int btnY = paneY + TOOL_BTN_Y + (ToolActionButton.HEIGHT + TOOL_BTN_PADDING) * button.getAction().ordinal();
+            int btnY = button.getAction().computeButtonY(paneY, height);
             button.setPosition(paneX + TOOL_BTN_X, btnY);
         });
     }
@@ -72,7 +76,14 @@ public final class ToolsTab extends ToolPaneTabWidget
     {
         CREATE_SINGLE_WIRE(new ToolIcon(WireType.SINGLE.getIcon().texture())),
         CREATE_BUNDLED_WIRE(new ToolIcon(WireType.BUNDLED.getIcon().texture())),
-        ;
+        CLEAR_CANVAS(new ToolIcon(Utils.rl("minecraft", "spectator/close")))
+        {
+            @Override
+            int computeButtonY(int paneY, int paneHeight)
+            {
+                return paneY + paneHeight - TOOL_BTN_Y - ToolActionButton.HEIGHT;
+            }
+        };
 
         private static final ToolAction[] ACTIONS = values();
 
@@ -85,6 +96,11 @@ public final class ToolsTab extends ToolPaneTabWidget
             this.icon = icon;
         }
 
+        int computeButtonY(int paneY, int paneHeight)
+        {
+            return paneY + TOOL_BTN_Y + (ToolActionButton.HEIGHT + TOOL_BTN_PADDING) * ordinal();
+        }
+
         private boolean isActive(ToolsTab tab)
         {
             if (tab.owner.hasActiveEditAction())
@@ -94,6 +110,7 @@ public final class ToolsTab extends ToolPaneTabWidget
                 {
                     case CREATE_SINGLE_WIRE -> wire != null && (wire.getType() == WireType.SINGLE || wire.isEmpty());
                     case CREATE_BUNDLED_WIRE -> wire != null && (wire.getType() == WireType.BUNDLED || wire.isEmpty());
+                    case CLEAR_CANVAS -> true;
                 };
             }
             return true;
@@ -106,6 +123,7 @@ public final class ToolsTab extends ToolPaneTabWidget
             {
                 case CREATE_SINGLE_WIRE -> wire != null && wire.getType() == WireType.SINGLE;
                 case CREATE_BUNDLED_WIRE -> wire != null && wire.getType() == WireType.BUNDLED;
+                case CLEAR_CANVAS -> false;
             };
         }
 
@@ -128,16 +146,27 @@ public final class ToolsTab extends ToolPaneTabWidget
                         tab.owner.getCanvas().startWirePull(WireType.BUNDLED, null);
                     }
                 }
+                case CLEAR_CANVAS ->
+                {
+                    DialogScreen dialog = DialogScreen.builder(DialogScreen.Type.CONFIRM)
+                            .withTitle(TITLE_CONFIRM_CLEAR)
+                            .withMessage(MESSAGE_CONFIRM_CLEAR_LINE_ONE)
+                            .withMessage(MESSAGE_CONFIRM_CLEAR_LINE_TWO)
+                            .withOkCallback(tab.owner.getCanvas()::clear)
+                            .build();
+                    Minecraft.getInstance().pushGuiLayer(dialog);
+                }
             }
         }
 
         public ToolIcon getIcon(ToolsTab tab)
         {
-            return switch (this)
+            ToolIcon toolIcon = icon;
+            if (this == CREATE_SINGLE_WIRE)
             {
-                case CREATE_SINGLE_WIRE -> icon.withColor(tab.wireColor.getTextureDiffuseColor());
-                case CREATE_BUNDLED_WIRE -> icon;
-            };
+                toolIcon = toolIcon.withColor(tab.wireColor.getTextureDiffuseColor());
+            }
+            return toolIcon;
         }
 
         public Component getTitle()
