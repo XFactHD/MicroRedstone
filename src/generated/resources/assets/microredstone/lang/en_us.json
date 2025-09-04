@@ -44,6 +44,8 @@
   "label.microredstone.circuit_workbench.library_browser.filter.private": "Private",
   "label.microredstone.circuit_workbench.library_browser.filter.public": "Public",
   "label.microredstone.circuit_workbench.library_browser.filter.shared": "Shared",
+  "label.microredstone.circuit_workbench.library_browser.import_entry.menu.details": "Details",
+  "label.microredstone.circuit_workbench.library_browser.import_entry.menu.import": "Import to Canvas",
   "label.microredstone.circuit_workbench.library_browser.import_from_clipboard": "Import from Clipboard",
   "label.microredstone.circuit_workbench.library_browser.mode": "Mode:",
   "label.microredstone.circuit_workbench.library_browser.mode.export": "Export",

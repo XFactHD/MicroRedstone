@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench;
 
+import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenu;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
@@ -15,6 +16,7 @@ import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
 import io.github.xfacthd.microredstone.common.menu.slot.ToggleableSlot;
@@ -40,6 +42,9 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
 {
     private static final ResourceLocation BACKGROUND = Utils.rl("background");
     public static final ResourceLocation WINDOW_FRAME = Utils.rl("window_frame");
+    public static final Component TITLE_CONFIRM_IMPORT = Utils.translate("title", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm");
+    public static final Component MESSAGE_CONFIRM_IMPORT_LINE_ONE = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_one");
+    public static final Component MESSAGE_CONFIRM_IMPORT_LINE_TWO = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_two");
     public static final int PADDING = 5;
     public static final int BORDER_LEFT = PADDING * 2;
     public static final int BORDER_RIGHT = PADDING * 2 + 1;
@@ -457,16 +462,23 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     private ContextMenuProvider getContextMenuProviderAt(double mouseX, double mouseY)
     {
         Optional<GuiEventListener> child = getChildAt(mouseX, mouseY);
-        if (child.isEmpty()) return null;
-
-        GuiEventListener listener = child.get();
-        if (listener instanceof ContextMenuProvider provider)
+        if (child.isPresent())
         {
-            return provider;
+            GuiEventListener listener = child.get();
+            if (listener instanceof ContextMenuProvider provider)
+            {
+                return provider;
+            }
+            if (listener instanceof ContextMenuProviderProxy proxy)
+            {
+                return proxy.getContextMenuProvider();
+            }
+            return null;
         }
-        if (listener instanceof ContextMenuProviderProxy proxy)
+        ScrollableWidget scrollable = getActiveTabWidget().getScrollableWidget();
+        if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY))
         {
-            return proxy.getContextMenuProvider();
+            return scrollable.getContextMenuProvider(mouseX, mouseY);
         }
         return null;
     }
@@ -478,7 +490,29 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
 
     public void importCircuitFromClipboard()
     {
+        // TODO: implement guarded circuit deserialization
+    }
 
+    public void importCircuit(CompoundCircuitNode circuitNode)
+    {
+        if (canvas.isEmpty())
+        {
+            doImportCircuit(circuitNode);
+            return;
+        }
+
+        DialogScreen.builder(DialogScreen.Type.CONFIRM)
+                .withTitle(TITLE_CONFIRM_IMPORT)
+                .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_ONE)
+                .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_TWO)
+                .withCancelCallback(() -> doImportCircuit(circuitNode))
+                .show();
+    }
+
+    private void doImportCircuit(CompoundCircuitNode circuitNode)
+    {
+        canvas.clear();
+        // TODO: implement circuit node disassembly
     }
 
     public CircuitCanvas getCanvas()

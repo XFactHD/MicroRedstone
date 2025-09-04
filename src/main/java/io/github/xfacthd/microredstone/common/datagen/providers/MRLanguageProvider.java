@@ -5,6 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.ImportEntryContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.WireToolActionContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
@@ -86,6 +87,8 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_TWO, "All unsaved changes will be lost.");
         add(WireToolActionContextMenuProvider.ENTRY_WIRE_COLOR, "Wire Color");
         add(WireToolActionContextMenuProvider.ENTRY_WIRE_ROUTE_PREF, "Long Section First");
+        add(ImportEntryContextMenuProvider.ENTRY_IMPORT, "Import to Canvas");
+        add(ImportEntryContextMenuProvider.ENTRY_DETAILS, "Details");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");

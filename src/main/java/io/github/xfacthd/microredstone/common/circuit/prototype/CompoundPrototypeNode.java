@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public final class CompoundPrototypeNode extends PrototypeNode
@@ -170,6 +171,11 @@ public final class CompoundPrototypeNode extends PrototypeNode
         childNodes.clear();
         wires.clear();
         Arrays.fill(connections, null);
+    }
+
+    public boolean isEmpty()
+    {
+        return childNodes.isEmpty() && wires.isEmpty() && Arrays.stream(connections).allMatch(Objects::isNull);
     }
 
     private static final class WireValidator

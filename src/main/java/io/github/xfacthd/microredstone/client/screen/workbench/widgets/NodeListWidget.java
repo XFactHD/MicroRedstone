@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
@@ -150,11 +151,22 @@ public final class NodeListWidget extends ScrollableWidget
         return entryCount.getAsInt() * ENTRY_HEIGHT;
     }
 
+    @Override
+    @Nullable
+    public ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY)
+    {
+        return getClickedEntryIdx(mouseY, idx -> entryGetter.apply(idx).getContextMenuProvider(owner));
+    }
+
     @Nullable
     public <T> T getClickedEntryIdx(double mouseY, IntFunction<T> resultFactory)
     {
         int relY = (int) (mouseY - innerY + getScrollOffset());
-        return relY >= 0 ? resultFactory.apply(relY / NodeListWidget.ENTRY_HEIGHT) : null;
+        if (relY < 0) return null;
+
+        int idx = relY / NodeListWidget.ENTRY_HEIGHT;
+        int count = entryCount.getAsInt();
+        return idx < count ? resultFactory.apply(idx) : null;
     }
 
     public void computeLayout(int height, int paneX, int paneY)
@@ -176,5 +188,11 @@ public final class NodeListWidget extends ScrollableWidget
         Component subTitle();
 
         PlaceableNode instantiate();
+
+        @Nullable
+        default ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner)
+        {
+            return null;
+        }
     }
 }

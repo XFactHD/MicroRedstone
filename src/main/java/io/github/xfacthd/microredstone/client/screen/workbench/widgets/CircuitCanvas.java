@@ -464,4 +464,9 @@ public final class CircuitCanvas
         wireGrid.clear();
         errorAnnotations.clear();
     }
+
+    public boolean isEmpty()
+    {
+        return circuit.isEmpty();
+    }
 }

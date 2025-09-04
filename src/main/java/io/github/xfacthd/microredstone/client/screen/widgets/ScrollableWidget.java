@@ -1,6 +1,8 @@
 package io.github.xfacthd.microredstone.client.screen.widgets;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class ScrollableWidget
 {
@@ -70,4 +72,10 @@ public abstract class ScrollableWidget
     public abstract boolean isMouseOverList(double mouseX, double mouseY);
 
     public abstract boolean isMouseOverScrollBar(double mouseX, double mouseY);
+
+    @Nullable
+    public ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY)
+    {
+        return null;
+    }
 }

@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.dialog;
 
 import com.google.common.base.Preconditions;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -54,5 +55,10 @@ public final class DialogScreenBuilder
     public DialogScreen build()
     {
         return new DialogScreen(type, title, messageLines, okCallback, cancelCallback);
+    }
+
+    public void show()
+    {
+        Minecraft.getInstance().pushGuiLayer(build());
     }
 }

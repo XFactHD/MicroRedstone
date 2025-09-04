@@ -2,9 +2,11 @@ package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.widgets.button.BasicButton;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.ImportEntryContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ExportActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public final class LibraryBrowser extends ToolPaneTabWidget
@@ -91,6 +94,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         this.filterButtons = makeActionButtons(this, SHARE_TYPES, FilterToggleButton::new);
         this.importJsonButton = new BasicButton(0, 0, IMPORT_BTN_WIDTH, IMPORT_BTN_HEIGHT, IMPORT_BTN_TITLE, owner::importCircuitFromClipboard);
         this.actionButtons = makeActionButtons(this, ExportAction.ACTIONS, ExportActionButton::new);
+        // TODO: add name validation to edit box (don't use existing "filter" predicate, it annoyingly prevents typing invalid entries)
         this.exportNameEditBox = new EditBox(Minecraft.getInstance().font, EXPORT_NAME_EDIT_WIDTH, EXPORT_NAME_EDIT_HEIGHT, Component.empty());
         this.importEntries = new ArrayList<>();
         this.importListWidget = new NodeListWidget(owner, importEntries::size, importEntries::get);
@@ -351,7 +355,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         }
     }
 
-    public record Entry(CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
+    public record Entry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
     {
         @Nullable
         @Override
@@ -364,6 +368,12 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         public PlaceableNode instantiate()
         {
             return ReferencePrototypeNode.create(node);
+        }
+
+        @Override
+        public ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner)
+        {
+            return new ImportEntryContextMenuProvider(owner, this);
         }
     }
 }
