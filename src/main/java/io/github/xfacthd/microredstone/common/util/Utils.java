@@ -12,6 +12,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -62,6 +63,11 @@ public final class Utils
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String path)
     {
         return new CustomPacketPayload.Type<>(Utils.rl(path));
+    }
+
+    public static ConfigurationTask.Type configTaskType(String path)
+    {
+        return new ConfigurationTask.Type(Utils.rl(path));
     }
 
     public static <T> ResourceKey<T> getKeyOrThrow(Holder<T> holder)

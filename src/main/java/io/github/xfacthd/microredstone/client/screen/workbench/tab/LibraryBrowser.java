@@ -5,6 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.button.BasicButton;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
+import io.github.xfacthd.microredstone.client.screen.workbench.ExportTarget;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.ImportEntryContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
@@ -17,6 +18,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircu
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
+import io.github.xfacthd.microredstone.common.data.library.CircuitLibraryEntry;
+import io.github.xfacthd.microredstone.common.data.library.ClientCircuitLibrary;
 import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
@@ -181,9 +184,13 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         if (changed)
         {
             filterButtons.forEach(FilterToggleButton::updateTooltip);
-            // TODO: implement library backend
-            //ClientLibraryManager.collectFiltered(importEntries, filters);
+            updateImportList();
         }
+    }
+
+    public void updateImportList()
+    {
+        ClientCircuitLibrary.getFilteredEntries(filters, entry -> importEntries.add(Entry.create(entry)));
     }
 
     public boolean isFilterEnabled(ShareType filter)
@@ -340,11 +347,12 @@ public final class LibraryBrowser extends ToolPaneTabWidget
 
         public void execute(LibraryBrowser browser)
         {
+            String circuitName = browser.exportNameEditBox.getValue();
             switch (this)
             {
-                case EXPORT_TO_LIBRARY -> browser.owner.assembleAndExport(CircuitWorkbenchScreen.ExportTarget.LIBRARY);
-                case EXPORT_TO_ITEM -> browser.owner.assembleAndExport(CircuitWorkbenchScreen.ExportTarget.CIRCUIT_ITEM);
-                case EXPORT_TO_JSON -> browser.owner.assembleAndExport(CircuitWorkbenchScreen.ExportTarget.JSON_IN_CLIPBOARD);
+                case EXPORT_TO_LIBRARY -> browser.owner.assembleAndExport(circuitName, ExportTarget.LIBRARY);
+                case EXPORT_TO_ITEM -> browser.owner.assembleAndExport(circuitName, ExportTarget.CIRCUIT_ITEM);
+                case EXPORT_TO_JSON -> browser.owner.assembleAndExport(circuitName, ExportTarget.JSON_IN_CLIPBOARD);
                 case CLEAR_ERROR_ANNOTATIONS -> browser.owner.getCanvas().getErrorAnnotations().clear();
             }
         }
@@ -357,6 +365,12 @@ public final class LibraryBrowser extends ToolPaneTabWidget
 
     public record Entry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
     {
+        private static Entry create(CircuitLibraryEntry entry)
+        {
+            IconConfig icon = ReferencePrototypeNode.makeIconConfig(entry.circuitNode());
+            return new Entry(entry.id(), entry.circuitNode(), icon, Component.literal(entry.name()));
+        }
+
         @Nullable
         @Override
         public Component subTitle()
@@ -367,7 +381,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         @Override
         public PlaceableNode instantiate()
         {
-            return ReferencePrototypeNode.create(node);
+            return ReferencePrototypeNode.create(node, icon);
         }
 
         @Override

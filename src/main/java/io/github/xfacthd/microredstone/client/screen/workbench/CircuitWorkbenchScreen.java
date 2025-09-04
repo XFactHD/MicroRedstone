@@ -483,7 +483,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         return null;
     }
 
-    public void assembleAndExport(ExportTarget target)
+    public void assembleAndExport(String name, ExportTarget target)
     {
         // TODO: implement circuit assembly, error handling, overwrite handling and target storage
     }
@@ -523,12 +523,5 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public LibraryBrowser getLibraryBrowser()
     {
         return libraryBrowser;
-    }
-
-    public enum ExportTarget
-    {
-        LIBRARY,
-        CIRCUIT_ITEM,
-        JSON_IN_CLIPBOARD,
     }
 }

@@ -2,12 +2,16 @@ package io.github.xfacthd.microredstone.common.net;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.VarInt;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
+import java.time.Instant;
 import java.util.function.IntFunction;
 
 public final class MRStreamCodecs
 {
+    public static final StreamCodec<ByteBuf, Instant> INSTANT = ByteBufCodecs.VAR_LONG.map(Instant::ofEpochSecond, Instant::getEpochSecond);
+
     public static <B extends ByteBuf, T> StreamCodec<B, T[]> array(StreamCodec<B, T> codec, IntFunction<T[]> arrayFactory)
     {
         return new StreamCodec<>()

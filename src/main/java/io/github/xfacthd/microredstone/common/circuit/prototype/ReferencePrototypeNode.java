@@ -10,21 +10,23 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ProblemReporter;
+import org.jetbrains.annotations.Nullable;
 
-// TODO: find a way to implement nesting properly
 public final class ReferencePrototypeNode extends PrototypeNode
 {
     private final CompoundCircuitNode referenced;
     private final Connector[] connectors;
 
-    public static ReferencePrototypeNode create(CompoundCircuitNode referenced)
+    public static ReferencePrototypeNode create(CompoundCircuitNode referenced, @Nullable IconConfig icon)
     {
-        return new ReferencePrototypeNode(referenced, Utils.concatArrays(referenced.getInputs(), referenced.getOutputs()));
+        Connector[] connectors = Utils.concatArrays(referenced.getInputs(), referenced.getOutputs());
+        if (icon == null) icon = makeIconConfig(connectors);
+        return new ReferencePrototypeNode(referenced, connectors, icon);
     }
 
-    private ReferencePrototypeNode(CompoundCircuitNode referenced, Connector[] connectors)
+    private ReferencePrototypeNode(CompoundCircuitNode referenced, Connector[] connectors, IconConfig icon)
     {
-        super(makePortConfig(connectors), makeIconConfig(connectors));
+        super(makePortConfig(connectors), icon);
         this.referenced = referenced;
         this.connectors = connectors;
     }
@@ -57,6 +59,11 @@ public final class ReferencePrototypeNode extends PrototypeNode
         return builder.build();
     }
 
+    public static IconConfig makeIconConfig(CompoundCircuitNode referenced)
+    {
+        return makeIconConfig(Utils.concatArrays(referenced.getInputs(), referenced.getOutputs()));
+    }
+
     private static IconConfig makeIconConfig(Connector[] connectors)
     {
         int portMask = 0;
@@ -65,6 +72,6 @@ public final class ReferencePrototypeNode extends PrototypeNode
             portMask = connector.port().appendMask(portMask, connector.type());
         }
         ResourceLocation portOverlay = PortOverlays.get(portMask);
-        return new IconConfig(Utils.rl("part/reference"), portOverlay);
+        return new IconConfig(Utils.rl("part/reference"), portOverlay, false);
     }
 }

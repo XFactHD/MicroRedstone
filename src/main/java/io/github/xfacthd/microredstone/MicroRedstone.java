@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone;
 
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.compat.CompatHandler;
+import io.github.xfacthd.microredstone.common.net.NetworkHandler;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
@@ -15,5 +16,8 @@ public final class MicroRedstone
     {
         MRContent.init(modBus);
         CompatHandler.init(modBus);
+
+        modBus.addListener(NetworkHandler::onRegisterPayloadHandlers);
+        modBus.addListener(NetworkHandler::onRegisterConfigTasks);
     }
 }

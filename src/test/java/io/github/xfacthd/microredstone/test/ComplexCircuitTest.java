@@ -103,7 +103,7 @@ public final class ComplexCircuitTest
         Connection outerConOut = outerBuilder.addConnection(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT);
         outerConOut.connect(outerWireOut);
 
-        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode));
+        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode, null));
         outerRefProtoNode.setConnection(Port.LEFT, outerWireIn, true);
         outerRefProtoNode.setConnection(Port.RIGHT, outerWireCon, true);
         PrimitivePrototypeNode outerNotProtoNode = outerBuilder.addNode(new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, WireType.SINGLE));
@@ -179,7 +179,7 @@ public final class ComplexCircuitTest
         PrimitivePrototypeNode outerNotProtoNode = outerBuilder.addNode(new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, WireType.SINGLE));
         outerNotProtoNode.setConnection(Port.LEFT, outerWireIn, true);
         outerNotProtoNode.setConnection(Port.RIGHT, outerWireCon, true);
-        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode));
+        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode, null));
         outerRefProtoNode.setConnection(Port.LEFT, outerWireCon, true);
         outerRefProtoNode.setConnection(Port.UP, outerWireConOne, true);
         outerRefProtoNode.setConnection(Port.DOWN, outerWireConTwo, true);
@@ -266,7 +266,7 @@ public final class ComplexCircuitTest
         PrimitivePrototypeNode outerNotProtoNode = outerBuilder.addNode(new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, WireType.SINGLE));
         outerNotProtoNode.setConnection(Port.LEFT, outerWireIn, true);
         outerNotProtoNode.setConnection(Port.RIGHT, outerWireCon, true);
-        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode));
+        ReferencePrototypeNode outerRefProtoNode = outerBuilder.addNode(ReferencePrototypeNode.create(innerNode, null));
         outerRefProtoNode.setConnection(Port.LEFT, outerWireCon, true);
         outerRefProtoNode.setConnection(Port.UP, outerWireConOne, true);
         outerRefProtoNode.setConnection(Port.RIGHT, outerWireConTwo, true);
