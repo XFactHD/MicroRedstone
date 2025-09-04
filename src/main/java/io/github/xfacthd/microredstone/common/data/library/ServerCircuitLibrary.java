@@ -2,7 +2,6 @@ package io.github.xfacthd.microredstone.common.data.library;
 
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryUpdatePayload;
-import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,7 +22,7 @@ public final class ServerCircuitLibrary extends SavedData
             ServerCircuitLibrary::serialize
     );
     private static final SavedDataType<ServerCircuitLibrary> TYPE = new SavedDataType<>(
-            Utils.rl("circuit_library").toString(),
+            "microredstone_circuit_library",
             ctx -> new ServerCircuitLibrary(ctx, new Object2ObjectOpenHashMap<>()),
             ctx -> CODEC.xmap(
                     libraries -> new ServerCircuitLibrary(ctx, libraries),
