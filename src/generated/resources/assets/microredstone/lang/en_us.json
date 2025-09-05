@@ -184,6 +184,7 @@
   "title.microredstone.dialog.title.confirm": "Confirm",
   "title.microredstone.dialog.title.error": "Error",
   "title.microredstone.dialog.title.info": "Info",
+  "title.microredstone.dialog.title.properties": "Properties",
   "title.microredstone.dialog.title.warning": "Warning",
   "title.microredstone.microchip": "Microchip",
   "tooltip.microredstone.circuit_workbench.parts_list.filter.hidden": "%s Circuits: Hidden",
