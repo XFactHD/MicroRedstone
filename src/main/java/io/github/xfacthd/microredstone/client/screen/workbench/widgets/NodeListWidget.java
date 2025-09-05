@@ -88,7 +88,6 @@ public final class NodeListWidget extends ScrollableWidget
 
             int nameX = minX + ENTRY_NAME_OFF_X;
             int nameY = y + ENTRY_NAME_OFF_Y;
-            // FIXME: the scrolling helper passes the wrong max Y to the actual scrolling string helper (missing +1 pixel)
             Component subTitle = entry.subTitle();
             if (subTitle != null)
             {
