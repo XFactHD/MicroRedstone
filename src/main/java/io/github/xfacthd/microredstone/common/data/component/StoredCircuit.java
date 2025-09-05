@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.data.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
@@ -11,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipProvider;
 import org.jetbrains.annotations.Nullable;
@@ -57,5 +59,11 @@ public record StoredCircuit(String name, @Nullable CompoundCircuitNode rootNode)
         {
             tooltipAdder.accept(Component.translatable(LABEL_CIRCUIT, name));
         }
+    }
+
+    public static boolean isPresent(ItemStack stack)
+    {
+        StoredCircuit circuit = stack.get(MRContent.DC_TYPE_CIRCUIT);
+        return circuit != null && !circuit.equals(EMPTY);
     }
 }

@@ -228,12 +228,12 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
         }
     }
 
-    public record LibraryEntry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
+    public record LibraryEntry(UUID id, CompoundCircuitNode node, IconConfig icon, String name, Component title) implements NodeListWidget.Entry
     {
         private static LibraryEntry create(CircuitLibraryEntry entry)
         {
             IconConfig icon = ReferencePrototypeNode.makeIconConfig(entry.circuitNode());
-            return new LibraryEntry(entry.id(), entry.circuitNode(), icon, Component.literal(entry.name()));
+            return new LibraryEntry(entry.id(), entry.circuitNode(), icon, entry.name(), Component.literal(entry.name()));
         }
 
         @Nullable

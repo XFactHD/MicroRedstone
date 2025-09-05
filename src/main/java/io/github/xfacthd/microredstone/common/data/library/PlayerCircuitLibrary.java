@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.data.library;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitValidator;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.UUIDUtil;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +54,7 @@ final class PlayerCircuitLibrary
     @Nullable
     CircuitLibraryEntry addOrModifyEntry(CircuitLibraryEntry entry)
     {
-        if (entry.author().equals(owner))
+        if (entry.author().equals(owner) && CircuitValidator.validate(entry.circuitNode()))
         {
             CircuitLibraryEntry existing = ownedByName.get(entry.name());
             if (existing != null)

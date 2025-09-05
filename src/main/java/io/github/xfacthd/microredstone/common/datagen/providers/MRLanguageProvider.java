@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.datagen.providers;
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
+import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LogicGateList;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
@@ -41,6 +42,8 @@ public final class MRLanguageProvider extends LanguageProvider
         addBlockTranslations();
         addItemTranslations();
         addScreenTranslations();
+        addWorkbenchScreenTranslations();
+        addPartTranslations();
         addSpecialTranslations();
     }
 
@@ -59,7 +62,10 @@ public final class MRLanguageProvider extends LanguageProvider
     private void addScreenTranslations()
     {
         add(MicrochipBlockEntity.MENU_TITLE, "Microchip");
+    }
 
+    private void addWorkbenchScreenTranslations()
+    {
         add(CircuitWorkbenchBlock.MENU_TITLE, "Circuit Workbench");
         add(CircuitCanvas.CELL_COORD_TRANSLATION, "Cell: %s, %s");
         add(PartsList.LABEL_MODE, "Mode: ");
@@ -75,10 +81,25 @@ public final class MRLanguageProvider extends LanguageProvider
         add(LibraryBrowser.Mode.EXPORT.getTitle(), "Export");
         add(LibraryBrowser.ImportAction.IMPORT_FROM_ITEM.getTitle(), "Import from Item");
         add(LibraryBrowser.ImportAction.IMPORT_FROM_JSON.getTitle(), "Import from Clipboard");
-        add(LibraryBrowser.ExportAction.EXPORT_TO_LIBRARY.getTitle(), "Export to Library");
         add(LibraryBrowser.ExportAction.EXPORT_TO_ITEM.getTitle(), "Export to Item");
+        add(LibraryBrowser.ExportAction.EXPORT_TO_LIBRARY.getTitle(), "Export to Library");
         add(LibraryBrowser.ExportAction.EXPORT_TO_JSON.getTitle(), "Export to Clipboard");
         add(LibraryBrowser.ExportAction.CLEAR_ERROR_ANNOTATIONS.getTitle(), "Clear Error Annotations");
+        add(ImportExportHandler.TITLE_CONFIRM_IMPORT, "Confirm Import");
+        add(ImportExportHandler.MESSAGE_CONFIRM_IMPORT_LINE_ONE, "Are you sure you want to overwrite the canvas with the imported circuit?");
+        add(ImportExportHandler.MESSAGE_CONFIRM_IMPORT_LINE_TWO, "All unsaved changes will be lost.");
+        add(ImportExportHandler.TITLE_CONFIRM_EXPORT, "Confirm Export");
+        add(ImportExportHandler.MESSAGE_CONFIRM_EXPORT, "Are you sure you want to overwrite the existing circuit?");
+        add(ImportExportHandler.TITLE_IMPORT_ERROR, "Import Failed");
+        add(ImportExportHandler.TITLE_EXPORT_SUCCESS, "Export Successful");
+        add(ImportExportHandler.TITLE_EXPORT_ERROR, "Export Failed");
+        add(ImportExportHandler.ImportError.PARSE_FAILED.getDialogMessage(), "Failed to parse clipboard contents");
+        add(ImportExportHandler.ImportError.DECODE_FAILED.getDialogMessage(), "Failed to decode clipboard contents");
+        add(ImportExportHandler.ImportError.VALIDATE_FAILED.getDialogMessage(), "The decoded circuit is invalid");
+        add(ImportExportHandler.ExportResult.SUCCESS.getDialogMessage(), "Circuit design exported successfully");
+        add(ImportExportHandler.ExportResult.ITEM_SERVER_ERROR.getDialogMessage(), "An unknown error occured writing the design to the circuit item");
+        add(ImportExportHandler.ExportResult.LIBRARY_SERVER_ERROR.getDialogMessage(), "An unknown error occured storing the design in the library");
+        add(ImportExportHandler.ExportResult.JSON_ENCODE_FAILED.getDialogMessage(), "Failed to encode design to JSON");
         add(ShareType.PRIVATE.getTitle(), "Private");
         add(ShareType.SHARED.getTitle(), "Shared");
         add(ShareType.PUBLIC.getTitle(), "Public");
@@ -100,6 +121,10 @@ public final class MRLanguageProvider extends LanguageProvider
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
         add(DialogScreen.Type.CONFIRM.getDefaultTitle(), "Confirm");
         add(KeyHint.WRAPPER, "[%s]");
+    }
+
+    private void addPartTranslations()
+    {
         addPart("connection_single", "Connector", "Single", "");
         addPart("connection_bundled", "Connector", "Bundled", "");
         addPart("clock", "Clock", null, "");

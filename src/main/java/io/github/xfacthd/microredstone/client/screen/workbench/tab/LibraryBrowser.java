@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExportTarget;
+import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.LibraryActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;
@@ -99,9 +100,19 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         }
     }
 
+    public void setExportName(String name)
+    {
+        exportNameEditBox.setValue(name);
+    }
+
     public boolean isCoveredByInventory(double mouseX, double mouseY)
     {
         return owner.getToolPaneTab() == getType() && mode == Mode.EXPORT && mouseX >= invX && mouseY >= invY;
+    }
+
+    public boolean isEditBoxFocused()
+    {
+        return mode == Mode.EXPORT && exportNameEditBox.isFocused();
     }
 
     @Override
@@ -232,12 +243,13 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         @Override
         public void execute(LibraryBrowser browser)
         {
+            final ImportExportHandler importExportHandler = browser.owner.getImportExportHandler();
             switch (this)
             {
-                case IMPORT_FROM_ITEM -> browser.owner.importCircuitFromItem(
+                case IMPORT_FROM_ITEM -> importExportHandler.importCircuitFromItem(
                         browser.owner.getMenu().getCircuitSlot().getItem()
                 );
-                case IMPORT_FROM_JSON -> browser.owner.importCircuitFromClipboard();
+                case IMPORT_FROM_JSON -> importExportHandler.importCircuitFromClipboard();
             }
         }
 
@@ -250,8 +262,8 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
 
     public enum ExportAction implements LibraryActionButton.Action<LibraryBrowser>
     {
-        EXPORT_TO_LIBRARY,
         EXPORT_TO_ITEM,
+        EXPORT_TO_LIBRARY,
         EXPORT_TO_JSON,
         CLEAR_ERROR_ANNOTATIONS,
         ;
@@ -266,8 +278,9 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         {
             return !browser.owner.hasActiveEditAction() && switch (this)
             {
-                case EXPORT_TO_LIBRARY, EXPORT_TO_JSON -> !browser.exportNameEditBox.getValue().isEmpty();
                 case EXPORT_TO_ITEM -> !browser.exportNameEditBox.getValue().isEmpty() && browser.owner.getMenu().getCircuitSlot().hasItem();
+                case EXPORT_TO_LIBRARY -> !browser.exportNameEditBox.getValue().isEmpty();
+                case EXPORT_TO_JSON -> true;
                 case CLEAR_ERROR_ANNOTATIONS -> !browser.owner.getCanvas().getErrorAnnotations().isEmpty();
             };
         }
@@ -275,12 +288,13 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         @Override
         public void execute(LibraryBrowser browser)
         {
+            ImportExportHandler importExportHandler = browser.owner.getImportExportHandler();
             String circuitName = browser.exportNameEditBox.getValue();
             switch (this)
             {
-                case EXPORT_TO_LIBRARY -> browser.owner.assembleAndExport(circuitName, ExportTarget.LIBRARY);
-                case EXPORT_TO_ITEM -> browser.owner.assembleAndExport(circuitName, ExportTarget.CIRCUIT_ITEM);
-                case EXPORT_TO_JSON -> browser.owner.assembleAndExport(circuitName, ExportTarget.JSON_IN_CLIPBOARD);
+                case EXPORT_TO_ITEM -> importExportHandler.assembleAndExport(circuitName, ExportTarget.CIRCUIT_ITEM);
+                case EXPORT_TO_LIBRARY -> importExportHandler.assembleAndExport(circuitName, ExportTarget.LIBRARY);
+                case EXPORT_TO_JSON -> importExportHandler.assembleAndExport(circuitName, ExportTarget.JSON_IN_CLIPBOARD);
                 case CLEAR_ERROR_ANNOTATIONS -> browser.owner.getCanvas().getErrorAnnotations().clear();
             }
         }

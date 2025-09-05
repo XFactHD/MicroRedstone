@@ -1,8 +1,12 @@
 package io.github.xfacthd.microredstone.common.menu;
 
 import io.github.xfacthd.microredstone.common.MRContent;
+import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitValidator;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.menu.slot.ToggleableSlot;
 import io.github.xfacthd.microredstone.common.menu.slot.WorkbenchCircuitSlot;
+import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundWorkbenchWriteCircuitResultPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -62,5 +66,26 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
     public Slot getCircuitSlot()
     {
         return circuitSlot;
+    }
+
+    public ClientboundWorkbenchWriteCircuitResultPayload applyCircuitToItem(String name, CompoundCircuitNode circuitNode)
+    {
+        if (!CircuitValidator.validate(circuitNode))
+        {
+            return result(false);
+        }
+        if (!circuitSlot.hasItem())
+        {
+            return result(false);
+        }
+
+        StoredCircuit circuit = new StoredCircuit(name, circuitNode);
+        circuitSlot.getItem().set(MRContent.DC_TYPE_CIRCUIT, circuit);
+        return result(true);
+    }
+
+    private ClientboundWorkbenchWriteCircuitResultPayload result(boolean success)
+    {
+        return new ClientboundWorkbenchWriteCircuitResultPayload(containerId, success);
     }
 }

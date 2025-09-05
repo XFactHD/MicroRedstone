@@ -25,7 +25,7 @@ public final class ImportEntryContextMenuProvider implements ContextMenuProvider
     @Override
     public void fillRootMenu(ContextMenuBuilder menuBuilder)
     {
-        menuBuilder.addActionEntry(ENTRY_IMPORT, () -> owner.importCircuit(entry.node()))
+        menuBuilder.addActionEntry(ENTRY_IMPORT, () -> owner.getImportExportHandler().importCircuit(entry.name(), entry.node()))
                 .addActionEntry(ENTRY_DETAILS, () -> { /* TODO: pull details from library */ });
     }
 

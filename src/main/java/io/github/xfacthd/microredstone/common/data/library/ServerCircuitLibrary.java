@@ -39,7 +39,7 @@ public final class ServerCircuitLibrary extends SavedData
         return server.overworld().getDataStorage().computeIfAbsent(TYPE);
     }
 
-    public void addOrModifyEntry(ServerPlayer player, CircuitLibraryEntry entry)
+    public boolean addOrModifyEntry(ServerPlayer player, CircuitLibraryEntry entry)
     {
         entry = getOrCreateLibrary(player.getUUID()).addOrModifyEntry(entry);
         if (entry != null)
@@ -47,14 +47,16 @@ public final class ServerCircuitLibrary extends SavedData
             sendUpdatePacket(player, List.of(entry), List.of());
             updateReferences(Set.of(entry), Map.of());
             setDirty();
+            return true;
         }
+        return false;
     }
 
-    public void removeEntry(ServerPlayer player, String name)
+    public boolean removeEntry(ServerPlayer player, String name)
     {
         UUID playerId = player.getUUID();
         PlayerCircuitLibrary library = playerLibraries.get(playerId);
-        if (library == null) return;
+        if (library == null) return false;
 
         UUID id = library.removeEntry(name);
         if (id != null)
@@ -62,7 +64,9 @@ public final class ServerCircuitLibrary extends SavedData
             sendUpdatePacket(player, List.of(), List.of(id));
             updateReferences(Set.of(), Map.of(playerId, Set.of(id)));
             setDirty();
+            return true;
         }
+        return false;
     }
 
     public List<CircuitLibraryEntry> getEntriesForPlayer(UUID player)

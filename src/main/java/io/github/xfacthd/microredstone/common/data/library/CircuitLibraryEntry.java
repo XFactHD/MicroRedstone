@@ -12,6 +12,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 public record CircuitLibraryEntry(
@@ -64,17 +65,25 @@ public record CircuitLibraryEntry(
 
     public CircuitLibraryEntry modifyShareInfo(ShareInfo shareInfo)
     {
-        return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, Instant.now(), shareInfo);
+        if (!this.shareInfo.equals(shareInfo))
+        {
+            return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, Instant.now(), shareInfo);
+        }
+        return this;
     }
 
     CircuitLibraryEntry withId(UUID id)
     {
-        return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, timeModified, shareInfo);
+        if (!this.id.equals(id))
+        {
+            return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, timeModified, shareInfo);
+        }
+        return this;
     }
 
     CircuitLibraryEntry withoutShareTargets()
     {
-        if (shareInfo.type() == ShareType.SHARED)
+        if (shareInfo instanceof ShareInfo.Shared(Set<UUID> sharedTo) && !sharedTo.isEmpty())
         {
             return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, timeModified, shareInfo.withoutShareTargets());
         }

@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.net.payload.serverbound;
 import com.mojang.datafixers.util.Either;
 import io.github.xfacthd.microredstone.common.data.library.CircuitLibraryEntry;
 import io.github.xfacthd.microredstone.common.data.library.ServerCircuitLibrary;
+import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundModifyCircuitLibraryResultPayload;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -29,8 +30,11 @@ public record ServerboundModifyCircuitLibraryPayload(Either<CircuitLibraryEntry,
 
         MinecraftServer server = Objects.requireNonNull(player.getServer());
         ServerCircuitLibrary library = ServerCircuitLibrary.get(server);
-        entry.ifLeft(entry -> library.addOrModifyEntry(player, entry))
-                .ifRight(entry -> library.removeEntry(player, entry));
+        boolean success = entry.map(
+                entry -> library.addOrModifyEntry(player, entry),
+                entry -> library.removeEntry(player, entry)
+        );
+        ctx.reply(new ClientboundModifyCircuitLibraryResultPayload(success));
     }
 
     @Override

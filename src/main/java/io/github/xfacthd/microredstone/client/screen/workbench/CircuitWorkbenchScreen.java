@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench;
 
-import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenu;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
@@ -16,11 +16,11 @@ import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
 import io.github.xfacthd.microredstone.common.menu.slot.ToggleableSlot;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -30,7 +30,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -43,9 +42,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
 {
     private static final ResourceLocation BACKGROUND = Utils.rl("background");
     public static final ResourceLocation WINDOW_FRAME = Utils.rl("window_frame");
-    public static final Component TITLE_CONFIRM_IMPORT = Utils.translate("title", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm");
-    public static final Component MESSAGE_CONFIRM_IMPORT_LINE_ONE = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_one");
-    public static final Component MESSAGE_CONFIRM_IMPORT_LINE_TWO = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_two");
     public static final int PADDING = 5;
     public static final int BORDER_LEFT = PADDING * 2;
     public static final int BORDER_RIGHT = PADDING * 2 + 1;
@@ -61,6 +57,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     private final LibraryBrowser libraryBrowser = new LibraryBrowser(this);
     private final ToolPaneTabWidget[] tabWidgets = { partsList, toolsTab, libraryBrowser };
     private final ContextMenu contextMenu = new ContextMenu(this);
+    private final ImportExportHandler importExportHandler = new ImportExportHandler(this);
     private ToolPaneTab toolPaneTab = ToolPaneTab.PARTS;
     @Nullable
     private DragStart dragStart = null;
@@ -377,6 +374,14 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             floatingNode = floatingNode.rotate(Screen.hasShiftDown() ? -1 : 1);
             return true;
         }
+        if (libraryBrowser.isEditBoxFocused())
+        {
+            InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
+            if (Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key))
+            {
+                return true;
+            }
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
@@ -490,43 +495,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         return null;
     }
 
-    public void assembleAndExport(String name, ExportTarget target)
-    {
-        // TODO: implement circuit assembly, error handling, overwrite handling and target storage
-    }
-
-    public void importCircuitFromItem(ItemStack stack)
-    {
-        // TODO: implement import from item
-    }
-
-    public void importCircuitFromClipboard()
-    {
-        // TODO: implement guarded circuit deserialization
-    }
-
-    public void importCircuit(CompoundCircuitNode circuitNode)
-    {
-        if (canvas.isEmpty())
-        {
-            doImportCircuit(circuitNode);
-            return;
-        }
-
-        DialogScreen.builder(DialogScreen.Type.CONFIRM)
-                .withTitle(TITLE_CONFIRM_IMPORT)
-                .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_ONE)
-                .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_TWO)
-                .withCancelCallback(() -> doImportCircuit(circuitNode))
-                .show();
-    }
-
-    private void doImportCircuit(CompoundCircuitNode circuitNode)
-    {
-        canvas.clear();
-        // TODO: implement circuit node disassembly
-    }
-
     public CircuitCanvas getCanvas()
     {
         return canvas;
@@ -540,5 +508,10 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public LibraryBrowser getLibraryBrowser()
     {
         return libraryBrowser;
+    }
+
+    public ImportExportHandler getImportExportHandler()
+    {
+        return importExportHandler;
     }
 }

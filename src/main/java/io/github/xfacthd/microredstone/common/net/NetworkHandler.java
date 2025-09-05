@@ -2,7 +2,10 @@ package io.github.xfacthd.microredstone.common.net;
 
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryUpdatePayload;
+import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundModifyCircuitLibraryResultPayload;
+import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundWorkbenchWriteCircuitResultPayload;
 import io.github.xfacthd.microredstone.common.net.payload.serverbound.ServerboundModifyCircuitLibraryPayload;
+import io.github.xfacthd.microredstone.common.net.payload.serverbound.ServerboundWorkbenchWriteCircuitPayload;
 import io.github.xfacthd.microredstone.common.net.task.SyncCircuitLibraryTask;
 import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -22,10 +25,23 @@ public final class NetworkHandler
                         ClientboundCircuitLibraryUpdatePayload.TYPE,
                         ClientboundCircuitLibraryUpdatePayload.STREAM_CODEC
                 )
+                .playToClient(
+                        ClientboundWorkbenchWriteCircuitResultPayload.TYPE,
+                        ClientboundWorkbenchWriteCircuitResultPayload.STREAM_CODEC
+                )
+                .playToClient(
+                        ClientboundModifyCircuitLibraryResultPayload.TYPE,
+                        ClientboundModifyCircuitLibraryResultPayload.STREAM_CODEC
+                )
                 .playToServer(
                         ServerboundModifyCircuitLibraryPayload.TYPE,
                         ServerboundModifyCircuitLibraryPayload.STREAM_CODEC,
                         ServerboundModifyCircuitLibraryPayload::handle
+                )
+                .playToServer(
+                        ServerboundWorkbenchWriteCircuitPayload.TYPE,
+                        ServerboundWorkbenchWriteCircuitPayload.STREAM_CODEC,
+                        ServerboundWorkbenchWriteCircuitPayload::handle
                 );
     }
 
