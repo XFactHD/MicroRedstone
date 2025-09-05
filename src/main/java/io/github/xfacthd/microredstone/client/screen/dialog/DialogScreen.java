@@ -128,7 +128,6 @@ public final class DialogScreen extends Screen
         return false;
     }
 
-    // TODO: make icons
     public enum Type
     {
         INFO(Utils.rl("dialog/icon_info"), false, (ok, cancel) -> ok),
