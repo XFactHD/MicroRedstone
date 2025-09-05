@@ -3,15 +3,18 @@ package io.github.xfacthd.microredstone.client.screen.dialog;
 import com.google.common.base.Preconditions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public final class DialogScreenBuilder
 {
     private final DialogScreen.Type type;
     private Component title;
     private final List<Component> messageLines = new ArrayList<>();
+    private final List<Property> properties = new ArrayList<>();
     private Runnable okCallback = () -> {};
     private Runnable cancelCallback = () -> {};
 
@@ -39,6 +42,20 @@ public final class DialogScreenBuilder
         return this;
     }
 
+    public DialogScreenBuilder withProperty(Component label, Component value)
+    {
+        Preconditions.checkState(type == DialogScreen.Type.PROPERTIES);
+        properties.add(new Property(label, new Property.ImmediateValue(value)));
+        return this;
+    }
+
+    public DialogScreenBuilder withProperty(Component label, Supplier<@Nullable Component> delayedValue, int expectedMaxValueWidth)
+    {
+        Preconditions.checkState(type == DialogScreen.Type.PROPERTIES);
+        properties.add(new Property(label, new Property.DelayedValue(delayedValue, expectedMaxValueWidth)));
+        return this;
+    }
+
     public DialogScreenBuilder withOkCallback(Runnable callback)
     {
         this.okCallback = callback;
@@ -54,7 +71,7 @@ public final class DialogScreenBuilder
 
     public DialogScreen build()
     {
-        return new DialogScreen(type, title, messageLines, okCallback, cancelCallback);
+        return new DialogScreen(type, title, messageLines, properties, okCallback, cancelCallback);
     }
 
     public void show()

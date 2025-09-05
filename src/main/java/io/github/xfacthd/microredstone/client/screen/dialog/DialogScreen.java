@@ -33,24 +33,35 @@ public final class DialogScreen extends Screen
 
     private final Type type;
     private final List<Component> messageLines;
+    private final List<Property> properties;
     private final Runnable okCallback;
     private final Runnable cancelCallback;
     private final List<List<FormattedCharSequence>> textBlocks = new ArrayList<>();
+    private final List<FormattedProperty> propertyLines = new ArrayList<>();
     private int leftPos;
     private int topPos;
     private int imageWidth;
     private int imageHeight;
+    private int propValueX;
 
     public static DialogScreenBuilder builder(Type type)
     {
         return new DialogScreenBuilder(type);
     }
 
-    DialogScreen(Type type, Component title, List<Component> messageLines, Runnable okCallback, Runnable cancelCallback)
+    DialogScreen(
+            Type type,
+            Component title,
+            List<Component> messageLines,
+            List<Property> properties,
+            Runnable okCallback,
+            Runnable cancelCallback
+    )
     {
         super(title);
         this.type = type;
         this.messageLines = messageLines;
+        this.properties = properties;
         this.okCallback = okCallback;
         this.cancelCallback = cancelCallback;
     }
@@ -59,13 +70,14 @@ public final class DialogScreen extends Screen
     protected void init()
     {
         textBlocks.clear();
+        propertyLines.clear();
 
         imageWidth = MIN_WIDTH;
         imageHeight = BASE_HEIGHT;
-        boolean first = true;
+        boolean addPadding = false;
         for (Component line : messageLines)
         {
-            if (!first)
+            if (addPadding)
             {
                 imageHeight += PADDING;
             }
@@ -79,11 +91,34 @@ public final class DialogScreen extends Screen
             imageHeight += segments.size() * font.lineHeight;
             textBlocks.add(segments);
 
-            first = false;
+            addPadding = true;
+        }
+        int maxLabelWidth = 0;
+        for (Property property : properties)
+        {
+            if (addPadding)
+            {
+                imageHeight += PADDING;
+            }
+
+            maxLabelWidth = Math.max(maxLabelWidth, font.width(property.label()));
+            imageHeight += font.lineHeight;
+
+            addPadding = false;
+        }
+        int maxValueWidth = MAX_TEXT_WIDTH - PADDING - maxLabelWidth;
+        for (Property property : properties)
+        {
+            FormattedProperty formatted = property.format(font, maxValueWidth);
+            propertyLines.add(formatted);
+            formatted.value().text(); // Try resolving potential DelayedValues
+            int lineWidth = maxLabelWidth + PADDING * 3 + formatted.value().valueWidth();
+            imageWidth = Math.max(imageWidth, lineWidth);
         }
 
         leftPos = (width - imageWidth) / 2;
         topPos = (height - imageHeight) / 2;
+        propValueX = leftPos + PADDING * 2 + maxLabelWidth;
 
         type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
     }
@@ -108,6 +143,18 @@ public final class DialogScreen extends Screen
             }
             contentY += PADDING;
         }
+        for (FormattedProperty line : propertyLines)
+        {
+            graphics.drawString(font, line.label(), contentX, contentY, 0xFF404040, false);
+            FormattedProperty.Value value = line.value();
+            graphics.drawString(font, value.text(), propValueX, contentY, 0xFF404040, false);
+            Component tooltip = value.tooltip();
+            if (tooltip != null && mouseY >= contentY && mouseY < contentY + font.lineHeight && mouseX >= propValueX && mouseX < propValueX + value.valueWidth())
+            {
+                graphics.setTooltipForNextFrame(tooltip, mouseX, mouseY);
+            }
+            contentY += font.lineHeight;
+        }
     }
 
     @Override
@@ -128,41 +175,50 @@ public final class DialogScreen extends Screen
         return false;
     }
 
+    @Override
+    public boolean isPauseScreen()
+    {
+        return false;
+    }
+
     public enum Type
     {
-        INFO(Utils.rl("dialog/icon_info"), false, (ok, cancel) -> ok),
-        WARNING(Utils.rl("dialog/icon_warning"), false, (ok, cancel) -> ok),
-        ERROR(Utils.rl("dialog/icon_error"), false, (ok, cancel) -> ok),
-        CONFIRM(Utils.rl("dialog/icon_confirm"), true, (ok, cancel) -> cancel)
-        {
-            @Override
-            void initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback)
-            {
-                int halfWidth = (xCenter - screen.leftPos) / 2;
-                int xLeft = screen.leftPos + halfWidth - BUTTON_WIDTH / 2;
-                Type.addButton(screen, xLeft, CommonComponents.GUI_YES, okCallback);
-                int xRight = xCenter + halfWidth - BUTTON_WIDTH / 2;
-                Type.addButton(screen, xRight, CommonComponents.GUI_CANCEL, cancelCallback);
-            }
-        },
+        INFO(Utils.rl("dialog/icon_info"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
+        WARNING(Utils.rl("dialog/icon_warning"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
+        ERROR(Utils.rl("dialog/icon_error"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
+        CONFIRM(Utils.rl("dialog/icon_confirm"), true, CommonComponents.GUI_YES, (ok, cancel) -> cancel),
+        PROPERTIES(Utils.rl("dialog/icon_properties"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
         ;
 
         private final ResourceLocation icon;
         final Component defaultTitle = Utils.translate("title", "dialog.title." + toString().toLowerCase(Locale.ROOT));
         final boolean hasCancel;
+        private final Component okText;
         private final BinaryOperator<Runnable> escCallbackSelector;
 
-        Type(ResourceLocation icon, boolean hasCancel, BinaryOperator<Runnable> escCallbackSelector)
+        Type(ResourceLocation icon, boolean hasCancel, Component okText, BinaryOperator<Runnable> escCallbackSelector)
         {
             this.icon = icon;
             this.hasCancel = hasCancel;
+            this.okText = okText;
             this.escCallbackSelector = escCallbackSelector;
         }
 
         void initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback)
         {
-            int x = xCenter - BUTTON_WIDTH / 2;
-            addButton(screen, x, CommonComponents.GUI_OK, okCallback);
+            if (hasCancel)
+            {
+                int halfWidth = (xCenter - screen.leftPos) / 2;
+                int xLeft = screen.leftPos + halfWidth - BUTTON_WIDTH / 2;
+                addButton(screen, xLeft, okText, okCallback);
+                int xRight = xCenter + halfWidth - BUTTON_WIDTH / 2;
+                addButton(screen, xRight, CommonComponents.GUI_CANCEL, cancelCallback);
+            }
+            else
+            {
+                int x = xCenter - BUTTON_WIDTH / 2;
+                addButton(screen, x, okText, okCallback);
+            }
         }
 
         private static void addButton(DialogScreen screen, int x, Component text, Runnable callback)
