@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.client.screen.workbench.part;
 
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
+import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
@@ -66,6 +67,21 @@ public final class PartGrid
             {
                 circuit.addChild(node);
             }
+        }
+    }
+
+    public void removePartNode(NodePos pos)
+    {
+        switch (getPartNode(pos))
+        {
+            case PrototypeNode ignored -> setPartNode(pos, null, 0, PartSetMode.REMOVE);
+            case Connection con ->
+            {
+                Port port = Port.ofPartRotation(con.getRotation());
+                canvas.getRootNode().getConnections()[port.ordinal()] = null;
+                canvas.getWireGrid().trimConnectedWires(pos, con);
+            }
+            case null, default -> {}
         }
     }
 

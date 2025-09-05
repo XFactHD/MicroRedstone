@@ -1,7 +1,9 @@
 package io.github.xfacthd.microredstone.common.circuit.connection;
 
 import com.mojang.serialization.Codec;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
@@ -22,6 +24,7 @@ public enum PortDir implements StringRepresentable
 
     private final String name = toString().toLowerCase(Locale.ROOT);
     private final String description = StringUtils.capitalize(name);
+    private final Component title = Utils.translate("label", "port_dir." + name);
 
     @Override
     public String getSerializedName()
@@ -32,5 +35,10 @@ public enum PortDir implements StringRepresentable
     public String getDescription()
     {
         return description;
+    }
+
+    public Component getTitle()
+    {
+        return title;
     }
 }

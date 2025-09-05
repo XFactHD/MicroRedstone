@@ -9,8 +9,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-
 public sealed interface FloatingNode
 {
     static FloatingNode of(PlaceableNode node, @Nullable NodePos lastPos)
@@ -40,8 +38,6 @@ public sealed interface FloatingNode
     boolean canPlaceAt(CircuitCanvas canvas, NodePos pos);
 
     void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast);
-
-    void delete(CircuitCanvas canvas);
 
     record Part(PrototypeNode node, @Nullable NodePos lastPos, int rotation) implements FloatingNode
     {
@@ -75,14 +71,6 @@ public sealed interface FloatingNode
                 mode = PartSetMode.ADD;
             }
             partGrid.setPartNode(pos, node, rotation, mode);
-        }
-
-        @Override
-        public void delete(CircuitCanvas canvas)
-        {
-            PartGrid partGrid = canvas.getPartGrid();
-            NodePos pos = Objects.requireNonNull(lastPos);
-            partGrid.setPartNode(pos, null, 0, PartSetMode.REMOVE);
         }
     }
 
@@ -139,16 +127,6 @@ public sealed interface FloatingNode
             {
                 connections[newPort.ordinal()] = node;
             }
-        }
-
-        @Override
-        public void delete(CircuitCanvas canvas)
-        {
-            Connection[] connections = canvas.getRootNode().getConnections();
-            NodePos pos = Objects.requireNonNull(lastPos);
-            Port port = Port.ofPartRotation(node.getRotation());
-            connections[port.ordinal()] = null;
-            canvas.getWireGrid().trimConnectedWires(pos, node);
         }
     }
 }

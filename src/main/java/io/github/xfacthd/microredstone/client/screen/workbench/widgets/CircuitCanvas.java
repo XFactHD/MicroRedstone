@@ -1,7 +1,12 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConnectionNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConverterPartNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.PartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartGrid;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.RoutedWire;
@@ -13,7 +18,9 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
@@ -404,6 +411,23 @@ public final class CircuitCanvas
     public ErrorAnnotations getErrorAnnotations()
     {
         return errorAnnotations;
+    }
+
+    @Nullable
+    public ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY)
+    {
+        NodePos pos = getNodePos((int) mouseX, (int) mouseY);
+        if (pos == null) return null;
+
+        PlaceableNode node = partGrid.getPartNode(pos);
+        return switch (node)
+        {
+            case Connection con -> new ConnectionNodeContextMenuProvider(this, con);
+            case ClockPrototypeNode clock -> new ClockPartNodeContextMenuProvider(this, clock);
+            case ConverterPrototypeNode conv -> new ConverterPartNodeContextMenuProvider(this, conv);
+            case PrototypeNode proto -> new PartNodeContextMenuProvider<>(this, proto);
+            case null, default -> null;
+        };
     }
 
     public void computeWindowSize(int width, int height)

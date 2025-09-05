@@ -5,6 +5,10 @@ import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
 import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.BaseNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConnectionNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConverterPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LogicGateList;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
@@ -17,6 +21,7 @@ import io.github.xfacthd.microredstone.client.util.ColorNames;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
+import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.compat.atlasviewer.AtlasViewerCompat;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.data.library.ShareType;
@@ -116,6 +121,10 @@ public final class MRLanguageProvider extends LanguageProvider
         add(WireToolActionContextMenuProvider.ENTRY_WIRE_ROUTE_PREF, "Long Section First");
         add(ImportEntryContextMenuProvider.ENTRY_IMPORT, "Import to Canvas");
         add(ImportEntryContextMenuProvider.ENTRY_DETAILS, "Details");
+        add(BaseNodeContextMenuProvider.ENTRY_DELETE_NODE, "Delete Part");
+        add(ConnectionNodeContextMenuProvider.ENTRY_PORT_DIR, "Port Direction");
+        add(ConverterPartNodeContextMenuProvider.ENTRY_SET_BIT, "Set Bundle Bit");
+        add(ClockPartNodeContextMenuProvider.ENTRY_SET_PERIOD, "Set Clock Period");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
@@ -171,6 +180,9 @@ public final class MRLanguageProvider extends LanguageProvider
             }
             add(ColorNames.getName(color), name.toString().trim());
         }
+
+        add(PortDir.INPUT.getTitle(), "Input");
+        add(PortDir.OUTPUT.getTitle(), "Output");
 
         add(AtlasViewerCompat.LABEL_MASK_TEXTURE, "Texture");
         add(AtlasViewerCompat.LABEL_MASK_SPRITE, "Sprite");

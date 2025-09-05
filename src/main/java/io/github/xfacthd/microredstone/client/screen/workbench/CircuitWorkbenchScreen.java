@@ -65,6 +65,8 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     private FloatingNode floatingNode = null;
     @Nullable
     private ArrowKey activeArrowKey = null;
+    private int lastMouseX = -1;
+    private int lastMouseY = -1;
 
     public CircuitWorkbenchScreen(CircuitWorkbenchMenu menu, Inventory inventory, Component title)
     {
@@ -127,7 +129,9 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         boolean overMenu = contextMenu.isOpen() && contextMenu.isMouseOver(mouseX, mouseY);
-        super.render(graphics, overMenu ? -1 : mouseX, overMenu ? -1 : mouseY, partialTick);
+        lastMouseX = overMenu ? -1 : mouseX;
+        lastMouseY = overMenu ? -1 : mouseY;
+        super.render(graphics, lastMouseX, lastMouseY, partialTick);
         contextMenu.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
     }
@@ -297,7 +301,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 }
                 else if (floatingNode.lastPos() != null)
                 {
-                    floatingNode.delete(canvas);
+                    canvas.getPartGrid().removePartNode(Objects.requireNonNull(floatingNode.lastPos()));
                 }
                 floatingNode = null;
             }
@@ -379,6 +383,15 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
             if (Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key))
             {
+                return true;
+            }
+        }
+        if (keyCode == GLFW.GLFW_KEY_DELETE)
+        {
+            NodePos pos = canvas.getNodePos(lastMouseX, lastMouseY);
+            if (pos != null && canvas.getPartGrid().getPartNode(pos) != null)
+            {
+                canvas.getPartGrid().removePartNode(pos);
                 return true;
             }
         }
@@ -491,6 +504,10 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY))
         {
             return scrollable.getContextMenuProvider(mouseX, mouseY);
+        }
+        if (canvas.isMouseOver(mouseX, mouseY))
+        {
+            return canvas.getContextMenuProvider(mouseX, mouseY);
         }
         return null;
     }
