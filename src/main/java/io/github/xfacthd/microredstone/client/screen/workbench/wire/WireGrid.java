@@ -200,11 +200,32 @@ public final class WireGrid implements Iterable<RoutedWire>
             if (connection != null && connection.neighbor() != null)
             {
                 wire.replaceSection(connection.neighbor(), pos, adjPos);
-                wire.wire().getNodes().remove(connection);
-                wire.wire().getNodes().add(new WireNode.Branch(adjPos, Set.of(port), Set.of(connection.neighbor())));
+
+                List<WireNode> nodes = wire.wire().getNodes();
+                nodes.remove(connection);
+                nodes.add(new WireNode.Branch(adjPos, Set.of(port), Set.of(connection.neighbor())));
+                updateWireNodeNeighbors(nodes, pos, port, adjPos);
             }
         }
         grid[index(pos)] = null;
+    }
+
+    private static void updateWireNodeNeighbors(List<WireNode> nodes, NodePos pos, Port port, NodePos adjPos)
+    {
+        Port opposite = port.getOpposite();
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            WireNode node = nodes.get(i);
+            if (node instanceof WireNode.Connection con && con.port() == opposite && pos.equals(con.neighbor()))
+            {
+                nodes.set(i, con.withNeighbor(opposite, adjPos));
+            }
+            else if (node instanceof WireNode.Branch branch && branch.ports().contains(opposite) && branch.neighbors().contains(pos))
+            {
+                branch.neighbors().remove(pos);
+                branch.neighbors().add(adjPos);
+            }
+        }
     }
 
     public void clear()
