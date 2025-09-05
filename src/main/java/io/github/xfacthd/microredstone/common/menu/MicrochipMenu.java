@@ -3,7 +3,6 @@ package io.github.xfacthd.microredstone.common.menu;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.menu.slot.CircuitSlot;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -101,19 +100,5 @@ public final class MicrochipMenu extends AbstractContainerMenu
         }
 
         Slot create(int x, int y);
-    }
-
-    private static final class SingleItemContainer extends SimpleContainer
-    {
-        public SingleItemContainer()
-        {
-            super(1);
-        }
-
-        @Override
-        public int getMaxStackSize()
-        {
-            return 1;
-        }
     }
 }

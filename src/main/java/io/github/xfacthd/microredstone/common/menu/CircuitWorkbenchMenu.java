@@ -8,7 +8,6 @@ import io.github.xfacthd.microredstone.common.menu.slot.ToggleableSlot;
 import io.github.xfacthd.microredstone.common.menu.slot.WorkbenchCircuitSlot;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundWorkbenchWriteCircuitResultPayload;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -39,7 +38,7 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
         super(MRContent.MENU_TYPE_CIRCUIT_WORKBENCH.value(), containerId);
         this.levelAccess = levelAccess;
         // Slot positions are configured by the screen
-        this.circuitSlot = addSlot(new WorkbenchCircuitSlot(new SimpleContainer(1), 0, 0, 0));
+        this.circuitSlot = addSlot(new WorkbenchCircuitSlot(new SingleItemContainer(), 0, 0, 0));
         for (int idx = 0; idx < 4 * 9; idx++)
         {
             addSlot(new ToggleableSlot(inventory, idx, 0, 0));
