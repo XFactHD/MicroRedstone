@@ -183,7 +183,7 @@ final class WireRouter
             }
             return computeBacktrackedNode(canvas, startPos, endPos, dir);
         }
-        WireGrid.WireNode wireNode = canvas.getWireGrid().getWireNode(endPos);
+        WireGrid.WireGridNode wireNode = canvas.getWireGrid().getWireNode(endPos);
         if (wireNode == null || (last && wireNode.canConnect(type, dir)))
         {
             return new WireNode.Branch(endPos, Set.of(dir.getOpposite()), Set.of(startPos));

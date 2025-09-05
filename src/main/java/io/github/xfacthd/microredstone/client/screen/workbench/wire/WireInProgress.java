@@ -98,7 +98,7 @@ public final class WireInProgress
             {
                 return tryConnectPart(pos, partNode, true, null, () -> Port.ofCross(exactPos.fracX(), exactPos.fracY()));
             }
-            WireGrid.WireNode wire = canvas.getWireGrid().getWireNode(pos);
+            WireGrid.WireGridNode wire = canvas.getWireGrid().getWireNode(pos);
             if (wire != null && wire.wires().size() == 1)
             {
                 RoutedWire routed = wire.wires().getFirst();
@@ -132,7 +132,7 @@ public final class WireInProgress
                     }
                     return result;
                 }
-                WireGrid.WireNode wireNode = canvas.getWireGrid().getWireNode(pos);
+                WireGrid.WireGridNode wireNode = canvas.getWireGrid().getWireNode(pos);
                 if (wireNode != null)
                 {
                     if (wireNode.canConnect(type, dir))
