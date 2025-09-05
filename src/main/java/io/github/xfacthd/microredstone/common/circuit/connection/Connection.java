@@ -95,9 +95,14 @@ public final class Connection implements PlaceableNode
         return Objects.requireNonNull(wire);
     }
 
-    public void validate(ProblemReporter conReporter)
+    public boolean validate(ProblemReporter conReporter)
     {
-        if (wire == null) conReporter.report(DanglingConnectionProblem.INSTANCE);
+        if (wire == null)
+        {
+            conReporter.report(DanglingConnectionProblem.INSTANCE);
+            return false;
+        }
+        return true;
     }
 
     public Connector toConnector(Port port, WireMapper wireMapper)

@@ -141,9 +141,11 @@ public final class CompoundPrototypeNode extends PrototypeNode
             if (connection != null)
             {
                 ProblemReporter conReporter = reporter.forChild(new ConnectionPathElement(connection));
-                connection.validate(conReporter);
-                boolean driver = connection.getPortDir() == PortDir.INPUT;
-                wireValidator.check(connection.getWire(), connection.getWireType(), driver, -1, conReporter);
+                if (connection.validate(conReporter))
+                {
+                    boolean driver = connection.getPortDir() == PortDir.INPUT;
+                    wireValidator.check(connection.getWire(), connection.getWireType(), driver, -1, conReporter);
+                }
             }
         }
         for (Reference2IntMap.Entry<Wire> entry : wireValidator.entries())
