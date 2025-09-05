@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench;
 
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.LogicGateList;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import org.jetbrains.annotations.Nullable;
@@ -85,7 +85,7 @@ public sealed interface DragStart
         @Override
         public PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen)
         {
-            return PartsList.createNode(partIdx);
+            return LogicGateList.instantiate(partIdx);
         }
     }
 
@@ -113,7 +113,7 @@ public sealed interface DragStart
         @Nullable
         public PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen)
         {
-            return workbenchScreen.getLibraryBrowser().createNode(entryIdx);
+            return workbenchScreen.getPartsList().instantiateLibraryNode(entryIdx);
         }
     }
 }

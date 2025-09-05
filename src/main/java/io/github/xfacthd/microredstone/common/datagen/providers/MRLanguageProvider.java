@@ -4,12 +4,13 @@ import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.LogicGateList;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.ImportEntryContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.WireToolActionContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
 import io.github.xfacthd.microredstone.client.util.ColorNames;
 import io.github.xfacthd.microredstone.common.MRContent;
@@ -61,14 +62,19 @@ public final class MRLanguageProvider extends LanguageProvider
 
         add(CircuitWorkbenchBlock.MENU_TITLE, "Circuit Workbench");
         add(CircuitCanvas.CELL_COORD_TRANSLATION, "Cell: %s, %s");
+        add(PartsList.LABEL_MODE, "Mode: ");
+        add(PartsList.LABEL_FILTER, "Filter:");
+        add(PartsList.MSG_DROP_TO_DELETE, "Drop here to delete");
+        add(PartsList.Mode.GATES.getTitle(), "Gates");
+        add(PartsList.Mode.LIBRARY.getTitle(), "Library");
         add(ToolPaneTab.PARTS.getTitle(), "Parts");
         add(ToolPaneTab.TOOLS.getTitle(), "Tools");
         add(ToolPaneTab.LIBRARY.getTitle(), "Library");
         add(LibraryBrowser.LABEL_MODE, "Mode:");
-        add(LibraryBrowser.LABEL_FILTER, "Filter:");
         add(LibraryBrowser.Mode.IMPORT.getTitle(), "Import");
         add(LibraryBrowser.Mode.EXPORT.getTitle(), "Export");
-        add(LibraryBrowser.IMPORT_BTN_TITLE, "Import from Clipboard");
+        add(LibraryBrowser.ImportAction.IMPORT_FROM_ITEM.getTitle(), "Import from Item");
+        add(LibraryBrowser.ImportAction.IMPORT_FROM_JSON.getTitle(), "Import from Clipboard");
         add(LibraryBrowser.ExportAction.EXPORT_TO_LIBRARY.getTitle(), "Export to Library");
         add(LibraryBrowser.ExportAction.EXPORT_TO_ITEM.getTitle(), "Export to Item");
         add(LibraryBrowser.ExportAction.EXPORT_TO_JSON.getTitle(), "Export to Clipboard");
@@ -154,7 +160,7 @@ public final class MRLanguageProvider extends LanguageProvider
     // TODO: add descriptions
     private void addPart(String partName, String title, @Nullable String subTitle, String description)
     {
-        PartsList.Entry entry = PartsList.getEntryByName(partName);
+        LogicGateList.Entry entry = LogicGateList.getEntryByName(partName);
         add(entry.title(), title);
         if (entry.subTitle() != null && subTitle != null)
         {

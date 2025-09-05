@@ -23,6 +23,8 @@ import java.util.Set;
 
 public final class WireGrid implements Iterable<RoutedWire>
 {
+    private static final Port[] PORTS = Port.values();
+
     private final CircuitCanvas canvas;
     private final WireNode[] grid = new WireNode[CircuitCanvas.PART_COUNT];
     private final Set<RoutedWire> wires = new ReferenceOpenHashSet<>();
@@ -142,9 +144,9 @@ public final class WireGrid implements Iterable<RoutedWire>
         }
     }
 
-    public void trimConnectedWires(NodePos pos, PrototypeNode partNode)
+    public void trimConnectedWires(NodePos pos, PlaceableNode partNode)
     {
-        for (Port port : Port.values())
+        for (Port port : PORTS)
         {
             if (!partNode.hasPort(port, null) || !partNode.isConnected(port)) continue;
 

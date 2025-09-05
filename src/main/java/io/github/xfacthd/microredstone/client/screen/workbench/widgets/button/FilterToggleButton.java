@@ -1,7 +1,8 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets.button;
 
 import io.github.xfacthd.microredstone.client.screen.widgets.button.SimpleButton;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.LibraryBrowser;
+import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,13 +19,13 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     private static final int ICON_SIZE = SIZE - ICON_OFFSET * 2;
     private static final WidgetSprites SPRITES_OFF = sprites(Utils.rl("button/toggle_button_off"));
     private static final WidgetSprites SPRITES_ON = sprites(Utils.rl("button/toggle_button_on"));
-    public static final String TOOLTIP_OFF = Utils.translationKey("tooltip", "circuit_workbench.library_browser.filter.hidden");
-    public static final String TOOLTIP_ON = Utils.translationKey("tooltip", "circuit_workbench.library_browser.filter.shown");
+    public static final String TOOLTIP_OFF = Utils.translationKey("tooltip", "circuit_workbench.parts_list.filter.hidden");
+    public static final String TOOLTIP_ON = Utils.translationKey("tooltip", "circuit_workbench.parts_list.filter.shown");
 
-    private final LibraryBrowser owner;
+    private final PartsList owner;
     private final ShareType filter;
 
-    public FilterToggleButton(LibraryBrowser owner, ShareType filter)
+    public FilterToggleButton(PartsList owner, ShareType filter)
     {
         super(0, 0, SIZE, SIZE, filter.getTitle());
         this.owner = owner;
@@ -40,10 +41,15 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, filter.getIcon(), iconX, iconY, ICON_SIZE, ICON_SIZE);
     }
 
+    private boolean isEnabled()
+    {
+        return WorkbenchConfig.INSTANCE.isImportFilterEnabled(filter);
+    }
+
     @Override
     protected WidgetSprites getSprites()
     {
-        return owner.isFilterEnabled(filter) ? SPRITES_ON : SPRITES_OFF;
+        return isEnabled() ? SPRITES_ON : SPRITES_OFF;
     }
 
     @Override
@@ -54,7 +60,7 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
 
     public void updateTooltip()
     {
-        String key = owner.isFilterEnabled(filter) ? TOOLTIP_ON : TOOLTIP_OFF;
+        String key = isEnabled() ? TOOLTIP_ON : TOOLTIP_OFF;
         setTooltip(Tooltip.create(Component.translatable(key, filter.getTitle())));
     }
 

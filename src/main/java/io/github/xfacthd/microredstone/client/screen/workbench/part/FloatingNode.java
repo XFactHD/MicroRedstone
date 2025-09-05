@@ -9,6 +9,8 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public sealed interface FloatingNode
 {
     static FloatingNode of(PlaceableNode node, @Nullable NodePos lastPos)
@@ -38,6 +40,8 @@ public sealed interface FloatingNode
     boolean canPlaceAt(CircuitCanvas canvas, NodePos pos);
 
     void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast);
+
+    void delete(CircuitCanvas canvas);
 
     record Part(PrototypeNode node, @Nullable NodePos lastPos, int rotation) implements FloatingNode
     {
@@ -71,6 +75,14 @@ public sealed interface FloatingNode
                 mode = PartSetMode.ADD;
             }
             partGrid.setPartNode(pos, node, rotation, mode);
+        }
+
+        @Override
+        public void delete(CircuitCanvas canvas)
+        {
+            PartGrid partGrid = canvas.getPartGrid();
+            NodePos pos = Objects.requireNonNull(lastPos);
+            partGrid.setPartNode(pos, null, 0, PartSetMode.REMOVE);
         }
     }
 
@@ -107,18 +119,36 @@ public sealed interface FloatingNode
         @Override
         public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast)
         {
+            // Dragging a connection doesn't actually remove it from the grid -> no action required if pos and rotation match
+            if (pos.equals(lastPos) && node.getRotation() == rotation) return;
+
             Connection[] connections = canvas.getRootNode().getConnections();
             int placeRot = revertToLast ? node.getRotation() : rotation;
-            Port port = Port.ofPartRotation(placeRot);
-            if (lastPos != null && placeRot != node.getRotation())
+            Port prevPort = Port.ofPartRotation(node.getRotation());
+            Port newPort = Port.ofPartRotation(placeRot);
+            if (lastPos != null)
             {
-                connections[port.ordinal()] = null;
+                if (newPort != prevPort)
+                {
+                    connections[prevPort.ordinal()] = null;
+                }
+                canvas.getWireGrid().trimConnectedWires(lastPos, node);
             }
             node.setPos(pos, placeRot);
-            if (lastPos == null)
+            if (lastPos == null || newPort != prevPort)
             {
-                connections[port.ordinal()] = node;
+                connections[newPort.ordinal()] = node;
             }
+        }
+
+        @Override
+        public void delete(CircuitCanvas canvas)
+        {
+            Connection[] connections = canvas.getRootNode().getConnections();
+            NodePos pos = Objects.requireNonNull(lastPos);
+            Port port = Port.ofPartRotation(node.getRotation());
+            connections[port.ordinal()] = null;
+            canvas.getWireGrid().trimConnectedWires(pos, node);
         }
     }
 }

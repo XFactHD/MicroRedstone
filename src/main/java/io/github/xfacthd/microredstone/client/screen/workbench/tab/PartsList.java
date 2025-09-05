@@ -1,111 +1,210 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
+import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
+import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.ImportEntryContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
-import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
-import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
+import io.github.xfacthd.microredstone.common.data.library.CircuitLibraryEntry;
+import io.github.xfacthd.microredstone.common.data.library.ClientCircuitLibrary;
+import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-public final class PartsList extends ToolPaneTabWidget
+public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<PartsList.Mode>
 {
-    private static final Entry[] ENTRIES = new Entry[] {
-            entry("connection_single").spec(Connection.ICON_SINGLE_IN, WireType.SINGLE).build(),
-            entry("connection_bundled").spec(Connection.ICON_BUNDLED_IN, WireType.BUNDLED).build(),
-            entry("clock").spec(ClockPrototypeNode.ICON, ClockPrototypeNode::new).withoutSubtitle().build(),
-            entry("buffer_single").spec(BufferPrototypeNode.ICON_SINGLE, () -> new BufferPrototypeNode(WireType.SINGLE)).build(),
-            entry("buffer_bundled").spec(BufferPrototypeNode.ICON_BUNDLED, () -> new BufferPrototypeNode(WireType.BUNDLED)).build(),
-            entry("not_single").spec(1, WireType.SINGLE, PrimitivePrototypeNode.Type.NOT::icon, PrimitivePrototypeNode.Type.NOT::factory).build(),
-            entry("and_two_single").spec(2, WireType.SINGLE, PrimitivePrototypeNode.Type.AND::icon, PrimitivePrototypeNode.Type.AND::factory).build(),
-            entry("and_three_single").spec(3, WireType.SINGLE, PrimitivePrototypeNode.Type.AND::icon, PrimitivePrototypeNode.Type.AND::factory).build(),
-            entry("or_two_single").spec(2, WireType.SINGLE, PrimitivePrototypeNode.Type.OR::icon, PrimitivePrototypeNode.Type.OR::factory).build(),
-            entry("or_three_single").spec(3, WireType.SINGLE, PrimitivePrototypeNode.Type.OR::icon, PrimitivePrototypeNode.Type.OR::factory).build(),
-            entry("xor_two_single").spec(2, WireType.SINGLE, PrimitivePrototypeNode.Type.XOR::icon, PrimitivePrototypeNode.Type.XOR::factory).build(),
-            entry("xor_three_single").spec(3, WireType.SINGLE, PrimitivePrototypeNode.Type.XOR::icon, PrimitivePrototypeNode.Type.XOR::factory).build(),
-            entry("nand_two_single").spec(2, WireType.SINGLE, PrimitivePrototypeNode.Type.NAND::icon, PrimitivePrototypeNode.Type.NAND::factory).build(),
-            entry("nand_three_single").spec(3, WireType.SINGLE, PrimitivePrototypeNode.Type.NAND::icon, PrimitivePrototypeNode.Type.NAND::factory).build(),
-            entry("nor_two_single").spec(2, WireType.SINGLE, PrimitivePrototypeNode.Type.NOR::icon, PrimitivePrototypeNode.Type.NOR::factory).build(),
-            entry("nor_three_single").spec(3, WireType.SINGLE, PrimitivePrototypeNode.Type.NOR::icon, PrimitivePrototypeNode.Type.NOR::factory).build(),
-            entry("xnor_two_single").spec(2, WireType.SINGLE, PrimitivePrototypeNode.Type.XNOR::icon, PrimitivePrototypeNode.Type.XNOR::factory).build(),
-            entry("xnor_three_single").spec(3, WireType.SINGLE, PrimitivePrototypeNode.Type.XNOR::icon, PrimitivePrototypeNode.Type.XNOR::factory).build(),
-            entry("not_bundled").spec(1, WireType.BUNDLED, PrimitivePrototypeNode.Type.NOT::icon, PrimitivePrototypeNode.Type.NOT::factory).build(),
-            entry("and_two_bundled").spec(2, WireType.BUNDLED, PrimitivePrototypeNode.Type.AND::icon, PrimitivePrototypeNode.Type.AND::factory).build(),
-            entry("and_three_bundled").spec(3, WireType.BUNDLED, PrimitivePrototypeNode.Type.AND::icon, PrimitivePrototypeNode.Type.AND::factory).build(),
-            entry("or_two_bundled").spec(2, WireType.BUNDLED, PrimitivePrototypeNode.Type.OR::icon, PrimitivePrototypeNode.Type.OR::factory).build(),
-            entry("or_three_bundled").spec(3, WireType.BUNDLED, PrimitivePrototypeNode.Type.OR::icon, PrimitivePrototypeNode.Type.OR::factory).build(),
-            entry("xor_two_bundled").spec(2, WireType.BUNDLED, PrimitivePrototypeNode.Type.XOR::icon, PrimitivePrototypeNode.Type.XOR::factory).build(),
-            entry("xor_three_bundled").spec(3, WireType.BUNDLED, PrimitivePrototypeNode.Type.XOR::icon, PrimitivePrototypeNode.Type.XOR::factory).build(),
-            entry("nand_two_bundled").spec(2, WireType.BUNDLED, PrimitivePrototypeNode.Type.NAND::icon, PrimitivePrototypeNode.Type.NAND::factory).build(),
-            entry("nand_three_bundled").spec(3, WireType.BUNDLED, PrimitivePrototypeNode.Type.NAND::icon, PrimitivePrototypeNode.Type.NAND::factory).build(),
-            entry("nor_two_bundled").spec(2, WireType.BUNDLED, PrimitivePrototypeNode.Type.NOR::icon, PrimitivePrototypeNode.Type.NOR::factory).build(),
-            entry("nor_three_bundled").spec(3, WireType.BUNDLED, PrimitivePrototypeNode.Type.NOR::icon, PrimitivePrototypeNode.Type.NOR::factory).build(),
-            entry("xnor_two_bundled").spec(2, WireType.BUNDLED, PrimitivePrototypeNode.Type.XNOR::icon, PrimitivePrototypeNode.Type.XNOR::factory).build(),
-            entry("xnor_three_bundled").spec(3, WireType.BUNDLED, PrimitivePrototypeNode.Type.XNOR::icon, PrimitivePrototypeNode.Type.XNOR::factory).build(),
-            entry("packer").spec(ConverterPrototypeNode.Type.PACK.getIcon(), () -> new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK)).withoutSubtitle().build(),
-            entry("unpacker").spec(ConverterPrototypeNode.Type.UNPACK.getIcon(), () -> new ConverterPrototypeNode(ConverterPrototypeNode.Type.UNPACK)).withoutSubtitle().build(),
-    };
-    private static final int ENTRY_COUNT = ENTRIES.length;
+    public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.parts_list.mode");
+    public static final Component LABEL_FILTER = Utils.translate("label", "circuit_workbench.parts_list.filter");
+    public static final Component MSG_DROP_TO_DELETE = Utils.translate("msg", "circuit_workbench.parts_list.drop_to_delete");
+    private static final ResourceLocation ICON_DELETE = Utils.rl("delete");
+    private static final ShareType[] SHARE_TYPES = ShareType.values();
+    private static final int LABEL_X = 5;
+    private static final int MODE_LABEL_Y = 10;
+    private static final int MODE_BTN_GATES_X = 35;
+    private static final int MODE_BTN_LIBRARY_X = MODE_BTN_GATES_X + ModeButton.WIDTH;
+    private static final int MODE_BTN_Y = MODE_LABEL_Y - 4;
+    private static final int FILTER_LABEL_Y = 28;
+    private static final int FILTER_BTN_X = 35;
+    private static final int FILTER_BTN_Y = FILTER_LABEL_Y - 4;
+    private static final int GATE_LIST_Y = 20;
+    private static final int IMPORT_LIST_Y = 38;
+    private static final int ICON_DELETE_SIZE = 16;
+    private static final int DELETE_OVERLAY_TINT = 0x77FF0000;
+    private static final int DELETE_ICON_TINT = 0xFF880000;
 
-    private final NodeListWidget listWidget;
+    private final ModeButton<Mode> modeBtnGates;
+    private final ModeButton<Mode> modeBtnLibrary;
+    private final NodeListWidget partListWidget;
+    private final List<LibraryEntry> importEntries;
+    private final NodeListWidget importListWidget;
+    private final List<FilterToggleButton> filterButtons;
+    private final EnumSet<ShareType> filters = EnumSet.allOf(ShareType.class);
+    private Mode mode = Mode.GATES;
+    private boolean wasModeLibrary = true;
 
     public PartsList(CircuitWorkbenchScreen owner)
     {
         super(owner);
-        this.listWidget = new NodeListWidget(owner, () -> ENTRY_COUNT, idx -> ENTRIES[idx]);
+        this.modeBtnGates = new ModeButton<>(this, Mode.GATES, 0, 0);
+        this.modeBtnLibrary = new ModeButton<>(this, Mode.LIBRARY, 0, 0);
+        this.partListWidget = new NodeListWidget(owner, () -> LogicGateList.ENTRY_COUNT, idx -> LogicGateList.ENTRIES[idx]);
+        this.importEntries = new ArrayList<>();
+        this.importListWidget = new NodeListWidget(owner, importEntries::size, importEntries::get);
+        this.filterButtons = makeActionButtons(this, SHARE_TYPES, FilterToggleButton::new);
     }
 
     @Override
     protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY)
     {
-        listWidget.render(graphics, mouseX, mouseY);
+        graphics.drawString(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
+
+        switch (mode)
+        {
+            case GATES -> partListWidget.render(graphics, mouseX, mouseY);
+            case LIBRARY ->
+            {
+                graphics.drawString(owner.getFont(), LABEL_FILTER, paneX + LABEL_X, paneY + FILTER_LABEL_Y, 0xFF404040, false);
+                importListWidget.render(graphics, mouseX, mouseY);
+            }
+        }
+
+        FloatingNode floating = owner.getFloatingNode();
+        if (floating != null && floating.lastPos() != null)
+        {
+            ScrollableWidget scrollable = getScrollableWidget();
+            int minX = scrollable.getInnerX();
+            int minY = scrollable.getInnerY();
+            int width = scrollable.getInnerWidth();
+            int height = scrollable.getInnerHeight();
+
+            graphics.fill(minX, minY, minX + width, minY + height, DELETE_OVERLAY_TINT);
+
+            int iconX = minX + (width / 2) - (ICON_DELETE_SIZE / 2);
+            int iconY = minY + (height / 2) - (ICON_DELETE_SIZE / 2);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_DELETE, iconX, iconY, ICON_DELETE_SIZE, ICON_DELETE_SIZE, DELETE_ICON_TINT);
+
+            if (scrollable.isMouseOver(mouseX, mouseY))
+            {
+                graphics.setTooltipForNextFrame(MSG_DROP_TO_DELETE, mouseX, mouseY);
+            }
+        }
     }
 
     @Nullable
     public DragStart getClickedPartIdx(double mouseY)
     {
-        return listWidget.getClickedEntryIdx(mouseY, DragStart::partsList);
+        return switch (mode)
+        {
+            case GATES -> partListWidget.getClickedEntryIdx(mouseY, DragStart::partsList);
+            case LIBRARY -> importListWidget.getClickedEntryIdx(mouseY, DragStart::library);
+        };
     }
 
     @Override
     public ScrollableWidget getScrollableWidget()
     {
-        return listWidget;
+        return switch (mode)
+        {
+            case GATES -> partListWidget;
+            case LIBRARY -> importListWidget;
+        };
+    }
+
+    @Nullable
+    public PlaceableNode instantiateLibraryNode(int slot)
+    {
+        return slot >= 0 && slot < importEntries.size() ? importEntries.get(slot).instantiate() : null;
+    }
+
+    @Override
+    public Mode getMode()
+    {
+        return mode;
+    }
+
+    @Override
+    public void setMode(Mode mode)
+    {
+        if (this.mode != mode)
+        {
+            this.mode = mode;
+            updateWidgetVisibility(true);
+        }
+    }
+
+    public void setFilter(ShareType filter, boolean exclusive)
+    {
+        if (WorkbenchConfig.INSTANCE.setFilter(filter, exclusive))
+        {
+            filterButtons.forEach(FilterToggleButton::updateTooltip);
+            updateImportList();
+        }
+    }
+
+    public void updateImportList()
+    {
+        ClientCircuitLibrary.getFilteredEntries(filters, entry -> importEntries.add(LibraryEntry.create(entry)));
     }
 
     @Override
     public void init(Consumer<AbstractWidget> widgetAdder)
     {
-
+        widgetAdder.accept(modeBtnGates);
+        widgetAdder.accept(modeBtnLibrary);
+        filterButtons.forEach(widgetAdder);
     }
 
     @Override
     public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight)
     {
         super.computeLayout(screenX, screenY, screenWidth, screenHeight, toolPaneX, toolPaneY, windowHeight);
-        listWidget.computeLayout(height, paneX, paneY);
+
+        modeBtnGates.setPosition(paneX + MODE_BTN_GATES_X, paneY + MODE_BTN_Y);
+        modeBtnLibrary.setPosition(paneX + MODE_BTN_LIBRARY_X, paneY + MODE_BTN_Y);
+        partListWidget.computeLayout(height - GATE_LIST_Y, paneX, paneY + GATE_LIST_Y);
+        importListWidget.computeLayout(height - IMPORT_LIST_Y, paneX, paneY + IMPORT_LIST_Y);
+
+        for (int i = 0; i < filterButtons.size(); i++)
+        {
+            int btnX = paneX + FILTER_BTN_X + FilterToggleButton.SIZE * i;
+            filterButtons.get(i).setPosition(btnX, paneY + FILTER_BTN_Y);
+        }
     }
 
     @Override
     public void updateWidgetVisibility(boolean active)
     {
+        modeBtnGates.visible = active;
+        modeBtnLibrary.visible = active;
 
+        boolean isModeLibrary = active && mode == Mode.LIBRARY;
+        if (isModeLibrary != wasModeLibrary)
+        {
+            filterButtons.forEach(btn -> btn.visible = isModeLibrary);
+            wasModeLibrary = isModeLibrary;
+        }
     }
 
     @Override
@@ -114,98 +213,46 @@ public final class PartsList extends ToolPaneTabWidget
         return ToolPaneTab.PARTS;
     }
 
-    public static PlaceableNode createNode(int index)
+    public enum Mode implements MultiModeTab.Mode
     {
-        return ENTRIES[index].instantiate();
-    }
+        GATES,
+        LIBRARY;
 
-    public static Entry getEntryByName(String componentName)
-    {
-        for (Entry entry : ENTRIES)
+        private final String name = toString().toLowerCase(Locale.ROOT);
+        private final Component title = Utils.translate("label", "circuit_workbench.parts_list.mode." + name);
+
+        @Override
+        public Component getTitle()
         {
-            if (entry.name.equals(componentName))
-            {
-                return entry;
-            }
+            return title;
         }
-        throw new IllegalArgumentException("Unknown component: " + componentName);
     }
 
-    private static EntryBuilder entry(String name)
+    public record LibraryEntry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
     {
-        return new EntryBuilder(name);
-    }
+        private static LibraryEntry create(CircuitLibraryEntry entry)
+        {
+            IconConfig icon = ReferencePrototypeNode.makeIconConfig(entry.circuitNode());
+            return new LibraryEntry(entry.id(), entry.circuitNode(), icon, Component.literal(entry.name()));
+        }
 
-    public record Entry(
-            String name,
-            Component title,
-            @Nullable Component subTitle,
-            Component description,
-            IconConfig icon,
-            Supplier<? extends PlaceableNode> factory
-    ) implements NodeListWidget.Entry
-    {
+        @Nullable
+        @Override
+        public Component subTitle()
+        {
+            return null;
+        }
+
         @Override
         public PlaceableNode instantiate()
         {
-            return factory.get();
+            return ReferencePrototypeNode.create(node, icon);
         }
-    }
 
-    private static final class EntryBuilder
-    {
-        private final String name;
-        private boolean hasSubtitle = true;
-        @Nullable
-        private IconConfig icon = null;
-        @Nullable
-        private Supplier<? extends PlaceableNode> factory = null;
-
-        private EntryBuilder(String name)
+        @Override
+        public ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner)
         {
-            this.name = name;
+            return new ImportEntryContextMenuProvider(owner, this);
         }
-
-        EntryBuilder spec(IconConfig icon, Supplier<PrototypeNode> factory)
-        {
-            this.icon = icon;
-            this.factory = factory;
-            return this;
-        }
-
-        EntryBuilder spec(int inputCount, WireType wireType, Provider<IconConfig> icon, Provider<Supplier<PrototypeNode>> factory)
-        {
-            return spec(icon.get(inputCount, wireType), factory.get(inputCount, wireType));
-        }
-
-        EntryBuilder spec(IconConfig icon, WireType wireType)
-        {
-            this.icon = icon;
-            this.factory = () -> new Connection(wireType);
-            return this;
-        }
-
-        EntryBuilder withoutSubtitle()
-        {
-            hasSubtitle = false;
-            return this;
-        }
-
-        Entry build()
-        {
-            Objects.requireNonNull(icon);
-            Objects.requireNonNull(factory);
-
-            String translationSuffix = "circuit_workbench.part_entry." + name;
-            Component title = Utils.translate("label", translationSuffix);
-            Component subTitle = hasSubtitle ? Utils.translate("subtitle", translationSuffix) : null;
-            Component description = Utils.translate("desc", translationSuffix);
-            return new Entry(name, title, subTitle, description, icon, factory);
-        }
-    }
-
-    private interface Provider<T>
-    {
-        T get(int inputCount, WireType wireType);
     }
 }

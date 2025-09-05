@@ -41,8 +41,8 @@ public final class NodeListWidget extends ScrollableWidget
     private final CircuitWorkbenchScreen owner;
     private final IntSupplier entryCount;
     private final IntFunction<Entry> entryGetter;
+    private int listX;
     private int scrollbarX;
-    private int innerListX;
     private int innerScrollbarX;
     private int innerY;
     private int innerHeight;
@@ -56,7 +56,7 @@ public final class NodeListWidget extends ScrollableWidget
 
     public void render(GuiGraphics graphics, int mouseX, int mouseY)
     {
-        int minX = innerListX;
+        int minX = listX;
         int maxX = minX + ENTRY_WIDTH;
         int minY = innerY;
         int maxY = minY + innerHeight;
@@ -116,14 +116,14 @@ public final class NodeListWidget extends ScrollableWidget
     public boolean isMouseOver(double mouseX, double mouseY)
     {
         if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
-        return mouseX >= innerListX && mouseX < (innerListX + FULL_INNER_WIDTH);
+        return mouseX >= listX && mouseX < (listX + FULL_INNER_WIDTH);
     }
 
     @Override
     public boolean isMouseOverList(double mouseX, double mouseY)
     {
         if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
-        return mouseX >= innerListX && mouseX < (innerListX + NodeListWidget.INNER_WIDTH);
+        return mouseX >= listX && mouseX < (listX + NodeListWidget.INNER_WIDTH);
     }
 
     @Override
@@ -134,13 +134,25 @@ public final class NodeListWidget extends ScrollableWidget
     }
 
     @Override
-    protected int getInnerY()
+    public int getInnerX()
+    {
+        return listX;
+    }
+
+    @Override
+    public int getInnerY()
     {
         return innerY;
     }
 
     @Override
-    protected int getInnerHeight()
+    public int getInnerWidth()
+    {
+        return FULL_INNER_WIDTH;
+    }
+
+    @Override
+    public int getInnerHeight()
     {
         return innerHeight;
     }
@@ -171,9 +183,9 @@ public final class NodeListWidget extends ScrollableWidget
 
     public void computeLayout(int height, int paneX, int paneY)
     {
-        innerHeight = height - (BORDER * 2);
+        this.innerHeight = height - (BORDER * 2);
         scrollbarX = paneX + WIDTH - BORDER + 1;
-        innerListX = paneX + BORDER;
+        listX = paneX + BORDER;
         innerScrollbarX = scrollbarX + 1;
         innerY = paneY + BORDER;
     }

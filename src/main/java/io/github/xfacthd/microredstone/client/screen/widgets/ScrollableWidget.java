@@ -61,9 +61,13 @@ public abstract class ScrollableWidget
         return dragging;
     }
 
-    protected abstract int getInnerY();
+    public abstract int getInnerX();
 
-    protected abstract int getInnerHeight();
+    public abstract int getInnerY();
+
+    public abstract int getInnerWidth();
+
+    public abstract int getInnerHeight();
 
     protected abstract int getEntriesHeight();
 

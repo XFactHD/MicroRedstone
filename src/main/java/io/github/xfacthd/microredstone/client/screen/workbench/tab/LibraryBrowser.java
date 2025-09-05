@@ -1,26 +1,12 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
-import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
-import io.github.xfacthd.microredstone.client.screen.widgets.button.BasicButton;
-import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
-import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExportTarget;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.ImportEntryContextMenuProvider;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ExportActionButton;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
-import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.LibraryModeButton;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.LibraryActionButton;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;
 import io.github.xfacthd.microredstone.client.util.ScreenUtils;
 import io.github.xfacthd.microredstone.common.MRContent;
-import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
-import io.github.xfacthd.microredstone.common.data.library.CircuitLibraryEntry;
-import io.github.xfacthd.microredstone.common.data.library.ClientCircuitLibrary;
-import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -30,61 +16,44 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.function.Consumer;
 
-public final class LibraryBrowser extends ToolPaneTabWidget
+public final class LibraryBrowser extends ToolPaneTabWidget implements MultiModeTab<LibraryBrowser.Mode>
 {
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.library_browser.mode");
-    public static final Component LABEL_FILTER = Utils.translate("label", "circuit_workbench.library_browser.filter");
-    public static final Component IMPORT_BTN_TITLE = Utils.translate("label", "circuit_workbench.library_browser.import_from_clipboard");
     private static final ResourceLocation INVENTORY = Utils.rl("workbench_inventory");
     private static final ResourceLocation SLOT = Utils.rl("minecraft", "container/slot");
-    private static final ShareType[] SHARE_TYPES = ShareType.values();
     private static final int INVENTORY_WIDTH = 172;
     private static final int INVENTORY_HEIGHT = 94;
     private static final int LABEL_X = 5;
     private static final int MODE_LABEL_Y = 10;
-    private static final int FILTER_LABEL_Y = 28;
     private static final int MODE_BTN_IMPORT_X = 35;
-    private static final int MODE_BTN_EXPORT_X = MODE_BTN_IMPORT_X + LibraryModeButton.WIDTH;
+    private static final int MODE_BTN_EXPORT_X = MODE_BTN_IMPORT_X + ModeButton.WIDTH;
     private static final int MODE_BTN_Y = MODE_LABEL_Y - 4;
-    private static final int FILTER_BTN_X = 35;
-    private static final int FILTER_BTN_Y = FILTER_LABEL_Y - 4;
-    private static final int IMPORT_BTN_X = 5;
-    private static final int IMPORT_BTN_WIDTH = TOOL_PANE_WIDTH - 10;
-    private static final int IMPORT_BTN_HEIGHT = 20;
-    private static final int EXPORT_NAME_EDIT_X = 5;
-    private static final int EXPORT_NAME_EDIT_Y = 26;
-    private static final int EXPORT_NAME_EDIT_WIDTH = TOOL_PANE_WIDTH - 10;
-    private static final int EXPORT_NAME_EDIT_HEIGHT = 22;
-    private static final int EXPORT_SLOT_X = 5;
-    private static final int EXPORT_SLOT_Y = 50;
-    private static final int EXPORT_SLOT_SIZE = 18;
-    private static final int EXPORT_BTN_X = 5;
-    private static final int EXPORT_BTN_Y = 72;
-    private static final int EXPORT_BTN_PADDING = 2;
+    private static final int SLOT_X = 5;
+    private static final int SLOT_Y = 28;
+    private static final int SLOT_SIZE = 18;
+    private static final int NAME_EDIT_X = SLOT_X + SLOT_SIZE + CircuitWorkbenchScreen.PADDING;
+    private static final int NAME_EDIT_Y = 26;
+    private static final int NAME_EDIT_WIDTH = TOOL_PANE_WIDTH - NAME_EDIT_X - CircuitWorkbenchScreen.PADDING;
+    private static final int NAME_EDIT_HEIGHT = 22;
+    private static final int ACTION_BTN_X = 5;
+    private static final int ACTION_BTN_Y = 50;
+    private static final int ACTION_BTN_PADDING = 2;
 
-    private final LibraryModeButton modeBtnImport;
-    private final LibraryModeButton modeBtnExport;
-    private final List<FilterToggleButton> filterButtons;
-    private final BasicButton importJsonButton;
-    private final List<ExportActionButton> actionButtons;
+    private final ModeButton<Mode> modeBtnImport;
+    private final ModeButton<Mode> modeBtnExport;
+    private final List<LibraryActionButton<ImportAction>> importActionButtons;
+    private final List<LibraryActionButton<ExportAction>> exportActionButtons;
     private final EditBox exportNameEditBox;
-    private final List<Entry> importEntries;
-    private final NodeListWidget importListWidget;
-    private final EnumSet<ShareType> filters = EnumSet.allOf(ShareType.class);
     private final ItemStack dummyCircuit = MRContent.ITEM_INTEGRATED_CIRCUIT.value().getDefaultInstance();
     private int invX;
     private int invY;
-    private int exportSlotX;
-    private int exportSlotY;
+    private int slotX;
+    private int slotY;
     private Mode mode = Mode.IMPORT;
     private boolean wasImport = true;
     private boolean wasExport = true;
@@ -92,15 +61,12 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     public LibraryBrowser(CircuitWorkbenchScreen owner)
     {
         super(owner);
-        this.modeBtnImport = new LibraryModeButton(this, Mode.IMPORT, 0, 0);
-        this.modeBtnExport = new LibraryModeButton(this, Mode.EXPORT, 0, 0);
-        this.filterButtons = makeActionButtons(this, SHARE_TYPES, FilterToggleButton::new);
-        this.importJsonButton = new BasicButton(0, 0, IMPORT_BTN_WIDTH, IMPORT_BTN_HEIGHT, IMPORT_BTN_TITLE, owner::importCircuitFromClipboard);
-        this.actionButtons = makeActionButtons(this, ExportAction.ACTIONS, ExportActionButton::new);
+        this.modeBtnImport = new ModeButton<>(this, Mode.IMPORT, 0, 0);
+        this.modeBtnExport = new ModeButton<>(this, Mode.EXPORT, 0, 0);
+        this.importActionButtons = makeActionButtons(this, ImportAction.ACTIONS, LibraryActionButton::new);
+        this.exportActionButtons = makeActionButtons(this, ExportAction.ACTIONS, LibraryActionButton::new);
         // TODO: add name validation to edit box (don't use existing "filter" predicate, it annoyingly prevents typing invalid entries)
-        this.exportNameEditBox = new EditBox(Minecraft.getInstance().font, EXPORT_NAME_EDIT_WIDTH, EXPORT_NAME_EDIT_HEIGHT, Component.empty());
-        this.importEntries = new ArrayList<>();
-        this.importListWidget = new NodeListWidget(owner, importEntries::size, importEntries::get);
+        this.exportNameEditBox = new EditBox(Minecraft.getInstance().font, NAME_EDIT_WIDTH, NAME_EDIT_HEIGHT, Component.empty());
     }
 
     @Override
@@ -108,48 +74,22 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     {
         graphics.drawString(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
 
-        if (isInExportMode())
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, INVENTORY, invX, invY, INVENTORY_WIDTH, INVENTORY_HEIGHT);
+
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, slotX, slotY, SLOT_SIZE, SLOT_SIZE);
+        if (!owner.getMenu().getCircuitSlot().hasItem())
         {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, INVENTORY, invX, invY, INVENTORY_WIDTH, INVENTORY_HEIGHT);
-
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, exportSlotX, exportSlotY, EXPORT_SLOT_SIZE, EXPORT_SLOT_SIZE);
-            if (!owner.getMenu().getCircuitSlot().hasItem())
-            {
-                ScreenUtils.renderTransparentFakeItem(graphics, dummyCircuit, exportSlotX + 1, exportSlotY + 1);
-            }
+            ScreenUtils.renderTransparentFakeItem(graphics, dummyCircuit, slotX + 1, slotY + 1);
         }
-        else
-        {
-            graphics.drawString(owner.getFont(), LABEL_FILTER, paneX + LABEL_X, paneY + FILTER_LABEL_Y, 0xFF404040, false);
-
-            importListWidget.render(graphics, mouseX, mouseY);
-        }
-
-        actionButtons.forEach((button) -> button.active = button.getAction().isActive(this));
     }
 
-    public boolean isMouseOverImportList(double mouseX, double mouseY)
+    @Override
+    public Mode getMode()
     {
-        return mode == Mode.IMPORT && importListWidget.isMouseOverList(mouseX, mouseY);
+        return mode;
     }
 
-    @Nullable
-    public DragStart getClickedEntryIdx(double mouseY)
-    {
-        return importListWidget.getClickedEntryIdx(mouseY, DragStart::library);
-    }
-
-    @Nullable
-    public PlaceableNode createNode(int slot)
-    {
-        return slot >= 0 && slot < importEntries.size() ? importEntries.get(slot).instantiate() : null;
-    }
-
-    public boolean isInExportMode()
-    {
-        return mode == Mode.EXPORT;
-    }
-
+    @Override
     public void setMode(Mode mode)
     {
         if (this.mode != mode)
@@ -159,59 +99,9 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         }
     }
 
-    public void setFilter(ShareType filter, boolean exclusive)
-    {
-        boolean changed = false;
-        if (exclusive)
-        {
-            if (!filters.contains(filter) || filters.size() > 1)
-            {
-                filters.clear();
-                filters.add(filter);
-                changed = true;
-            }
-        }
-        else if (filters.contains(filter))
-        {
-            filters.remove(filter);
-            changed = true;
-        }
-        else
-        {
-            filters.add(filter);
-            changed = true;
-        }
-        if (changed)
-        {
-            filterButtons.forEach(FilterToggleButton::updateTooltip);
-            updateImportList();
-        }
-    }
-
-    public void updateImportList()
-    {
-        ClientCircuitLibrary.getFilteredEntries(filters, entry -> importEntries.add(Entry.create(entry)));
-    }
-
-    public boolean isFilterEnabled(ShareType filter)
-    {
-        return filters.contains(filter);
-    }
-
     public boolean isCoveredByInventory(double mouseX, double mouseY)
     {
         return owner.getToolPaneTab() == getType() && mode == Mode.EXPORT && mouseX >= invX && mouseY >= invY;
-    }
-
-    public Mode getMode()
-    {
-        return mode;
-    }
-
-    @Override
-    public ScrollableWidget getScrollableWidget()
-    {
-        return importListWidget;
     }
 
     @Override
@@ -219,9 +109,8 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     {
         widgetAdder.accept(modeBtnImport);
         widgetAdder.accept(modeBtnExport);
-        filterButtons.forEach(widgetAdder);
-        widgetAdder.accept(importJsonButton);
-        actionButtons.forEach(widgetAdder);
+        importActionButtons.forEach(widgetAdder);
+        exportActionButtons.forEach(widgetAdder);
         widgetAdder.accept(exportNameEditBox);
     }
 
@@ -232,40 +121,37 @@ public final class LibraryBrowser extends ToolPaneTabWidget
 
         invX = paneX - INVENTORY_WIDTH - CircuitWorkbenchScreen.PADDING;
         invY = paneY + height - INVENTORY_HEIGHT;
-        exportSlotX = paneX + EXPORT_SLOT_X;
-        exportSlotY = paneY + EXPORT_SLOT_Y;
+        slotX = paneX + SLOT_X;
+        slotY = paneY + SLOT_Y;
 
         modeBtnImport.setPosition(paneX + MODE_BTN_IMPORT_X, paneY + MODE_BTN_Y);
         modeBtnExport.setPosition(paneX + MODE_BTN_EXPORT_X, paneY + MODE_BTN_Y);
-        exportNameEditBox.setPosition(paneX + EXPORT_NAME_EDIT_X, paneY + EXPORT_NAME_EDIT_Y);
-        for (int i = 0; i < filterButtons.size(); i++)
+        exportNameEditBox.setPosition(paneX + NAME_EDIT_X, paneY + NAME_EDIT_Y);
+        importActionButtons.forEach((button) ->
         {
-            int btnX = paneX + FILTER_BTN_X + FilterToggleButton.SIZE * i;
-            filterButtons.get(i).setPosition(btnX, paneY + FILTER_BTN_Y);
-        }
-        importJsonButton.setPosition(paneX + IMPORT_BTN_X, paneY + height - 5 - IMPORT_BTN_HEIGHT);
-        actionButtons.forEach((button) ->
-        {
-            int btnY = paneY + EXPORT_BTN_Y + (ExportActionButton.HEIGHT + EXPORT_BTN_PADDING) * button.getAction().ordinal();
-            button.setPosition(paneX + EXPORT_BTN_X, btnY);
+            int btnY = paneY + ACTION_BTN_Y + (LibraryActionButton.HEIGHT + ACTION_BTN_PADDING) * button.getAction().ordinal();
+            button.setPosition(paneX + ACTION_BTN_X, btnY);
         });
-
-        importListWidget.computeLayout(height - 65, paneX, paneY + 40);
+        exportActionButtons.forEach((button) ->
+        {
+            int btnY = paneY + ACTION_BTN_Y + (LibraryActionButton.HEIGHT + ACTION_BTN_PADDING) * button.getAction().ordinal();
+            button.setPosition(paneX + ACTION_BTN_X, btnY);
+        });
 
         owner.getSlots().forEach(slot ->
         {
             // Circuit slot
             if (slot.index == 0)
             {
-                slot.x = exportSlotX - screenX + 1;
-                slot.y = exportSlotY - screenY + 1;
+                slot.x = slotX - screenX + 1;
+                slot.y = slotY - screenY + 1;
                 return;
             }
 
             // Inventory slots
             int slotIdx = slot.getContainerSlot();
             slot.x = invX - screenX + 11 + (slotIdx % 9 * 18);
-            slot.y = invY - screenY + 19 + (slotIdx >= 9 ? ((slotIdx - 1) / 9 * 18) : 58);
+            slot.y = invY - screenY + 19 + (slotIdx >= 9 ? ((slotIdx - 9) / 9 * 18) : 58);
         });
     }
 
@@ -274,20 +160,19 @@ public final class LibraryBrowser extends ToolPaneTabWidget
     {
         modeBtnImport.visible = active;
         modeBtnExport.visible = active;
+        owner.getSlots().forEach(slot -> slot.setActive(active));
 
         boolean isImport = active && mode == Mode.IMPORT;
         if (wasImport != isImport)
         {
-            filterButtons.forEach(btn -> btn.visible = isImport);
-            importJsonButton.visible = isImport;
+            importActionButtons.forEach(btn -> btn.visible = isImport);
             wasImport = isImport;
         }
-        boolean isExport = active && isInExportMode();
+        boolean isExport = active && mode == Mode.EXPORT;
         if (wasExport != isExport)
         {
             exportNameEditBox.visible = isExport;
-            actionButtons.forEach(btn -> btn.visible = isExport);
-            owner.getSlots().forEach(slot -> slot.setActive(isExport));
+            exportActionButtons.forEach(btn -> btn.visible = isExport);
             wasExport = isExport;
         }
     }
@@ -308,7 +193,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         return ToolPaneTab.LIBRARY;
     }
 
-    public enum Mode
+    public enum Mode implements MultiModeTab.Mode
     {
         IMPORT,
         EXPORT;
@@ -316,13 +201,54 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final Component title = Utils.translate("label", "circuit_workbench.library_browser.mode." + name);
 
+        @Override
         public Component getTitle()
         {
             return title;
         }
     }
 
-    public enum ExportAction
+    public enum ImportAction implements LibraryActionButton.Action<LibraryBrowser>
+    {
+        IMPORT_FROM_ITEM,
+        IMPORT_FROM_JSON,
+        ;
+
+        private static final ImportAction[] ACTIONS = values();
+
+        private final String name = toString().toLowerCase(Locale.ROOT);
+        private final Component title = Utils.translate("label", "circuit_workbench.library_browser.import_action." + name);
+
+        @Override
+        public boolean isActive(LibraryBrowser browser)
+        {
+            return !browser.owner.hasActiveEditAction() && switch (this)
+            {
+                case IMPORT_FROM_ITEM -> browser.owner.getMenu().getCircuitSlot().hasItem();
+                case IMPORT_FROM_JSON -> true;
+            };
+        }
+
+        @Override
+        public void execute(LibraryBrowser browser)
+        {
+            switch (this)
+            {
+                case IMPORT_FROM_ITEM -> browser.owner.importCircuitFromItem(
+                        browser.owner.getMenu().getCircuitSlot().getItem()
+                );
+                case IMPORT_FROM_JSON -> browser.owner.importCircuitFromClipboard();
+            }
+        }
+
+        @Override
+        public Component getTitle()
+        {
+            return title;
+        }
+    }
+
+    public enum ExportAction implements LibraryActionButton.Action<LibraryBrowser>
     {
         EXPORT_TO_LIBRARY,
         EXPORT_TO_ITEM,
@@ -335,7 +261,8 @@ public final class LibraryBrowser extends ToolPaneTabWidget
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final Component title = Utils.translate("label", "circuit_workbench.library_browser.export_action." + name);
 
-        private boolean isActive(LibraryBrowser browser)
+        @Override
+        public boolean isActive(LibraryBrowser browser)
         {
             return !browser.owner.hasActiveEditAction() && switch (this)
             {
@@ -345,6 +272,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget
             };
         }
 
+        @Override
         public void execute(LibraryBrowser browser)
         {
             String circuitName = browser.exportNameEditBox.getValue();
@@ -357,37 +285,10 @@ public final class LibraryBrowser extends ToolPaneTabWidget
             }
         }
 
+        @Override
         public Component getTitle()
         {
             return title;
-        }
-    }
-
-    public record Entry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
-    {
-        private static Entry create(CircuitLibraryEntry entry)
-        {
-            IconConfig icon = ReferencePrototypeNode.makeIconConfig(entry.circuitNode());
-            return new Entry(entry.id(), entry.circuitNode(), icon, Component.literal(entry.name()));
-        }
-
-        @Nullable
-        @Override
-        public Component subTitle()
-        {
-            return null;
-        }
-
-        @Override
-        public PlaceableNode instantiate()
-        {
-            return ReferencePrototypeNode.create(node, icon);
-        }
-
-        @Override
-        public ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner)
-        {
-            return new ImportEntryContextMenuProvider(owner, this);
         }
     }
 }

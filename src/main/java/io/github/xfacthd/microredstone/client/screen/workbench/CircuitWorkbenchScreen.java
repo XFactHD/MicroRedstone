@@ -30,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -75,7 +76,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         canvas.setCanvasSize(CircuitCanvas.MAX_WIDTH, CircuitCanvas.MAX_HEIGHT);
         for (ToolPaneTabWidget widget : tabWidgets)
         {
-            widget.updateWidgetVisibility(false);
+            widget.updateWidgetVisibility(widget.getType() == ToolPaneTab.PARTS);
         }
     }
 
@@ -123,7 +124,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
 
         canvas.drag(0, 0); // Clamp canvas offset
         partsList.getScrollableWidget().scroll(0); // Clamp parts list offset
-        libraryBrowser.getScrollableWidget().scroll(0); // Clamp import list offset
     }
 
     @Override
@@ -164,7 +164,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY)
     {
         graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
-        if (toolPaneTab == ToolPaneTab.LIBRARY && libraryBrowser.isInExportMode())
+        if (toolPaneTab == ToolPaneTab.LIBRARY)
         {
             graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
         }
@@ -218,10 +218,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             else if (toolPaneTab == ToolPaneTab.PARTS && partsList.getScrollableWidget().isMouseOverList(mouseX, mouseY))
             {
                 dragStart = partsList.getClickedPartIdx(mouseY);
-            }
-            else if (toolPaneTab == ToolPaneTab.LIBRARY && libraryBrowser.isMouseOverImportList(mouseX, mouseY))
-            {
-                dragStart = libraryBrowser.getClickedEntryIdx(mouseY);
             }
             if (dragStart != null)
             {
@@ -293,7 +289,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 {
                     target = null;
                 }
-                if (target == null)
+                if (target == null && !canDeletePart(floatingNode, target, mouseX, mouseY))
                 {
                     target = floatingNode.lastPos();
                     revertToLast = true;
@@ -302,6 +298,10 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 {
                     floatingNode.placeAt(canvas, target, revertToLast);
                 }
+                else if (floatingNode.lastPos() != null)
+                {
+                    floatingNode.delete(canvas);
+                }
                 floatingNode = null;
             }
             setDragging(false);
@@ -309,6 +309,13 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private boolean canDeletePart(FloatingNode floatingNode, @Nullable NodePos target, double mouseX, double mouseY)
+    {
+        if (target != null || floatingNode.lastPos() == null) return false;
+        if (toolPaneTab != ToolPaneTab.PARTS) return false;
+        return partsList.getScrollableWidget().isMouseOver(mouseX, mouseY);
     }
 
     @Override
@@ -488,6 +495,11 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         // TODO: implement circuit assembly, error handling, overwrite handling and target storage
     }
 
+    public void importCircuitFromItem(ItemStack stack)
+    {
+        // TODO: implement import from item
+    }
+
     public void importCircuitFromClipboard()
     {
         // TODO: implement guarded circuit deserialization
@@ -518,6 +530,11 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public CircuitCanvas getCanvas()
     {
         return canvas;
+    }
+
+    public PartsList getPartsList()
+    {
+        return partsList;
     }
 
     public LibraryBrowser getLibraryBrowser()
