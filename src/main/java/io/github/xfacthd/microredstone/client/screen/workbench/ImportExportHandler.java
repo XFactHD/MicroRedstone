@@ -114,7 +114,7 @@ public final class ImportExportHandler
                 .withTitle(TITLE_CONFIRM_IMPORT)
                 .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_ONE)
                 .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_TWO)
-                .withCancelCallback(() -> doImportCircuit(name, circuitNode))
+                .withOkCallback(() -> doImportCircuit(name, circuitNode))
                 .show();
     }
 
@@ -159,7 +159,7 @@ public final class ImportExportHandler
         DialogScreen.builder(DialogScreen.Type.CONFIRM)
                 .withTitle(TITLE_CONFIRM_EXPORT)
                 .withMessage(MESSAGE_CONFIRM_EXPORT)
-                .withCancelCallback(() -> exportCircuit(name, assembled, target))
+                .withOkCallback(() -> exportCircuit(name, assembled, target))
                 .show();
     }
 
