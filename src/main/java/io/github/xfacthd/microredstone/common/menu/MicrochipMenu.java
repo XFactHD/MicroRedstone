@@ -93,7 +93,7 @@ public final class MicrochipMenu extends AbstractContainerMenu
     @FunctionalInterface
     private interface CircuitSlotFactory
     {
-        CircuitSlotFactory CLIENT = (x, y) -> new Slot(new SimpleContainer(1), 0, x, y);
+        CircuitSlotFactory CLIENT = (x, y) -> new Slot(new SingleItemContainer(), 0, x, y);
 
         static CircuitSlotFactory server(MicrochipBlockEntity blockEntity)
         {
@@ -101,5 +101,19 @@ public final class MicrochipMenu extends AbstractContainerMenu
         }
 
         Slot create(int x, int y);
+    }
+
+    private static final class SingleItemContainer extends SimpleContainer
+    {
+        public SingleItemContainer()
+        {
+            super(1);
+        }
+
+        @Override
+        public int getMaxStackSize()
+        {
+            return 1;
+        }
     }
 }
