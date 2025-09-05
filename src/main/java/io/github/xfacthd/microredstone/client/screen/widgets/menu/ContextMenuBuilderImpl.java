@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 final class ContextMenuBuilderImpl implements ContextMenuBuilder
 {
@@ -27,30 +28,15 @@ final class ContextMenuBuilderImpl implements ContextMenuBuilder
     @Override
     public ContextMenuBuilder addActionEntry(Component text, Runnable action)
     {
-        return addActionEntry(text, KeyHint.NO_HINT, action);
+        return addActionEntry(text, builder -> builder.withAction(action));
     }
 
     @Override
-    public ContextMenuBuilder addActionEntry(Component text, KeyHint keyHint, Runnable action)
+    public ContextMenuBuilder addActionEntry(Component text, Consumer<ActionEntryBuilder> consumer)
     {
-        return addActionEntry(text, keyHint, action, Optional.empty());
-    }
-
-    @Override
-    public ContextMenuBuilder addActionEntry(Component text, Runnable action, BooleanSupplier stateSupplier)
-    {
-        return addActionEntry(text, KeyHint.NO_HINT, action, stateSupplier);
-    }
-
-    @Override
-    public ContextMenuBuilder addActionEntry(Component text, KeyHint keyHint, Runnable action, BooleanSupplier stateSupplier)
-    {
-        return addActionEntry(text, keyHint, action, Optional.of(stateSupplier));
-    }
-
-    private ContextMenuBuilder addActionEntry(Component text, KeyHint keyHint, Runnable action, Optional<BooleanSupplier> stateSupplier)
-    {
-        addEntry(MenuEntryButton.create(owner, text, keyHint.format(), action, stateSupplier));
+        ActionEntryBuilderImpl builder = new ActionEntryBuilderImpl();
+        consumer.accept(builder);
+        addEntry(MenuEntryButton.create(owner, text, builder.keyHint.format(), builder.action, builder.stateSupplier));
         return this;
     }
 
@@ -125,5 +111,33 @@ final class ContextMenuBuilderImpl implements ContextMenuBuilder
             return desiredY;
         }
         return owner.owner.height - totalHeight;
+    }
+
+    private static final class ActionEntryBuilderImpl implements ActionEntryBuilder
+    {
+        private Runnable action = () -> {};
+        private KeyHint keyHint = KeyHint.NO_HINT;
+        private Optional<BooleanSupplier> stateSupplier = Optional.empty();
+
+        @Override
+        public ActionEntryBuilder withAction(Runnable action)
+        {
+            this.action = action;
+            return this;
+        }
+
+        @Override
+        public ActionEntryBuilder withKeyHint(KeyHint keyHint)
+        {
+            this.keyHint = keyHint;
+            return this;
+        }
+
+        @Override
+        public ActionEntryBuilder withStateSupplier(BooleanSupplier stateSupplier)
+        {
+            this.stateSupplier = Optional.of(stateSupplier);
+            return this;
+        }
     }
 }

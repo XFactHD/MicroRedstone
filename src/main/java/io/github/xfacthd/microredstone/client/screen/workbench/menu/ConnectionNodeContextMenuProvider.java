@@ -33,7 +33,10 @@ public final class ConnectionNodeContextMenuProvider extends BaseNodeContextMenu
         {
             for (PortDir dir : PORT_DIRS)
             {
-                menuBuilder.addActionEntry(dir.getTitle(), () -> node.setPortDir(dir), () -> node.getPortDir() == dir);
+                menuBuilder.addActionEntry(dir.getTitle(), entry -> entry
+                        .withAction(() -> node.setPortDir(dir))
+                        .withStateSupplier(() -> node.getPortDir() == dir)
+                );
             }
         }
     }

@@ -35,10 +35,9 @@ public final class WireToolActionContextMenuProvider implements ContextMenuProvi
         }
 
         WorkbenchConfig config = WorkbenchConfig.INSTANCE;
-        menuBuilder.addActionEntry(
-                ENTRY_WIRE_ROUTE_PREF,
-                config::toggleRouteLongWireSectionFirst,
-                config::isRouteLongWireSectionFirst
+        menuBuilder.addActionEntry(ENTRY_WIRE_ROUTE_PREF, entry -> entry
+                .withAction(config::toggleRouteLongWireSectionFirst)
+                .withStateSupplier(config::isRouteLongWireSectionFirst)
         );
     }
 
@@ -50,10 +49,9 @@ public final class WireToolActionContextMenuProvider implements ContextMenuProvi
             WorkbenchConfig config = WorkbenchConfig.INSTANCE;
             for (DyeColor color : COLORS)
             {
-                menuBuilder.addActionEntry(
-                        ColorNames.getName(color),
-                        () -> config.setWireColor(color),
-                        () -> config.getWireColor() == color
+                menuBuilder.addActionEntry(ColorNames.getName(color), entry -> entry
+                        .withAction(()-> config.setWireColor(color))
+                        .withStateSupplier(() -> config.getWireColor() == color)
                 );
             }
         }
