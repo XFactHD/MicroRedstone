@@ -79,12 +79,12 @@ public final class DialogScreenBuilder
 
     public DialogScreen build()
     {
-        Runnable okCallback = queryWidgets.isEmpty() ? this.okCallback : () ->
+        return switch (type)
         {
-            queryWidgets.forEach(QueryWidget::saveQueryResult);
-            this.okCallback.run();
+            case PROPERTIES -> new PropertiesDialogScreen(title, messageLines, properties, okCallback);
+            case QUERY -> new QueryDialogScreen(title, messageLines, queryWidgets, okCallback, cancelCallback);
+            default -> new DialogScreen(type, title, messageLines, okCallback, cancelCallback);
         };
-        return new DialogScreen(type, title, messageLines, properties, queryWidgets, okCallback, cancelCallback);
     }
 
     public void show()

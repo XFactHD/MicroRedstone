@@ -2,7 +2,6 @@ package io.github.xfacthd.microredstone.client.screen.dialog;
 
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -10,19 +9,18 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BinaryOperator;
-import java.util.function.BooleanSupplier;
 
-public final class DialogScreen extends Screen
+public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, QueryDialogScreen
 {
     private static final ResourceLocation BACKGROUND = Utils.rl("dialog/background");
-    private static final int PADDING = 5;
+    protected static final int PADDING = 5;
     private static final int ICON_SIZE = 10;
     private static final int TITLE_X = PADDING + ICON_SIZE + PADDING;
     private static final int TITLE_Y = PADDING + 2;
@@ -32,48 +30,33 @@ public final class DialogScreen extends Screen
     private static final int MIN_WIDTH = BUTTON_WIDTH * 2 + PADDING * 4;
     private static final int MAX_WIDTH = 220;
     private static final int MAX_TITLE_WIDTH = MAX_WIDTH - TITLE_X - PADDING;
-    private static final int MAX_TEXT_WIDTH = MAX_WIDTH - PADDING * 2;
+    protected static final int MAX_TEXT_WIDTH = MAX_WIDTH - PADDING * 2;
     private static final int HEADER_HEIGHT = CONTENT_Y + PADDING;
     private static final int FOOTER_HEIGHT = BUTTON_HEIGHT + PADDING * 2;
-    private static final int QUERY_WIDGET_PADDING = 2;
 
     private final Type type;
     private final List<Component> messageLines;
-    private final List<Property> properties;
-    private final List<QueryWidget> queryWidgets;
     private final Runnable okCallback;
     private final Runnable cancelCallback;
     private final List<List<FormattedCharSequence>> textBlocks = new ArrayList<>();
-    private final List<FormattedProperty> propertyLines = new ArrayList<>();
-    private final List<BuiltQueryWidget> builtQueryWidgets = new ArrayList<>();
-    private int leftPos;
-    private int topPos;
-    private int imageWidth;
-    private int imageHeight;
-    private int propValueX;
-    private Runnable okStateUpdater = () -> {};
+    protected int leftPos;
+    protected int topPos;
+    protected int imageWidth;
+    protected int imageHeight;
+    @UnknownNullability
+    protected Button okButton = null;
 
     public static DialogScreenBuilder builder(Type type)
     {
         return new DialogScreenBuilder(type);
     }
 
-    DialogScreen(
-            Type type,
-            Component title,
-            List<Component> messageLines,
-            List<Property> properties,
-            List<QueryWidget> queryWidgets,
-            Runnable okCallback,
-            Runnable cancelCallback
-    )
+    DialogScreen(Type type, Component title, List<Component> messageLines, Runnable okCallback, Runnable cancelCallback)
     {
         super(title);
         this.type = type;
         this.messageLines = messageLines;
-        this.properties = properties;
         this.okCallback = okCallback;
-        this.queryWidgets = queryWidgets;
         this.cancelCallback = cancelCallback;
     }
 
@@ -81,12 +64,28 @@ public final class DialogScreen extends Screen
     protected void init()
     {
         textBlocks.clear();
-        propertyLines.clear();
-        builtQueryWidgets.clear();
 
         imageWidth = MIN_WIDTH;
         imageWidth = Math.max(imageWidth, Math.min(font.width(title), MAX_TITLE_WIDTH) + TITLE_X + PADDING);
         imageHeight = HEADER_HEIGHT;
+
+        computeContent();
+
+        if (imageWidth % 2 != 0)
+        {
+            imageWidth++;
+        }
+        imageHeight += FOOTER_HEIGHT;
+        leftPos = (width - imageWidth) / 2;
+        topPos = (height - imageHeight) / 2;
+
+        finalizeContent();
+
+        okButton = type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
+    }
+
+    protected boolean computeContent()
+    {
         boolean addPadding = false;
         for (Component line : messageLines)
         {
@@ -106,101 +105,13 @@ public final class DialogScreen extends Screen
 
             addPadding = true;
         }
-        int maxLabelWidth = 0;
-        for (Property property : properties)
-        {
-            if (addPadding)
-            {
-                imageHeight += PADDING;
-            }
-
-            maxLabelWidth = Math.max(maxLabelWidth, font.width(property.label()));
-            imageHeight += font.lineHeight;
-
-            addPadding = false;
-        }
-        int maxValueWidth = MAX_TEXT_WIDTH - PADDING - maxLabelWidth;
-        for (Property property : properties)
-        {
-            FormattedProperty formatted = property.format(font, maxValueWidth);
-            propertyLines.add(formatted);
-            formatted.value().text(); // Try resolving potential DelayedValues
-            int lineWidth = maxLabelWidth + PADDING * 3 + formatted.value().valueWidth();
-            imageWidth = Math.max(imageWidth, lineWidth);
-        }
-        boolean addWidgetPadding = false;
-        for (QueryWidget queryWidget : queryWidgets)
-        {
-            if (addPadding)
-            {
-                imageHeight += PADDING;
-                addPadding = false;
-            }
-            else if (addWidgetPadding)
-            {
-                imageHeight += QUERY_WIDGET_PADDING;
-            }
-
-            int labelWidth = font.width(queryWidget.label()) + PADDING;
-            MutableInt maxWidgetX = new MutableInt();
-            MutableInt maxWidgetY = new MutableInt();
-            List<AbstractWidget> widgets = new ArrayList<>();
-            queryWidget.setupWidget(font, labelWidth, imageHeight, MAX_TEXT_WIDTH - labelWidth, widget ->
-            {
-                maxWidgetX.setValue(Math.max(maxWidgetX.intValue(), widget.getRight()));
-                maxWidgetY.setValue(Math.max(maxWidgetY.intValue(), widget.getBottom()));
-                widgets.add(widget);
-            });
-            int height = maxWidgetY.intValue() - imageHeight;
-            int labelY = imageHeight + (height / 2) - (font.lineHeight / 2);
-            imageWidth = Math.max(imageWidth, maxWidgetX.intValue() + PADDING * 2);
-            imageHeight += height;
-            builtQueryWidgets.add(new BuiltQueryWidget(queryWidget.label(), labelY, widgets));
-
-            addWidgetPadding = true;
-        }
-        if (!queryWidgets.isEmpty())
-        {
-            imageHeight += PADDING;
-        }
-
-        if (imageWidth % 2 != 0)
-        {
-            imageWidth++;
-        }
-        imageHeight += FOOTER_HEIGHT;
-        leftPos = (width - imageWidth) / 2;
-        topPos = (height - imageHeight) / 2;
-        propValueX = leftPos + PADDING * 2 + maxLabelWidth;
-
-        builtQueryWidgets.replaceAll(queryWidget ->
-        {
-            for (AbstractWidget widget : queryWidget.widgets())
-            {
-                widget.setPosition(leftPos + PADDING + widget.getX(), topPos + widget.getY());
-                addRenderableWidget(widget);
-            }
-            return queryWidget.offsetLabelY(topPos);
-        });
-
-        Button okButton = type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
-        if (!queryWidgets.isEmpty())
-        {
-            BooleanSupplier state = () ->
-            {
-                boolean valid = true;
-                for (QueryWidget queryWidget : queryWidgets)
-                {
-                    valid &= queryWidget.isInputValid();
-                }
-                return valid;
-            };
-            okStateUpdater = () -> okButton.active = state.getAsBoolean();
-        }
+        return addPadding;
     }
 
+    protected void finalizeContent() { }
+
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public final void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         renderMenuBackground(graphics);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
@@ -209,6 +120,11 @@ public final class DialogScreen extends Screen
         graphics.drawString(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0xFF404040, false);
 
         int contentX = leftPos + PADDING;
+        renderContent(graphics, contentX, mouseX, mouseY, partialTick);
+    }
+
+    protected int renderContent(GuiGraphics graphics, int contentX, int mouseX, int mouseY, float partialTick)
+    {
         int contentY = topPos + CONTENT_Y;
         for (List<FormattedCharSequence> block : textBlocks)
         {
@@ -219,23 +135,7 @@ public final class DialogScreen extends Screen
             }
             contentY += PADDING;
         }
-        for (FormattedProperty line : propertyLines)
-        {
-            graphics.drawString(font, line.label(), contentX, contentY, 0xFF404040, false);
-            FormattedProperty.Value value = line.value();
-            graphics.drawString(font, value.text(), propValueX, contentY, 0xFF404040, false);
-            Component tooltip = value.tooltip();
-            if (tooltip != null && mouseY >= contentY && mouseY < contentY + font.lineHeight && mouseX >= propValueX && mouseX < propValueX + value.valueWidth())
-            {
-                graphics.setTooltipForNextFrame(tooltip, mouseX, mouseY);
-            }
-            contentY += font.lineHeight;
-        }
-        for (BuiltQueryWidget widget : builtQueryWidgets)
-        {
-            graphics.drawString(font, widget.label(), contentX, widget.labelY(), 0xFF404040, false);
-        }
-        okStateUpdater.run();
+        return contentY;
     }
 
     @Override
