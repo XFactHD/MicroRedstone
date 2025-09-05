@@ -130,12 +130,15 @@ public final class MRLanguageProvider extends LanguageProvider
         add(BaseNodeContextMenuProvider.ENTRY_DELETE_NODE, "Delete Part");
         add(ConnectionNodeContextMenuProvider.ENTRY_PORT_DIR, "Port Direction");
         add(ConverterPartNodeContextMenuProvider.ENTRY_SET_BIT, "Set Bundle Bit");
+        add(ConverterPartNodeContextMenuProvider.TITLE_SET_BIT, "Set Bundle Bit");
+        add(ConverterPartNodeContextMenuProvider.LABEL_SET_BIT, "Bit:");
         add(ClockPartNodeContextMenuProvider.ENTRY_SET_PERIOD, "Set Clock Period");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
         add(DialogScreen.Type.CONFIRM.getDefaultTitle(), "Confirm");
         add(DialogScreen.Type.PROPERTIES.getDefaultTitle(), "Properties");
+        add(DialogScreen.Type.QUERY.getDefaultTitle(), "Set Value");
         add(KeyHint.WRAPPER, "[%s]");
     }
 

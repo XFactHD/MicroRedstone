@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.client.screen.dialog;
 
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -9,12 +10,14 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BinaryOperator;
+import java.util.function.BooleanSupplier;
 
 public final class DialogScreen extends Screen
 {
@@ -22,27 +25,33 @@ public final class DialogScreen extends Screen
     private static final int PADDING = 5;
     private static final int ICON_SIZE = 10;
     private static final int TITLE_X = PADDING + ICON_SIZE + PADDING;
-    private static final int TITLE_Y = PADDING + 1;
+    private static final int TITLE_Y = PADDING + 2;
     private static final int CONTENT_Y = PADDING + ICON_SIZE + PADDING * 2;
     private static final int BUTTON_WIDTH = 60;
     private static final int BUTTON_HEIGHT = 20;
-    private static final int MIN_WIDTH = BUTTON_WIDTH * 2 + PADDING * 3;
+    private static final int MIN_WIDTH = BUTTON_WIDTH * 2 + PADDING * 4;
     private static final int MAX_WIDTH = 220;
+    private static final int MAX_TITLE_WIDTH = MAX_WIDTH - TITLE_X - PADDING;
     private static final int MAX_TEXT_WIDTH = MAX_WIDTH - PADDING * 2;
-    private static final int BASE_HEIGHT = CONTENT_Y + PADDING * 2 + BUTTON_HEIGHT + PADDING;
+    private static final int HEADER_HEIGHT = CONTENT_Y + PADDING;
+    private static final int FOOTER_HEIGHT = BUTTON_HEIGHT + PADDING * 2;
+    private static final int QUERY_WIDGET_PADDING = 2;
 
     private final Type type;
     private final List<Component> messageLines;
     private final List<Property> properties;
+    private final List<QueryWidget> queryWidgets;
     private final Runnable okCallback;
     private final Runnable cancelCallback;
     private final List<List<FormattedCharSequence>> textBlocks = new ArrayList<>();
     private final List<FormattedProperty> propertyLines = new ArrayList<>();
+    private final List<BuiltQueryWidget> builtQueryWidgets = new ArrayList<>();
     private int leftPos;
     private int topPos;
     private int imageWidth;
     private int imageHeight;
     private int propValueX;
+    private Runnable okStateUpdater = () -> {};
 
     public static DialogScreenBuilder builder(Type type)
     {
@@ -54,6 +63,7 @@ public final class DialogScreen extends Screen
             Component title,
             List<Component> messageLines,
             List<Property> properties,
+            List<QueryWidget> queryWidgets,
             Runnable okCallback,
             Runnable cancelCallback
     )
@@ -63,6 +73,7 @@ public final class DialogScreen extends Screen
         this.messageLines = messageLines;
         this.properties = properties;
         this.okCallback = okCallback;
+        this.queryWidgets = queryWidgets;
         this.cancelCallback = cancelCallback;
     }
 
@@ -71,9 +82,11 @@ public final class DialogScreen extends Screen
     {
         textBlocks.clear();
         propertyLines.clear();
+        builtQueryWidgets.clear();
 
         imageWidth = MIN_WIDTH;
-        imageHeight = BASE_HEIGHT;
+        imageWidth = Math.max(imageWidth, Math.min(font.width(title), MAX_TITLE_WIDTH) + TITLE_X + PADDING);
+        imageHeight = HEADER_HEIGHT;
         boolean addPadding = false;
         for (Component line : messageLines)
         {
@@ -115,12 +128,75 @@ public final class DialogScreen extends Screen
             int lineWidth = maxLabelWidth + PADDING * 3 + formatted.value().valueWidth();
             imageWidth = Math.max(imageWidth, lineWidth);
         }
+        boolean addWidgetPadding = false;
+        for (QueryWidget queryWidget : queryWidgets)
+        {
+            if (addPadding)
+            {
+                imageHeight += PADDING;
+                addPadding = false;
+            }
+            else if (addWidgetPadding)
+            {
+                imageHeight += QUERY_WIDGET_PADDING;
+            }
 
+            int labelWidth = font.width(queryWidget.label()) + PADDING;
+            MutableInt maxWidgetX = new MutableInt();
+            MutableInt maxWidgetY = new MutableInt();
+            List<AbstractWidget> widgets = new ArrayList<>();
+            queryWidget.setupWidget(font, labelWidth, imageHeight, MAX_TEXT_WIDTH - labelWidth, widget ->
+            {
+                maxWidgetX.setValue(Math.max(maxWidgetX.intValue(), widget.getRight()));
+                maxWidgetY.setValue(Math.max(maxWidgetY.intValue(), widget.getBottom()));
+                widgets.add(widget);
+            });
+            int height = maxWidgetY.intValue() - imageHeight;
+            int labelY = imageHeight + (height / 2) - (font.lineHeight / 2);
+            imageWidth = Math.max(imageWidth, maxWidgetX.intValue() + PADDING * 2);
+            imageHeight += height;
+            builtQueryWidgets.add(new BuiltQueryWidget(queryWidget.label(), labelY, widgets));
+
+            addWidgetPadding = true;
+        }
+        if (!queryWidgets.isEmpty())
+        {
+            imageHeight += PADDING;
+        }
+
+        if (imageWidth % 2 != 0)
+        {
+            imageWidth++;
+        }
+        imageHeight += FOOTER_HEIGHT;
         leftPos = (width - imageWidth) / 2;
         topPos = (height - imageHeight) / 2;
         propValueX = leftPos + PADDING * 2 + maxLabelWidth;
 
-        type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
+        builtQueryWidgets.replaceAll(queryWidget ->
+        {
+            for (AbstractWidget widget : queryWidget.widgets())
+            {
+                widget.setPosition(leftPos + PADDING + widget.getX(), topPos + widget.getY());
+                addRenderableWidget(widget);
+            }
+            return queryWidget.offsetLabelY(topPos);
+        });
+
+        Button okButton = type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
+        if (!queryWidgets.isEmpty())
+        {
+            BooleanSupplier state = () ->
+            {
+                boolean valid = true;
+                for (QueryWidget queryWidget : queryWidgets)
+                {
+                    valid &= queryWidget.isInputValid();
+                }
+                return valid;
+            };
+            okStateUpdater = () -> okButton.active = state.getAsBoolean();
+        }
     }
 
     @Override
@@ -155,6 +231,11 @@ public final class DialogScreen extends Screen
             }
             contentY += font.lineHeight;
         }
+        for (BuiltQueryWidget widget : builtQueryWidgets)
+        {
+            graphics.drawString(font, widget.label(), contentX, widget.labelY(), 0xFF404040, false);
+        }
+        okStateUpdater.run();
     }
 
     @Override
@@ -188,6 +269,7 @@ public final class DialogScreen extends Screen
         ERROR(Utils.rl("dialog/icon_error"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
         CONFIRM(Utils.rl("dialog/icon_confirm"), true, CommonComponents.GUI_YES, (ok, cancel) -> cancel),
         PROPERTIES(Utils.rl("dialog/icon_properties"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
+        QUERY(Utils.rl("dialog/icon_query"), true, CommonComponents.GUI_DONE, (ok, cancel) -> cancel),
         ;
 
         private final ResourceLocation icon;
@@ -204,27 +286,29 @@ public final class DialogScreen extends Screen
             this.escCallbackSelector = escCallbackSelector;
         }
 
-        void initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback)
+        Button initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback)
         {
+            Button okButton;
             if (hasCancel)
             {
                 int halfWidth = (xCenter - screen.leftPos) / 2;
                 int xLeft = screen.leftPos + halfWidth - BUTTON_WIDTH / 2;
-                addButton(screen, xLeft, okText, okCallback);
+                okButton = addButton(screen, xLeft, okText, okCallback);
                 int xRight = xCenter + halfWidth - BUTTON_WIDTH / 2;
                 addButton(screen, xRight, CommonComponents.GUI_CANCEL, cancelCallback);
             }
             else
             {
                 int x = xCenter - BUTTON_WIDTH / 2;
-                addButton(screen, x, okText, okCallback);
+                okButton = addButton(screen, x, okText, okCallback);
             }
+            return okButton;
         }
 
-        private static void addButton(DialogScreen screen, int x, Component text, Runnable callback)
+        private static Button addButton(DialogScreen screen, int x, Component text, Runnable callback)
         {
             int y = screen.topPos + screen.imageHeight - PADDING - BUTTON_HEIGHT;
-            screen.addRenderableWidget(
+            return screen.addRenderableWidget(
                     Button.builder(text, btn ->
                             {
                                 callback.run();
