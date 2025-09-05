@@ -107,7 +107,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
 
     public boolean isCoveredByInventory(double mouseX, double mouseY)
     {
-        return owner.getToolPaneTab() == getType() && mode == Mode.EXPORT && mouseX >= invX && mouseY >= invY;
+        return owner.getToolPaneTab() == getType() && mouseX >= invX && mouseY >= invY;
     }
 
     public boolean isEditBoxFocused()
