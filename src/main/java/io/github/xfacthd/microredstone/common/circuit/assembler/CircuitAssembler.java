@@ -6,9 +6,11 @@ import com.google.common.graph.ElementOrder;
 import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
+import com.mojang.logging.LogUtils;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.pathelement.RootNodePathElement;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.DirectCyclicConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.IndirectCyclicConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnexpectedErrorProblem;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WireCountMismatchProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -34,6 +36,7 @@ import net.minecraft.util.ProblemReporter;
 import net.neoforged.fml.loading.toposort.CyclePresentException;
 import net.neoforged.fml.loading.toposort.TopologicalSort;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +48,7 @@ import java.util.Objects;
 @SuppressWarnings("UnstableApiUsage")
 public final class CircuitAssembler
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Port[] PORTS = Port.values();
 
     @Nullable
@@ -52,7 +56,15 @@ public final class CircuitAssembler
     {
         CountingProblemReporter reporter = CountingProblemReporter.of(problemReporter);
 
-        node.validate(reporter.forChild(new RootNodePathElement(node)));
+        try
+        {
+            node.validate(reporter.forChild(new RootNodePathElement(node)));
+        }
+        catch (Throwable t)
+        {
+            reporter.report(new UnexpectedErrorProblem(t));
+            LOGGER.error("Encountered an unexpected error validating the circuit prototype. This is a bug!", t);
+        }
         if (reporter.hasIssues()) return null;
 
         List<ClockPrototypeNode> clockProtoNodes = new ArrayList<>();
