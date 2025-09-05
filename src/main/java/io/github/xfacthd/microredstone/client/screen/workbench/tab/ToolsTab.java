@@ -5,7 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuPro
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.WireToolActionContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.WireToolActionContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireInProgress;
 import io.github.xfacthd.microredstone.client.util.Icon;

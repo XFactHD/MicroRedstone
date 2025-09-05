@@ -7,7 +7,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.DragStart;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
-import io.github.xfacthd.microredstone.client.screen.workbench.tab.menu.ImportEntryContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ImportEntryContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;

@@ -2,7 +2,7 @@
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package io.github.xfacthd.microredstone.client.screen.workbench.tab.menu;
+package io.github.xfacthd.microredstone.client.screen.workbench.menu;
 
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;

@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.client.screen.workbench.tab.menu;
+package io.github.xfacthd.microredstone.client.screen.workbench.menu;
 
 import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuBuilder;
