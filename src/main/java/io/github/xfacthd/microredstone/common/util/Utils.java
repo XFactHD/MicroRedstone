@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.util;
 
+import com.mojang.authlib.GameProfile;
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntity;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -18,15 +19,24 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.function.IOFunction;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class Utils
@@ -39,6 +49,7 @@ public final class Utils
                     (sideA, sideB) -> { throw new IllegalArgumentException("Duplicate keys"); },
                     Long2ObjectOpenHashMap::new
             ));
+    private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss");
 
     public static Direction getDirection(BlockPos srcPos, BlockPos destPos)
     {
@@ -174,6 +185,24 @@ public final class Utils
     public static <T, R> Function<T, R> uncheckIO(IOFunction<T, R> function)
     {
         return function.asFunction();
+    }
+
+    public static Component formatInstant(Instant instant)
+    {
+        ZonedDateTime dateTime = instant.atZone(ZoneId.systemDefault());
+        return Component.literal(INSTANT_FORMATTER.format(dateTime));
+    }
+
+    public static Supplier<Component> resolvePlayerName(UUID playerId, Executor mainThread)
+    {
+        MutableObject<Component> playerName = new MutableObject<>();
+        SkullBlockEntity.fetchGameProfile(playerId)
+                .thenAcceptAsync(profile ->
+                {
+                    String name = profile.map(GameProfile::getName).orElseGet(playerId::toString);
+                    playerName.setValue(Component.literal(name));
+                }, mainThread);
+        return playerName::getValue;
     }
 
     private Utils() { }

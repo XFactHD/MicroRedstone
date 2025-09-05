@@ -11,6 +11,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -34,6 +35,11 @@ public final class ClientCircuitLibrary
     public static boolean hasEntryWithName(String name)
     {
         return OWNED_ENTRIES_BY_NAME.containsKey(name);
+    }
+
+    public static CircuitLibraryEntry getEntryById(UUID id)
+    {
+        return Objects.requireNonNull(ENTRIES_BY_ID.get(id));
     }
 
     public static void addOrModifyCircuit(String name, CompoundCircuitNode circuitNode)

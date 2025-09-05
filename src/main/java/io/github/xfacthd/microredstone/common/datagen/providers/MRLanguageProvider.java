@@ -120,7 +120,13 @@ public final class MRLanguageProvider extends LanguageProvider
         add(WireToolActionContextMenuProvider.ENTRY_WIRE_COLOR, "Wire Color");
         add(WireToolActionContextMenuProvider.ENTRY_WIRE_ROUTE_PREF, "Long Section First");
         add(ImportEntryContextMenuProvider.ENTRY_IMPORT, "Import to Canvas");
-        add(ImportEntryContextMenuProvider.ENTRY_DETAILS, "Details");
+        add(ImportEntryContextMenuProvider.ENTRY_DETAILS, "Show Details");
+        add(ImportEntryContextMenuProvider.TITLE_DETAILS, "Circuit Details");
+        add(ImportEntryContextMenuProvider.PROP_NAME, "Name:");
+        add(ImportEntryContextMenuProvider.PROP_AUTHOR, "Author:");
+        add(ImportEntryContextMenuProvider.PROP_TIME_CREATED, "Created:");
+        add(ImportEntryContextMenuProvider.PROP_TIME_MODIFIED, "Modified:");
+        add(ImportEntryContextMenuProvider.PROP_SHARE_TYPE, "Visibility:");
         add(BaseNodeContextMenuProvider.ENTRY_DELETE_NODE, "Delete Part");
         add(ConnectionNodeContextMenuProvider.ENTRY_PORT_DIR, "Port Direction");
         add(ConverterPartNodeContextMenuProvider.ENTRY_SET_BIT, "Set Bundle Bit");
