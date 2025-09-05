@@ -18,6 +18,8 @@ import net.minecraft.world.item.ItemStack;
 
 public final class CircuitWorkbenchMenu extends AbstractContainerMenu
 {
+    private static final int CIRCUIT_SLOT_COUNT = 1;
+
     private final ContainerLevelAccess levelAccess;
     private final Slot circuitSlot;
 
@@ -47,7 +49,35 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
     @Override
     public ItemStack quickMoveStack(Player player, int index)
     {
-        return null;
+        ItemStack remainder = ItemStack.EMPTY;
+        Slot slot = slots.get(index);
+        if (slot.hasItem())
+        {
+            ItemStack stack = slot.getItem();
+            remainder = stack.copy();
+            if (index < CIRCUIT_SLOT_COUNT)
+            {
+                if (!moveItemStackTo(stack, CIRCUIT_SLOT_COUNT, slots.size(), true))
+                {
+                    return ItemStack.EMPTY;
+                }
+            }
+            else if (!moveItemStackTo(stack, 0, CIRCUIT_SLOT_COUNT, false))
+            {
+                return ItemStack.EMPTY;
+            }
+
+            if (stack.isEmpty())
+            {
+                slot.set(ItemStack.EMPTY);
+            }
+            else
+            {
+                slot.setChanged();
+            }
+        }
+
+        return remainder;
     }
 
     @Override
