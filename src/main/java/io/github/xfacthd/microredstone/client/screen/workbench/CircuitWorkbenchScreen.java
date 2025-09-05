@@ -360,7 +360,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             canvas.cancelWirePull();
             return true;
         }
-        if (!hasActiveEditAction())
+        if (!hasActiveEditAction() && !libraryBrowser.isEditBoxFocused())
         {
             if (keyCode == GLFW.GLFW_KEY_W)
             {
@@ -373,7 +373,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 return true;
             }
         }
-        if (floatingNode != null && keyCode == GLFW.GLFW_KEY_R)
+        if (floatingNode != null && keyCode == GLFW.GLFW_KEY_R && !libraryBrowser.isEditBoxFocused())
         {
             floatingNode = floatingNode.rotate(Screen.hasShiftDown() ? -1 : 1);
             return true;
