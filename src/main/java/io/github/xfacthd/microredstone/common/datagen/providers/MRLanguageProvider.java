@@ -133,6 +133,8 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ConverterPartNodeContextMenuProvider.TITLE_SET_BIT, "Set Bundle Bit");
         add(ConverterPartNodeContextMenuProvider.LABEL_SET_BIT, "Bit:");
         add(ClockPartNodeContextMenuProvider.ENTRY_SET_PERIOD, "Set Clock Period");
+        add(ClockPartNodeContextMenuProvider.TITLE_SET_PERIOD, "Set Clock Period");
+        add(ClockPartNodeContextMenuProvider.LABEL_SET_PERIOD, "Period:");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");

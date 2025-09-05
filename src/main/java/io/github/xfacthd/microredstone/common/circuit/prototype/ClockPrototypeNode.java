@@ -28,6 +28,11 @@ public final class ClockPrototypeNode extends PrototypeNode
         super(PORT_CONFIG, ICON);
     }
 
+    public int getHalfPeriodLength()
+    {
+        return halfPeriodLength;
+    }
+
     public void setHalfPeriodLength(int halfCycleLength)
     {
         this.halfPeriodLength = halfCycleLength;
