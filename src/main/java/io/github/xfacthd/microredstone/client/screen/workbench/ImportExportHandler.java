@@ -137,10 +137,15 @@ public final class ImportExportHandler
 
     public void assembleAndExport(String name, ExportTarget target)
     {
-        CompoundCircuitNode assembled = CircuitAssembler.assemble(canvas.getRootNode(), ProblemReporter.DISCARDING);
+        ProblemReporter.Collector reporter = new ProblemReporter.Collector();
+        CompoundCircuitNode assembled = CircuitAssembler.assemble(canvas.getRootNode(), reporter);
         if (assembled == null)
         {
-            // TODO: unpack reporter and set up error annotations
+            // TODO: unpack reporter and set up error annotations, replacing temporary error dialog
+            DialogScreen.builder(DialogScreen.Type.ERROR)
+                    .withTitle(Component.literal("Circuit Assembly Failed"))
+                    .withMessage(Component.literal(reporter.getReport()))
+                    .show();
             return;
         }
 
