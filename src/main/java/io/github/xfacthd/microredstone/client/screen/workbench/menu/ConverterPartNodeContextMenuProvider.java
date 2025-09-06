@@ -2,13 +2,13 @@ package io.github.xfacthd.microredstone.client.screen.workbench.menu;
 
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.dialog.QueryWidget;
+import io.github.xfacthd.microredstone.client.screen.widgets.NumberEditBox;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuBuilder;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -19,6 +19,7 @@ public final class ConverterPartNodeContextMenuProvider extends PartNodeContextM
     public static final Component ENTRY_SET_BIT = Utils.translate("label", "circuit_workbench.canvas.menu.node.converter.set_bit");
     public static final Component TITLE_SET_BIT = Utils.translate("title", "circuit_workbench.canvas.node.converter.set_bit");
     public static final Component LABEL_SET_BIT = Utils.translate("label", "circuit_workbench.canvas.node.converter.set_bit.query");
+    public static final Component TOOLTIP_INVALID_BIT = Utils.translate("tooltip", "circuit_workbench.canvas.node.converter.set_bit.invalid_value");
 
     public ConverterPartNodeContextMenuProvider(CircuitCanvas canvas, ConverterPrototypeNode node)
     {
@@ -44,11 +45,11 @@ public final class ConverterPartNodeContextMenuProvider extends PartNodeContextM
     {
         private static final int EDIT_BOX_WIDTH = 60;
         private static final int EDIT_BOX_HEIGHT = 20;
+        private static final NumberEditBox.Validator VALIDATOR = new BundleBitValidator();
 
         private final ConverterPrototypeNode node;
-        // TODO: replace with proper NumberEditBox based on improved EditBox needed for export name edit
         @UnknownNullability
-        private EditBox editBox = null;
+        private NumberEditBox editBox = null;
 
         private ConverterQueryWidget(ConverterPrototypeNode node)
         {
@@ -64,37 +65,36 @@ public final class ConverterPartNodeContextMenuProvider extends PartNodeContextM
         @Override
         public void setupWidget(Font font, int x, int y, int maxWidth, Consumer<AbstractWidget> widgetAdder)
         {
-            EditBox prevEditBox = editBox;
-            editBox = new EditBox(font, x, y, Math.min(EDIT_BOX_WIDTH, maxWidth), EDIT_BOX_HEIGHT, Component.empty());
-            editBox.setFilter(text -> isInputValid(text, false));
-            editBox.setValue(prevEditBox != null ? prevEditBox.getValue() : Integer.toString(node.getBitIndex()));
+            int width = Math.min(EDIT_BOX_WIDTH, maxWidth);
+            editBox = new NumberEditBox(font, x, y, width, EDIT_BOX_HEIGHT, VALIDATOR, false, editBox, node.getBitIndex());
             widgetAdder.accept(editBox);
         }
 
         @Override
         public boolean isInputValid()
         {
-            return isInputValid(editBox.getValue(), true);
-        }
-
-        private static boolean isInputValid(String text, boolean strict)
-        {
-            if (text.isBlank()) return !strict;
-            try
-            {
-                int value = Integer.parseInt(text);
-                return value >= 0 && value < 16;
-            }
-            catch (NumberFormatException e)
-            {
-                return false;
-            }
+            return editBox.isInputValid();
         }
 
         @Override
         public void saveQueryResult()
         {
-            node.setBitIndex(Integer.parseInt(editBox.getValue()));
+            node.setBitIndex(editBox.getIntValue());
+        }
+    }
+
+    private static final class BundleBitValidator implements NumberEditBox.Validator
+    {
+        @Override
+        public boolean test(int value)
+        {
+            return value >= 0 && value < 16;
+        }
+
+        @Override
+        public Component getInvalidValueTooltip()
+        {
+            return TOOLTIP_INVALID_BIT;
         }
     }
 }

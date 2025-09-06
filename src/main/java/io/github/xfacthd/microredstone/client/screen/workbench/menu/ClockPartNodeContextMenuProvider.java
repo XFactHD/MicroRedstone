@@ -2,13 +2,13 @@ package io.github.xfacthd.microredstone.client.screen.workbench.menu;
 
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.dialog.QueryWidget;
+import io.github.xfacthd.microredstone.client.screen.widgets.NumberEditBox;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuBuilder;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -19,6 +19,7 @@ public final class ClockPartNodeContextMenuProvider extends PartNodeContextMenuP
     public static final Component ENTRY_SET_PERIOD = Utils.translate("label", "circuit_workbench.canvas.menu.node.clock.set_period");
     public static final Component TITLE_SET_PERIOD = Utils.translate("title", "circuit_workbench.canvas.node.clock.set_period");
     public static final Component LABEL_SET_PERIOD = Utils.translate("label", "circuit_workbench.canvas.node.clock.set_period.query");
+    public static final Component TOOLTIP_INVALID_PERIOD = Utils.translate("tooltip", "circuit_workbench.canvas.node.clock.set_perdiod.invalid_value");
 
     public ClockPartNodeContextMenuProvider(CircuitCanvas canvas, ClockPrototypeNode node)
     {
@@ -44,11 +45,11 @@ public final class ClockPartNodeContextMenuProvider extends PartNodeContextMenuP
     {
         private static final int EDIT_BOX_WIDTH = 60;
         private static final int EDIT_BOX_HEIGHT = 20;
+        private static final NumberEditBox.Validator VALIDATOR = new PeriodValidator();
 
         private final ClockPrototypeNode node;
-        // TODO: replace with proper NumberEditBox based on improved EditBox needed for export name edit
         @UnknownNullability
-        private EditBox editBox = null;
+        private NumberEditBox editBox = null;
 
         private ClockQueryWidget(ClockPrototypeNode node)
         {
@@ -64,37 +65,37 @@ public final class ClockPartNodeContextMenuProvider extends PartNodeContextMenuP
         @Override
         public void setupWidget(Font font, int x, int y, int maxWidth, Consumer<AbstractWidget> widgetAdder)
         {
-            EditBox prevEditBox = editBox;
-            editBox = new EditBox(font, x, y, Math.min(EDIT_BOX_WIDTH, maxWidth), EDIT_BOX_HEIGHT, Component.empty());
-            editBox.setFilter(text -> isInputValid(text, false));
-            editBox.setValue(prevEditBox != null ? prevEditBox.getValue() : Integer.toString(node.getHalfPeriodLength() * 2));
+            int width = Math.min(EDIT_BOX_WIDTH, maxWidth);
+            int defVal = node.getHalfPeriodLength() * 2;
+            editBox = new NumberEditBox(font, x, y, width, EDIT_BOX_HEIGHT, VALIDATOR, false, editBox, defVal);
             widgetAdder.accept(editBox);
         }
 
         @Override
         public boolean isInputValid()
         {
-            return isInputValid(editBox.getValue(), true);
-        }
-
-        private static boolean isInputValid(String text, boolean strict)
-        {
-            if (text.isBlank()) return !strict;
-            try
-            {
-                int value = Integer.parseInt(text);
-                return value >= 2 && (!strict || value % 2 == 0);
-            }
-            catch (NumberFormatException e)
-            {
-                return false;
-            }
+            return editBox.isInputValid();
         }
 
         @Override
         public void saveQueryResult()
         {
-            node.setHalfPeriodLength(Integer.parseInt(editBox.getValue()) / 2);
+            node.setHalfPeriodLength(editBox.getIntValue() / 2);
+        }
+    }
+
+    private static final class PeriodValidator implements NumberEditBox.Validator
+    {
+        @Override
+        public boolean test(int value)
+        {
+            return value >= 2 && value % 2 == 0;
+        }
+
+        @Override
+        public Component getInvalidValueTooltip()
+        {
+            return TOOLTIP_INVALID_PERIOD;
         }
     }
 }

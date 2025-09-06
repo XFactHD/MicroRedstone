@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.ValidatingEditBox;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExportTarget;
 import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
@@ -8,14 +9,15 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.Li
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;
 import io.github.xfacthd.microredstone.client.util.ScreenUtils;
 import io.github.xfacthd.microredstone.common.MRContent;
+import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitValidator;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.TriState;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -44,12 +46,18 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     private static final int ACTION_BTN_X = 5;
     private static final int ACTION_BTN_Y = 50;
     private static final int ACTION_BTN_PADDING = 2;
+    private static final ValidatingEditBox.Validator NAME_VALIDATOR = value ->
+    {
+        if (value.isEmpty()) return TriState.DEFAULT;
+        if (CircuitValidator.validateName(value, false)) return TriState.TRUE;
+        return TriState.FALSE;
+    };
 
     private final ModeButton<Mode> modeBtnImport;
     private final ModeButton<Mode> modeBtnExport;
     private final List<LibraryActionButton<ImportAction>> importActionButtons;
     private final List<LibraryActionButton<ExportAction>> exportActionButtons;
-    private final EditBox exportNameEditBox;
+    private final ValidatingEditBox exportNameEditBox;
     private final ItemStack dummyCircuit = MRContent.ITEM_INTEGRATED_CIRCUIT.value().getDefaultInstance();
     private int invX;
     private int invY;
@@ -66,8 +74,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         this.modeBtnExport = new ModeButton<>(this, Mode.EXPORT, 0, 0);
         this.importActionButtons = makeActionButtons(this, ImportAction.ACTIONS, LibraryActionButton::new);
         this.exportActionButtons = makeActionButtons(this, ExportAction.ACTIONS, LibraryActionButton::new);
-        // TODO: add name validation to edit box (don't use existing "filter" predicate, it annoyingly prevents typing invalid entries)
-        this.exportNameEditBox = new EditBox(Minecraft.getInstance().font, NAME_EDIT_WIDTH, NAME_EDIT_HEIGHT, Component.empty());
+        this.exportNameEditBox = new ValidatingEditBox(Minecraft.getInstance().font, NAME_EDIT_WIDTH, NAME_EDIT_HEIGHT, NAME_VALIDATOR, "");
     }
 
     @Override
@@ -186,6 +193,10 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
             exportActionButtons.forEach(btn -> btn.visible = isExport);
             wasExport = isExport;
         }
+        if (!exportNameEditBox.visible)
+        {
+            exportNameEditBox.clearInvalidState();
+        }
     }
 
     public int getInvLabelX()
@@ -289,7 +300,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         public void execute(LibraryBrowser browser)
         {
             ImportExportHandler importExportHandler = browser.owner.getImportExportHandler();
-            String circuitName = browser.exportNameEditBox.getValue();
+            String circuitName = browser.exportNameEditBox.getTrimmedValue();
             switch (this)
             {
                 case EXPORT_TO_ITEM -> importExportHandler.assembleAndExport(circuitName, ExportTarget.CIRCUIT_ITEM);

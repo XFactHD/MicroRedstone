@@ -192,6 +192,8 @@
   "title.microredstone.dialog.title.query": "Set Value",
   "title.microredstone.dialog.title.warning": "Warning",
   "title.microredstone.microchip": "Microchip",
+  "tooltip.microredstone.circuit_workbench.canvas.node.clock.set_perdiod.invalid_value": "Period must be higher or equal to 2 and a multiple of 2",
+  "tooltip.microredstone.circuit_workbench.canvas.node.converter.set_bit.invalid_value": "Bit index must be between 0 and 15 (inclusive)",
   "tooltip.microredstone.circuit_workbench.parts_list.filter.hidden": "%s Circuits: Hidden",
   "tooltip.microredstone.circuit_workbench.parts_list.filter.shown": "%s Circuits: Shown",
   "value.microredstone.source_tooltip.area_mask.area": "X: %s Y: %s Width: %s Height: %s",
