@@ -93,7 +93,7 @@ public final class ImportExportHandler
             return;
         }
 
-        if (!CircuitValidator.validate(circuitNode))
+        if (!CircuitValidator.validate(null, circuitNode))
         {
             displayImportError(ImportError.VALIDATE_FAILED);
             return;

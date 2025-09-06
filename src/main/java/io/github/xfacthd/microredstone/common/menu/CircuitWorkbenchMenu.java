@@ -99,7 +99,7 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
 
     public ClientboundWorkbenchWriteCircuitResultPayload applyCircuitToItem(String name, CompoundCircuitNode circuitNode)
     {
-        if (!CircuitValidator.validate(circuitNode))
+        if (!CircuitValidator.validate(name, circuitNode))
         {
             return result(false);
         }
