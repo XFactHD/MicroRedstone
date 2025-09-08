@@ -44,6 +44,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class CircuitAssembler
@@ -78,10 +79,10 @@ public final class CircuitAssembler
         WireMapper wireMapper = new WireMapper();
 
         List<NodeEntry<ClockCircuitNode>> clockNodes = clockProtoNodes.stream()
-                .map(clock -> new NodeEntry<>(clock.assemble(wireMapper), clock.getPos(), clock.getRotation()))
+                .map(clock -> buildPrimitiveNode(clock, wireMapper, ClockPrototypeNode::assemble))
                 .toList();
         List<NodeEntry<BufferCircuitNode>> bufferNodes = bufferProtoNodes.stream()
-                .map(buffer -> new NodeEntry<>(buffer.assemble(wireMapper), buffer.getPos(), buffer.getRotation()))
+                .map(buffer -> buildPrimitiveNode(buffer, wireMapper, BufferPrototypeNode::assemble))
                 .toList();
 
         List<NodeEntry<CircuitNode>> childNodes = new ArrayList<>();
@@ -113,19 +114,7 @@ public final class CircuitAssembler
                             .toArray(WirePair[]::new);
                     childNodes.add(new NodeEntry<>(assembled, reference.getPos(), reference.getRotation(), inputs, outputs));
                 }
-                default ->
-                {
-                    CircuitNode assembled = childNode.assemble(wireMapper);
-                    WirePair[] inputs = Arrays.stream(assembled.getInputs())
-                            .mapToInt(Connector::wire)
-                            .mapToObj(WirePair::new)
-                            .toArray(WirePair[]::new);
-                    WirePair[] outputs = Arrays.stream(assembled.getOutputs())
-                            .mapToInt(Connector::wire)
-                            .mapToObj(WirePair::new)
-                            .toArray(WirePair[]::new);
-                    childNodes.add(new NodeEntry<>(assembled, childNode.getPos(), childNode.getRotation(), inputs, outputs));
-                }
+                default -> childNodes.add(buildPrimitiveNode(childNode, wireMapper, PrototypeNode::assemble));
             }
         }
 
@@ -161,6 +150,20 @@ public final class CircuitAssembler
         }
 
         return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, node.getWiresCopy(), inputs, outputs);
+    }
+
+    private static <P extends PrototypeNode, C extends CircuitNode> NodeEntry<C> buildPrimitiveNode(
+            P protoNode, WireMapper wireMapper, BiFunction<P, WireMapper, C> assembler
+    )
+    {
+        C assembled = assembler.apply(protoNode, wireMapper);
+        WirePair[] inputs = Arrays.stream(assembled.getInputs())
+                .map(con -> new WirePair(con.wire(), con.port().ordinal()))
+                .toArray(WirePair[]::new);
+        WirePair[] outputs = Arrays.stream(assembled.getOutputs())
+                .map(con -> new WirePair(con.wire(), con.port().ordinal()))
+                .toArray(WirePair[]::new);
+        return new NodeEntry<>(assembled, protoNode.getPos(), protoNode.getRotation(), inputs, outputs);
     }
 
     @Nullable

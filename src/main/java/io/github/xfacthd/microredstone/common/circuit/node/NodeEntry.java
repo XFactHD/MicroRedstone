@@ -17,12 +17,6 @@ public record NodeEntry<T extends CircuitNode>(T node, NodePos pos, int rotation
 {
     public static final Codec<NodeEntry<CircuitNode>> CODEC = codec(CircuitNode.CODEC);
     public static final StreamCodec<ByteBuf, NodeEntry<CircuitNode>> STREAM_CODEC = streamCodec(CircuitNode.STREAM_CODEC);
-    private static final WirePair[] EMPTY_ARRAY = new WirePair[0];
-
-    public NodeEntry(T node, NodePos pos, int rotation)
-    {
-        this(node, pos, rotation, EMPTY_ARRAY, EMPTY_ARRAY);
-    }
 
     public void evaluate(EvalContext context)
     {

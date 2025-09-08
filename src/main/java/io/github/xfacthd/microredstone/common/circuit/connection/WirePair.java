@@ -30,9 +30,4 @@ public record WirePair(int external, int internal)
             WirePair::new
     );
     public static final StreamCodec<ByteBuf, WirePair[]> ARRAY_STREAM_CODEC = MRStreamCodecs.array(STREAM_CODEC, WirePair[]::new);
-
-    public WirePair(int wire)
-    {
-        this(wire, wire);
-    }
 }
