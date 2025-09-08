@@ -210,4 +210,17 @@ public final class CompoundCircuitNode extends RootCircuitNode
     {
         return MRContent.NODE_TYPE_COMPOUND.value();
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        // We only care about proper equality in the compilation key where this type will never be encountered
+        return obj == this;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return System.identityHashCode(this);
+    }
 }

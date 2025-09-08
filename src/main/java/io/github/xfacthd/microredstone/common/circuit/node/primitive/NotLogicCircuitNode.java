@@ -17,6 +17,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class NotLogicCircuitNode extends PrimitiveCircuitNode
 {
@@ -67,5 +68,19 @@ public final class NotLogicCircuitNode extends PrimitiveCircuitNode
     public CircuitNodeType<? extends CircuitNode> type()
     {
         return MRContent.NODE_TYPE_LOGIC_NOT.value();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == this) return true;
+        if (!(obj instanceof NotLogicCircuitNode other)) return false;
+        return other.inputWire == inputWire && other.outputWire == outputWire && other.inversionMask == inversionMask;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(inputWire, outputWire, inversionMask);
     }
 }

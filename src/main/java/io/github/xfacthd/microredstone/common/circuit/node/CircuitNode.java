@@ -52,4 +52,10 @@ public abstract class CircuitNode
     }
 
     public abstract CircuitNodeType<? extends CircuitNode> type();
+
+    @Override
+    public abstract boolean equals(Object obj);
+
+    @Override
+    public abstract int hashCode();
 }

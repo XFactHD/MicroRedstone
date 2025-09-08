@@ -18,6 +18,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
 {
@@ -106,5 +107,25 @@ public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
     public CircuitNodeType<? extends CircuitNode> type()
     {
         return MRContent.NODE_TYPE_LOGIC_THREE_INPUT.value();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == this) return true;
+        if (!(obj instanceof ThreeInputLogicCircuitNode other)) return false;
+        return other.type == type &&
+                other.inputOneWire == inputOneWire &&
+                other.inputTwoWire == inputTwoWire &&
+                other.inputThreeWire == inputThreeWire &&
+                other.outputWire == outputWire &&
+                other.invertResult == invertResult &&
+                other.inversionMask == inversionMask;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(type, inputOneWire, inputTwoWire, inputThreeWire, outputWire, invertResult, inversionMask);
     }
 }

@@ -28,4 +28,16 @@ public abstract class CompiledCircuitNode extends RootCircuitNode
         // CompiledCircuitNodes can't be serialized directly, they must be unwrapped first
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        return this == obj;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return System.identityHashCode(this);
+    }
 }

@@ -17,6 +17,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class BundleUnpackerCircuitNode extends PrimitiveCircuitNode
 {
@@ -73,5 +74,19 @@ public final class BundleUnpackerCircuitNode extends PrimitiveCircuitNode
     public CircuitNodeType<? extends CircuitNode> type()
     {
         return MRContent.NODE_TYPE_BUNDLE_UNPACKER.value();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == this) return true;
+        if (!(obj instanceof BundleUnpackerCircuitNode other)) return false;
+        return other.bitIndex == bitIndex && other.inputWire == inputWire && other.outputWire == outputWire;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(bitIndex, inputWire, outputWire);
     }
 }

@@ -16,6 +16,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Special buffer node to use for safely evaluating circular dependencies
@@ -82,5 +83,19 @@ public final class BufferCircuitNode extends CircuitNode
     public CircuitNodeType<? extends CircuitNode> type()
     {
         return MRContent.NODE_TYPE_BUFFER.value();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == this) return true;
+        if (!(obj instanceof BufferCircuitNode other)) return false;
+        return other.inputWire == inputWire && other.outputWire == outputWire;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(inputWire, outputWire);
     }
 }
