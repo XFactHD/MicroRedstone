@@ -10,7 +10,6 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
@@ -34,9 +33,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -55,7 +53,7 @@ public final class CircuitCompiler
         }
     });
     private static final AtomicLong CLASS_COUNTER = new AtomicLong();
-    private static final boolean DUMP_TO_FILE = true;
+    private static final boolean DUMP_TO_FILE = !FMLEnvironment.production;
     @Nullable
     @VisibleForTesting
     public static Path EXPORT_PATH_OVERRIDE = null;
@@ -64,10 +62,10 @@ public final class CircuitCompiler
     private static final String SUPER_CLASS = CompiledCircuitNode.class.getName().replace(".", "/");
     private static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
     private static final String CLASS_NAME_PREFIX = SUPER_CLASS + "$";
-    private static final MethodType CTOR_MTH_TYPE = MethodType.methodType(void.class, CompoundCircuitNode.class);
+    private static final MethodType CTOR_MTH_TYPE = MethodType.methodType(void.class, CompoundCircuitNode.class, Runnable.class);
     private static final MethodType CTOR_HANDLE_MTH_TYPE = CTOR_MTH_TYPE.changeReturnType(RootCircuitNode.class);
-    private static final Method CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class);
-    private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, Connector[].class, Connector[].class);
+    private static final Method CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, Runnable.class);
+    private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, Runnable.class, Connector[].class, Connector[].class);
     private static final Type INT_ARRAY_TYPE = Type.getType(int[].class);
     private static final Type CIRCUIT_STATE_TYPE = Type.getType(CircuitState.class);
     private static final Method CIRCUIT_STATE_CTOR_MTH = method("<init>", Type.VOID_TYPE, int[].class, int[].class, int[].class);
@@ -86,41 +84,18 @@ public final class CircuitCompiler
     static final Type WIRE_PAIR_TYPE = Type.getType(WirePair.class);
     static final Method WIRE_PAIR_EXTERNAL_MTH = findMethod(WirePair.class, "external");
 
-    private static final Map<CompilationKey, Optional<MethodHandle>> COMPILATION_CACHE = new Object2ObjectOpenHashMap<>();
-
-    @Nullable
-    public static RootCircuitNode getOrCompileNode(CompoundCircuitNode node, @Nullable String name)
+    public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, @Nullable String name)
     {
-        return getOrCompileNode(node, name, false);
+        return tryCompileNode(node, name, false);
+    }
+
+    public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
+    {
+        return CompilationCache.tryCompileNode(node, name, suppressExport);
     }
 
     @Nullable
-    public static RootCircuitNode getOrCompileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
-    {
-        CompilationKey cacheKey = new CompilationKey(node);
-        Optional<MethodHandle> nodeConstructor = COMPILATION_CACHE.get(cacheKey);
-        if (nodeConstructor == null)
-        {
-            nodeConstructor = Optional.ofNullable(compileNode(node, name, suppressExport));
-            COMPILATION_CACHE.put(cacheKey, nodeConstructor);
-        }
-        try
-        {
-            if (nodeConstructor.isPresent())
-            {
-                return (RootCircuitNode) nodeConstructor.get().invokeExact(node);
-            }
-        }
-        catch (Throwable t)
-        {
-            LOGGER.error("Failed to instantiate compiled node {}, falling back to interpreted eval", node, t);
-            COMPILATION_CACHE.put(cacheKey, Optional.empty());
-        }
-        return null;
-    }
-
-    @Nullable
-    private static MethodHandle compileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
+    static MethodHandle compileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
     {
         try
         {
@@ -143,11 +118,11 @@ public final class CircuitCompiler
             compileStateSerdes(writer, selfType, evalCompiler.getBufferFields(), evalCompiler.getClockFields());
 
             byte[] bytes = writer.toByteArray();
-            if (!suppressExport)
+            if (DUMP_TO_FILE && !suppressExport)
             {
                 exportClassBytes(className, bytes);
             }
-            MethodHandles.Lookup lookup = LOOKUP.defineHiddenClass(bytes, true, MethodHandles.Lookup.ClassOption.STRONG);
+            MethodHandles.Lookup lookup = LOOKUP.defineHiddenClass(bytes, true);
             MethodHandle constructor = lookup.findConstructor(lookup.lookupClass(), CTOR_MTH_TYPE);
             return constructor.asType(CTOR_HANDLE_MTH_TYPE);
         }
@@ -163,6 +138,8 @@ public final class CircuitCompiler
         ctorGen.loadThis();
         ctorGen.loadArg(0);
         ctorGen.dup();
+        ctorGen.loadArg(1);
+        ctorGen.swap();
         ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_INPUTS_MTH);
         ctorGen.loadArg(0);
         ctorGen.invokeVirtual(CMP_NODE_TYPE, CMP_NODE_OUTPUTS_MTH);
@@ -326,8 +303,6 @@ public final class CircuitCompiler
 
     private static void exportClassBytes(String name, byte[] bytes)
     {
-        if (!DUMP_TO_FILE || FMLEnvironment.production) return;
-
         Path exportPath = Objects.requireNonNullElseGet(EXPORT_PATH_OVERRIDE, EXPORT_PATH);
         String fileName = name.substring(name.lastIndexOf("/") + 1);
         Path path = exportPath.resolve(fileName + ".class");

@@ -9,21 +9,29 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNo
 public abstract class CompiledCircuitNode extends RootCircuitNode
 {
     private final CompoundCircuitNode originalNode;
+    private final Runnable releaser;
 
-    CompiledCircuitNode(CompoundCircuitNode originalNode, Connector[] inputs, Connector[] outputs)
+    CompiledCircuitNode(CompoundCircuitNode originalNode, Runnable releaser, Connector[] inputs, Connector[] outputs)
     {
         super(inputs, outputs);
         this.originalNode = originalNode;
+        this.releaser = releaser;
     }
 
     @Override
-    public CompoundCircuitNode serializable()
+    public final CompoundCircuitNode serializable()
     {
         return originalNode;
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
+    public final void release()
+    {
+        releaser.run();
+    }
+
+    @Override
+    public final CircuitNodeType<? extends CircuitNode> type()
     {
         // CompiledCircuitNodes can't be serialized directly, they must be unwrapped first
         throw new UnsupportedOperationException();

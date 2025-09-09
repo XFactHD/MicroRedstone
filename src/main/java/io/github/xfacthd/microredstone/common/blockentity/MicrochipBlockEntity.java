@@ -3,8 +3,11 @@ package io.github.xfacthd.microredstone.common.blockentity;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.ExternalInterfaceAdapter;
+import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.data.PropertyHolder;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
@@ -24,6 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -39,6 +43,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.model.data.ModelData;
 import net.neoforged.neoforge.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter, ExternalInterfaceAdapter, MenuProvider
 {
@@ -83,6 +89,8 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
 
     public void setCircuit(String circuitName, @Nullable Circuit circuit)
     {
+        if (level().isClientSide()) return;
+
         boolean[] signalUpdates = new boolean[4];
         boolean hadCircuit = this.circuit != null;
         if (hadCircuit)
@@ -111,6 +119,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
             {
                 portTypes[output.port().ordinal()] = RedstoneType.of(output.type());
             }
+            scheduleCircuitCompilation(circuit);
         }
 
         if (hadCircuit != hasCircuit)
@@ -131,6 +140,27 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
             {
                 triggerSignalUpdate(portIdx);
             }
+        }
+    }
+
+    private void scheduleCircuitCompilation(Circuit prevCircuit)
+    {
+        if (prevCircuit.getRootNode() instanceof CompoundCircuitNode circuitNode)
+        {
+            MinecraftServer server = Objects.requireNonNull(level().getServer());
+            CircuitCompiler.tryCompileNode(circuitNode, circuitName)
+                    .thenAcceptAsync(node ->
+                    {
+                        if (circuit != prevCircuit)
+                        {
+                            node.release();
+                            return;
+                        }
+                        if (node instanceof CompiledCircuitNode compiled)
+                        {
+                            circuit = circuit.replaceRootNode(compiled);
+                        }
+                    }, server);
         }
     }
 
@@ -279,10 +309,24 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         if (!level().isClientSide())
         {
             boolean hasCircuit = circuit != null;
+            if (hasCircuit)
+            {
+                scheduleCircuitCompilation(circuit);
+            }
             if (getBlockState().getValue(PropertyHolder.HAS_CIRCUIT) != hasCircuit)
             {
                 level().setBlockAndUpdate(worldPosition, getBlockState().setValue(PropertyHolder.HAS_CIRCUIT, hasCircuit));
             }
+        }
+    }
+
+    @Override
+    public void setRemoved()
+    {
+        super.setRemoved();
+        if (circuit != null)
+        {
+            circuit.release();
         }
     }
 

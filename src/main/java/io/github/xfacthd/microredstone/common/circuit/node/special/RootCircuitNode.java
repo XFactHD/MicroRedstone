@@ -23,4 +23,6 @@ public abstract class RootCircuitNode extends CircuitNode
     public abstract CircuitState serializeState();
 
     public abstract void applyState(CircuitState state);
+
+    public abstract void release();
 }

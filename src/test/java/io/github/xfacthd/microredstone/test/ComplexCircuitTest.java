@@ -2,7 +2,6 @@ package io.github.xfacthd.microredstone.test;
 
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.CircuitState;
-import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -32,7 +31,7 @@ public final class ComplexCircuitTest
         CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
         CompoundCircuitNode node = TestUtils.assemble(protoNode);
 
-        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(node, "BCD_2_7SEG");
+        RootCircuitNode compiled = TestUtils.compile(node, "BCD_2_7SEG");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         int[] expectedOutputs = new int[] {
@@ -113,7 +112,7 @@ public final class ComplexCircuitTest
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
         CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
 
-        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED_OneInOneOut");
+        RootCircuitNode compiled = TestUtils.compile(outerNode, "NESTED_OneInOneOut");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);
@@ -195,7 +194,7 @@ public final class ComplexCircuitTest
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
         CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
 
-        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED_OneInTwoOut");
+        RootCircuitNode compiled = TestUtils.compile(outerNode, "NESTED_OneInTwoOut");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);
@@ -287,7 +286,7 @@ public final class ComplexCircuitTest
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
         CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
 
-        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(outerNode, "NESTED_OneInThreeOut");
+        RootCircuitNode compiled = TestUtils.compile(outerNode, "NESTED_OneInThreeOut");
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);

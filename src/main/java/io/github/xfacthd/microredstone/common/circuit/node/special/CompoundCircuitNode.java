@@ -26,6 +26,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public final class CompoundCircuitNode extends RootCircuitNode
 {
@@ -194,9 +195,21 @@ public final class CompoundCircuitNode extends RootCircuitNode
         }
     }
 
+    public List<Wire> getWires()
+    {
+        return wires;
+    }
+
     public int getWireCount()
     {
         return wires.size();
+    }
+
+    public void forAllNodes(Consumer<NodeEntry<? extends CircuitNode>> consumer)
+    {
+        childNodes.forEach(consumer);
+        clockNodes.forEach(consumer);
+        bufferNodes.forEach(consumer);
     }
 
     @Override
@@ -204,6 +217,9 @@ public final class CompoundCircuitNode extends RootCircuitNode
     {
         return this;
     }
+
+    @Override
+    public void release() { }
 
     @Override
     public CircuitNodeType<? extends CircuitNode> type()

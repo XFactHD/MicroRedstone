@@ -4,6 +4,7 @@ import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitAssembler;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
@@ -17,6 +18,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @State(Scope.Benchmark)
 @SuppressWarnings("MethodMayBeStatic")
@@ -32,8 +34,9 @@ public class CircuitPerformanceTests
     private static final TestInterfaceAdapter BCD_7SEG_DEC_INTERP_ADAPTER = new TestInterfaceAdapter();
     private static final RootCircuitNode BCD_7SEG_DEC_COMPILED = Util.make(() ->
     {
-        RootCircuitNode compiled = CircuitCompiler.getOrCompileNode(BCD_7SEG_DEC_INTERP, null, true);
-        return Objects.requireNonNull(compiled);
+        CompletableFuture<RootCircuitNode> future = CircuitCompiler.tryCompileNode(BCD_7SEG_DEC_INTERP, null, true);
+        if (future.join() instanceof CompiledCircuitNode compiled) return compiled;
+        throw new IllegalStateException("Test circuit failed to compile");
     });
     private static final Circuit BCD_7SEG_DEC_COMPILED_CIRCUIT = new Circuit(BCD_7SEG_DEC_COMPILED);
     private static final TestInterfaceAdapter BCD_7SEG_DEC_COMPILED_ADAPTER = new TestInterfaceAdapter();

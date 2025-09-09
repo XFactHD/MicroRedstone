@@ -6,6 +6,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 
@@ -48,6 +49,11 @@ public final class Circuit
         evalContext.flush(adapter);
     }
 
+    public Circuit replaceRootNode(CompiledCircuitNode compiled)
+    {
+        return new Circuit(compiled, serializeState());
+    }
+
     private CircuitState serializeState()
     {
         return rootNode.serializeState();
@@ -71,5 +77,10 @@ public final class Circuit
     public Connector[] getOutputs()
     {
         return rootNode.getOutputs();
+    }
+
+    public void release()
+    {
+        rootNode.release();
     }
 }
