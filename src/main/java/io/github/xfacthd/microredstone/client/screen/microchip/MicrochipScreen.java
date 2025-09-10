@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.client.screen;
+package io.github.xfacthd.microredstone.client.screen.microchip;
 
 import io.github.xfacthd.microredstone.client.util.ScreenUtils;
 import io.github.xfacthd.microredstone.common.MRContent;

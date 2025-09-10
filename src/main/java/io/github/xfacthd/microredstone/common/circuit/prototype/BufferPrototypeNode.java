@@ -50,4 +50,9 @@ public final class BufferPrototypeNode extends PrototypeNode
                 new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, wireType)
         );
     }
+
+    public static IconConfig icon(BufferCircuitNode node)
+    {
+        return node.getInputs()[0].type().select(ICON_SINGLE, ICON_BUNDLED);
+    }
 }

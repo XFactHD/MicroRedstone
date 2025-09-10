@@ -7,6 +7,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.NotLogicCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.primitive.PrimitiveCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.ThreeInputLogicCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLogicCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -95,6 +96,17 @@ public final class PrimitivePrototypeNode extends PrototypeNode
             case 2 -> new TwoInputLogicCircuitNode(type, isMultiBit(), inputConnectors, outputConnector);
             case 3 -> new ThreeInputLogicCircuitNode(type, isMultiBit(), inputConnectors, outputConnector);
             default -> throw new IllegalStateException("Invalid input count: " + inputCount);
+        };
+    }
+
+    public static IconConfig icon(PrimitiveCircuitNode node)
+    {
+        return switch (node)
+        {
+            case NotLogicCircuitNode not -> Type.NOT.icon(1, not.getInputs()[0].type());
+            case TwoInputLogicCircuitNode logicTwo -> logicTwo.getType().icon(2, logicTwo.getInputs()[0].type());
+            case ThreeInputLogicCircuitNode logicThree -> logicThree.getType().icon(3, logicThree.getInputs()[0].type());
+            default -> throw new IllegalStateException("Unexpected value: " + node);
         };
     }
 

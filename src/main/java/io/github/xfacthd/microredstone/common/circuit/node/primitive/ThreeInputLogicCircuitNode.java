@@ -103,6 +103,11 @@ public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
         localWires.generateStore(outputWire);
     }
 
+    public PrimitivePrototypeNode.Type getType()
+    {
+        return type;
+    }
+
     @Override
     public CircuitNodeType<? extends CircuitNode> type()
     {

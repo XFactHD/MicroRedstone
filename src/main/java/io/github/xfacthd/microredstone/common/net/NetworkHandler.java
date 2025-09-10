@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.net;
 
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryUpdatePayload;
+import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundMicrochipChangeCircuitPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundModifyCircuitLibraryResultPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundWorkbenchWriteCircuitResultPayload;
 import io.github.xfacthd.microredstone.common.net.payload.serverbound.ServerboundModifyCircuitLibraryPayload;
@@ -32,6 +33,10 @@ public final class NetworkHandler
                 .playToClient(
                         ClientboundModifyCircuitLibraryResultPayload.TYPE,
                         ClientboundModifyCircuitLibraryResultPayload.STREAM_CODEC
+                )
+                .playToClient(
+                        ClientboundMicrochipChangeCircuitPayload.TYPE,
+                        ClientboundMicrochipChangeCircuitPayload.STREAM_CODEC
                 )
                 .playToServer(
                         ServerboundModifyCircuitLibraryPayload.TYPE,

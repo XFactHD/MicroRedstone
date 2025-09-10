@@ -3,8 +3,9 @@ package io.github.xfacthd.microredstone.client;
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.model.UnbakedMicrochipModel;
 import io.github.xfacthd.microredstone.client.net.ClientNetworkHandler;
+import io.github.xfacthd.microredstone.client.screen.microchip.MicrochipCircuitScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
-import io.github.xfacthd.microredstone.client.screen.MicrochipScreen;
+import io.github.xfacthd.microredstone.client.screen.microchip.MicrochipScreen;
 import io.github.xfacthd.microredstone.client.texture.AreaMaskSource;
 import io.github.xfacthd.microredstone.client.texture.PortOverlaySource;
 import io.github.xfacthd.microredstone.common.MRContent;
@@ -45,6 +46,7 @@ public final class MRClient
     private static void onRegisterMenuScreens(RegisterMenuScreensEvent event)
     {
         event.register(MRContent.MENU_TYPE_MICROCHIP.value(), MicrochipScreen::new);
+        event.register(MRContent.MENU_TYPE_MICROCHIP_CIRCUIT.value(), MicrochipCircuitScreen::new);
         event.register(MRContent.MENU_TYPE_CIRCUIT_WORKBENCH.value(), CircuitWorkbenchScreen::new);
     }
 }

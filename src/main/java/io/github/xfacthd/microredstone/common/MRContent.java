@@ -20,6 +20,7 @@ import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.item.CircuitItem;
 import io.github.xfacthd.microredstone.common.item.block.MicrochipBlockItem;
 import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
+import io.github.xfacthd.microredstone.common.menu.MicrochipCircuitMenu;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntity;
 import io.github.xfacthd.microredstone.common.util.registration.DeferredBlockEntityRegister;
@@ -85,6 +86,9 @@ public final class MRContent
     // region MenuTypes
     public static final DeferredMenuType<MicrochipMenu> MENU_TYPE_MICROCHIP = MENU_TYPES.registerSimpleMenuType(
             "microchip", MicrochipMenu::createClient
+    );
+    public static final DeferredMenuType<MicrochipCircuitMenu> MENU_TYPE_MICROCHIP_CIRCUIT = MENU_TYPES.registerAdvancedMenuType(
+            "microchip_circuit", MicrochipCircuitMenu::createClient
     );
     public static final DeferredMenuType<CircuitWorkbenchMenu> MENU_TYPE_CIRCUIT_WORKBENCH = MENU_TYPES.registerSimpleMenuType(
             "circuit_workbench", CircuitWorkbenchMenu::createClient

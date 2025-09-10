@@ -99,6 +99,11 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
         localWires.generateStore(outputWire);
     }
 
+    public PrimitivePrototypeNode.Type getType()
+    {
+        return type;
+    }
+
     @Override
     public CircuitNodeType<? extends CircuitNode> type()
     {

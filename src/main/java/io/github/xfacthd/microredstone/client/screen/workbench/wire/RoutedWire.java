@@ -193,5 +193,19 @@ public record RoutedWire(Wire wire, List<Section> sections)
                 }
             }
         }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this) return true;
+            if (!(obj instanceof Section(NodePos one, NodePos two))) return false;
+            return matches(one, two);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return posOne.hashCode() ^ posTwo.hashCode();
+        }
     }
 }

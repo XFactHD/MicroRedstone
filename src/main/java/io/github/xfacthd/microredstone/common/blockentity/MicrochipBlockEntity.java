@@ -10,6 +10,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCirc
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.data.PropertyHolder;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
+import io.github.xfacthd.microredstone.common.menu.MicrochipCircuitMenu;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
 import io.github.xfacthd.microredstone.common.redstone.BundledWireSupport;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneLevelAdapter;
@@ -23,11 +24,13 @@ import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -250,7 +253,20 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
     {
+        if (circuit != null && !player.isShiftKeyDown())
+        {
+            return MicrochipCircuitMenu.createServer(containerId, this, (ServerPlayer) player);
+        }
         return MicrochipMenu.createServer(containerId, inventory, this);
+    }
+
+    @Override
+    public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer)
+    {
+        if (menu instanceof MicrochipCircuitMenu circuitMenu)
+        {
+            circuitMenu.encodeInitialCircuit(buffer);
+        }
     }
 
     @Override
