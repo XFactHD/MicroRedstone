@@ -40,12 +40,10 @@ public record CircuitCanvasContentRenderState(
             List<WireRenderState> wires,
             int canvasX,
             int canvasY,
-            int canvasWidth,
-            int canvasHeight,
             @Nullable ScreenRectangle scissorArea
     )
     {
-        ScreenRectangle bounds = getBounds(canvasX, canvasY, canvasWidth, canvasHeight, scissorArea);
+        ScreenRectangle bounds = getBounds(canvasX, canvasY, scissorArea);
         TextureAtlas guiAtlas = Minecraft.getInstance().getGuiSprites().microredstone$getTextureAtlas();
         TextureAtlasSprite whiteSprite = guiAtlas.getSprite(WHITE_SPRITE);
         TextureSetup textureSetup = TextureSetup.singleTexture(guiAtlas.getTextureView());
@@ -132,9 +130,9 @@ public record CircuitCanvasContentRenderState(
     }
 
     @Nullable
-    private static ScreenRectangle getBounds(int x, int y, int width, int height, @Nullable ScreenRectangle scissorArea)
+    private static ScreenRectangle getBounds(int x, int y, @Nullable ScreenRectangle scissorArea)
     {
-        ScreenRectangle rect = new ScreenRectangle(x, y, width, height);
+        ScreenRectangle rect = new ScreenRectangle(x, y, CircuitCanvas.WIDTH, CircuitCanvas.HEIGHT);
         return scissorArea != null ? scissorArea.intersection(rect) : rect;
     }
 }

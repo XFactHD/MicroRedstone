@@ -62,14 +62,14 @@ public final class CircuitCanvas
 
     private static final int PADDING = 5;
     public static final int PART_COUNT_X = 48;
-    private static final int PART_COUNT_Y = 24;
+    public static final int PART_COUNT_Y = 24;
     public static final int PART_COUNT = PART_COUNT_X * PART_COUNT_Y;
     public static final int PART_SIZE = 8;
     public static final int PART_SLOT_SIZE = PART_SIZE + 1;
     public static final int BORDER_TOP_LEFT = 4;
     private static final int BORDER_BOTTOM_RIGHT = 5;
-    public static final int MAX_WIDTH = PART_SLOT_SIZE * PART_COUNT_X + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
-    public static final int MAX_HEIGHT = PART_SLOT_SIZE * PART_COUNT_Y + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
+    public static final int WIDTH = PART_SLOT_SIZE * PART_COUNT_X + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
+    public static final int HEIGHT = PART_SLOT_SIZE * PART_COUNT_Y + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
     public static final int CELL_COORD_TEXT_HEIGHT = 10;
     private static final int CELL_COORD_TEXT_OFF_Y = CELL_COORD_TEXT_HEIGHT + PADDING;
 
@@ -82,8 +82,6 @@ public final class CircuitCanvas
     private int y;
     private int width;
     private int height;
-    private int canvasWidth;
-    private int canvasHeight;
     private float canvasOffX;
     private float canvasOffY;
     private float canvasScale = 1F; // TODO: implement zoom support
@@ -102,7 +100,7 @@ public final class CircuitCanvas
         int canvasX = x - (int) canvasOffX;
         int canvasY = y - (int) canvasOffY;
 
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BLUEPRINT, canvasX, canvasY, canvasWidth, canvasHeight);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BLUEPRINT, canvasX, canvasY, WIDTH, HEIGHT);
 
         List<PartRenderState> parts = new ArrayList<>();
         List<WireRenderState> wires = new ArrayList<>();
@@ -174,7 +172,7 @@ public final class CircuitCanvas
         if (!parts.isEmpty() || !wires.isEmpty())
         {
             graphics.submitGuiElementRenderState(CircuitCanvasContentRenderState.create(
-                    parts, wires, canvasX, canvasY, canvasWidth, canvasHeight, graphics.peekScissorStack()
+                    parts, wires, canvasX, canvasY, graphics.peekScissorStack()
             ));
         }
 
@@ -289,7 +287,7 @@ public final class CircuitCanvas
 
         int slotX = relX / PART_SLOT_SIZE;
         int slotY = relY / PART_SLOT_SIZE;
-        return slotX < getGridWidth() && slotY < getGridHeight() ? new NodePos(slotX, slotY) : null;
+        return slotX < PART_COUNT_X && slotY < PART_COUNT_Y ? new NodePos(slotX, slotY) : null;
     }
 
     @Nullable
@@ -303,7 +301,7 @@ public final class CircuitCanvas
 
         double slotX = relX / PART_SLOT_SIZE;
         double slotY = relY / PART_SLOT_SIZE;
-        return slotX < getGridWidth() && slotY < getGridHeight() ? new ExactNodePos(slotX, slotY) : null;
+        return slotX < PART_COUNT_X && slotY < PART_COUNT_Y ? new ExactNodePos(slotX, slotY) : null;
     }
 
     public CompoundPrototypeNode getRootNode()
@@ -379,8 +377,8 @@ public final class CircuitCanvas
     public void computeWindowSize(int width, int height)
     {
         int windowPadding = CircuitWorkbenchScreen.PADDING * 2;
-        this.width = Math.min(MAX_WIDTH, width - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_WIDTH);
-        this.height = Math.min(MAX_HEIGHT, height - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_HEIGHT);
+        this.width = Math.min(WIDTH, width - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_WIDTH);
+        this.height = Math.min(HEIGHT, height - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_HEIGHT);
     }
 
     public void computeWindowPos(int leftPos, int topPos)
@@ -399,23 +397,6 @@ public final class CircuitCanvas
         return height;
     }
 
-    public int getGridWidth()
-    {
-        return PART_COUNT_X;
-    }
-
-    public int getGridHeight()
-    {
-        return PART_COUNT_Y;
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    public void setCanvasSize(int width, int height)
-    {
-        canvasWidth = width;
-        canvasHeight = height;
-    }
-
     public void drag(ArrowKey.Direction dir)
     {
         drag(dir.getDiffX(), dir.getDiffY());
@@ -423,8 +404,8 @@ public final class CircuitCanvas
 
     public void drag(float xDiff, float yDiff)
     {
-        canvasOffX = Mth.clamp(canvasOffX + xDiff, 0, canvasWidth - width);
-        canvasOffY = Mth.clamp(canvasOffY + yDiff, 0, canvasHeight - height);
+        canvasOffX = Mth.clamp(canvasOffX + xDiff, 0, WIDTH - width);
+        canvasOffY = Mth.clamp(canvasOffY + yDiff, 0, HEIGHT - height);
     }
 
     public void clear()

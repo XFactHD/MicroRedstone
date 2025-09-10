@@ -71,8 +71,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     public CircuitWorkbenchScreen(CircuitWorkbenchMenu menu, Inventory inventory, Component title)
     {
         super(menu, inventory, title);
-        // TODO: consider making the canvas size configurable in the workbench screen (requires storing the size in the assembled circuit for reconstruction)
-        canvas.setCanvasSize(CircuitCanvas.MAX_WIDTH, CircuitCanvas.MAX_HEIGHT);
         for (ToolPaneTabWidget widget : tabWidgets)
         {
             widget.updateWidgetVisibility(widget.getType() == ToolPaneTab.PARTS);

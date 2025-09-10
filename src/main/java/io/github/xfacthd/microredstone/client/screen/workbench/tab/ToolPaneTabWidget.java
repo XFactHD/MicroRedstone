@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, LibraryBrowser
 {
     public static final int TOOL_PANE_WIDTH = 144;
-    private static final int MAX_HEIGHT = CircuitCanvas.MAX_HEIGHT;
+    private static final int MAX_HEIGHT = CircuitCanvas.HEIGHT;
     private static final int HEADER_HEIGHT = 15;
     private static final ResourceLocation BACKGROUND = Utils.rl("minecraft", "toast/tutorial");
 

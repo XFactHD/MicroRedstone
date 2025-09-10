@@ -98,8 +98,8 @@ public sealed interface FloatingNode
             {
                 case 0 -> pos.x() == 0;
                 case 1 -> pos.y() == 0;
-                case 2 -> pos.x() == canvas.getGridWidth() - 1;
-                case 3 -> pos.y() == canvas.getGridHeight() - 1;
+                case 2 -> pos.x() == CircuitCanvas.PART_COUNT_X - 1;
+                case 3 -> pos.y() == CircuitCanvas.PART_COUNT_Y - 1;
                 default -> throw new IllegalArgumentException("Invalid rotation");
             };
         }
