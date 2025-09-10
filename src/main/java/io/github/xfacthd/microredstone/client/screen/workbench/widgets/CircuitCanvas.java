@@ -3,7 +3,6 @@ package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
-import io.github.xfacthd.microredstone.client.screen.workbench.element.CircuitCanvasContentRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.PartRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
@@ -15,7 +14,6 @@ import io.github.xfacthd.microredstone.client.screen.workbench.part.PartGrid;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.RoutedWire;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireGrid;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireInProgress;
-import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
@@ -33,7 +31,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
@@ -44,9 +41,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.ToIntFunction;
 
-public final class CircuitCanvas
+public final class CircuitCanvas extends AbstractCircuitCanvas
 {
-    private static final ResourceLocation BLUEPRINT = Utils.rl("blueprint");
     private static final ResourceLocation MONOSPACE_FONT = Utils.rl("monospace");
     private static final ResourceLocation[] PORT_BORDERS = Util.make(new ResourceLocation[8], arr ->
     {
@@ -61,15 +57,6 @@ public final class CircuitCanvas
     public static final String CELL_COORD_TRANSLATION = Utils.translationKey("label", "circuit_workbench.cell_coord");
 
     private static final int PADDING = 5;
-    public static final int PART_COUNT_X = 48;
-    public static final int PART_COUNT_Y = 24;
-    public static final int PART_COUNT = PART_COUNT_X * PART_COUNT_Y;
-    public static final int PART_SIZE = 8;
-    public static final int PART_SLOT_SIZE = PART_SIZE + 1;
-    public static final int BORDER_TOP_LEFT = 4;
-    private static final int BORDER_BOTTOM_RIGHT = 5;
-    public static final int WIDTH = PART_SLOT_SIZE * PART_COUNT_X + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
-    public static final int HEIGHT = PART_SLOT_SIZE * PART_COUNT_Y + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
     public static final int CELL_COORD_TEXT_HEIGHT = 10;
     private static final int CELL_COORD_TEXT_OFF_Y = CELL_COORD_TEXT_HEIGHT + PADDING;
 
@@ -78,13 +65,6 @@ public final class CircuitCanvas
     private final PartGrid partGrid = new PartGrid(this);
     private final WireGrid wireGrid = new WireGrid(this);
     private final ErrorAnnotations errorAnnotations = new ErrorAnnotations(this);
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private float canvasOffX;
-    private float canvasOffY;
-    private float canvasScale = 1F; // TODO: implement zoom support
     @Nullable
     private WireInProgress wireInProgress;
 
@@ -93,18 +73,9 @@ public final class CircuitCanvas
         this.owner = owner;
     }
 
-    public void render(GuiGraphics graphics, int mouseX, int mouseY)
+    @Override
+    protected void collectCanvasContent(int canvasX, int canvasY, List<PartRenderState> parts, List<WireRenderState> wires, int mouseX, int mouseY)
     {
-        graphics.enableScissor(x, y, x + width, y + height);
-
-        int canvasX = x - (int) canvasOffX;
-        int canvasY = y - (int) canvasOffY;
-
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BLUEPRINT, canvasX, canvasY, WIDTH, HEIGHT);
-
-        List<PartRenderState> parts = new ArrayList<>();
-        List<WireRenderState> wires = new ArrayList<>();
-
         for (RoutedWire wire : wireGrid)
         {
             WireType type = wire.wire().getWireType();
@@ -168,14 +139,11 @@ public final class CircuitCanvas
                 parts.add(new PartRenderState(connection));
             }
         }
+    }
 
-        if (!parts.isEmpty() || !wires.isEmpty())
-        {
-            graphics.submitGuiElementRenderState(CircuitCanvasContentRenderState.create(
-                    parts, wires, canvasX, canvasY, graphics.peekScissorStack()
-            ));
-        }
-
+    @Override
+    protected void renderCanvasOverlays(GuiGraphics graphics, int canvasX, int canvasY, int mouseX, int mouseY)
+    {
         NodePos hovered = getNodePos(mouseX, mouseY);
         FloatingNode floatingNode = owner.getFloatingNode();
         if (floatingNode != null)
@@ -213,11 +181,12 @@ public final class CircuitCanvas
                 graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, iconX, iconY, PART_SIZE + 2, PART_SIZE + 2);
             }
         }
+    }
 
-        graphics.disableScissor();
-
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, CircuitWorkbenchScreen.WINDOW_FRAME, x, y, width, height);
-
+    @Override
+    protected void renderAdditionalContent(GuiGraphics graphics, int mouseX, int mouseY)
+    {
+        NodePos hovered = getNodePos(mouseX, mouseY);
         Component cellText = Component.translatable(
                 CELL_COORD_TRANSLATION,
                 formatCellCoord(hovered, NodePos::x),
@@ -267,41 +236,10 @@ public final class CircuitCanvas
         }
     }
 
+    @Override
     public boolean isMouseOver(double mouseX, double mouseY)
     {
-        return mouseX > x &&
-               mouseX < (x + width - 1) &&
-               mouseY > y &&
-               mouseY < (y + height - 1);
-    }
-
-    @Nullable
-    public NodePos getNodePos(int mouseX, int mouseY)
-    {
-        if (!isMouseOver(mouseX, mouseY)) return null;
-        if (owner.getLibraryBrowser().isCoveredByInventory(mouseX, mouseY)) return null;
-
-        int relX = mouseX - x + (int) canvasOffX - BORDER_TOP_LEFT;
-        int relY = mouseY - y + (int) canvasOffY - BORDER_TOP_LEFT;
-        if (relX < 0 || relY < 0) return null;
-
-        int slotX = relX / PART_SLOT_SIZE;
-        int slotY = relY / PART_SLOT_SIZE;
-        return slotX < PART_COUNT_X && slotY < PART_COUNT_Y ? new NodePos(slotX, slotY) : null;
-    }
-
-    @Nullable
-    public ExactNodePos getExactNodePos(double mouseX, double mouseY)
-    {
-        if (!isMouseOver(mouseX, mouseY)) return null;
-
-        double relX = mouseX - x + (int) canvasOffX - BORDER_TOP_LEFT;
-        double relY = mouseY - y + (int) canvasOffY - BORDER_TOP_LEFT;
-        if (relX < 0 || relY < 0) return null;
-
-        double slotX = relX / PART_SLOT_SIZE;
-        double slotY = relY / PART_SLOT_SIZE;
-        return slotX < PART_COUNT_X && slotY < PART_COUNT_Y ? new ExactNodePos(slotX, slotY) : null;
+        return super.isMouseOver(mouseX, mouseY) && !owner.getLibraryBrowser().isCoveredByInventory(mouseX, mouseY);
     }
 
     public CompoundPrototypeNode getRootNode()
@@ -374,6 +312,7 @@ public final class CircuitCanvas
         };
     }
 
+    @Override
     public void computeWindowSize(int width, int height)
     {
         int windowPadding = CircuitWorkbenchScreen.PADDING * 2;
@@ -381,31 +320,11 @@ public final class CircuitCanvas
         this.height = Math.min(HEIGHT, height - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_HEIGHT);
     }
 
+    @Override
     public void computeWindowPos(int leftPos, int topPos)
     {
         x = leftPos + CircuitWorkbenchScreen.BORDER_LEFT;
         y = topPos + CircuitWorkbenchScreen.OFFSET_TOP;
-    }
-
-    public int getWindowWidth()
-    {
-        return width;
-    }
-
-    public int getWindowHeight()
-    {
-        return height;
-    }
-
-    public void drag(ArrowKey.Direction dir)
-    {
-        drag(dir.getDiffX(), dir.getDiffY());
-    }
-
-    public void drag(float xDiff, float yDiff)
-    {
-        canvasOffX = Mth.clamp(canvasOffX + xDiff, 0, WIDTH - width);
-        canvasOffY = Mth.clamp(canvasOffY + yDiff, 0, HEIGHT - height);
     }
 
     public void clear()
