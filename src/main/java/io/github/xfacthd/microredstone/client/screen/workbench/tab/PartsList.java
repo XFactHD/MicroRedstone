@@ -191,6 +191,10 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
             int btnX = paneX + FILTER_BTN_X + FilterToggleButton.SIZE * i;
             filterButtons.get(i).setPosition(btnX, paneY + FILTER_BTN_Y);
         }
+
+        // Clamp list offsets
+        partListWidget.scroll(0);
+        importListWidget.scroll(0);
     }
 
     @Override

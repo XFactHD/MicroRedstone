@@ -122,7 +122,6 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
         inventoryLabelY = libraryBrowser.getInvLabelY() - topPos;
 
         canvas.drag(0, 0); // Clamp canvas offset
-        partsList.getScrollableWidget().scroll(0); // Clamp parts list offset
     }
 
     @Override
