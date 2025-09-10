@@ -22,7 +22,7 @@ final class CompilationCache
     private static final long GC_INTERVAL_MS = 30_000;
     private static final Lazy<ScheduledExecutorService> COMPILATION_EXECUTOR = Lazy.of(() ->
     {
-        ThreadFactory threadFactory = Thread.ofPlatform().daemon().factory();
+        ThreadFactory threadFactory = Thread.ofPlatform().daemon().name("MicroRedstone Compilation Worker").factory();
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(threadFactory);
         executor.scheduleAtFixedRate(CompilationCache::runCacheGC, 0, GC_INTERVAL_MS, TimeUnit.MILLISECONDS);
         return executor;
