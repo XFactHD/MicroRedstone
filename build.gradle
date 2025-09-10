@@ -19,7 +19,7 @@ neoForge {
 
     validateAccessTransformers = true
 
-    //interfaceInjectionData = files('src/main/resources/injected_interfaces.json')
+    interfaceInjectionData = files('src/main/resources/injected_interfaces.json')
 
     parchment {
         minecraftVersion = project.parchment_minecraft_version

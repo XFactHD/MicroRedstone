@@ -12,12 +12,8 @@ license="LGPL v3"
     authors="XFactHD"
     description=''''''
 
-
-
-#[[mixins]]
-#    config="microredstone.mixin.json"
-
-
+[[mixins]]
+    config="microredstone.mixin.json"
 
 [[dependencies.microredstone]]
     modId="neoforge"

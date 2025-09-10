@@ -1,0 +1,14 @@
+{
+    "required": true,
+    "package": "io.github.xfacthd.microredstone.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+    ],
+    "client": [
+        "client.AccessorTextureAtlasHolder"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "minVersion": "0.8"
+}

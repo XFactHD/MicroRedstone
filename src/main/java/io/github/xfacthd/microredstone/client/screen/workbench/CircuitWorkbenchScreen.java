@@ -151,7 +151,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
 
         if (floatingNode != null)
         {
-            CircuitCanvas.drawPartNode(graphics, floatingNode.node().getIcon(), mouseX - 4, mouseY - 4, floatingNode.rotation());
+            CircuitCanvas.drawPartNode(graphics, floatingNode.node().getIcon(), mouseX - 4, mouseY - 4, floatingNode.rotation(), CircuitCanvas.PART_SIZE);
         }
         if (canvas.isPullingWire() && Objects.requireNonNull(canvas.getWireInProgress()).isEmpty())
         {

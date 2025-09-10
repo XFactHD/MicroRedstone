@@ -7,6 +7,7 @@ import io.github.xfacthd.microredstone.client.util.PortOverlays;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.client.resources.model.AtlasIds;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -91,5 +92,6 @@ public final class MRSpriteSourceProvider extends SpriteSourceProvider
                         Map.of(Port.RIGHT, WireType.BUNDLED),
                         Optional.of("border")
                 ));
+        guiAtlas.addSource(new SingleFile(Utils.rl("neoforge", "white")));
     }
 }

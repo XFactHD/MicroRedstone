@@ -3,6 +3,9 @@ package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
+import io.github.xfacthd.microredstone.client.screen.workbench.element.CircuitCanvasContentRenderState;
+import io.github.xfacthd.microredstone.client.screen.workbench.element.PartRenderState;
+import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConnectionNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConverterPartNodeContextMenuProvider;
@@ -33,15 +36,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2fStack;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.ToIntFunction;
 
-// TODO: move canvas content rendering to a PiP renderer
 public final class CircuitCanvas
 {
     private static final ResourceLocation BLUEPRINT = Utils.rl("blueprint");
@@ -62,9 +64,9 @@ public final class CircuitCanvas
     public static final int PART_COUNT_X = 48;
     private static final int PART_COUNT_Y = 24;
     public static final int PART_COUNT = PART_COUNT_X * PART_COUNT_Y;
-    private static final int PART_SIZE = 8;
-    private static final int PART_SLOT_SIZE = PART_SIZE + 1;
-    private static final int BORDER_TOP_LEFT = 4;
+    public static final int PART_SIZE = 8;
+    public static final int PART_SLOT_SIZE = PART_SIZE + 1;
+    public static final int BORDER_TOP_LEFT = 4;
     private static final int BORDER_BOTTOM_RIGHT = 5;
     public static final int MAX_WIDTH = PART_SLOT_SIZE * PART_COUNT_X + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
     public static final int MAX_HEIGHT = PART_SLOT_SIZE * PART_COUNT_Y + BORDER_TOP_LEFT + BORDER_BOTTOM_RIGHT;
@@ -102,18 +104,20 @@ public final class CircuitCanvas
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BLUEPRINT, canvasX, canvasY, canvasWidth, canvasHeight);
 
+        List<PartRenderState> parts = new ArrayList<>();
+        List<WireRenderState> wires = new ArrayList<>();
+
         for (RoutedWire wire : wireGrid)
         {
             WireType type = wire.wire().getWireType();
             DyeColor color = wire.wire().getColor();
-            for (RoutedWire.Section section : wire.sections())
-            {
-                drawWireSection(graphics, type, color, section.posOne(), section.posTwo(), canvasX, canvasY);
-            }
+
+            WireRenderState renderState = new WireRenderState(type, color, new ArrayList<>(wire.sections()), new ArrayList<>());
             for (WireNode node : wire.wire().getNodes())
             {
-                drawWireNode(graphics, type, color, node, canvasX, canvasY);
+                renderState.addNode(node);
             }
+            wires.add(renderState);
         }
 
         if (wireInProgress != null)
@@ -122,20 +126,14 @@ public final class CircuitCanvas
 
             WireType type = wireInProgress.getType();
             DyeColor color = wireInProgress.getColor();
-            List<RoutedWire.Section> sections = wireInProgress.getSections();
-            if (!sections.isEmpty())
-            {
-                for (RoutedWire.Section section : sections)
-                {
-                    drawWireSection(graphics, type, color, section.posOne(), section.posTwo(), canvasX, canvasY);
-                }
-            }
+
+            WireRenderState renderState = new WireRenderState(type, color, new ArrayList<>(wireInProgress.getSections()), new ArrayList<>());
             List<WireNode> wireNodes = wireInProgress.getWireNodes();
             if (!wireNodes.isEmpty())
             {
                 for (WireNode node : wireNodes)
                 {
-                    drawWireNode(graphics, type, color, node, canvasX, canvasY);
+                    renderState.addNode(node);
                 }
             }
             List<WireNode> floatingNodes = wireInProgress.getFloatingNodes();
@@ -145,10 +143,15 @@ public final class CircuitCanvas
                 NodePos lastPos = wireNodes.getLast().pos();
                 for (WireNode node : floatingNodes)
                 {
-                    drawWireSection(graphics, type, color, lastPos, node.pos(), canvasX, canvasY);
-                    drawWireNode(graphics, type, color, node, canvasX, canvasY);
+                    renderState.addSection(lastPos, node.pos());
+                    renderState.addNode(node);
                     lastPos = node.pos();
                 }
+            }
+
+            if (!renderState.isEmpty())
+            {
+                wires.add(renderState);
             }
         }
 
@@ -156,21 +159,23 @@ public final class CircuitCanvas
         {
             if (!owner.isNodeFloating(node))
             {
-                NodePos pos = node.getPos();
-                int iconX = canvasX + BORDER_TOP_LEFT + 1 + pos.x() * PART_SLOT_SIZE;
-                int iconY = canvasY + BORDER_TOP_LEFT + 1 + pos.y() * PART_SLOT_SIZE;
-                drawPartNode(graphics, node, iconX, iconY);
+                parts.add(new PartRenderState(node));
             }
         });
 
         for (Connection connection : circuit.getConnections())
         {
-            if (connection == null || owner.isNodeFloating(connection)) continue;
+            if (connection != null && !owner.isNodeFloating(connection))
+            {
+                parts.add(new PartRenderState(connection));
+            }
+        }
 
-            NodePos pos = connection.getPos();
-            int iconX = canvasX + BORDER_TOP_LEFT + 1 + pos.x() * PART_SLOT_SIZE;
-            int iconY = canvasY + BORDER_TOP_LEFT + 1 + pos.y() * PART_SLOT_SIZE;
-            drawPartNode(graphics, connection.getIcon(), iconX, iconY, connection.getRotation());
+        if (!parts.isEmpty() || !wires.isEmpty())
+        {
+            graphics.submitGuiElementRenderState(CircuitCanvasContentRenderState.create(
+                    parts, wires, canvasX, canvasY, canvasWidth, canvasHeight, graphics.peekScissorStack()
+            ));
         }
 
         NodePos hovered = getNodePos(mouseX, mouseY);
@@ -234,92 +239,33 @@ public final class CircuitCanvas
         graphics.renderOutline(x, y, PART_SLOT_SIZE + 1, PART_SLOT_SIZE + 1, color);
     }
 
-    private static void drawPartNode(GuiGraphics graphics, PrototypeNode node, int x, int y)
-    {
-        drawPartNode(graphics, node.getIcon(), x, y, node.getRotation());
-    }
-
-    public static void drawPartNode(GuiGraphics graphics, IconConfig icon, int x, int y, int rotation)
-    {
-        drawPartNode(graphics, icon, x, y, rotation, PART_SIZE);
-    }
-
     public static void drawPartNode(GuiGraphics graphics, IconConfig icon, int x, int y, int rotation, int partSize)
+    {
+        drawPartNode(graphics.pose(), icon, x, y, rotation, partSize, PartBlitter.of(graphics));
+    }
+
+    public static void drawPartNode(Matrix3x2fStack pose, IconConfig icon, int x, int y, int rotation, int partSize, PartBlitter blitter)
     {
         if (!icon.rotateTexture())
         {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.icon(), x, y, partSize, partSize);
+            blitter.blit(pose, icon.icon(), x, y, partSize);
         }
         if (rotation != 0)
         {
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(x, y);
-            graphics.pose().rotateAbout((float) Math.toRadians(90 * rotation), partSize / 2F, partSize / 2F);
+            pose.pushMatrix();
+            pose.translate(x, y);
+            pose.rotateAbout((float) Math.toRadians(90 * rotation), partSize / 2F, partSize / 2F);
             x = 0;
             y = 0;
         }
         if (icon.rotateTexture())
         {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.icon(), x, y, partSize, partSize);
+            blitter.blit(pose, icon.icon(), x, y, partSize);
         }
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.portOverlay(), x, y, partSize, partSize);
+        blitter.blit(pose, icon.portOverlay(), x, y, partSize);
         if (rotation != 0)
         {
-            graphics.pose().popMatrix();
-        }
-    }
-
-    private static void drawWireNode(GuiGraphics graphics, WireType type, DyeColor color, WireNode node, int canvasX, int canvasY)
-    {
-        if (node instanceof WireNode.Connection) return;
-
-        if (node instanceof WireNode.Branch(NodePos pos, Set<Port> ignored, Set<NodePos> neighbors))
-        {
-            if (neighbors.size() == 2)
-            {
-                Iterator<NodePos> it = neighbors.iterator();
-                NodePos adjOne = it.next();
-                NodePos adjTwo = it.next();
-                if ((pos.x() == adjOne.x() && adjOne.x() == adjTwo.x()) || (pos.y() == adjOne.y() && adjOne.y() == adjTwo.y()))
-                {
-                    // Hide unnecessary branch nodes on straight pieces
-                    return;
-                }
-            }
-        }
-
-        NodePos pos = node.pos();
-        int x = canvasX + BORDER_TOP_LEFT + 1 + pos.x() * PART_SLOT_SIZE + 4;
-        int y = canvasY + BORDER_TOP_LEFT + 1 + pos.y() * PART_SLOT_SIZE + 4;
-        int packedColor = type == WireType.BUNDLED ? 0xFFFFFFFF : color.getTextureDiffuseColor();
-        graphics.fill(x - 2, y - 2, x + 2, y + 2, packedColor);
-    }
-
-    private static void drawWireSection(GuiGraphics graphics, WireType type, DyeColor color, NodePos posOne, NodePos posTwo, int canvasX, int canvasY)
-    {
-        // TODO: shorten sections going into parts to only enter the part by one pixel and then render wires after parts again
-        // TODO: draw textures instead of colored lines (same for nodes)
-
-        int packedColor = type == WireType.BUNDLED ? 0xFFFFFFFF : color.getTextureDiffuseColor();
-        if (posOne.x() == posTwo.x())
-        {
-            int minY = Math.min(posOne.y(), posTwo.y());
-            int maxY = Math.max(posOne.y(), posTwo.y());
-            int x = canvasX + 4 + posOne.x() * PART_SLOT_SIZE + 4;
-            int y1 = canvasY + 4 + minY * PART_SLOT_SIZE + 4;
-            int y2 = canvasY + 5 + maxY * PART_SLOT_SIZE + 4;
-            graphics.vLine(x, y1, y2, packedColor);
-            graphics.vLine(x + 1, y1, y2, packedColor);
-        }
-        else if (posOne.y() == posTwo.y())
-        {
-            int minX = Math.min(posOne.x(), posTwo.x());
-            int maxX = Math.max(posOne.x(), posTwo.x());
-            int x1 = canvasX + 4 + minX * PART_SLOT_SIZE + 4;
-            int x2 = canvasX + 5 + maxX * PART_SLOT_SIZE + 4;
-            int y = canvasY + 4 + posOne.y() * PART_SLOT_SIZE + 4;
-            graphics.hLine(x1, x2, y, packedColor);
-            graphics.hLine(x1, x2, y + 1, packedColor);
+            pose.popMatrix();
         }
     }
 

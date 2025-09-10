@@ -759,6 +759,10 @@
       },
       "sprite": "microredstone:port/border_right_bundled",
       "type_prefix": "border"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "neoforge:white"
     }
   ]
 }

@@ -1,0 +1,5 @@
+{
+    "net/minecraft/client/resources/TextureAtlasHolder": [
+        "io/github/xfacthd/microredstone/client/util/duck/DefaultedAccessorTextureAtlasHolder"
+    ]
+}
