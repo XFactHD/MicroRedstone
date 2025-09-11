@@ -50,13 +50,13 @@ public final class SingleNodeSingleWireTests
         for (int i = 0; i < 4; i++)
         {
             int left = adapter.setValue(Port.LEFT, i & 1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Interpreted WIRE input " + i);
         }
         for (int i = 0; i < 4; i++)
         {
             int left = adapter.setValue(Port.LEFT, i & 1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled WIRE input " + i);
         }
 
@@ -94,12 +94,12 @@ public final class SingleNodeSingleWireTests
 
         for (int i = 0; i < 10; i++)
         {
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~i & 0x1, adapter.getValue(Port.RIGHT), "Interpreted CLOCK cycle " + i);
         }
         for (int i = 0; i < 10; i++)
         {
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~i & 0x1, adapter.getValue(Port.RIGHT), "Compiled CLOCK cycle " + i);
         }
 
@@ -137,12 +137,12 @@ public final class SingleNodeSingleWireTests
 
         for (int i = 0; i < 16; i++)
         {
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals((~i & 0b10) >> 1, adapter.getValue(Port.RIGHT), "Interpreted CLOCK cycle " + i);
         }
         for (int i = 0; i < 16; i++)
         {
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals((~i & 0b10) >> 1, adapter.getValue(Port.RIGHT), "Compiled CLOCK cycle " + i);
         }
 
@@ -185,7 +185,7 @@ public final class SingleNodeSingleWireTests
         for (int i = 0; i < 16; i++)
         {
             int left = adapter.setValue(Port.LEFT, i & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(lastInput, adapter.getValue(Port.RIGHT), "Interpreted BUFFER last cycle input " + lastInput);
             lastInput = left;
         }
@@ -193,7 +193,7 @@ public final class SingleNodeSingleWireTests
         for (int i = 0; i < 16; i++)
         {
             int left = adapter.setValue(Port.LEFT, i & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(lastInput, adapter.getValue(Port.RIGHT), "Compiled BUFFER last cycle input " + lastInput);
             lastInput = left;
         }
@@ -236,13 +236,13 @@ public final class SingleNodeSingleWireTests
         for (int i = 0; i <= 0b1; i++)
         {
             adapter.setValue(Port.LEFT, i);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~i & 0x1, adapter.getValue(Port.RIGHT), "Interpreted NOT input " + i);
         }
         for (int i = 0; i <= 0b1; i++)
         {
             adapter.setValue(Port.LEFT, i);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~i & 0x1, adapter.getValue(Port.RIGHT), "Compiled NOT input " + i);
         }
 
@@ -289,14 +289,14 @@ public final class SingleNodeSingleWireTests
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up & down, adapter.getValue(Port.RIGHT), "Interpreted AND input " + up + "," + down);
         }
         for (int i = 0; i <= 0b11; i++)
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up & down, adapter.getValue(Port.RIGHT), "Compiled AND input " + up + "," + down);
         }
 
@@ -348,7 +348,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up & left & down, adapter.getValue(Port.RIGHT), "Interpreted AND input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b111; i++)
@@ -356,7 +356,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up & left & down, adapter.getValue(Port.RIGHT), "Compiled AND input " + up + "," + left + "," + down);
         }
 
@@ -403,14 +403,14 @@ public final class SingleNodeSingleWireTests
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up | down, adapter.getValue(Port.RIGHT), "Interpreted OR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b11; i++)
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up | down, adapter.getValue(Port.RIGHT), "Compiled OR input " + up + "," + down);
         }
 
@@ -462,7 +462,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up | left | down, adapter.getValue(Port.RIGHT), "Interpreted OR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b111; i++)
@@ -470,7 +470,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up | left | down, adapter.getValue(Port.RIGHT), "Compiled OR input " + up + "," + left + "," + down);
         }
 
@@ -517,14 +517,14 @@ public final class SingleNodeSingleWireTests
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up ^ down, adapter.getValue(Port.RIGHT), "Interpreted XOR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b11; i++)
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up ^ down, adapter.getValue(Port.RIGHT), "Compiled XOR input " + up + "," + down);
         }
 
@@ -576,7 +576,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up ^ left ^ down, adapter.getValue(Port.RIGHT), "Interpreted XOR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b111; i++)
@@ -584,7 +584,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up ^ left ^ down, adapter.getValue(Port.RIGHT), "Compiled XOR input " + up + "," + left + "," + down);
         }
 
@@ -631,14 +631,14 @@ public final class SingleNodeSingleWireTests
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up & down) & 0x1, adapter.getValue(Port.RIGHT), "Interpreted NAND input " + up + "," + down);
         }
         for (int i = 0; i <= 0b11; i++)
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up & down) & 0x1, adapter.getValue(Port.RIGHT), "Compiled NAND input " + up + "," + down);
         }
 
@@ -690,7 +690,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up & left & down) & 0x1, adapter.getValue(Port.RIGHT), "Interpreted NAND input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b111; i++)
@@ -698,7 +698,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up & left & down) & 0x1, adapter.getValue(Port.RIGHT), "Compiled NAND input " + up + "," + left + "," + down);
         }
 
@@ -745,14 +745,14 @@ public final class SingleNodeSingleWireTests
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up | down) & 0x1, adapter.getValue(Port.RIGHT), "Interpreted NOR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b11; i++)
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up | down) & 0x1, adapter.getValue(Port.RIGHT), "Compiled NOR input " + up + "," + down);
         }
 
@@ -804,7 +804,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up | left | down) & 0x1, adapter.getValue(Port.RIGHT), "Interpreted NOR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b111; i++)
@@ -812,7 +812,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up | left | down) & 0x1, adapter.getValue(Port.RIGHT), "Compiled NOR input " + up + "," + left + "," + down);
         }
 
@@ -859,14 +859,14 @@ public final class SingleNodeSingleWireTests
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ down) & 0x1, adapter.getValue(Port.RIGHT), "Interpreted XNOR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b11; i++)
         {
             int up = adapter.setValue(Port.UP, i & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ down) & 0x1, adapter.getValue(Port.RIGHT), "Compiled XNOR input " + up + "," + down);
         }
 
@@ -918,7 +918,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ left ^ down) & 0x1, adapter.getValue(Port.RIGHT), "Interpreted XNOR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b111; i++)
@@ -926,7 +926,7 @@ public final class SingleNodeSingleWireTests
             int up = adapter.setValue(Port.UP, i & 0x1);
             int left = adapter.setValue(Port.LEFT, (i >> 1) & 0x1);
             int down = adapter.setValue(Port.DOWN, (i >> 2) & 0x1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ left ^ down) & 0x1, adapter.getValue(Port.RIGHT), "Compiled XNOR input " + up + "," + left + "," + down);
         }
 

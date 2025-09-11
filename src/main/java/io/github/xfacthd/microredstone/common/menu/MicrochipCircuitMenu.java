@@ -3,8 +3,11 @@ package io.github.xfacthd.microredstone.common.menu;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
+import io.github.xfacthd.microredstone.common.circuit.WireStateListener;
+import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundMicrochipChangeCircuitPayload;
+import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundMicrochipUpdateWireStatesPayload;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class MicrochipCircuitMenu extends AbstractContainerMenu
+public final class MicrochipCircuitMenu extends AbstractContainerMenu implements WireStateListener
 {
     public static final StreamCodec<ByteBuf, Optional<CompoundCircuitNode>> ROOT_NODE_CODEC = ByteBufCodecs.optional(CompoundCircuitNode.STREAM_CODEC);
 
@@ -63,6 +66,10 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu
         this.levelAccess = levelAccess;
         this.initialRootNode = initialRootNode;
         this.lastCircuit = blockEntity != null ? blockEntity.getCircuit() : null;
+        if (blockEntity != null)
+        {
+            blockEntity.addWireStateListener(this);
+        }
     }
 
     public void encodeInitialCircuit(ByteBuf buffer)
@@ -88,6 +95,15 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu
         }
     }
 
+    @Override
+    public void handleWireStates(WireStates wireStates)
+    {
+        if (player != null)
+        {
+            PacketDistributor.sendToPlayer(player, new ClientboundMicrochipUpdateWireStatesPayload(containerId, wireStates));
+        }
+    }
+
     @Nullable
     public CompoundCircuitNode getInitialRootNode()
     {
@@ -104,5 +120,15 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu
     public boolean stillValid(Player player)
     {
         return stillValid(levelAccess, player, MRContent.BLOCK_MICROCHIP.value());
+    }
+
+    @Override
+    public void removed(Player player)
+    {
+        super.removed(player);
+        if (blockEntity != null)
+        {
+            blockEntity.removeWireStateListener(this);
+        }
     }
 }

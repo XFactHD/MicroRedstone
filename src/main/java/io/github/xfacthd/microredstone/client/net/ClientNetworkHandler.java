@@ -8,6 +8,7 @@ import io.github.xfacthd.microredstone.common.data.library.ClientCircuitLibrary;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryUpdatePayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundMicrochipChangeCircuitPayload;
+import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundMicrochipUpdateWireStatesPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundModifyCircuitLibraryResultPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundWorkbenchWriteCircuitResultPayload;
 import net.minecraft.client.Minecraft;
@@ -23,6 +24,7 @@ public final class ClientNetworkHandler
         event.register(ClientboundWorkbenchWriteCircuitResultPayload.TYPE, ClientNetworkHandler::handleCircuitWriteResult);
         event.register(ClientboundModifyCircuitLibraryResultPayload.TYPE, ClientNetworkHandler::handleModifyCircuitLibraryResult);
         event.register(ClientboundMicrochipChangeCircuitPayload.TYPE, ClientNetworkHandler::handleMicrochipChangeCircuit);
+        event.register(ClientboundMicrochipUpdateWireStatesPayload.TYPE, ClientNetworkHandler::handleMicrochipUpdateWireStates);
     }
 
     private static void handleCircuitLibrary(ClientboundCircuitLibraryPayload payload, IPayloadContext ctx)
@@ -56,6 +58,14 @@ public final class ClientNetworkHandler
         if (Minecraft.getInstance().screen instanceof MicrochipCircuitScreen screen && screen.getMenu().containerId == payload.containerId())
         {
             screen.handleCircuitUpdate(payload.rootNode().orElse(null));
+        }
+    }
+
+    private static void handleMicrochipUpdateWireStates(ClientboundMicrochipUpdateWireStatesPayload payload, IPayloadContext ctx)
+    {
+        if (Minecraft.getInstance().screen instanceof MicrochipCircuitScreen screen && screen.getMenu().containerId == payload.containerId())
+        {
+            screen.handleWireStateUpdate(payload.wireStates());
         }
     }
 

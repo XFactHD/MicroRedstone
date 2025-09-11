@@ -49,13 +49,13 @@ public final class SingleNodeBundledWireTests
         for (int i = 0; i < 32; i++)
         {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b1111, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Interpreted WIRE input " + i);
         }
         for (int i = 0; i < 32; i++)
         {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b1111, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled WIRE input " + i);
         }
 
@@ -98,7 +98,7 @@ public final class SingleNodeBundledWireTests
         for (int i = 0; i < 16; i++)
         {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b11, 2));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(lastInput, adapter.getValue(Port.RIGHT), "Interpreted BUFFER last cycle input " + lastInput);
             lastInput = left;
         }
@@ -106,7 +106,7 @@ public final class SingleNodeBundledWireTests
         for (int i = 0; i < 16; i++)
         {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b11, 2));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(lastInput, adapter.getValue(Port.RIGHT), "Compiled BUFFER last cycle input " + lastInput);
             lastInput = left;
         }
@@ -149,13 +149,13 @@ public final class SingleNodeBundledWireTests
         for (int i = 0; i <= 0b1111; i++)
         {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~left & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NOT input " + i);
         }
         for (int i = 0; i <= 0b1111; i++)
         {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~left & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NOT input " + i);
         }
 
@@ -202,14 +202,14 @@ public final class SingleNodeBundledWireTests
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up & down, adapter.getValue(Port.RIGHT), "Interpreted AND input " + up + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111; i++)
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up & down, adapter.getValue(Port.RIGHT), "Compiled AND input " + up + "," + down);
         }
 
@@ -261,7 +261,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up & left & down, adapter.getValue(Port.RIGHT), "Interpreted AND input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111_1111; i++)
@@ -269,7 +269,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up & left & down, adapter.getValue(Port.RIGHT), "Compiled AND input " + up + "," + left + "," + down);
         }
 
@@ -316,14 +316,14 @@ public final class SingleNodeBundledWireTests
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up | down, adapter.getValue(Port.RIGHT), "Interpreted OR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111; i++)
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up | down, adapter.getValue(Port.RIGHT), "Compiled OR input " + up + "," + down);
         }
 
@@ -375,7 +375,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up | left | down, adapter.getValue(Port.RIGHT), "Interpreted OR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111_1111; i++)
@@ -383,7 +383,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up | left | down, adapter.getValue(Port.RIGHT), "Compiled OR input " + up + "," + left + "," + down);
         }
 
@@ -430,14 +430,14 @@ public final class SingleNodeBundledWireTests
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up ^ down, adapter.getValue(Port.RIGHT), "Interpreted XOR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111; i++)
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up ^ down, adapter.getValue(Port.RIGHT), "Compiled XOR input " + up + "," + down);
         }
 
@@ -489,7 +489,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up ^ left ^ down, adapter.getValue(Port.RIGHT), "Interpreted XOR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111_1111; i++)
@@ -497,7 +497,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(up ^ left ^ down, adapter.getValue(Port.RIGHT), "Compiled XOR input " + up + "," + left + "," + down);
         }
 
@@ -544,14 +544,14 @@ public final class SingleNodeBundledWireTests
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NAND input " + up + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111; i++)
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NAND input " + up + "," + down);
         }
 
@@ -603,7 +603,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up & left & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NAND input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111_1111; i++)
@@ -611,7 +611,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up & left & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NAND input " + up + "," + left + "," + down);
         }
 
@@ -658,14 +658,14 @@ public final class SingleNodeBundledWireTests
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NOR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111; i++)
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NOR input " + up + "," + down);
         }
 
@@ -717,7 +717,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up | left | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NOR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111_1111; i++)
@@ -725,7 +725,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up | left | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NOR input " + up + "," + left + "," + down);
         }
 
@@ -772,14 +772,14 @@ public final class SingleNodeBundledWireTests
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted XNOR input " + up + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111; i++)
         {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled XNOR input " + up + "," + down);
         }
 
@@ -831,7 +831,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ left ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted XNOR input " + up + "," + left + "," + down);
         }
         for (int i = 0; i <= 0b1111_1111_1111; i++)
@@ -839,7 +839,7 @@ public final class SingleNodeBundledWireTests
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ left ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled XNOR input " + up + "," + left + "," + down);
         }
 

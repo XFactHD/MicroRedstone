@@ -11,11 +11,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public record WireRenderState(List<RoutedWire.Section> sections, List<NodePos> nodes, int packedColor)
+public record WireRenderState(WireType type, DyeColor color, List<RoutedWire.Section> sections, List<NodePos> nodes, boolean powered, int packedColor)
 {
     public WireRenderState(WireType type, DyeColor color, List<RoutedWire.Section> sections, List<NodePos> nodes, boolean powered)
     {
-        this(sections, nodes, computeColor(type, color, powered));
+        this(type, color, sections, nodes, powered, computeColor(type, color, powered));
     }
 
     public WireRenderState(WireType type, DyeColor color, List<RoutedWire.Section> sections, List<NodePos> nodes)
@@ -52,6 +52,12 @@ public record WireRenderState(List<RoutedWire.Section> sections, List<NodePos> n
     public boolean isEmpty()
     {
         return sections.isEmpty() && nodes.isEmpty();
+    }
+
+    public WireRenderState withPowered(boolean powered)
+    {
+        if (powered == this.powered || type == WireType.BUNDLED) return this;
+        return new WireRenderState(type, color, sections, nodes, powered, computeColor(type, color, powered));
     }
 
     private static int computeColor(WireType type, DyeColor color, boolean powered)

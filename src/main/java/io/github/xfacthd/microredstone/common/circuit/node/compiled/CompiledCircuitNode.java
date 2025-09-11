@@ -10,12 +10,20 @@ public abstract class CompiledCircuitNode extends RootCircuitNode
 {
     private final CompoundCircuitNode originalNode;
     private final Runnable releaser;
+    private final int wireCount;
 
     CompiledCircuitNode(CompoundCircuitNode originalNode, Runnable releaser, Connector[] inputs, Connector[] outputs)
     {
         super(inputs, outputs);
         this.originalNode = originalNode;
         this.releaser = releaser;
+        this.wireCount = originalNode.getWireCount();
+    }
+
+    @Override
+    public final int getWireCount()
+    {
+        return wireCount;
     }
 
     @Override

@@ -5,10 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -42,10 +42,10 @@ public final class Circuit
         this.evalContext = new EvalContext.Root(inputs, outputs);
     }
 
-    public void evaluate(ExternalInterfaceAdapter adapter)
+    public void evaluate(ExternalInterfaceAdapter adapter, @Nullable WireStates wireStates)
     {
         evalContext.prepare(adapter);
-        rootNode.evaluate(evalContext, inputs, outputs);
+        rootNode.evaluate(evalContext, inputs, outputs, wireStates);
         evalContext.flush(adapter);
     }
 
@@ -59,7 +59,7 @@ public final class Circuit
         return rootNode.serializeState();
     }
 
-    public CircuitNode getRootNode()
+    public RootCircuitNode getRootNode()
     {
         return rootNode;
     }

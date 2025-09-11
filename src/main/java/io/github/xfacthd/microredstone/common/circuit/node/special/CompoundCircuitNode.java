@@ -4,11 +4,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.CircuitState;
+import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.compiler.EvalMethodCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
@@ -22,6 +24,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntListIterator;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -78,7 +81,7 @@ public final class CompoundCircuitNode extends RootCircuitNode
     }
 
     @Override
-    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
+    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs, @Nullable WireStates wireStates)
     {
         for (NodeEntry<ClockCircuitNode> clock : clockNodes)
         {
@@ -90,6 +93,16 @@ public final class CompoundCircuitNode extends RootCircuitNode
             child.evaluate(nestedContext);
         }
         nestedContext.flush(context, outputs);
+        if (wireStates != null)
+        {
+            for (int i = 0; i < wires.size(); i++)
+            {
+                if (wires.get(i).getWireType() != WireType.BUNDLED)
+                {
+                    wireStates.set(i, nestedContext.loadInput(i));
+                }
+            }
+        }
         for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
         {
             buffer.evaluate(nestedContext);
@@ -200,6 +213,7 @@ public final class CompoundCircuitNode extends RootCircuitNode
         return wires;
     }
 
+    @Override
     public int getWireCount()
     {
         return wires.size();

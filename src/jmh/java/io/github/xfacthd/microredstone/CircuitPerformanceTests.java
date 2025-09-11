@@ -47,7 +47,7 @@ public class CircuitPerformanceTests
         for (int i = 0; i < 10; i++)
         {
             BCD_7SEG_DEC_INTERP_ADAPTER.setValue(Port.LEFT, i);
-            BCD_7SEG_DEC_INTERP_CIRCUIT.evaluate(BCD_7SEG_DEC_INTERP_ADAPTER);
+            BCD_7SEG_DEC_INTERP_CIRCUIT.evaluate(BCD_7SEG_DEC_INTERP_ADAPTER, null);
             bh.consume(BCD_7SEG_DEC_INTERP_ADAPTER.getValue(Port.RIGHT));
         }
     }
@@ -58,7 +58,7 @@ public class CircuitPerformanceTests
         for (int i = 0; i < 10; i++)
         {
             BCD_7SEG_DEC_COMPILED_ADAPTER.setValue(Port.LEFT, i);
-            BCD_7SEG_DEC_COMPILED_CIRCUIT.evaluate(BCD_7SEG_DEC_COMPILED_ADAPTER);
+            BCD_7SEG_DEC_COMPILED_CIRCUIT.evaluate(BCD_7SEG_DEC_COMPILED_ADAPTER, null);
             bh.consume(BCD_7SEG_DEC_COMPILED_ADAPTER.getValue(Port.RIGHT));
         }
     }

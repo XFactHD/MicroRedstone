@@ -1,13 +1,16 @@
 package io.github.xfacthd.microredstone.common.circuit.compiler;
 
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
+import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -156,7 +159,7 @@ public final class EvalMethodCompiler
             }
             default ->
             {
-                // return (outputLocal1 << 48) | (outputLocal1 << 32) | (outputLocal1 << 16) | outputLocal0;
+                // return (outputLocal3 << 48) | (outputLocal2 << 32) | (outputLocal1 << 16) | outputLocal0;
                 for (int i = 0; i < outputs.length; i++)
                 {
                     if (i < outputs.length - 1)
@@ -179,19 +182,40 @@ public final class EvalMethodCompiler
 
     private void compileEval(
             Method evalMth,
-            boolean publicMth,
+            boolean rootMth,
             CompoundCircuitNode node,
             NodeCompiler compiler,
             InputOutputCompiler inputCompiler,
             InputOutputCompiler outputCompiler
     )
     {
-        GeneratorAdapter generator = new GeneratorAdapter(publicMth ? Opcodes.ACC_PUBLIC : Opcodes.ACC_PRIVATE, evalMth, null, null, classWriter);
+        GeneratorAdapter generator = new GeneratorAdapter(rootMth ? Opcodes.ACC_PUBLIC : Opcodes.ACC_PRIVATE, evalMth, null, null, classWriter);
         LocalWireMapper localWires = new LocalWireMapper(generator, node.getWireCount());
 
         inputCompiler.compile(generator, localWires, node.getInputs());
         compiler.compile(this, generator, selfType, fieldAppender, localWires, node);
         outputCompiler.compile(generator, localWires, node.getOutputs());
+
+        if (rootMth)
+        {
+            Label skipCaptureLabel = new Label();
+
+            generator.loadArg(3);
+            generator.ifNull(skipCaptureLabel);
+
+            List<Wire> wires = node.getWires();
+            for (int i = 0; i < wires.size(); i++)
+            {
+                if (wires.get(i).getWireType() == WireType.BUNDLED) continue;
+
+                generator.loadArg(3);
+                generator.push(i);
+                localWires.generateLoad(i);
+                generator.invokeVirtual(CircuitCompiler.WIRE_STATES_TYPE, CircuitCompiler.WIRE_STATES_SET_MTH);
+            }
+
+            generator.mark(skipCaptureLabel);
+        }
 
         generator.returnValue();
         generator.endMethod();

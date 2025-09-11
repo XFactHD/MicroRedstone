@@ -1,8 +1,12 @@
 package io.github.xfacthd.microredstone.common.circuit.node.special;
 
 import io.github.xfacthd.microredstone.common.circuit.CircuitState;
+import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
+import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
+import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -17,6 +21,16 @@ public abstract class RootCircuitNode extends CircuitNode
     {
         super(inputs, outputs);
     }
+
+    @Override
+    public final void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
+    {
+        evaluate(context, inputs, outputs, null);
+    }
+
+    public abstract void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs, @Nullable WireStates wireStates);
+
+    public abstract int getWireCount();
 
     public abstract CompoundCircuitNode serializable();
 

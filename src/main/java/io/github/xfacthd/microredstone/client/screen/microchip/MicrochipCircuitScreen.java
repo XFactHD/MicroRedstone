@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.microchip;
 
+import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.menu.MicrochipCircuitMenu;
 import io.github.xfacthd.microredstone.common.util.Utils;
@@ -53,5 +54,10 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     public void handleCircuitUpdate(@Nullable CompoundCircuitNode rootNode)
     {
         canvas.update(rootNode);
+    }
+
+    public void handleWireStateUpdate(WireStates wireStates)
+    {
+        canvas.updateWireStates(wireStates);
     }
 }

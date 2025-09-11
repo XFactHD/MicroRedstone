@@ -3,6 +3,8 @@ package io.github.xfacthd.microredstone.common.blockentity;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.ExternalInterfaceAdapter;
+import io.github.xfacthd.microredstone.common.circuit.WireStateListener;
+import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -17,6 +19,7 @@ import io.github.xfacthd.microredstone.common.redstone.RedstoneLevelAdapter;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneType;
 import io.github.xfacthd.microredstone.common.util.SerdesUtils;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -48,6 +51,7 @@ import net.neoforged.neoforge.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Set;
 
 public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter, ExternalInterfaceAdapter, MenuProvider
 {
@@ -58,6 +62,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
 
     private final RedstoneType[] portTypes = Utils.fillArray(new RedstoneType[4], $ -> RedstoneType.NONE);
     private final short[] portStates = new short[4];
+    private final Set<WireStateListener> wireStateListeners = new ReferenceOpenHashSet<>();
     private Direction facing = Direction.DOWN;
     private Rotation rotation = Rotation.NONE;
     @Nullable
@@ -74,7 +79,16 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     {
         if (circuit != null)
         {
-            circuit.evaluate(this);
+            if (!wireStateListeners.isEmpty())
+            {
+                WireStates wireStates = new WireStates(circuit.getRootNode().getWireCount());
+                circuit.evaluate(this, wireStates);
+                wireStateListeners.forEach(listener -> listener.handleWireStates(wireStates));
+            }
+            else
+            {
+                circuit.evaluate(this, null);
+            }
         }
     }
 
@@ -176,6 +190,16 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     public String getCircuitName()
     {
         return circuitName;
+    }
+
+    public void addWireStateListener(WireStateListener listener)
+    {
+        wireStateListeners.add(listener);
+    }
+
+    public void removeWireStateListener(WireStateListener listener)
+    {
+        wireStateListeners.remove(listener);
     }
 
     @Override

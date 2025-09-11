@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.circuit.compiler;
 import com.mojang.logging.LogUtils;
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.common.circuit.CircuitState;
+import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -77,12 +78,14 @@ public final class CircuitCompiler
     private static final Type CMP_NODE_TYPE = Type.getType(CompoundCircuitNode.class);
     private static final Method CMP_NODE_INPUTS_MTH = findMethod(CircuitNode.class, "getInputs");
     private static final Method CMP_NODE_OUTPUTS_MTH = findMethod(CircuitNode.class, "getOutputs");
-    static final Method NODE_EVAL_MTH = findMethod(CircuitNode.class, "evaluate", EvalContext.class, WirePair[].class, WirePair[].class);
+    static final Method NODE_EVAL_MTH = findMethod(RootCircuitNode.class, "evaluate", EvalContext.class, WirePair[].class, WirePair[].class, WireStates.class);
     static final Type EVAL_CONTEXT_TYPE = Type.getType(EvalContext.class);
     static final Method EVAL_CONTEXT_LOAD_MTH = findMethod(EvalContext.class, "loadInput", int.class);
     static final Method EVAL_CONTEXT_STORE_MTH = findMethod(EvalContext.class, "storeOutput", int.class, short.class);
     static final Type WIRE_PAIR_TYPE = Type.getType(WirePair.class);
     static final Method WIRE_PAIR_EXTERNAL_MTH = findMethod(WirePair.class, "external");
+    static final Type WIRE_STATES_TYPE = Type.getType(WireStates.class);
+    static final Method WIRE_STATES_SET_MTH = findMethod(WireStates.class, "set", int.class, int.class);
 
     public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, @Nullable String name)
     {

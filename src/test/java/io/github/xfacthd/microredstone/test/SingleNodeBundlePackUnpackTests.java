@@ -55,13 +55,13 @@ public final class SingleNodeBundlePackUnpackTests
             for (int i = 0; i <= 0b11; i++)
             {
                 int left = adapter.setValue(Port.LEFT, i & 1);
-                circuitInterp.evaluate(adapter);
+                circuitInterp.evaluate(adapter, null);
                 Assertions.assertEquals(left << bit, adapter.getValue(Port.RIGHT), "Interpreted PACK bit " + bit + " input " + left);
             }
             for (int i = 0; i <= 0b11; i++)
             {
                 int left = adapter.setValue(Port.LEFT, i & 1);
-                circuitCompiled.evaluate(adapter);
+                circuitCompiled.evaluate(adapter, null);
                 Assertions.assertEquals(left << bit, adapter.getValue(Port.RIGHT), "Compiled PACK bit " + bit + " input " + left);
             }
 
@@ -114,14 +114,14 @@ public final class SingleNodeBundlePackUnpackTests
         {
             int up = adapter.setValue(Port.UP, i & 1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 1);
-            circuitInterp.evaluate(adapter);
+            circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(i, adapter.getValue(Port.RIGHT), "Interpreted PACK_MULTI input " + up + ", " + down);
         }
         for (int i = 0; i <= 0b11; i++)
         {
             int up = adapter.setValue(Port.UP, i & 1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 1);
-            circuitCompiled.evaluate(adapter);
+            circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(i, adapter.getValue(Port.RIGHT), "Compiled PACK_MULTI input " + up + ", " + down);
         }
     }
@@ -159,13 +159,13 @@ public final class SingleNodeBundlePackUnpackTests
             for (int i = 0; i <= 16; i++)
             {
                 int left = adapter.setValue(Port.LEFT, (1 << i) & 0xFFFF);
-                circuitInterp.evaluate(adapter);
+                circuitInterp.evaluate(adapter, null);
                 Assertions.assertEquals(i == bit ? 1 : 0, adapter.getValue(Port.RIGHT), "Interpreted UNPACK bit " + bit + " input " + left);
             }
             for (int i = 0; i <= 16; i++)
             {
                 int left = adapter.setValue(Port.LEFT, (1 << i) & 0xFFFF);
-                circuitCompiled.evaluate(adapter);
+                circuitCompiled.evaluate(adapter, null);
                 Assertions.assertEquals(i == bit ? 1 : 0, adapter.getValue(Port.RIGHT), "Compiled UNPACK bit " + bit + " input " + left);
             }
 

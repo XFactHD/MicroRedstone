@@ -5,6 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRende
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.AbstractCircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.RoutedWire;
 import io.github.xfacthd.microredstone.common.circuit.CircuitUtils;
+import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -83,6 +84,15 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
                 wires.add(renderState);
             }
         });
+    }
+
+    public void updateWireStates(WireStates wireStates)
+    {
+        for (int i = 0; i < wires.size(); i++)
+        {
+            WireRenderState renderState = wires.get(i);
+            wires.set(i, renderState.withPowered(wireStates.get(i)));
+        }
     }
 
     @Override
