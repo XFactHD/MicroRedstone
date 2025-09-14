@@ -25,7 +25,7 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
     public static final MapCodec<TwoInputLogicCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             PrimitivePrototypeNode.Type.CODEC.fieldOf("function").forGetter(node -> node.type),
             Codec.BOOL.fieldOf("multi_bit").forGetter(node -> node.inversionMask != 0x1),
-            Connector.CODEC.listOf(3, 3).fieldOf("inputs").forGetter(node -> List.of(node.inputs)),
+            Connector.CODEC.listOf(2, 2).fieldOf("inputs").forGetter(node -> List.of(node.inputs)),
             Connector.CODEC.fieldOf("output").forGetter(node -> node.getOutputs()[0])
     ).apply(inst, TwoInputLogicCircuitNode::new));
     public static final StreamCodec<ByteBuf, TwoInputLogicCircuitNode> STREAM_CODEC = StreamCodec.composite(
