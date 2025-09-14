@@ -67,6 +67,12 @@ final class ContextMenuBuilderImpl implements ContextMenuBuilder
         }
     }
 
+    @Override
+    public boolean isEmpty()
+    {
+        return owner.renderables.isEmpty();
+    }
+
     void build()
     {
         int maxWidth = ContextMenu.MIN_WIDTH;

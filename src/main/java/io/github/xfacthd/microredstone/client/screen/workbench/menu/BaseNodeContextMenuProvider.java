@@ -25,8 +25,11 @@ public abstract sealed class BaseNodeContextMenuProvider<T extends PlaceableNode
     @Override
     public void fillRootMenu(ContextMenuBuilder menuBuilder)
     {
-        menuBuilder.addSeparator()
-                .addActionEntry(ENTRY_DELETE_NODE, () -> canvas.getPartGrid().removePartNode(node.getPos()));
+        if (!menuBuilder.isEmpty())
+        {
+            menuBuilder.addSeparator();
+        }
+        menuBuilder.addActionEntry(ENTRY_DELETE_NODE, () -> canvas.getPartGrid().removePartNode(node.getPos()));
     }
 
     @Override

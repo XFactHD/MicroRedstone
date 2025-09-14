@@ -16,6 +16,8 @@ public interface ContextMenuBuilder
 
     ContextMenuBuilder addSeparator();
 
+    boolean isEmpty();
+
     interface ActionEntryBuilder
     {
         ActionEntryBuilder withAction(Runnable action);
