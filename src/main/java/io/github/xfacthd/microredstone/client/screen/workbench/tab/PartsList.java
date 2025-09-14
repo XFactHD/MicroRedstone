@@ -167,7 +167,10 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     public void updateImportList()
     {
         importEntries.clear();
-        ClientCircuitLibrary.getFilteredEntries(filters, entry -> importEntries.add(LibraryEntry.create(entry)));
+        ClientCircuitLibrary.getFilteredEntries(
+                WorkbenchConfig.INSTANCE::isImportFilterEnabled,
+                entry -> importEntries.add(LibraryEntry.create(entry))
+        );
     }
 
     @Override

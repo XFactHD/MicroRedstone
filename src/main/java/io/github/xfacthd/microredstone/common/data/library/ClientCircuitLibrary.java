@@ -12,20 +12,20 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public final class ClientCircuitLibrary
 {
     private static final Map<UUID, CircuitLibraryEntry> ENTRIES_BY_ID = new Object2ObjectOpenHashMap<>();
     private static final Map<String, CircuitLibraryEntry> OWNED_ENTRIES_BY_NAME = new Object2ObjectOpenHashMap<>();
 
-    public static void getFilteredEntries(Set<ShareType> filter, Consumer<CircuitLibraryEntry> consumer)
+    public static void getFilteredEntries(Predicate<ShareType> filter, Consumer<CircuitLibraryEntry> consumer)
     {
         for (CircuitLibraryEntry value : ENTRIES_BY_ID.values())
         {
-            if (filter.contains(value.shareInfo().type()))
+            if (filter.test(value.shareInfo().type()))
             {
                 consumer.accept(value);
             }
