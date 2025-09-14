@@ -131,6 +131,9 @@
   "label.microredstone.source_tooltip.port_overlay.entries": "Ports",
   "label.microredstone.source_tooltip.port_overlay.sprite": "Sprite",
   "label.microredstone.source_tooltip.port_overlay.type_prefix": "Type Prefix",
+  "label.microredstone.source_tooltip.stacking.primary": "Primary Texture",
+  "label.microredstone.source_tooltip.stacking.secondaries": "Secondary Textures",
+  "label.microredstone.source_tooltip.stacking.sprite": "Sprite",
   "label.microredstone.stored_circuit": "Circuit: %s",
   "msg.microredstone.circuit_workbench.library_browser.export_action.export_overwrite.confirm": "Are you sure you want to overwrite the existing circuit?",
   "msg.microredstone.circuit_workbench.library_browser.export_action.result.item_server_error": "An unknown error occured writing the design to the circuit item",
@@ -197,5 +200,6 @@
   "tooltip.microredstone.circuit_workbench.parts_list.filter.hidden": "%s Circuits: Hidden",
   "tooltip.microredstone.circuit_workbench.parts_list.filter.shown": "%s Circuits: Shown",
   "value.microredstone.source_tooltip.area_mask.area": "X: %s Y: %s Width: %s Height: %s",
-  "value.microredstone.source_tooltip.port_overlay.entry": "  - %s = %s"
+  "value.microredstone.source_tooltip.port_overlay.entry": "  - %s = %s",
+  "value.microredstone.source_tooltip.stacking.secondary": "  - %s"
 }

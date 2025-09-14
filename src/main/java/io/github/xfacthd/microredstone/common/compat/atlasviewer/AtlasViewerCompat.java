@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.compat.atlasviewer;
 
 import io.github.xfacthd.microredstone.client.texture.AreaMaskSource;
 import io.github.xfacthd.microredstone.client.texture.PortOverlaySource;
+import io.github.xfacthd.microredstone.client.texture.StackingSource;
 import io.github.xfacthd.microredstone.common.compat.CompatHandler;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.network.chat.Component;
@@ -19,6 +20,10 @@ public final class AtlasViewerCompat
     public static final Component LABEL_PORT_ENTRIES = Utils.translate("label", "source_tooltip.port_overlay.entries");
     public static final String VALUE_PORT_ENTRY = Utils.translationKey("value", "source_tooltip.port_overlay.entry");
     public static final Component LABEL_PORT_TYPE_PREFIX = Utils.translate("label", "source_tooltip.port_overlay.type_prefix");
+    public static final Component LABEL_STACKING_SPRITE = Utils.translate("label", "source_tooltip.stacking.sprite");
+    public static final Component LABEL_STACKING_PRIMARY = Utils.translate("label", "source_tooltip.stacking.primary");
+    public static final Component LABEL_STACKING_SECONDARIES = Utils.translate("label", "source_tooltip.stacking.secondaries");
+    public static final String VALUE_STACKING_SECONDARY = Utils.translationKey("value", "source_tooltip.stacking.secondary");
 
     public static void init(IEventBus modBus)
     {
@@ -44,8 +49,9 @@ public final class AtlasViewerCompat
 
         private static void onRegisterSpriteSourceDetails(RegisterSpriteSourceDetailsEvent event)
         {
-            event.registerPrimaryResourceGetter(AreaMaskSource.AreaMaskInstance.class, AreaMaskSource.AreaMaskInstance::srcRes);
+            event.registerPrimaryResourceGetter(AreaMaskSource.AreaMaskInstance.class, AreaMaskSource.AreaMaskInstance::getPrimaryResource);
             event.registerPrimaryResourceGetter(PortOverlaySource.PortOverlaySupplier.class, PortOverlaySource.PortOverlaySupplier::getPrimaryResource);
+            event.registerPrimaryResourceGetter(StackingSource.StackingSupplier.class, StackingSource.StackingSupplier::getPrimaryResource);
 
             event.registerSourceTooltipAppender(AreaMaskSource.class, (src, consumer) ->
             {
@@ -61,6 +67,15 @@ public final class AtlasViewerCompat
                         consumer.accept(null, Component.translatable(VALUE_PORT_ENTRY, port.toString(), type.toString()))
                 );
                 src.typePrefix().ifPresent(prefix -> consumer.accept(LABEL_PORT_TYPE_PREFIX, Component.literal(prefix)));
+            });
+            event.registerSourceTooltipAppender(StackingSource.class, (src, consumer) ->
+            {
+                consumer.accept(LABEL_STACKING_SPRITE, Component.literal(src.sprite().toString()));
+                consumer.accept(LABEL_STACKING_PRIMARY, Component.literal(src.primary().toString()));
+                consumer.accept(LABEL_STACKING_SECONDARIES, Component.empty());
+                src.secondaries().forEach(secondary ->
+                        consumer.accept(null, Component.translatable(VALUE_STACKING_SECONDARY, secondary.toString()))
+                );
             });
         }
 

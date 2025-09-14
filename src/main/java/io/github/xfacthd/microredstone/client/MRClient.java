@@ -8,6 +8,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchS
 import io.github.xfacthd.microredstone.client.screen.microchip.MicrochipScreen;
 import io.github.xfacthd.microredstone.client.texture.AreaMaskSource;
 import io.github.xfacthd.microredstone.client.texture.PortOverlaySource;
+import io.github.xfacthd.microredstone.client.texture.StackingSource;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.data.library.ClientCircuitLibrary;
 import io.github.xfacthd.microredstone.common.util.Utils;
@@ -36,6 +37,7 @@ public final class MRClient
     {
         event.register(AreaMaskSource.ID, AreaMaskSource.CODEC);
         event.register(PortOverlaySource.ID, PortOverlaySource.CODEC);
+        event.register(StackingSource.ID, StackingSource.CODEC);
     }
 
     private static void onRegisterBlockModels(RegisterBlockStateModels event)

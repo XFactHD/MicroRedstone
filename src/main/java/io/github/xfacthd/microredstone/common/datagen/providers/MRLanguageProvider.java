@@ -206,6 +206,10 @@ public final class MRLanguageProvider extends LanguageProvider
         add(AtlasViewerCompat.LABEL_PORT_ENTRIES, "Ports");
         add(AtlasViewerCompat.VALUE_PORT_ENTRY, "  - %s = %s");
         add(AtlasViewerCompat.LABEL_PORT_TYPE_PREFIX, "Type Prefix");
+        add(AtlasViewerCompat.LABEL_STACKING_SPRITE, "Sprite");
+        add(AtlasViewerCompat.LABEL_STACKING_PRIMARY, "Primary Texture");
+        add(AtlasViewerCompat.LABEL_STACKING_SECONDARIES, "Secondary Textures");
+        add(AtlasViewerCompat.VALUE_STACKING_SECONDARY, "  - %s");
     }
 
     // TODO: add descriptions
