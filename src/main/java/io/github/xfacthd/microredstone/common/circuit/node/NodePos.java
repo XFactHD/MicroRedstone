@@ -11,7 +11,7 @@ import net.minecraft.util.ExtraCodecs;
 import java.util.EnumSet;
 import java.util.Set;
 
-public record NodePos(int x, int y)
+public record NodePos(int x, int y) implements Comparable<NodePos>
 {
     public static final Codec<NodePos> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("x").forGetter(NodePos::x),
@@ -93,5 +93,12 @@ public record NodePos(int x, int y)
             }
         }
         throw new IllegalArgumentException("Same position or diagonal offset");
+    }
+
+    @Override
+    public int compareTo(NodePos other)
+    {
+        int compX = Integer.compare(y, other.y);
+        return compX != 0 ? compX : Integer.compare(x, other.x);
     }
 }

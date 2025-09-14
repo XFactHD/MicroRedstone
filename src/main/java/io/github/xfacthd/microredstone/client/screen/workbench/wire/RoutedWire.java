@@ -149,6 +149,12 @@ public record RoutedWire(Wire wire, List<Section> sections)
         public Section
         {
             Preconditions.checkArgument(posOne.x() == posTwo.x() || posOne.y() == posTwo.y());
+            if (posOne.compareTo(posTwo) > 0)
+            {
+                NodePos temp = posOne;
+                posOne = posTwo;
+                posTwo = temp;
+            }
         }
 
         public boolean isHorizontal()
@@ -192,20 +198,6 @@ public record RoutedWire(Wire wire, List<Section> sections)
                     consumer.accept(new NodePos(x, minY));
                 }
             }
-        }
-
-        @Override
-        public boolean equals(Object obj)
-        {
-            if (obj == this) return true;
-            if (!(obj instanceof Section(NodePos one, NodePos two))) return false;
-            return matches(one, two);
-        }
-
-        @Override
-        public int hashCode()
-        {
-            return posOne.hashCode() ^ posTwo.hashCode();
         }
     }
 }
