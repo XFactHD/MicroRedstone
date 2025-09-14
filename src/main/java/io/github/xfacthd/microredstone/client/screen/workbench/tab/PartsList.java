@@ -73,6 +73,7 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
         this.importEntries = new ArrayList<>();
         this.importListWidget = new NodeListWidget(owner, importEntries::size, importEntries::get);
         this.filterButtons = makeActionButtons(this, SHARE_TYPES, FilterToggleButton::new);
+        updateImportList();
     }
 
     @Override
@@ -165,6 +166,7 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
 
     public void updateImportList()
     {
+        importEntries.clear();
         ClientCircuitLibrary.getFilteredEntries(filters, entry -> importEntries.add(LibraryEntry.create(entry)));
     }
 
