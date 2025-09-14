@@ -41,7 +41,7 @@ public final class ClockPrototypeNode extends PrototypeNode
     @Override
     public void validate(ProblemReporter reporter)
     {
-        if (!isConnected(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
+        if (!isConnectedNormalized(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
     }
 
     @Override

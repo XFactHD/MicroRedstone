@@ -68,7 +68,12 @@ public abstract class PrototypeNode implements PlaceableNode
     @Override
     public final boolean isConnected(Port port)
     {
-        return connectedWires.containsKey(port.rotate(-rotation));
+        return isConnectedNormalized(port.rotate(-rotation));
+    }
+
+    protected final boolean isConnectedNormalized(Port port)
+    {
+        return connectedWires.containsKey(port);
     }
 
     public final Wire getWireOrThrow(Port port)

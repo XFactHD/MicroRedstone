@@ -43,8 +43,8 @@ public final class ConverterPrototypeNode extends PrototypeNode
     @Override
     public void validate(ProblemReporter reporter)
     {
-        if (!isConnected(Port.LEFT)) reporter.report(UnspecifiedConnectionProblem.input(Port.LEFT));
-        if (!isConnected(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
+        if (!isConnectedNormalized(Port.LEFT)) reporter.report(UnspecifiedConnectionProblem.input(Port.LEFT));
+        if (!isConnectedNormalized(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
     }
 
     @Override

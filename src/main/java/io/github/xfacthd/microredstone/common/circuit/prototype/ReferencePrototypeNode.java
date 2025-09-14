@@ -36,7 +36,7 @@ public final class ReferencePrototypeNode extends PrototypeNode
     {
         for (Connector connector : connectors)
         {
-            if (!isConnected(connector.port()))
+            if (!isConnectedNormalized(connector.port()))
             {
                 reporter.report(new UnspecifiedConnectionProblem(connector.port(), connector.dir()));
             }

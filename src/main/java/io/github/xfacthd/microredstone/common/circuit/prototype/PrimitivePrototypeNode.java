@@ -64,12 +64,12 @@ public final class PrimitivePrototypeNode extends PrototypeNode
     {
         portConfig.getPortsWithDir(PortDir.INPUT).forEach(port ->
         {
-            if (!isConnected(port))
+            if (!isConnectedNormalized(port))
             {
                 reporter.report(UnspecifiedConnectionProblem.input(port));
             }
         });
-        if (!isConnected(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
+        if (!isConnectedNormalized(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
     }
 
     @Override
