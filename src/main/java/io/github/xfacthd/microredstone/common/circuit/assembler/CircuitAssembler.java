@@ -149,7 +149,8 @@ public final class CircuitAssembler
             return null;
         }
 
-        return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, node.getWiresCopy(), inputs, outputs);
+        List<Wire> wires = wireMapper.getSortedWireCopies();
+        return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, wires, inputs, outputs);
     }
 
     private static <P extends PrototypeNode, C extends CircuitNode> NodeEntry<C> buildPrimitiveNode(

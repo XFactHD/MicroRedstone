@@ -78,16 +78,6 @@ public final class CompoundPrototypeNode extends PrototypeNode
         return childNodes;
     }
 
-    public List<Wire> getWiresCopy()
-    {
-        List<Wire> wireList = new ArrayList<>(wires.size());
-        for (Wire wire : wires)
-        {
-            wireList.add(wire.copy());
-        }
-        return wireList;
-    }
-
     public int getWireCount()
     {
         return wires.size();
