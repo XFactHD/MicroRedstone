@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.datagen.providers;
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
+import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.BaseNodeContextMenuProvider;
@@ -72,6 +73,9 @@ public final class MRLanguageProvider extends LanguageProvider
     private void addWorkbenchScreenTranslations()
     {
         add(CircuitWorkbenchBlock.MENU_TITLE, "Circuit Workbench");
+        add(CircuitWorkbenchScreen.TITLE_CONFIRM_CLOSE, "Confirm Close");
+        add(CircuitWorkbenchScreen.MESSAGE_CONFIRM_CLOSE_LINE_ONE, "Are you sure you want to close the %s?");
+        add(CircuitWorkbenchScreen.MESSAGE_CONFIRM_CLOSE_LINE_TWO, "All unsaved changes will be lost.");
         add(CircuitCanvas.CELL_COORD_TRANSLATION, "Cell: %s, %s");
         add(PartsList.LABEL_MODE, "Mode: ");
         add(PartsList.LABEL_FILTER, "Filter:");

@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.workbench;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenu;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
@@ -14,6 +15,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCa
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.client.util.Icon;
+import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
@@ -42,6 +44,9 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
 {
     private static final ResourceLocation BACKGROUND = Utils.rl("background");
     public static final ResourceLocation WINDOW_FRAME = Utils.rl("window_frame");
+    public static final Component TITLE_CONFIRM_CLOSE = Utils.translate("title", "circuit_workbench.close.confirm");
+    public static final Component MESSAGE_CONFIRM_CLOSE_LINE_ONE = Utils.translate("msg", "circuit_workbench.close.confirm_line_one", CircuitWorkbenchBlock.MENU_TITLE);
+    public static final Component MESSAGE_CONFIRM_CLOSE_LINE_TWO = Utils.translate("msg", "circuit_workbench.close.confirm_line_two");
     public static final int PADDING = 5;
     public static final int BORDER_LEFT = PADDING * 2;
     public static final int BORDER_RIGHT = PADDING * 2 + 1;
@@ -395,6 +400,16 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             {
                 return true;
             }
+        }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE && !canvas.isEmpty())
+        {
+            DialogScreen.builder(DialogScreen.Type.CONFIRM)
+                    .withTitle(TITLE_CONFIRM_CLOSE)
+                    .withMessage(MESSAGE_CONFIRM_CLOSE_LINE_ONE)
+                    .withMessage(MESSAGE_CONFIRM_CLOSE_LINE_TWO)
+                    .withOkCallback(this::onClose)
+                    .show();
+            return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
