@@ -67,7 +67,7 @@ final class PlayerCircuitLibrary
             }
             ownedById.put(entry.id(), entry);
             ownedByName.put(entry.name(), entry);
-            return entry.withId(UUID.randomUUID());
+            return entry;
         }
         return null;
     }
