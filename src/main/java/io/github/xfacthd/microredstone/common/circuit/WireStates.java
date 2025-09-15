@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.VarInt;
 import net.minecraft.network.codec.StreamCodec;
 
+import java.util.Arrays;
+
 public final class WireStates
 {
     public static final StreamCodec<ByteBuf, WireStates> STREAM_CODEC = streamCodec();
@@ -42,6 +44,20 @@ public final class WireStates
     private static int wordIndex(int bitIdx)
     {
         return bitIdx >> ADDRESS_BITS_PER_WORD;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == this) return true;
+        if (!(obj instanceof WireStates other)) return false;
+        return Arrays.equals(words, other.words);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Arrays.hashCode(words);
     }
 
     private static StreamCodec<ByteBuf, WireStates> streamCodec()

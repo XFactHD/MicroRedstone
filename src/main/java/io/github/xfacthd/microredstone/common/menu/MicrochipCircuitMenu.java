@@ -38,6 +38,10 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
     private final CompoundCircuitNode initialRootNode;
     @Nullable
     private Circuit lastCircuit;
+    @Nullable
+    private WireStates currStates = null;
+    @Nullable
+    private WireStates lastStates = null;
 
     public static MicrochipCircuitMenu createServer(int containerId, MicrochipBlockEntity blockEntity, ServerPlayer player)
     {
@@ -91,6 +95,13 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
                 CompoundCircuitNode rootNode = circuit != null ? circuit.getSerializableRootNode() : null;
                 PacketDistributor.sendToPlayer(player, new ClientboundMicrochipChangeCircuitPayload(containerId, rootNode));
                 lastCircuit = circuit;
+                currStates = null;
+                lastStates = null;
+            }
+            if (currStates != null && !currStates.equals(lastStates))
+            {
+                PacketDistributor.sendToPlayer(player, new ClientboundMicrochipUpdateWireStatesPayload(containerId, currStates));
+                lastStates = currStates;
             }
         }
     }
@@ -98,10 +109,7 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
     @Override
     public void handleWireStates(WireStates wireStates)
     {
-        if (player != null)
-        {
-            PacketDistributor.sendToPlayer(player, new ClientboundMicrochipUpdateWireStatesPayload(containerId, wireStates));
-        }
+        currStates = wireStates;
     }
 
     @Nullable
