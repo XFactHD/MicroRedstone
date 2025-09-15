@@ -86,6 +86,11 @@ public abstract class PrototypeNode implements PlaceableNode
         connectedWires.replaceAll((port, wire) -> wire == oldWire ? newWire : wire);
     }
 
+    public final void removeConnectedWire(Wire wire)
+    {
+        connectedWires.values().removeIf(mapWire -> mapWire == wire);
+    }
+
     public final void clearWires()
     {
         connectedWires.clear();

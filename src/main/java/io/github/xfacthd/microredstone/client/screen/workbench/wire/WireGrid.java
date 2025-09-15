@@ -228,6 +228,30 @@ public final class WireGrid implements Iterable<RoutedWire>
         }
     }
 
+    // TODO: implement disambiguation when the node has multiple wires crossing and implement partial (i.e. single-section) deletion when fullWire is false
+    public boolean removeWireAt(NodePos pos, boolean fullWire)
+    {
+        WireGrid.WireGridNode node = getWireNode(pos);
+        if (node == null) return false;
+
+        if (node.wires.size() != 1) return false;
+
+        RoutedWire wire = node.wires.getFirst();
+        wires.remove(wire);
+        canvas.getRootNode().removeWire(wire.wire());
+
+        for (WireGridNode gridNode : grid)
+        {
+            if (gridNode != null)
+            {
+                // Mutating while iterating works because grid is an array and the loop is secretly a for-i loop
+                removeWireFromNode(gridNode.pos, wire);
+            }
+        }
+
+        return true;
+    }
+
     public void clear()
     {
         Arrays.fill(grid, null);

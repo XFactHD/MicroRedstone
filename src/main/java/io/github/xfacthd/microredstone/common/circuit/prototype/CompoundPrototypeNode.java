@@ -61,6 +61,10 @@ public final class CompoundPrototypeNode extends PrototypeNode
     public void removeWire(Wire wire)
     {
         wires.remove(wire);
+        for (PrototypeNode child : childNodes)
+        {
+            child.removeConnectedWire(wire);
+        }
     }
 
     public void setConnection(Port port, @Nullable Connection connection)

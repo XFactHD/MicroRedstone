@@ -391,6 +391,10 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 canvas.getPartGrid().removePartNode(pos);
                 return true;
             }
+            if (pos != null && canvas.getWireGrid().removeWireAt(pos, hasShiftDown()))
+            {
+                return true;
+            }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
