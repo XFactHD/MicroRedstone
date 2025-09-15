@@ -72,6 +72,6 @@ public final class ReferencePrototypeNode extends PrototypeNode
             portMask = connector.port().appendMask(portMask, connector.type());
         }
         ResourceLocation portOverlay = PortOverlays.get(portMask);
-        return new IconConfig(Utils.rl("part/reference"), portOverlay, false);
+        return new IconConfig(Utils.rl("part/reference"), portOverlay);
     }
 }
