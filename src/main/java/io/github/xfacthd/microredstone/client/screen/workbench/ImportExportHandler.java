@@ -185,7 +185,16 @@ public final class ImportExportHandler
             }
             case JSON_IN_CLIPBOARD ->
             {
-                DataResult<JsonElement> result = NODE_CODEC.encodeStart(JsonOps.INSTANCE, circuitNode);
+                DataResult<JsonElement> result;
+                try
+                {
+                    result = NODE_CODEC.encodeStart(JsonOps.INSTANCE, circuitNode);
+                }
+                catch (Throwable t)
+                {
+                    displayExportResult(ExportResult.JSON_ENCODE_FAILED);
+                    return;
+                }
                 if (result.isError() || result.result().isEmpty())
                 {
                     displayExportResult(ExportResult.JSON_ENCODE_FAILED);
