@@ -1,19 +1,17 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.menu;
 
+import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuUtils;
 import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuBuilder;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.SubMenuKey;
-import io.github.xfacthd.microredstone.client.util.ColorNames;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.DyeColor;
 
 public final class WireToolActionContextMenuProvider implements ContextMenuProvider
 {
     public static final Component ENTRY_WIRE_COLOR = Utils.translate("label", "circuit_workbench.tools_tab.menu.wire.wire_color");
     public static final Component ENTRY_WIRE_ROUTE_PREF = Utils.translate("label", "circuit_workbench.tools_tab.menu.wire.wire_route_pref");
-    private static final DyeColor[] COLORS = DyeColor.values();
     private static final SubMenuKey COLOR_SUB_MENU = new SubMenuKey("wire_colors");
     public static final ContextMenuProvider INSTANCE_SINGLE = new WireToolActionContextMenuProvider(true);
     public static final ContextMenuProvider INSTANCE_BUNDLED = new WireToolActionContextMenuProvider(false);
@@ -47,13 +45,7 @@ public final class WireToolActionContextMenuProvider implements ContextMenuProvi
         if (subMenuKey == COLOR_SUB_MENU)
         {
             WorkbenchConfig config = WorkbenchConfig.INSTANCE;
-            for (DyeColor color : COLORS)
-            {
-                menuBuilder.addActionEntry(ColorNames.getName(color), entry -> entry
-                        .withAction(()-> config.setWireColor(color))
-                        .withStateSupplier(() -> config.getWireColor() == color)
-                );
-            }
+            ContextMenuUtils.makeDyeColorMenu(menuBuilder, config::setWireColor, config::getWireColor);
         }
     }
 }
