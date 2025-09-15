@@ -44,7 +44,7 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     protected int imageWidth;
     protected int imageHeight;
     @UnknownNullability
-    protected Button okButton = null;
+    ButtonPair buttonPair = null;
 
     public static DialogScreenBuilder builder(Type type)
     {
@@ -81,7 +81,7 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
 
         finalizeContent();
 
-        okButton = type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
+        buttonPair = type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
     }
 
     protected boolean computeContent()
@@ -186,23 +186,25 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
             this.escCallbackSelector = escCallbackSelector;
         }
 
-        Button initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback)
+        ButtonPair initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback)
         {
-            Button okButton;
+            ButtonPair buttonPair;
             if (hasCancel)
             {
                 int halfWidth = (xCenter - screen.leftPos) / 2;
                 int xLeft = screen.leftPos + halfWidth - BUTTON_WIDTH / 2;
-                okButton = addButton(screen, xLeft, okText, okCallback);
                 int xRight = xCenter + halfWidth - BUTTON_WIDTH / 2;
-                addButton(screen, xRight, CommonComponents.GUI_CANCEL, cancelCallback);
+                buttonPair = new ButtonPair(
+                        addButton(screen, xLeft, okText, okCallback),
+                        addButton(screen, xRight, CommonComponents.GUI_CANCEL, cancelCallback)
+                );
             }
             else
             {
                 int x = xCenter - BUTTON_WIDTH / 2;
-                okButton = addButton(screen, x, okText, okCallback);
+                buttonPair = new ButtonPair(addButton(screen, x, okText, okCallback), null);
             }
-            return okButton;
+            return buttonPair;
         }
 
         private static Button addButton(DialogScreen screen, int x, Component text, Runnable callback)

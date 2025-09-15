@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ final class QueryDialogScreen extends DialogScreen
                 }
                 return true;
             };
-            okStateUpdater = () -> okButton.active = state.getAsBoolean();
+            okStateUpdater = () -> buttonPair.okButton().active = state.getAsBoolean();
         }
     }
 
@@ -107,6 +108,20 @@ final class QueryDialogScreen extends DialogScreen
         }
         okStateUpdater.run();
         return contentY;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
+        {
+            if (!buttonPair.isFocused() && buttonPair.okButton().active)
+            {
+                buttonPair.okButton().onPress();
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private static Runnable mergeCallbacks(List<QueryWidget> queryWidgets, Runnable okCallback)
