@@ -106,7 +106,7 @@ public final class CircuitCompiler
             String className = CLASS_NAME_PREFIX;
             if (name != null)
             {
-                className += name + "$";
+                className += name.replaceAll(" ", "_") + "$";
             }
             className += CLASS_COUNTER.getAndIncrement();
             Type selfType = Type.getType("L" + className + ";");
