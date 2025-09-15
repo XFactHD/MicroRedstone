@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 public final class ConverterPartNodeContextMenuProvider extends PartNodeContextMenuProvider<ConverterPrototypeNode>
@@ -45,7 +46,12 @@ public final class ConverterPartNodeContextMenuProvider extends PartNodeContextM
     {
         private static final int EDIT_BOX_WIDTH = 60;
         private static final int EDIT_BOX_HEIGHT = 20;
-        private static final NumberEditBox.Validator VALIDATOR = new BundleBitValidator();
+        private static final NumberEditBox.ParserConfig PARSER_CONFIG = new NumberEditBox.ParserConfig(
+                value -> value >= 0 && value < 16,
+                Set.of(NumberEditBox.NumberFormat.DEC),
+                false,
+                TOOLTIP_INVALID_BIT
+        );
 
         private final ConverterPrototypeNode node;
         @UnknownNullability
@@ -66,7 +72,7 @@ public final class ConverterPartNodeContextMenuProvider extends PartNodeContextM
         public void setupWidget(Font font, int x, int y, int maxWidth, Consumer<AbstractWidget> widgetAdder)
         {
             int width = Math.min(EDIT_BOX_WIDTH, maxWidth);
-            editBox = new NumberEditBox(font, x, y, width, EDIT_BOX_HEIGHT, VALIDATOR, false, editBox, node.getBitIndex());
+            editBox = new NumberEditBox(font, x, y, width, EDIT_BOX_HEIGHT, PARSER_CONFIG, editBox, node.getBitIndex());
             widgetAdder.accept(editBox);
         }
 
@@ -80,21 +86,6 @@ public final class ConverterPartNodeContextMenuProvider extends PartNodeContextM
         public void saveQueryResult()
         {
             node.setBitIndex(editBox.getIntValue());
-        }
-    }
-
-    private static final class BundleBitValidator implements NumberEditBox.Validator
-    {
-        @Override
-        public boolean test(int value)
-        {
-            return value >= 0 && value < 16;
-        }
-
-        @Override
-        public Component getInvalidValueTooltip()
-        {
-            return TOOLTIP_INVALID_BIT;
         }
     }
 }

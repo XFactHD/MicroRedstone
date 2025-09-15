@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 public final class ClockPartNodeContextMenuProvider extends PartNodeContextMenuProvider<ClockPrototypeNode>
@@ -45,7 +46,12 @@ public final class ClockPartNodeContextMenuProvider extends PartNodeContextMenuP
     {
         private static final int EDIT_BOX_WIDTH = 60;
         private static final int EDIT_BOX_HEIGHT = 20;
-        private static final NumberEditBox.Validator VALIDATOR = new PeriodValidator();
+        private static final NumberEditBox.ParserConfig PARSER_CONFIG = new NumberEditBox.ParserConfig(
+                value -> value >= 2 && value % 2 == 0,
+                Set.of(NumberEditBox.NumberFormat.DEC),
+                false,
+                TOOLTIP_INVALID_PERIOD
+        );
 
         private final ClockPrototypeNode node;
         @UnknownNullability
@@ -67,7 +73,7 @@ public final class ClockPartNodeContextMenuProvider extends PartNodeContextMenuP
         {
             int width = Math.min(EDIT_BOX_WIDTH, maxWidth);
             int defVal = node.getHalfPeriodLength() * 2;
-            editBox = new NumberEditBox(font, x, y, width, EDIT_BOX_HEIGHT, VALIDATOR, false, editBox, defVal);
+            editBox = new NumberEditBox(font, x, y, width, EDIT_BOX_HEIGHT, PARSER_CONFIG, editBox, defVal);
             widgetAdder.accept(editBox);
         }
 
@@ -81,21 +87,6 @@ public final class ClockPartNodeContextMenuProvider extends PartNodeContextMenuP
         public void saveQueryResult()
         {
             node.setHalfPeriodLength(editBox.getIntValue() / 2);
-        }
-    }
-
-    private static final class PeriodValidator implements NumberEditBox.Validator
-    {
-        @Override
-        public boolean test(int value)
-        {
-            return value >= 2 && value % 2 == 0;
-        }
-
-        @Override
-        public Component getInvalidValueTooltip()
-        {
-            return TOOLTIP_INVALID_PERIOD;
         }
     }
 }
