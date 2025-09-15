@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 public class ValidatingEditBox extends EditBox
 {
     private final Validator validator;
+    private boolean alignRight = false;
     private boolean wasFocusedNonEmpty = false;
 
     public ValidatingEditBox(Font font, int width, int height, Validator validator, String defaultValue)
@@ -67,6 +68,44 @@ public class ValidatingEditBox extends EditBox
         wasFocusedNonEmpty = false;
     }
 
+    public void setTextAlignment(TextAlignment alignment)
+    {
+        setCentered(alignment == TextAlignment.CENTER);
+        alignRight = alignment == TextAlignment.RIGHT;
+        updateTextPosition();
+    }
+
+    @Override
+    public void setCentered(boolean centered)
+    {
+        super.setCentered(centered);
+        if (centered)
+        {
+            alignRight = false;
+        }
+    }
+
+    @Override
+    protected void updateTextPosition()
+    {
+        if (alignRight)
+        {
+            String text = font.plainSubstrByWidth(getValue().substring(displayPos), getInnerWidth());
+            textX = getX() + getWidth() - (isBordered() ? 4 : 0) - font.width(text);
+            textY = isBordered() ? getY() + (height - 8) / 2 : getY();
+        }
+        else
+        {
+            super.updateTextPosition();
+        }
+    }
+
+    @Override
+    public boolean microredstone$forceIBeamCursor()
+    {
+        return alignRight;
+    }
+
     @FunctionalInterface
     public interface Validator
     {
@@ -77,5 +116,12 @@ public class ValidatingEditBox extends EditBox
         {
             return null;
         }
+    }
+
+    public enum TextAlignment
+    {
+        LEFT,
+        CENTER,
+        RIGHT
     }
 }

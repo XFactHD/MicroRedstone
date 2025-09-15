@@ -27,6 +27,7 @@ public final class NumberEditBox extends ValidatingEditBox
     {
         super(font, x, y, width, height, toValidator(config), prevEditBox, formatValue(config, defaultValue));
         this.config = config;
+        setTextAlignment(TextAlignment.RIGHT);
     }
 
     private static String formatValue(ParserConfig config, int defaultValue)

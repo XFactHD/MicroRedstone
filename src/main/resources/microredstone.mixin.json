@@ -5,7 +5,8 @@
     "mixins": [
     ],
     "client": [
-        "client.AccessorTextureAtlasHolder"
+        "client.AccessorTextureAtlasHolder",
+        "client.MixinEditBox"
     ],
     "injectors": {
         "defaultRequire": 1
