@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone;
 
 import io.github.xfacthd.microredstone.common.MRContent;
+import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.compat.CompatHandler;
 import io.github.xfacthd.microredstone.common.net.NetworkHandler;
 import net.neoforged.bus.api.IEventBus;
@@ -19,5 +20,7 @@ public final class MicroRedstone
 
         modBus.addListener(NetworkHandler::onRegisterPayloadHandlers);
         modBus.addListener(NetworkHandler::onRegisterConfigTasks);
+
+        CircuitCompiler.clearDumpDirectory();
     }
 }

@@ -30,7 +30,7 @@ public final class DebugExportConfigExtension implements Extension
             return;
         }
 
-        CircuitCompiler.EXPORT_PATH_OVERRIDE = Path.of("./", MicroRedstone.MOD_ID);
+        CircuitCompiler.EXPORT_PATH_OVERRIDE = Path.of("./", MicroRedstone.MOD_ID, "test");
         CircuitCompiler.clearDumpDirectory();
         CONFIGURED.set(true);
     }

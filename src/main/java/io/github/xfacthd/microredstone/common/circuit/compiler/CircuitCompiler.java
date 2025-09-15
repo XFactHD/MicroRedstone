@@ -58,7 +58,7 @@ public final class CircuitCompiler
     @Nullable
     @VisibleForTesting
     public static Path EXPORT_PATH_OVERRIDE = null;
-    private static final Lazy<Path> EXPORT_PATH = Lazy.of(() -> FMLPaths.GAMEDIR.get().resolve(MicroRedstone.MOD_ID));
+    private static final Lazy<Path> EXPORT_PATH = Lazy.of(() -> FMLPaths.GAMEDIR.get().resolve(MicroRedstone.MOD_ID).resolve("runtime"));
 
     private static final String SUPER_CLASS = CompiledCircuitNode.class.getName().replace(".", "/");
     private static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
@@ -322,6 +322,8 @@ public final class CircuitCompiler
 
     public static void clearDumpDirectory()
     {
+        if (!DUMP_TO_FILE) return;
+
         Path exportPath = Objects.requireNonNullElseGet(EXPORT_PATH_OVERRIDE, EXPORT_PATH);
         if (!Files.isDirectory(exportPath)) return;
 
