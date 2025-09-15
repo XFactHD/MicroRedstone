@@ -9,6 +9,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundlePackerCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundleUnpackerCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.primitive.ConstantCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.NotLogicCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.ThreeInputLogicCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLogicCircuitNode;
@@ -97,6 +98,9 @@ public final class MRContent
     // endregion
 
     // region CircuitNodeTypes
+    public static final Holder<CircuitNodeType<?>> NODE_TYPE_CONSTANT = registerCircuitNodeType(
+            "constant", ConstantCircuitNode.CODEC, ConstantCircuitNode.STREAM_CODEC
+    );
     public static final Holder<CircuitNodeType<?>> NODE_TYPE_CLOCK = registerCircuitNodeType(
             "clock", ClockCircuitNode.CODEC, ClockCircuitNode.STREAM_CODEC
     );

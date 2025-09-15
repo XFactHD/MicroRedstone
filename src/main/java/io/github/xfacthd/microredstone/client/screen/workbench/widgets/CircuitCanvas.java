@@ -8,6 +8,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.element.PartRende
 import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConnectionNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConstantPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConverterPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.LampPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.PartNodeContextMenuProvider;
@@ -23,6 +24,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ConstantPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
@@ -355,6 +357,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
         return switch (node)
         {
             case Connection con -> new ConnectionNodeContextMenuProvider(this, con);
+            case ConstantPrototypeNode constant -> new ConstantPartNodeContextMenuProvider(this, constant);
             case ClockPrototypeNode clock -> new ClockPartNodeContextMenuProvider(this, clock);
             case LampPrototypeNode lamp -> new LampPartNodeContextMenuProvider(this, lamp);
             case ConverterPrototypeNode conv -> new ConverterPartNodeContextMenuProvider(this, conv);

@@ -9,6 +9,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.BaseNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConnectionNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConstantPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConverterPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.LampPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LogicGateList;
@@ -143,6 +144,11 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ClockPartNodeContextMenuProvider.LABEL_SET_PERIOD, "Period:");
         add(ClockPartNodeContextMenuProvider.TOOLTIP_INVALID_PERIOD, "Period must be higher or equal to 2 and a multiple of 2");
         add(LampPartNodeContextMenuProvider.ENTRY_LAMP_COLOR, "Lamp Color:");
+        add(ConstantPartNodeContextMenuProvider.ENTRY_SET_VALUE, "Set Constant Value");
+        add(ConstantPartNodeContextMenuProvider.TITLE_SET_VALUE, "Set Constant Value");
+        add(ConstantPartNodeContextMenuProvider.LABEL_SET_VALUE, "Value:");
+        add(ConstantPartNodeContextMenuProvider.TOOLTIP_INVALID_VALUE_SINGLE, "Value must be binary 0 or 1");
+        add(ConstantPartNodeContextMenuProvider.TOOLTIP_INVALID_VALUE_BUNDLED, "Value must be binary or hex between 0 and 65_535 (inclusive)");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
@@ -156,6 +162,8 @@ public final class MRLanguageProvider extends LanguageProvider
     {
         addPart("connection_single", "Connector", "Single", "");
         addPart("connection_bundled", "Connector", "Bundled", "");
+        addPart("constant_single", "Constant Value", "Single", "");
+        addPart("constant_bundled", "Constant Value", "Bundled", "");
         addPart("clock", "Clock", null, "");
         addPart("lamp", "Lamp", null, "");
         addPart("buffer_single", "Buffer", "Single", "");
