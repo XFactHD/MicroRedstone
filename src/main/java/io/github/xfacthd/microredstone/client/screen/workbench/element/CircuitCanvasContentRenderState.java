@@ -6,6 +6,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCa
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.PartBlitter;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.RoutedWire;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -24,6 +25,7 @@ import java.util.List;
 public record CircuitCanvasContentRenderState(
         List<PartRenderState> parts,
         List<WireRenderState> wires,
+        List<LampRenderState> lamps,
         int canvasX,
         int canvasY,
         TextureAtlas guiAtlas,
@@ -38,6 +40,7 @@ public record CircuitCanvasContentRenderState(
     public static CircuitCanvasContentRenderState create(
             List<PartRenderState> parts,
             List<WireRenderState> wires,
+            List<LampRenderState> lamps,
             int canvasX,
             int canvasY,
             @Nullable ScreenRectangle scissorArea
@@ -47,7 +50,7 @@ public record CircuitCanvasContentRenderState(
         TextureAtlas guiAtlas = Minecraft.getInstance().getGuiSprites().microredstone$getTextureAtlas();
         TextureAtlasSprite whiteSprite = guiAtlas.getSprite(WHITE_SPRITE);
         TextureSetup textureSetup = TextureSetup.singleTexture(guiAtlas.getTextureView());
-        return new CircuitCanvasContentRenderState(parts, wires, canvasX, canvasY, guiAtlas, whiteSprite, textureSetup, bounds, scissorArea);
+        return new CircuitCanvasContentRenderState(parts, wires, lamps, canvasX, canvasY, guiAtlas, whiteSprite, textureSetup, bounds, scissorArea);
     }
 
     @Override
@@ -72,7 +75,7 @@ public record CircuitCanvasContentRenderState(
                     int x = canvasX + 4 + posOne.x() * CircuitCanvas.PART_SLOT_SIZE + 4;
                     int y1 = canvasY + 4 + minY * CircuitCanvas.PART_SLOT_SIZE + 4;
                     int y2 = canvasY + 5 + maxY * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    fill(buffer, x, y1, x + 2, y2, z, packedColor);
+                    fill(buffer, pose, x, y1, x + 2, y2, z, packedColor);
                 }
                 else if (posOne.y() == posTwo.y())
                 {
@@ -81,14 +84,14 @@ public record CircuitCanvasContentRenderState(
                     int x1 = canvasX + 4 + minX * CircuitCanvas.PART_SLOT_SIZE + 4;
                     int x2 = canvasX + 5 + maxX * CircuitCanvas.PART_SLOT_SIZE + 4;
                     int y = canvasY + 4 + posOne.y() * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    fill(buffer, x1, y, x2, y + 2, z, packedColor);
+                    fill(buffer, pose, x1, y, x2, y + 2, z, packedColor);
                 }
             }
             for (NodePos pos : wire.nodes())
             {
                 int x = canvasX + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.x() * CircuitCanvas.PART_SLOT_SIZE + 4;
                 int y = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE + 4;
-                fill(buffer, x - 2, y - 2, x + 2, y + 2, z, packedColor);
+                fill(buffer, pose, x - 2, y - 2, x + 2, y + 2, z, packedColor);
             }
         }
         PartBlitter blitter = (blitPose, icon, x, y, size) -> blit(buffer, blitPose, icon, x, y, x + size, y + size, z);
@@ -98,6 +101,37 @@ public record CircuitCanvasContentRenderState(
             int x = canvasX + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.x() * CircuitCanvas.PART_SLOT_SIZE;
             int y = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE;
             CircuitCanvas.drawPartNode(pose, part.icon(), x, y, part.rotation(), CircuitCanvas.PART_SIZE, blitter);
+        }
+        for (LampRenderState lamp : lamps)
+        {
+            NodePos pos = lamp.pos();
+            int x = canvasX + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.x() * CircuitCanvas.PART_SLOT_SIZE;
+            int y = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE;
+
+            CircuitCanvas.drawPartNode(pose, LampPrototypeNode.ICON_BG, x, y, lamp.rotation(), CircuitCanvas.PART_SIZE, blitter);
+            fill(buffer, pose, x + 1, y + 1, x + CircuitCanvas.PART_SIZE - 1, y + CircuitCanvas.PART_SIZE - 1, z, lamp.packedColor());
+            CircuitCanvas.drawPartNode(pose, LampPrototypeNode.ICON_FG, x, y, 0, CircuitCanvas.PART_SIZE, blitter);
+        }
+        for (LampRenderState lamp : lamps)
+        {
+            if (!lamp.chainedToNeighbor()) continue;
+
+            NodePos pos = lamp.pos();
+            int cx = canvasX + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.x() * CircuitCanvas.PART_SLOT_SIZE - 2;
+            int cy = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE - 2;
+            int size = CircuitCanvas.PART_SIZE + 4;
+            int rotation = lamp.rotation();
+
+            CircuitCanvas.drawPartNode(pose, LampPrototypeNode.ICON_CHAIN, cx, cy, rotation, size, blitter);
+
+            pose.pushMatrix();
+            pose.translate(cx, cy);
+            if (rotation != 0)
+            {
+                pose.rotateAbout((float) Math.toRadians(90 * rotation), size / 2F, size / 2F);
+            }
+            fill(buffer, pose, 0, 3, 3, CircuitCanvas.PART_SIZE + 1, z, lamp.packedColor());
+            pose.popMatrix();
         }
     }
 
@@ -115,12 +149,12 @@ public record CircuitCanvasContentRenderState(
         buffer.addVertexWith2DPose(pose, x1, y0, z).setUv(sprite.getU1(), sprite.getV0()).setColor(color);
     }
 
-    private void fill(VertexConsumer buffer, int x0, int y0, int x1, int y1, float z, int color)
+    private void fill(VertexConsumer buffer, Matrix3x2f pose, int x0, int y0, int x1, int y1, float z, int color)
     {
-        buffer.addVertex(x0, y0, z).setUv(whiteSprite.getU0(), whiteSprite.getV0()).setColor(color);
-        buffer.addVertex(x0, y1, z).setUv(whiteSprite.getU0(), whiteSprite.getV1()).setColor(color);
-        buffer.addVertex(x1, y1, z).setUv(whiteSprite.getU1(), whiteSprite.getV1()).setColor(color);
-        buffer.addVertex(x1, y0, z).setUv(whiteSprite.getU1(), whiteSprite.getV0()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x0, y0, z).setUv(whiteSprite.getU0(), whiteSprite.getV0()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x0, y1, z).setUv(whiteSprite.getU0(), whiteSprite.getV1()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x1, y1, z).setUv(whiteSprite.getU1(), whiteSprite.getV1()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x1, y0, z).setUv(whiteSprite.getU1(), whiteSprite.getV0()).setColor(color);
     }
 
     @Override

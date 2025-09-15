@@ -3,11 +3,13 @@ package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
+import io.github.xfacthd.microredstone.client.screen.workbench.element.LampRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.PartRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConnectionNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConverterPartNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.LampPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.PartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartGrid;
@@ -22,6 +24,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
@@ -74,7 +77,15 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
     }
 
     @Override
-    protected void collectCanvasContent(int canvasX, int canvasY, List<PartRenderState> parts, List<WireRenderState> wires, int mouseX, int mouseY)
+    protected void collectCanvasContent(
+            int canvasX,
+            int canvasY,
+            List<PartRenderState> parts,
+            List<WireRenderState> wires,
+            List<LampRenderState> lamps,
+            int mouseX,
+            int mouseY
+    )
     {
         for (RoutedWire wire : wireGrid)
         {
@@ -128,7 +139,16 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
         {
             if (!owner.isNodeFloating(node))
             {
-                parts.add(new PartRenderState(node));
+                if (node instanceof LampPrototypeNode lamp)
+                {
+                    LampPrototypeNode chainedLamp = lamp.getNodeChainedTo();
+                    boolean chained = chainedLamp != null && !owner.isNodeFloating(chainedLamp);
+                    lamps.add(new LampRenderState(lamp, chained));
+                }
+                else
+                {
+                    parts.add(new PartRenderState(node));
+                }
             }
         });
 
@@ -144,8 +164,8 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
     @Override
     protected void renderCanvasOverlays(GuiGraphics graphics, int canvasX, int canvasY, int mouseX, int mouseY)
     {
-        NodePos hovered = getNodePos(mouseX, mouseY);
         FloatingNode floatingNode = owner.getFloatingNode();
+        NodePos hovered = getNodePlacementPos(mouseX, mouseY, floatingNode);
         if (floatingNode != null)
         {
             NodePos pos = floatingNode.lastPos();
@@ -157,7 +177,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
             }
 
             boolean canPlace = hovered != null && floatingNode.canPlaceAt(this, hovered);
-            if (hovered != null && (!canPlace || !hovered.equals(pos)))
+            if (hovered != null && (!canPlace || !hovered.equals(pos) || !hovered.equals(getNodePos(mouseX, mouseY))))
             {
                 int targetX = canvasX + BORDER_TOP_LEFT + hovered.x() * PART_SLOT_SIZE;
                 int targetY = canvasY + BORDER_TOP_LEFT + hovered.y() * PART_SLOT_SIZE;
@@ -229,11 +249,41 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
         {
             blitter.blit(pose, icon.icon(), x, y, partSize);
         }
-        blitter.blit(pose, icon.portOverlay(), x, y, partSize);
+        if (icon.portOverlay() != null)
+        {
+            blitter.blit(pose, icon.portOverlay(), x, y, partSize);
+        }
         if (rotation != 0)
         {
             pose.popMatrix();
         }
+    }
+
+    @Nullable
+    public NodePos getNodePlacementPos(int mouseX, int mouseY, @Nullable FloatingNode floatingNode)
+    {
+        NodePos pos = getNodePos(mouseX, mouseY);
+        if (pos != null && floatingNode instanceof FloatingNode.Part part && part.node() instanceof LampPrototypeNode floatingLamp)
+        {
+            return getLampPlacementPos(pos, part, floatingLamp, mouseX, mouseY);
+        }
+        return pos;
+    }
+
+    private NodePos getLampPlacementPos(NodePos pos, FloatingNode.Part part, LampPrototypeNode floatingLamp, int mouseX, int mouseY)
+    {
+        if (!(partGrid.getPartNode(pos) instanceof LampPrototypeNode lamp)) return pos;
+        if (lamp == floatingLamp) return pos;
+
+        ExactNodePos exactPos = getExactNodePos(mouseX, mouseY);
+        if (exactPos == null) return pos;
+
+        Port hoveredPort = Port.ofCross(exactPos.fracX(), exactPos.fracY());
+        if (Port.LEFT.rotate(lamp.getRotation()) == hoveredPort) return pos;
+        if (Port.LEFT.rotate(part.rotation()) != hoveredPort.getOpposite()) return pos;
+
+        NodePos lampPos = pos.offset(hoveredPort);
+        return lampPos.isValid(PART_COUNT_X, PART_COUNT_Y) ? lampPos : pos;
     }
 
     @Override
@@ -306,6 +356,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
         {
             case Connection con -> new ConnectionNodeContextMenuProvider(this, con);
             case ClockPrototypeNode clock -> new ClockPartNodeContextMenuProvider(this, clock);
+            case LampPrototypeNode lamp -> new LampPartNodeContextMenuProvider(this, lamp);
             case ConverterPrototypeNode conv -> new ConverterPartNodeContextMenuProvider(this, conv);
             case PrototypeNode proto -> new PartNodeContextMenuProvider<>(this, proto);
             case null, default -> null;

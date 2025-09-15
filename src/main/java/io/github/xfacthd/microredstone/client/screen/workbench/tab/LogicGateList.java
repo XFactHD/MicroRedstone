@@ -6,6 +6,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
@@ -23,6 +24,7 @@ public final class LogicGateList
             entry("connection_single").spec(Connection.ICON_SINGLE_IN, WireType.SINGLE).build(),
             entry("connection_bundled").spec(Connection.ICON_BUNDLED_IN, WireType.BUNDLED).build(),
             entry("clock").spec(ClockPrototypeNode.ICON, ClockPrototypeNode::new).withoutSubtitle().build(),
+            entry("lamp").spec(LampPrototypeNode.ICON, LampPrototypeNode::new).withoutSubtitle().build(),
             entry("buffer_single").spec(BufferPrototypeNode.ICON_SINGLE, () -> new BufferPrototypeNode(WireType.SINGLE)).build(),
             entry("buffer_bundled").spec(BufferPrototypeNode.ICON_BUNDLED, () -> new BufferPrototypeNode(WireType.BUNDLED)).build(),
             entry("not_single").spec(1, WireType.SINGLE, PrimitivePrototypeNode.Type.NOT::icon, PrimitivePrototypeNode.Type.NOT::factory).build(),

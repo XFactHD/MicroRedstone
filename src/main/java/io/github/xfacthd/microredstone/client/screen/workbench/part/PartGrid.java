@@ -5,6 +5,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import org.jetbrains.annotations.Nullable;
@@ -74,6 +75,11 @@ public final class PartGrid
     {
         switch (getPartNode(pos))
         {
+            case LampPrototypeNode lamp ->
+            {
+                lamp.unchainOnDelete();
+                setPartNode(pos, null, 0, PartSetMode.REMOVE);
+            }
             case PrototypeNode ignored -> setPartNode(pos, null, 0, PartSetMode.REMOVE);
             case Connection con ->
             {

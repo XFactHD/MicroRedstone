@@ -3,9 +3,11 @@ package io.github.xfacthd.microredstone.common.datagen.providers;
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.texture.AreaMaskSource;
 import io.github.xfacthd.microredstone.client.texture.PortOverlaySource;
+import io.github.xfacthd.microredstone.client.texture.StackingSource;
 import io.github.xfacthd.microredstone.client.util.PortOverlays;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.client.resources.model.AtlasIds;
@@ -14,6 +16,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.data.SpriteSourceProvider;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -93,5 +96,10 @@ public final class MRSpriteSourceProvider extends SpriteSourceProvider
                         Optional.of("border")
                 ));
         guiAtlas.addSource(new SingleFile(Utils.rl("neoforge", "white")));
+        guiAtlas.addSource(new StackingSource(
+                LampPrototypeNode.ICON_BG.icon().withPrefix("gui/sprites/"),
+                List.of(LampPrototypeNode.ICON_FG.icon().withPrefix("gui/sprites/")),
+                LampPrototypeNode.ICON.icon()
+        ));
     }
 }

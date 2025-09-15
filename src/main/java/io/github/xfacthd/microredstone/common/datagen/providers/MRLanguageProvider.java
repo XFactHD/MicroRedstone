@@ -10,6 +10,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.menu.BaseNodeCont
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ClockPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConnectionNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ConverterPartNodeContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.menu.LampPartNodeContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LogicGateList;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
@@ -141,6 +142,7 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ClockPartNodeContextMenuProvider.TITLE_SET_PERIOD, "Set Clock Period");
         add(ClockPartNodeContextMenuProvider.LABEL_SET_PERIOD, "Period:");
         add(ClockPartNodeContextMenuProvider.TOOLTIP_INVALID_PERIOD, "Period must be higher or equal to 2 and a multiple of 2");
+        add(LampPartNodeContextMenuProvider.ENTRY_LAMP_COLOR, "Lamp Color:");
         add(DialogScreen.Type.INFO.getDefaultTitle(), "Info");
         add(DialogScreen.Type.WARNING.getDefaultTitle(), "Warning");
         add(DialogScreen.Type.ERROR.getDefaultTitle(), "Error");
@@ -155,6 +157,7 @@ public final class MRLanguageProvider extends LanguageProvider
         addPart("connection_single", "Connector", "Single", "");
         addPart("connection_bundled", "Connector", "Bundled", "");
         addPart("clock", "Clock", null, "");
+        addPart("lamp", "Lamp", null, "");
         addPart("buffer_single", "Buffer", "Single", "");
         addPart("buffer_bundled", "Buffer", "Bundled", "");
         addPart("not_single", "NOT", "Single", "");

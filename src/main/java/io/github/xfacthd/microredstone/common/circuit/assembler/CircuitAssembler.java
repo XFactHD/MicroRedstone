@@ -78,12 +78,16 @@ public final class CircuitAssembler
 
         WireMapper wireMapper = new WireMapper();
 
-        List<NodeEntry<ClockCircuitNode>> clockNodes = clockProtoNodes.stream()
-                .map(clock -> buildPrimitiveNode(clock, wireMapper, ClockPrototypeNode::assemble))
-                .toList();
-        List<NodeEntry<BufferCircuitNode>> bufferNodes = bufferProtoNodes.stream()
-                .map(buffer -> buildPrimitiveNode(buffer, wireMapper, BufferPrototypeNode::assemble))
-                .toList();
+        List<NodeEntry<ClockCircuitNode>> clockNodes = new ArrayList<>(clockProtoNodes.size());
+        for (ClockPrototypeNode clock : clockProtoNodes)
+        {
+            buildPrimitiveNode(clockNodes, clock, wireMapper, ClockPrototypeNode::assemble);
+        }
+        List<NodeEntry<BufferCircuitNode>> bufferNodes = new ArrayList<>(bufferProtoNodes.size());
+        for (BufferPrototypeNode buffer : bufferProtoNodes)
+        {
+            buildPrimitiveNode(bufferNodes, buffer, wireMapper, BufferPrototypeNode::assemble);
+        }
 
         List<NodeEntry<CircuitNode>> childNodes = new ArrayList<>();
         for (PrototypeNode childNode : childProtoNodes)
@@ -114,7 +118,7 @@ public final class CircuitAssembler
                             .toArray(WirePair[]::new);
                     childNodes.add(new NodeEntry<>(assembled, reference.getPos(), reference.getRotation(), inputs, outputs));
                 }
-                default -> childNodes.add(buildPrimitiveNode(childNode, wireMapper, PrototypeNode::assemble));
+                default -> buildPrimitiveNode(childNodes, childNode, wireMapper, PrototypeNode::assemble);
             }
         }
 
@@ -153,18 +157,20 @@ public final class CircuitAssembler
         return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, wires, inputs, outputs);
     }
 
-    private static <P extends PrototypeNode, C extends CircuitNode> NodeEntry<C> buildPrimitiveNode(
-            P protoNode, WireMapper wireMapper, BiFunction<P, WireMapper, C> assembler
+    private static <P extends PrototypeNode, C extends CircuitNode> void buildPrimitiveNode(
+            List<NodeEntry<C>> output, P protoNode, WireMapper wireMapper, BiFunction<P, WireMapper, @Nullable C> assembler
     )
     {
         C assembled = assembler.apply(protoNode, wireMapper);
+        if (assembled == null) return;
+
         WirePair[] inputs = Arrays.stream(assembled.getInputs())
                 .map(con -> new WirePair(con.wire(), con.port().ordinal()))
                 .toArray(WirePair[]::new);
         WirePair[] outputs = Arrays.stream(assembled.getOutputs())
                 .map(con -> new WirePair(con.wire(), con.port().ordinal()))
                 .toArray(WirePair[]::new);
-        return new NodeEntry<>(assembled, protoNode.getPos(), protoNode.getRotation(), inputs, outputs);
+        output.add(new NodeEntry<>(assembled, protoNode.getPos(), protoNode.getRotation(), inputs, outputs));
     }
 
     @Nullable

@@ -4,7 +4,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCa
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 
 public sealed class PartNodeContextMenuProvider<T extends PrototypeNode> extends BaseNodeContextMenuProvider<T>
-        permits ClockPartNodeContextMenuProvider, ConverterPartNodeContextMenuProvider
+        permits ClockPartNodeContextMenuProvider, ConverterPartNodeContextMenuProvider, LampPartNodeContextMenuProvider
 {
     public PartNodeContextMenuProvider(CircuitCanvas canvas, T node)
     {

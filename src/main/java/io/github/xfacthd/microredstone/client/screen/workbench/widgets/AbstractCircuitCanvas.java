@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.CircuitCanvasContentRenderState;
+import io.github.xfacthd.microredstone.client.screen.workbench.element.LampRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.PartRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRenderState;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
@@ -49,13 +50,14 @@ public abstract class AbstractCircuitCanvas
 
             List<PartRenderState> parts = new ArrayList<>();
             List<WireRenderState> wires = new ArrayList<>();
+            List<LampRenderState> lamps = new ArrayList<>();
 
-            collectCanvasContent(canvasX, canvasY, parts, wires, mouseX, mouseY);
+            collectCanvasContent(canvasX, canvasY, parts, wires, lamps, mouseX, mouseY);
 
-            if (!parts.isEmpty() || !wires.isEmpty())
+            if (!parts.isEmpty() || !wires.isEmpty() || !lamps.isEmpty())
             {
                 graphics.submitGuiElementRenderState(CircuitCanvasContentRenderState.create(
-                        parts, wires, canvasX, canvasY, graphics.peekScissorStack()
+                        parts, wires, lamps, canvasX, canvasY, graphics.peekScissorStack()
                 ));
             }
 
@@ -68,7 +70,15 @@ public abstract class AbstractCircuitCanvas
         renderAdditionalContent(graphics, mouseX, mouseY);
     }
 
-    protected abstract void collectCanvasContent(int canvasX, int canvasY, List<PartRenderState> parts, List<WireRenderState> wires, int mouseX, int mouseY);
+    protected abstract void collectCanvasContent(
+            int canvasX,
+            int canvasY,
+            List<PartRenderState> parts,
+            List<WireRenderState> wires,
+            List<LampRenderState> lamps,
+            int mouseX,
+            int mouseY
+    );
 
     protected void renderCanvasOverlays(GuiGraphics graphics, int canvasX, int canvasY, int mouseX, int mouseY) {}
 

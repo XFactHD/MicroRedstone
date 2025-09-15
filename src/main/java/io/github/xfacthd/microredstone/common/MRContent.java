@@ -15,6 +15,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLog
 import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.LampCircuitNode;
 import io.github.xfacthd.microredstone.common.data.MRRegistries;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.item.CircuitItem;
@@ -98,6 +99,9 @@ public final class MRContent
     // region CircuitNodeTypes
     public static final Holder<CircuitNodeType<?>> NODE_TYPE_CLOCK = registerCircuitNodeType(
             "clock", ClockCircuitNode.CODEC, ClockCircuitNode.STREAM_CODEC
+    );
+    public static final Holder<CircuitNodeType<?>> NODE_TYPE_LAMP = registerCircuitNodeType(
+            "lamp", LampCircuitNode.CODEC, LampCircuitNode.STREAM_CODEC
     );
     public static final Holder<CircuitNodeType<?>> NODE_TYPE_BUFFER = registerCircuitNodeType(
             "buffer", BufferCircuitNode.CODEC, BufferCircuitNode.STREAM_CODEC

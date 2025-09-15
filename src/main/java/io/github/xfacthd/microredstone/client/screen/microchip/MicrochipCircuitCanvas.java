@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.microchip;
 
+import io.github.xfacthd.microredstone.client.screen.workbench.element.LampRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.PartRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRenderState;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.AbstractCircuitCanvas;
@@ -12,8 +13,10 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.LampCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -25,12 +28,22 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
 {
     private final List<PartRenderState> parts = new ArrayList<>();
     private final List<WireRenderState> wires = new ArrayList<>();
+    private final List<LampRenderState> lamps = new ArrayList<>();
 
     @Override
-    protected void collectCanvasContent(int canvasX, int canvasY, List<PartRenderState> parts, List<WireRenderState> wires, int mouseX, int mouseY)
+    protected void collectCanvasContent(
+            int canvasX,
+            int canvasY,
+            List<PartRenderState> parts,
+            List<WireRenderState> wires,
+            List<LampRenderState> lamps,
+            int mouseX,
+            int mouseY
+    )
     {
         parts.addAll(this.parts);
         wires.addAll(this.wires);
+        lamps.addAll(this.lamps);
     }
 
     void update(@Nullable CompoundCircuitNode rootNode)
@@ -49,6 +62,18 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
         }
         rootNode.forAllNodes(entry ->
         {
+            if (entry.node() instanceof LampCircuitNode lamp)
+            {
+                int inputWire = lamp.getInputWire();
+                DyeColor color = lamp.getColor();
+                lamps.add(new LampRenderState(entry.pos(), entry.rotation(), inputWire, color, false));
+                for (LampCircuitNode.ChainEntry node : lamp.getChainedNodes())
+                {
+                    lamps.add(new LampRenderState(node.pos(), node.rotation(), inputWire, color, true));
+                }
+                return;
+            }
+
             IconConfig icon = CircuitUtils.makeIconConfig(entry.node());
             parts.add(new PartRenderState(entry.pos(), icon, entry.rotation()));
         });
@@ -92,6 +117,12 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
         {
             WireRenderState renderState = wires.get(i);
             wires.set(i, renderState.withPowered(wireStates.get(i)));
+        }
+        for (int i = 0; i < lamps.size(); i++)
+        {
+            LampRenderState renderState = lamps.get(i);
+            boolean powered = wireStates.get(renderState.inputWire());
+            lamps.set(i, renderState.withPowered(powered));
         }
     }
 

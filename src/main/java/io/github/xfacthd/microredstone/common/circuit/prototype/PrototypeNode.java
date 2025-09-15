@@ -98,6 +98,7 @@ public abstract class PrototypeNode implements PlaceableNode
 
     public abstract void validate(ProblemReporter reporter);
 
+    @Nullable
     public abstract CircuitNode assemble(WireMapper wireMapper);
 
     @Override

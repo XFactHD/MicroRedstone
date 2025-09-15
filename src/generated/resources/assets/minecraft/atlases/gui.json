@@ -763,6 +763,14 @@
     {
       "type": "minecraft:single",
       "resource": "neoforge:white"
+    },
+    {
+      "type": "microredstone:stacking",
+      "primary_texture": "microredstone:gui/sprites/part/untyped",
+      "secondary_textures": [
+        "microredstone:gui/sprites/part/lamp_overlay"
+      ],
+      "sprite": "microredstone:part/lamp"
     }
   ]
 }
