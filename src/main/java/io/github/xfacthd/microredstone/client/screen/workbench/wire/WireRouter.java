@@ -168,10 +168,16 @@ final class WireRouter
             return computeBacktrackedNode(canvas, startPos, endPos, dir);
         }
         PartGrid partGrid = canvas.getPartGrid();
+        WireGrid wireGrid = canvas.getWireGrid();
         NodePos checkPos = startPos;
         while (!(checkPos = checkPos.offset(dir)).equals(endPos))
         {
             if (partGrid.getPartNode(checkPos) != null)
+            {
+                endPos = checkPos;
+                return computeBacktrackedNode(canvas, startPos, endPos, dir);
+            }
+            if (wireGrid.getWireNode(checkPos) != null)
             {
                 endPos = checkPos;
                 return computeBacktrackedNode(canvas, startPos, endPos, dir);
@@ -187,7 +193,7 @@ final class WireRouter
             }
             return computeBacktrackedNode(canvas, startPos, endPos, dir);
         }
-        WireGrid.WireGridNode wireNode = canvas.getWireGrid().getWireNode(endPos);
+        WireGrid.WireGridNode wireNode = wireGrid.getWireNode(endPos);
         if (wireNode == null || (last && wireNode.canConnect(type, color, dir)))
         {
             return new WireNode.Branch(endPos, Set.of(dir.getOpposite()), Set.of(startPos));
