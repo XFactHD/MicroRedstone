@@ -9,6 +9,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
+import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -28,10 +29,10 @@ final class WireRouter
             return List.of();
         }
 
-        return route(canvas, wip, wireNodes.getLast(), cursorPos, wip.getType());
+        return route(canvas, wip, wireNodes.getLast(), cursorPos, wip.getType(), wip.getColor());
     }
 
-    private static List<WireNode> route(CircuitCanvas canvas, WireInProgress wip, WireNode startNode, NodePos endPos, WireType wireType)
+    private static List<WireNode> route(CircuitCanvas canvas, WireInProgress wip, WireNode startNode, NodePos endPos, WireType wireType, DyeColor color)
     {
         Set<Port> dirsToEnd = startNode.pos().getDirsTowards(endPos);
         if (dirsToEnd.isEmpty())
@@ -44,7 +45,7 @@ final class WireRouter
             case WireNode.Dangling ignored ->
             {
                 SequencedSet<Port> sectionDirs = sortDirsByLength(startNode.pos(), endPos, dirsToEnd);
-                yield routeWithReverse(canvas, wip, sectionDirs, startNode, endPos, wireType);
+                yield routeWithReverse(canvas, wip, sectionDirs, startNode, endPos, wireType, color);
             }
             case WireNode.Branch branch ->
             {
@@ -57,13 +58,13 @@ final class WireRouter
                 if (size >= dirsToEnd.size())
                 {
                     SequencedSet<Port> sectionDirs = sortDirsByLength(startNode.pos(), endPos, dirsToEnd);
-                    yield routeWithReverse(canvas, wip, sectionDirs, startNode, endPos, wireType);
+                    yield routeWithReverse(canvas, wip, sectionDirs, startNode, endPos, wireType, color);
                 }
 
                 SequencedSet<Port> sectionDirs = new LinkedHashSet<>();
                 sectionDirs.add(openDirs.iterator().next());
                 sectionDirs.addAll(dirsToEnd);
-                yield route(canvas, wip, sectionDirs, startNode, endPos, wireType);
+                yield route(canvas, wip, sectionDirs, startNode, endPos, wireType, color);
             }
             case WireNode.Connection connection ->
             {
@@ -75,7 +76,7 @@ final class WireRouter
                 SequencedSet<Port> sectionDirs = new LinkedHashSet<>();
                 sectionDirs.add(connection.port());
                 sectionDirs.addAll(dirsToEnd);
-                yield route(canvas, wip, sectionDirs, startNode, endPos, wireType);
+                yield route(canvas, wip, sectionDirs, startNode, endPos, wireType, color);
             }
         };
     }
@@ -101,15 +102,16 @@ final class WireRouter
             SequencedSet<Port> sectionDirs,
             WireNode startNode,
             NodePos endPos,
-            WireType wireType
+            WireType wireType,
+            DyeColor color
     )
     {
-        List<WireNode> nodes = route(canvas, wip, sectionDirs, startNode, endPos, wireType);
+        List<WireNode> nodes = route(canvas, wip, sectionDirs, startNode, endPos, wireType, color);
         if (nodes.size() == sectionDirs.size() && nodes.getLast().pos().equals(endPos))
         {
             return nodes;
         }
-        return route(canvas, wip, sectionDirs.reversed(), startNode, endPos, wireType);
+        return route(canvas, wip, sectionDirs.reversed(), startNode, endPos, wireType, color);
     }
 
     private static List<WireNode> route(
@@ -118,19 +120,20 @@ final class WireRouter
             SequencedSet<Port> sectionDirs,
             WireNode startNode,
             NodePos endPos,
-            WireType wireType
+            WireType wireType,
+            DyeColor color
     )
     {
         NodePos startPos = startNode.pos();
         Port firstDir = sectionDirs.getFirst();
         if (sectionDirs.size() == 1)
         {
-            WireNode wireNode = computeNode(canvas, wip, startPos, endPos, firstDir, wireType, true);
+            WireNode wireNode = computeNode(canvas, wip, startPos, endPos, firstDir, wireType, color, true);
             return wireNode != null ? List.of(wireNode) : List.of();
         }
 
         NodePos endPosOne = new NodePos(firstDir.select(endPos, startPos).x(), firstDir.select(startPos, endPos).y());
-        WireNode wireOne = computeNode(canvas, wip, startPos, endPosOne, firstDir, wireType, false);
+        WireNode wireOne = computeNode(canvas, wip, startPos, endPosOne, firstDir, wireType, color, false);
         if (wireOne == null)
         {
             return List.of();
@@ -144,7 +147,7 @@ final class WireRouter
         nodes.add(wireOne);
         Port lastDir = sectionDirs.getLast();
         NodePos endPosTwo = new NodePos(lastDir.select(endPos, wireOne.pos()).x(), lastDir.select(wireOne.pos(), endPos).y());
-        nodes.addAll(route(canvas, wip, wireOne, endPosTwo, wireType));
+        nodes.addAll(route(canvas, wip, wireOne, endPosTwo, wireType, color));
         return nodes;
     }
 
@@ -156,6 +159,7 @@ final class WireRouter
             NodePos endPos,
             Port dir,
             WireType type,
+            DyeColor color,
             boolean last
     )
     {
@@ -177,14 +181,14 @@ final class WireRouter
         if (partNode != null)
         {
             Port partPort = dir.getOpposite();
-            if (last && partNode.hasPort(partPort, type) && !partNode.isConnected(partPort))
+            if (last && canvas.canConnectToPart(partNode, endPos, partPort, type))
             {
                 return new WireNode.Connection(endPos, partPort, startPos);
             }
             return computeBacktrackedNode(canvas, startPos, endPos, dir);
         }
         WireGrid.WireGridNode wireNode = canvas.getWireGrid().getWireNode(endPos);
-        if (wireNode == null || (last && wireNode.canConnect(type, dir)))
+        if (wireNode == null || (last && wireNode.canConnect(type, color, dir)))
         {
             return new WireNode.Branch(endPos, Set.of(dir.getOpposite()), Set.of(startPos));
         }

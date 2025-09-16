@@ -276,12 +276,14 @@ public final class WireGrid implements Iterable<RoutedWire>
             this(pos, new ReferenceLinkedOpenHashSet<>());
         }
 
-        boolean canConnect(WireType type, Port dir)
+        boolean canConnect(WireType type, DyeColor color, Port dir)
         {
             if (wires.size() != 1) return false;
 
             RoutedWire wire = wires.getFirst();
-            return wire.wire().getWireType() == type && !wire.getBlockedDirsAt(pos).contains(dir.getOpposite());
+            if (wire.wire().getWireType() != type) return false;
+            if (wire.wire().getColor() != color) return false;
+            return !wire.getBlockedDirsAt(pos).contains(dir.getOpposite());
         }
     }
 }

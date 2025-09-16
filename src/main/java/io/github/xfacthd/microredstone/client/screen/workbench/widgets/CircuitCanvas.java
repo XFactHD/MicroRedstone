@@ -196,7 +196,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
             ExactNodePos exactPos = Objects.requireNonNull(getExactNodePos(mouseX, mouseY));
             Port port = wireInProgress.getTargettedPort(exactPos);
             WireType type = wireInProgress.getType();
-            if (port != null && node.hasPort(port, type))
+            if (port != null && canConnectToPart(node, hovered, port, type))
             {
                 ResourceLocation icon = PORT_BORDERS[port.ordinal() << 1 | type.ordinal()];
                 int iconX = canvasX + BORDER_TOP_LEFT + hovered.x() * PART_SLOT_SIZE;
@@ -297,6 +297,16 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
     public boolean isNodeOccupied(NodePos pos)
     {
         return partGrid.getPartNode(pos) != null || wireGrid.getWireNode(pos) != null;
+    }
+
+    public boolean canConnectToPart(PlaceableNode node, NodePos pos, Port port, WireType type)
+    {
+        return node.hasPort(port, type) && !node.isConnected(port) && !isPortObstructed(pos, port);
+    }
+
+    public boolean isPortObstructed(NodePos pos, Port port)
+    {
+        return partGrid.getPartNode(pos.offset(port)) != null;
     }
 
     public boolean isPullingWire()

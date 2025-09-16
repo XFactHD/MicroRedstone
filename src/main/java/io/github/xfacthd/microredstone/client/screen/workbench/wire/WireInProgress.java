@@ -96,12 +96,15 @@ public final class WireInProgress
             PlaceableNode partNode = canvas.getPartGrid().getPartNode(pos);
             if (partNode != null)
             {
-                return tryConnectPart(pos, partNode, true, null, () -> Port.ofCross(exactPos.fracX(), exactPos.fracY()));
+                return tryConnectPart(canvas, pos, partNode, true, null, () -> Port.ofCross(exactPos.fracX(), exactPos.fracY()));
             }
             WireGrid.WireGridNode wire = canvas.getWireGrid().getWireNode(pos);
             if (wire != null && wire.wires().size() == 1)
             {
                 RoutedWire routed = wire.wires().getFirst();
+                if (routed.wire().getWireType() != type) return PlaceResult.GENERIC_FAIL;
+                if (routed.wire().getColor() != color) return PlaceResult.GENERIC_FAIL;
+
                 RoutedWire.Section section = routed.findIntersectedSection(pos);
                 Set<NodePos> neighbors = section != null ? Set.of(section.posOne(), section.posTwo()) : Set.of();
                 wireNodes.add(new WireNode.Branch(pos, routed.getBlockedDirsAt(pos), neighbors));
@@ -125,7 +128,7 @@ public final class WireInProgress
                 if (partNode != null)
                 {
                     floatingNodes.removeLast();
-                    PlaceResult result = tryConnectPart(pos, partNode, false, lastNode.pos(), dir::getOpposite);
+                    PlaceResult result = tryConnectPart(canvas, pos, partNode, false, lastNode.pos(), dir::getOpposite);
                     if (result == PlaceResult.SUCCESS)
                     {
                         addMissingSectionsAndComplete(canvas);
@@ -135,7 +138,7 @@ public final class WireInProgress
                 WireGrid.WireGridNode wireNode = canvas.getWireGrid().getWireNode(pos);
                 if (wireNode != null)
                 {
-                    if (wireNode.canConnect(type, dir))
+                    if (wireNode.canConnect(type, color, dir))
                     {
                         wireNodes.add(floatingNodes.removeLast());
                         addMissingSectionsAndComplete(canvas);
@@ -161,6 +164,7 @@ public final class WireInProgress
     }
 
     private PlaceResult tryConnectPart(
+            CircuitCanvas canvas,
             NodePos pos,
             PlaceableNode part,
             boolean updateNode,
@@ -170,7 +174,7 @@ public final class WireInProgress
     {
         Port port = portSupplier.get();
         if (!part.hasPort(port, type)) return PlaceResult.NO_PORT;
-        if (part.isConnected(port)) return PlaceResult.BLOCKED_PORT;
+        if (!canvas.canConnectToPart(part, pos, port, type)) return PlaceResult.BLOCKED_PORT;
 
         WireNode.Connection node = new WireNode.Connection(pos, port, neighbor);
         if (updateNode && !wireNodes.isEmpty())
