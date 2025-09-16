@@ -124,6 +124,7 @@ public sealed interface FloatingNode
                     connections[prevPort.ordinal()] = null;
                 }
                 canvas.getWireGrid().trimConnectedWires(lastPos, node);
+                node.connect(null);
             }
             node.setPos(pos, placeRot);
             if (lastPos == null || newPort != prevPort)
