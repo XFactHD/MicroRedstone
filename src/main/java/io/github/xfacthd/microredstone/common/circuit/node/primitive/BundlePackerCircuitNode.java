@@ -10,6 +10,8 @@ import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -77,6 +79,14 @@ public final class BundlePackerCircuitNode extends PrimitiveCircuitNode
             methodGen.math(GeneratorAdapter.OR, Type.SHORT_TYPE);
         }
         localWires.generateStore(outputWire);
+    }
+
+    @Override
+    public PrototypeNode disassemble()
+    {
+        ConverterPrototypeNode node = new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK);
+        node.setBitIndex(bitIndex);
+        return node;
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.data.MRRegistries;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -34,6 +35,8 @@ public abstract class CircuitNode
     }
 
     public abstract void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs);
+
+    public abstract PrototypeNode disassemble();
 
     /**
      * {@return the internal indices of ioPorts used as inputs}

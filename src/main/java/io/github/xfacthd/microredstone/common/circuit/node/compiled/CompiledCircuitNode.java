@@ -5,6 +5,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 
 public abstract class CompiledCircuitNode extends RootCircuitNode
 {
@@ -36,6 +37,13 @@ public abstract class CompiledCircuitNode extends RootCircuitNode
     public final void release()
     {
         releaser.run();
+    }
+
+    @Override
+    public PrototypeNode disassemble()
+    {
+        // CompiledCircuitNodes can never reach the client
+        throw new UnsupportedOperationException();
     }
 
     @Override

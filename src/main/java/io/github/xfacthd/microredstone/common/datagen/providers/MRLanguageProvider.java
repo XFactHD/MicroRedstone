@@ -99,6 +99,8 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ImportExportHandler.TITLE_CONFIRM_IMPORT, "Confirm Import");
         add(ImportExportHandler.MESSAGE_CONFIRM_IMPORT_LINE_ONE, "Are you sure you want to overwrite the canvas with the imported circuit?");
         add(ImportExportHandler.MESSAGE_CONFIRM_IMPORT_LINE_TWO, "All unsaved changes will be lost.");
+        add(ImportExportHandler.TITLE_IMPORT_BROKEN, "Import Incomplete");
+        add(ImportExportHandler.MESSAGE_IMPORT_BROKEN, "The imported design may be incomplete due to issues in the circuit data or a bug in the importer.");
         add(ImportExportHandler.TITLE_CONFIRM_EXPORT, "Confirm Export");
         add(ImportExportHandler.MESSAGE_CONFIRM_EXPORT, "Are you sure you want to overwrite the existing circuit?");
         add(ImportExportHandler.TITLE_IMPORT_ERROR, "Import Failed");

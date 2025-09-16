@@ -6,11 +6,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -24,7 +26,7 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
 {
     public static final MapCodec<TwoInputLogicCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             PrimitivePrototypeNode.Type.CODEC.fieldOf("function").forGetter(node -> node.type),
-            Codec.BOOL.fieldOf("multi_bit").forGetter(node -> node.inversionMask != 0x1),
+            Codec.BOOL.fieldOf("multi_bit").forGetter(TwoInputLogicCircuitNode::isMultiBit),
             Connector.CODEC.listOf(2, 2).fieldOf("inputs").forGetter(node -> List.of(node.inputs)),
             Connector.CODEC.fieldOf("output").forGetter(node -> node.getOutputs()[0])
     ).apply(inst, TwoInputLogicCircuitNode::new));
@@ -105,9 +107,20 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
+    public PrototypeNode disassemble()
+    {
+        return new PrimitivePrototypeNode(type, 2, isMultiBit() ? WireType.BUNDLED : WireType.SINGLE);
+    }
+
+    @Override
     public CircuitNodeType<? extends CircuitNode> type()
     {
         return MRContent.NODE_TYPE_LOGIC_TWO_INPUT.value();
+    }
+
+    private boolean isMultiBit()
+    {
+        return inversionMask != 0x1;
     }
 
     @Override

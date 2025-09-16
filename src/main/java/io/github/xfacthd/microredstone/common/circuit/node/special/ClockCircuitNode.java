@@ -10,6 +10,8 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -122,6 +124,14 @@ public final class ClockCircuitNode extends CircuitNode
     {
         this.periodCounter = counter;
         this.state = (short) state;
+    }
+
+    @Override
+    public PrototypeNode disassemble()
+    {
+        ClockPrototypeNode node = new ClockPrototypeNode();
+        node.setHalfPeriodLength(halfPeriodLength);
+        return node;
     }
 
     @Override

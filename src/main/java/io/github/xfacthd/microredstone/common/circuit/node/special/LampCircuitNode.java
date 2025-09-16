@@ -10,6 +10,8 @@ import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -63,6 +65,14 @@ public final class LampCircuitNode extends CircuitNode
     public List<ChainEntry> getChainedNodes()
     {
         return chainedNodes;
+    }
+
+    @Override
+    public PrototypeNode disassemble()
+    {
+        LampPrototypeNode node = new LampPrototypeNode();
+        node.setColor(color);
+        return node;
     }
 
     @Override

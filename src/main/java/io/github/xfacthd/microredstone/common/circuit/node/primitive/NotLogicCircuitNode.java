@@ -6,10 +6,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
+import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,7 +25,7 @@ import java.util.Objects;
 public final class NotLogicCircuitNode extends PrimitiveCircuitNode
 {
     public static final MapCodec<NotLogicCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-            Codec.BOOL.fieldOf("multi_bit").forGetter(node -> node.inversionMask != 0x1),
+            Codec.BOOL.fieldOf("multi_bit").forGetter(NotLogicCircuitNode::isMultiBit),
             Connector.CODEC.fieldOf("input").forGetter(node -> node.getInputs()[0]),
             Connector.CODEC.fieldOf("output").forGetter(node -> node.getOutputs()[0])
     ).apply(inst, NotLogicCircuitNode::new));
@@ -65,9 +68,20 @@ public final class NotLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
+    public PrototypeNode disassemble()
+    {
+        return new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, isMultiBit() ? WireType.BUNDLED : WireType.SINGLE);
+    }
+
+    @Override
     public CircuitNodeType<? extends CircuitNode> type()
     {
         return MRContent.NODE_TYPE_LOGIC_NOT.value();
+    }
+
+    private boolean isMultiBit()
+    {
+        return inversionMask != 0x1;
     }
 
     @Override

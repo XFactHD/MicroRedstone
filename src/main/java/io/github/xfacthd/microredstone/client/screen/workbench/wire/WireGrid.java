@@ -17,6 +17,7 @@ import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SequencedSet;
@@ -143,6 +144,52 @@ public final class WireGrid implements Iterable<RoutedWire>
         {
             section.forNonVertexNodes(pos -> addOrUpdateWireNode(pos, routedWire));
         }
+    }
+
+    public Wire importWire(Wire wire)
+    {
+        wire = wire.copy();
+        canvas.getRootNode().addWire(wire);
+
+        Set<RoutedWire.Section> sections = new HashSet<>();
+        Set<NodePos> branchNodes = new HashSet<>();
+        for (WireNode node : wire.getNodes())
+        {
+            switch (node)
+            {
+                case WireNode.Branch(NodePos pos, Set<Port> ignored, Set<NodePos> neighbors) ->
+                {
+                    for (NodePos neighbor : neighbors)
+                    {
+                        if (!neighbor.equals(pos))
+                        {
+                            sections.add(new RoutedWire.Section(pos, neighbor));
+                        }
+                    }
+                    branchNodes.add(pos);
+                }
+                case WireNode.Connection(NodePos pos, Port ignored, @Nullable NodePos neighbor) ->
+                {
+                    if (neighbor != null && !neighbor.equals(pos))
+                    {
+                        sections.add(new RoutedWire.Section(pos, neighbor));
+                    }
+                }
+                case WireNode.Dangling ignored -> {}
+            }
+        }
+        RoutedWire routed = new RoutedWire(wire, List.copyOf(sections));
+        wires.add(routed);
+        for (NodePos pos : branchNodes)
+        {
+            addOrUpdateWireNode(pos, routed);
+        }
+        for (RoutedWire.Section section : sections)
+        {
+            section.forNonVertexNodes(pos -> addOrUpdateWireNode(pos, routed));
+        }
+
+        return wire;
     }
 
     public void trimConnectedWires(NodePos pos, PlaceableNode partNode)
