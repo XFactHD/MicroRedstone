@@ -86,6 +86,14 @@ public final class Connection implements PlaceableNode
         return hasPort(port, wireType) && wire != null;
     }
 
+    public void removeWire(Wire wire)
+    {
+        if (this.wire == wire)
+        {
+            this.wire = null;
+        }
+    }
+
     public PortDir getPortDir()
     {
         return portDir;
