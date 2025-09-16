@@ -223,7 +223,7 @@ public final class WireGrid implements Iterable<RoutedWire>
             else if (node instanceof WireNode.Branch branch && branch.ports().contains(opposite) && branch.neighbors().contains(pos))
             {
                 branch.neighbors().remove(pos);
-                branch.neighbors().add(adjPos);
+                branch.withNeighbor(opposite, adjPos);
             }
         }
     }

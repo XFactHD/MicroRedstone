@@ -142,9 +142,23 @@ public sealed interface WireNode
         @Override
         public WireNode withNeighbor(Port dir, NodePos neighbor)
         {
-            ports.add(dir);
-            neighbors.add(neighbor);
+            if (!neighbor.equals(pos))
+            {
+                ports.add(dir);
+                neighbors.add(neighbor);
+            }
             return this;
+        }
+
+        public void addNeighbors(Set<NodePos> neighbors)
+        {
+            for (NodePos neighbor : neighbors)
+            {
+                if (!neighbor.equals(pos))
+                {
+                    this.neighbors.add(neighbor);
+                }
+            }
         }
 
         @Override

@@ -77,7 +77,7 @@ public record RoutedWire(Wire wire, List<Section> sections)
                 {
                     WireNode.Branch other = branches.get(i);
                     branch.ports().addAll(other.ports());
-                    branch.neighbors().addAll(other.neighbors());
+                    branch.addNeighbors(other.neighbors());
                 }
                 nodes.add(branch);
             }
@@ -198,6 +198,11 @@ public record RoutedWire(Wire wire, List<Section> sections)
                     consumer.accept(new NodePos(x, minY));
                 }
             }
+        }
+
+        public boolean isZeroLength()
+        {
+            return posOne.equals(posTwo);
         }
     }
 }

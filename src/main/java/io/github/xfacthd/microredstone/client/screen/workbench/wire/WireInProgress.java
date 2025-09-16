@@ -210,6 +210,7 @@ public final class WireInProgress
 
     private void completeWire(CircuitCanvas canvas)
     {
+        sections.removeIf(RoutedWire.Section::isZeroLength);
         canvas.getWireGrid().addWire(type, color, wireNodes, sections);
         canvas.cancelWirePull();
     }
