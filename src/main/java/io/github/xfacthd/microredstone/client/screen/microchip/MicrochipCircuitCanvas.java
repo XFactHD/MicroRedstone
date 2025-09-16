@@ -58,6 +58,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
             Connection connection = new Connection(connector.type());
             connection.setPos(connector.pos(), connector.port().toPartRotation());
             connection.setPortDir(connector.dir());
+            connection.setName(connector.name());
             parts.add(new PartRenderState(connection));
         }
         rootNode.forAllNodes(entry ->

@@ -24,6 +24,7 @@ public final class Connection implements PlaceableNode
     private PortDir portDir = PortDir.INPUT;
     @Nullable
     private Wire wire;
+    private String name = "";
 
     public Connection(WireType wireType)
     {
@@ -44,6 +45,11 @@ public final class Connection implements PlaceableNode
     public void setPortDir(PortDir portDir)
     {
         this.portDir = portDir;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
     }
 
     @Override
@@ -85,6 +91,11 @@ public final class Connection implements PlaceableNode
         return portDir;
     }
 
+    public String getName()
+    {
+        return name;
+    }
+
     public WireType getWireType()
     {
         return wireType;
@@ -108,12 +119,12 @@ public final class Connection implements PlaceableNode
     public Connector toConnector(Port port, WireMapper wireMapper)
     {
         int resolveWire = wireMapper.resolveWire(Objects.requireNonNull(wire));
-        return new Connector(pos, port, resolveWire, portDir, wireType);
+        return new Connector(pos, port, resolveWire, portDir, wireType, name);
     }
 
     @Override
     public String toString()
     {
-        return "Connector[dir=" + portDir + ",type=" + wireType + "]";
+        return "Connector[dir=" + portDir + ",type=" + wireType + ",desc=" + name + "]";
     }
 }

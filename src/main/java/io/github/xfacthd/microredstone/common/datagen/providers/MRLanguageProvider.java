@@ -135,6 +135,9 @@ public final class MRLanguageProvider extends LanguageProvider
         add(ImportEntryContextMenuProvider.PROP_SHARE_TYPE, "Visibility:");
         add(BaseNodeContextMenuProvider.ENTRY_DELETE_NODE, "Delete Part");
         add(ConnectionNodeContextMenuProvider.ENTRY_PORT_DIR, "Port Direction");
+        add(ConnectionNodeContextMenuProvider.ENTRY_NAME, "Set Name");
+        add(ConnectionNodeContextMenuProvider.TITLE_SET_NAME, "Set Name");
+        add(ConnectionNodeContextMenuProvider.LABEL_SET_NAME, "Name:");
         add(ConverterPartNodeContextMenuProvider.ENTRY_SET_BIT, "Set Bundle Bit");
         add(ConverterPartNodeContextMenuProvider.TITLE_SET_BIT, "Set Bundle Bit");
         add(ConverterPartNodeContextMenuProvider.LABEL_SET_BIT, "Bit:");
