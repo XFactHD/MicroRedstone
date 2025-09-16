@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
+import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
@@ -8,6 +9,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.node.special.LampCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
@@ -146,5 +148,45 @@ public final class LampPrototypeNode extends PrototypeNode
             chainedNodes.add(new LampCircuitNode.ChainEntry(node.getPos(), node.getRotation()));
             node.collectChainedNodes(chainedNodes);
         }
+    }
+
+    @Override
+    public NodePos nudgePlacementPos(CircuitCanvasAccess canvas, NodePos newPos, int newRotation, int mouseX, int mouseY)
+    {
+        if (!(canvas.getPartNode(newPos) instanceof LampPrototypeNode lamp)) return newPos;
+        if (lamp == this) return newPos;
+
+        ExactNodePos exactPos = canvas.getExactNodePos(mouseX, mouseY);
+        if (exactPos == null) return newPos;
+
+        Port hoveredPort = Port.ofCross(exactPos.fracX(), exactPos.fracY());
+        if (Port.LEFT.rotate(lamp.getRotation()) == hoveredPort) return newPos;
+        if (Port.LEFT.rotate(newRotation) != hoveredPort.getOpposite()) return newPos;
+
+        NodePos lampPos = newPos.offset(hoveredPort);
+        return canvas.isValidPos(lampPos) ? lampPos : newPos;
+    }
+
+    @Override
+    public void performPostPlaceAction(CircuitCanvasAccess canvas, int mouseX, int mouseY, @Nullable PartSetMode mode, boolean revertToLast)
+    {
+        if (mode != null && mode != PartSetMode.ADD)
+        {
+            unchainOnMove(mode);
+        }
+        if (!revertToLast)
+        {
+            NodePos pos = canvas.getNodePos(mouseX, mouseY);
+            if (pos != null && !pos.equals(getPos()) && canvas.getPartNode(pos) instanceof LampPrototypeNode lamp)
+            {
+                chain(lamp);
+            }
+        }
+    }
+
+    @Override
+    public void performPreRemoveAction(CircuitCanvasAccess canvas)
+    {
+        unchainOnDelete();
     }
 }

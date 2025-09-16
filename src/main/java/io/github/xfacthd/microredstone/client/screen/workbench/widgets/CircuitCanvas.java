@@ -22,6 +22,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.prototype.CircuitCanvasAccess;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ConstantPrototypeNode;
@@ -46,7 +47,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.ToIntFunction;
 
-public final class CircuitCanvas extends AbstractCircuitCanvas
+public final class CircuitCanvas extends AbstractCircuitCanvas implements CircuitCanvasAccess
 {
     private static final ResourceLocation MONOSPACE_FONT = Utils.rl("monospace");
     private static final ResourceLocation[] PORT_BORDERS = Util.make(new ResourceLocation[8], arr ->
@@ -265,27 +266,11 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
     public NodePos getNodePlacementPos(int mouseX, int mouseY, @Nullable FloatingNode floatingNode)
     {
         NodePos pos = getNodePos(mouseX, mouseY);
-        if (pos != null && floatingNode instanceof FloatingNode.Part part && part.node() instanceof LampPrototypeNode floatingLamp)
+        if (pos != null && floatingNode != null)
         {
-            return getLampPlacementPos(pos, part, floatingLamp, mouseX, mouseY);
+            return floatingNode.node().nudgePlacementPos(this, pos, floatingNode.rotation(), mouseX, mouseY);
         }
         return pos;
-    }
-
-    private NodePos getLampPlacementPos(NodePos pos, FloatingNode.Part part, LampPrototypeNode floatingLamp, int mouseX, int mouseY)
-    {
-        if (!(partGrid.getPartNode(pos) instanceof LampPrototypeNode lamp)) return pos;
-        if (lamp == floatingLamp) return pos;
-
-        ExactNodePos exactPos = getExactNodePos(mouseX, mouseY);
-        if (exactPos == null) return pos;
-
-        Port hoveredPort = Port.ofCross(exactPos.fracX(), exactPos.fracY());
-        if (Port.LEFT.rotate(lamp.getRotation()) == hoveredPort) return pos;
-        if (Port.LEFT.rotate(part.rotation()) != hoveredPort.getOpposite()) return pos;
-
-        NodePos lampPos = pos.offset(hoveredPort);
-        return lampPos.isValid(PART_COUNT_X, PART_COUNT_Y) ? lampPos : pos;
     }
 
     @Override
@@ -392,5 +377,18 @@ public final class CircuitCanvas extends AbstractCircuitCanvas
     public boolean isEmpty()
     {
         return circuit.isEmpty();
+    }
+
+    @Override
+    @Nullable
+    public PlaceableNode getPartNode(NodePos pos)
+    {
+        return partGrid.getPartNode(pos);
+    }
+
+    @Override
+    public boolean isValidPos(NodePos pos)
+    {
+        return pos.isValid(PART_COUNT_X, PART_COUNT_Y);
     }
 }

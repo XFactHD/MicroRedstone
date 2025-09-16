@@ -18,7 +18,6 @@ import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.block.CircuitWorkbenchBlock;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
 import io.github.xfacthd.microredstone.common.menu.slot.ToggleableSlot;
@@ -300,15 +299,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 }
                 if (target != null)
                 {
-                    floatingNode.placeAt(canvas, target, revertToLast);
-                    if (!revertToLast && floatingNode instanceof FloatingNode.Part part && part.node() instanceof LampPrototypeNode lampFloat)
-                    {
-                        NodePos pos = canvas.getNodePos((int) mouseX, (int) mouseY);
-                        if (pos != null && !pos.equals(target) && canvas.getPartGrid().getPartNode(pos) instanceof LampPrototypeNode lamp)
-                        {
-                            lampFloat.chain(lamp);
-                        }
-                    }
+                    floatingNode.placeAt(canvas, target, revertToLast, (int) mouseX, (int) mouseY);
                 }
                 else if (floatingNode.lastPos() != null)
                 {

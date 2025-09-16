@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
+import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -131,4 +132,8 @@ public abstract class PrototypeNode implements PlaceableNode
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
+
+    public void performPostPlaceAction(CircuitCanvasAccess canvas, int mouseX, int mouseY, @Nullable PartSetMode mode, boolean revertToLast) {}
+
+    public void performPreRemoveAction(CircuitCanvasAccess canvas) {}
 }

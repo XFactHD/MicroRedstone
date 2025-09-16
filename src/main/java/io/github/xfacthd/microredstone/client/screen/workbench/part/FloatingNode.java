@@ -4,7 +4,6 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCa
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import net.minecraft.util.Mth;
@@ -38,7 +37,7 @@ public sealed interface FloatingNode
 
     boolean canPlaceAt(CircuitCanvas canvas, NodePos pos);
 
-    void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast);
+    void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY);
 
     record Part(PrototypeNode node, @Nullable NodePos lastPos, int rotation) implements FloatingNode
     {
@@ -55,28 +54,26 @@ public sealed interface FloatingNode
         }
 
         @Override
-        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast)
+        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY)
         {
             boolean posMatches = pos.equals(lastPos);
+            PartSetMode mode = null;
             // Dragging a node doesn't actually remove it from the grid -> no action required if pos and rotation match
-            if (rotation == node.getRotation() && posMatches) return;
-
-            PartGrid partGrid = canvas.getPartGrid();
-            PartSetMode mode = posMatches ? PartSetMode.ROTATE : PartSetMode.MOVE;
-            if (lastPos != null)
+            if (rotation != node.getRotation() || !posMatches)
             {
-                partGrid.setPartNode(lastPos, null, 0, mode);
+                PartGrid partGrid = canvas.getPartGrid();
+                mode = posMatches ? PartSetMode.ROTATE : PartSetMode.MOVE;
+                if (lastPos != null)
+                {
+                    partGrid.setPartNode(lastPos, null, 0, mode);
+                }
+                else
+                {
+                    mode = PartSetMode.ADD;
+                }
+                partGrid.setPartNode(pos, node, rotation, mode);
             }
-            else
-            {
-                mode = PartSetMode.ADD;
-            }
-            partGrid.setPartNode(pos, node, rotation, mode);
-
-            if (!mode.addOrRemove() && node instanceof LampPrototypeNode lamp)
-            {
-                lamp.unchainOnMove(mode);
-            }
+            node.performPostPlaceAction(canvas, mouseX, mouseY, mode, revertToLast);
         }
     }
 
@@ -111,7 +108,7 @@ public sealed interface FloatingNode
         }
 
         @Override
-        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast)
+        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY)
         {
             // Dragging a connection doesn't actually remove it from the grid -> no action required if pos and rotation match
             if (pos.equals(lastPos) && node.getRotation() == rotation) return;

@@ -17,4 +17,9 @@ public interface PlaceableNode
     boolean hasPort(Port port, @Nullable WireType wireType);
 
     boolean isConnected(Port port);
+
+    default NodePos nudgePlacementPos(CircuitCanvasAccess canvas, NodePos newPos, int newRotation, int mouseX, int mouseY)
+    {
+        return newPos;
+    }
 }
