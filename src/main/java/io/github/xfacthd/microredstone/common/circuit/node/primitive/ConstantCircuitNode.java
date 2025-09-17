@@ -60,7 +60,7 @@ public final class ConstantCircuitNode extends PrimitiveCircuitNode
     @Override
     public PrototypeNode disassemble()
     {
-        ConstantPrototypeNode node = new ConstantPrototypeNode(getInputs()[0].type());
+        ConstantPrototypeNode node = new ConstantPrototypeNode(getOutputs()[0].type());
         node.setValue(value);
         return node;
     }
