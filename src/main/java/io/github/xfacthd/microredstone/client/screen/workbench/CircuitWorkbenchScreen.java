@@ -382,13 +382,9 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             floatingNode = floatingNode.rotate(Screen.hasShiftDown() ? -1 : 1);
             return true;
         }
-        if (libraryBrowser.isEditBoxFocused())
+        if (libraryBrowser.isEditBoxFocused() && isInventoryKey(keyCode, scanCode))
         {
-            InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
-            if (Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key))
-            {
-                return true;
-            }
+            return true;
         }
         if (keyCode == GLFW.GLFW_KEY_DELETE)
         {
@@ -403,7 +399,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
                 return true;
             }
         }
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE && !canvas.isEmpty())
+        if ((keyCode == GLFW.GLFW_KEY_ESCAPE || isInventoryKey(keyCode, scanCode)) && !canvas.isEmpty())
         {
             DialogScreen.builder(DialogScreen.Type.CONFIRM)
                     .withTitle(TITLE_CONFIRM_CLOSE)
@@ -425,6 +421,12 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             return true;
         }
         return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    private static boolean isInventoryKey(int keyCode, int scanCode)
+    {
+        InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
+        return Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key);
     }
 
     @Override
