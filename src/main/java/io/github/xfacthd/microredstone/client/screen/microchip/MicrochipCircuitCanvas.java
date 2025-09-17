@@ -80,7 +80,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
         });
         rootNode.getWires().forEach(wire ->
         {
-            WireRenderState renderState = new WireRenderState(wire.getWireType(), wire.getColor(), new ArrayList<>(), new ArrayList<>());
+            WireRenderState renderState = new WireRenderState(wire.getWireType(), wire.getColor());
             Set<RoutedWire.Section> sections = new HashSet<>();
             for (WireNode node : wire.getNodes())
             {
@@ -104,7 +104,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
                     case WireNode.Dangling ignored -> {}
                 }
             }
-            renderState.sections().addAll(sections);
+            renderState.addSections(sections);
             if (!renderState.isEmpty())
             {
                 wires.add(renderState);

@@ -95,11 +95,12 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
             WireType type = wire.wire().getWireType();
             DyeColor color = wire.wire().getColor();
 
-            WireRenderState renderState = new WireRenderState(type, color, new ArrayList<>(wire.sections()), new ArrayList<>());
+            WireRenderState renderState = new WireRenderState(type, color);
             for (WireNode node : wire.wire().getNodes())
             {
                 renderState.addNode(node);
             }
+            renderState.addSections(wire.sections());
             wires.add(renderState);
         }
 
@@ -110,7 +111,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
             WireType type = wireInProgress.getType();
             DyeColor color = wireInProgress.getColor();
 
-            WireRenderState renderState = new WireRenderState(type, color, new ArrayList<>(wireInProgress.getSections()), new ArrayList<>());
+            WireRenderState renderState = new WireRenderState(type, color);
             List<WireNode> wireNodes = wireInProgress.getWireNodes();
             if (!wireNodes.isEmpty())
             {
@@ -119,17 +120,20 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
                     renderState.addNode(node);
                 }
             }
+            renderState.addSections(wireInProgress.getSections());
             List<WireNode> floatingNodes = wireInProgress.getFloatingNodes();
             if (!floatingNodes.isEmpty())
             {
+                List<RoutedWire.Section> sections = new ArrayList<>(floatingNodes.size());
                 // If a floating node is present, then at least one pinned node exists
                 NodePos lastPos = wireNodes.getLast().pos();
                 for (WireNode node : floatingNodes)
                 {
-                    renderState.addSection(lastPos, node.pos());
+                    sections.add(new RoutedWire.Section(lastPos, node.pos()));
                     renderState.addNode(node);
                     lastPos = node.pos();
                 }
+                renderState.addSections(sections);
             }
 
             if (!renderState.isEmpty())

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.PartBlitter;
-import io.github.xfacthd.microredstone.client.screen.workbench.wire.RoutedWire;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
@@ -35,7 +34,7 @@ public record CircuitCanvasContentRenderState(
         @Nullable ScreenRectangle scissorArea
 ) implements GuiElementRenderState
 {
-    private static final ResourceLocation WHITE_SPRITE = Utils.rl("neoforge", "white");
+    static final ResourceLocation WHITE_SPRITE = Utils.rl("neoforge", "white");
 
     public static CircuitCanvasContentRenderState create(
             List<PartRenderState> parts,
@@ -58,42 +57,6 @@ public record CircuitCanvasContentRenderState(
     {
         Matrix3x2fStack pose = new Matrix3x2fStack(2);
 
-        for (WireRenderState wire : wires)
-        {
-            // TODO: shorten sections going into parts to only enter the part by one pixel and then render wires after parts again
-            // TODO: draw textures instead of colored lines (same for nodes)
-
-            int packedColor = wire.packedColor();
-            for (RoutedWire.Section section : wire.sections())
-            {
-                NodePos posOne = section.posOne();
-                NodePos posTwo = section.posTwo();
-                if (posOne.x() == posTwo.x())
-                {
-                    int minY = Math.min(posOne.y(), posTwo.y());
-                    int maxY = Math.max(posOne.y(), posTwo.y());
-                    int x = canvasX + 4 + posOne.x() * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    int y1 = canvasY + 4 + minY * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    int y2 = canvasY + 5 + maxY * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    fill(buffer, pose, x, y1, x + 2, y2, z, packedColor);
-                }
-                else if (posOne.y() == posTwo.y())
-                {
-                    int minX = Math.min(posOne.x(), posTwo.x());
-                    int maxX = Math.max(posOne.x(), posTwo.x());
-                    int x1 = canvasX + 4 + minX * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    int x2 = canvasX + 5 + maxX * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    int y = canvasY + 4 + posOne.y() * CircuitCanvas.PART_SLOT_SIZE + 4;
-                    fill(buffer, pose, x1, y, x2, y + 2, z, packedColor);
-                }
-            }
-            for (NodePos pos : wire.nodes())
-            {
-                int x = canvasX + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.x() * CircuitCanvas.PART_SLOT_SIZE + 4;
-                int y = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE + 4;
-                fill(buffer, pose, x - 2, y - 2, x + 2, y + 2, z, packedColor);
-            }
-        }
         PartBlitter blitter = (blitPose, icon, x, y, size) -> blit(buffer, blitPose, icon, x, y, x + size, y + size, z);
         for (PartRenderState part : parts)
         {
@@ -132,6 +95,27 @@ public record CircuitCanvasContentRenderState(
             }
             fill(buffer, pose, 0, 3, 3, CircuitCanvas.PART_SIZE + 1, z, lamp.packedColor());
             pose.popMatrix();
+        }
+
+        for (WireRenderState wire : wires)
+        {
+            // TODO: draw textures instead of colored lines (same for nodes)
+
+            int packedColor = wire.packedColor();
+            for (WireRenderState.WireSection section : wire.sections())
+            {
+                int x0 = canvasX + section.minX();
+                int y0 = canvasY + section.minY();
+                int x1 = canvasX + section.maxX();
+                int y1 = canvasY + section.maxY();
+                fill(buffer, pose, x0, y0, x1, y1, z, packedColor);
+            }
+            for (NodePos pos : wire.nodes())
+            {
+                int x = canvasX + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.x() * CircuitCanvas.PART_SLOT_SIZE + 4;
+                int y = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE + 4;
+                fill(buffer, pose, x - 2, y - 2, x + 2, y + 2, z, packedColor);
+            }
         }
     }
 
