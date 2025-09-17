@@ -333,5 +333,14 @@ public final class WireGrid implements Iterable<RoutedWire>
             if (wire.wire().getColor() != color) return false;
             return !wire.getBlockedDirsAt(pos).contains(dir.getOpposite());
         }
+
+        boolean canPassOver(NodePos pos, Port dir)
+        {
+            if (wires.isEmpty()) return true;
+            if (wires.size() > 1) return false;
+
+            RoutedWire wire = wires.getFirst();
+            return !wire.getBlockedDirsAt(pos).contains(dir);
+        }
     }
 }

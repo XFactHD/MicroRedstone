@@ -177,7 +177,8 @@ final class WireRouter
                 endPos = checkPos;
                 return computeBacktrackedNode(canvas, startPos, endPos, dir);
             }
-            if (wireGrid.getWireNode(checkPos) != null)
+            WireGrid.WireGridNode node = wireGrid.getWireNode(checkPos);
+            if (node != null && !node.canPassOver(checkPos, dir))
             {
                 endPos = checkPos;
                 return computeBacktrackedNode(canvas, startPos, endPos, dir);
