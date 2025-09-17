@@ -194,6 +194,7 @@ public final class WireGrid implements Iterable<RoutedWire>
 
     public void trimConnectedWires(NodePos pos, PlaceableNode partNode)
     {
+        // FIXME: removing a part connected to a wire with an immediately adjacent branch node does not trim the connecting section correctly
         for (Port port : PORTS)
         {
             if (!partNode.hasPort(port, null) || !partNode.isConnected(port)) continue;

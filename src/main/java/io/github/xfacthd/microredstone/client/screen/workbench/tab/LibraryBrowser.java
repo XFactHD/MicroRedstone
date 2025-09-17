@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+// TODO: rename to something more sensible
 public final class LibraryBrowser extends ToolPaneTabWidget implements MultiModeTab<LibraryBrowser.Mode>
 {
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.library_browser.mode");

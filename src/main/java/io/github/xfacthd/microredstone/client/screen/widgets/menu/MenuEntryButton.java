@@ -171,6 +171,7 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
         }
         else if (!isCursorCloseEnough(mouseX, mouseY) && openMenu != null && !openMenu.shouldKeepMenuOpen(mouseX, mouseY, false))
         {
+            // TODO: avoid closing the sub-menu when moving the cursor diagonally from the button into the sub-menu
             openMenu.close();
         }
     }

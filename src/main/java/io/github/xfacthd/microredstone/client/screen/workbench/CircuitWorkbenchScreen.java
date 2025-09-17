@@ -39,7 +39,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-// TODO: add "modified" flag to prevent data loss when accidentally closing the screen (can be re-used to cache assembly result)
+// TODO: add "modified" flag to prevent data loss when accidentally closing the screen and adjust close confirmation
+//       to use it instead of canvas emptiness, can be re-used to cache assembly result
+// TODO: add local storage for (partial) designs in prototype stage
 public final class CircuitWorkbenchScreen extends AbstractContainerScreen<CircuitWorkbenchMenu>
 {
     private static final ResourceLocation BACKGROUND = Utils.rl("background");

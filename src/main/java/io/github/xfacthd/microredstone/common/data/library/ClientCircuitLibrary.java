@@ -30,6 +30,7 @@ public final class ClientCircuitLibrary
                 consumer.accept(value);
             }
         }
+        // TODO: implement built-in entry handling
     }
 
     public static boolean hasEntryWithName(String name)

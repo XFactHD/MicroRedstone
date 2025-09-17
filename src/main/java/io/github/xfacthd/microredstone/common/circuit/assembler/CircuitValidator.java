@@ -17,7 +17,7 @@ public final class CircuitValidator
             return false;
         }
 
-        // TODO: implement validation of assembled circuit nodes
+        // TODO: implement validation of assembled circuit nodes (ensure nesting doesn't blow up processing times too much and potentially move checking off thread)
         return true;
     }
 

@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.util;
 import net.minecraft.util.ProblemReporter;
 import org.apache.commons.lang3.mutable.MutableInt;
 
+// TODO: replace with deeply inspectable implementation for use by unit tests and workbench screen error annotations
 public final class CountingProblemReporter implements ProblemReporter
 {
     private final ProblemReporter reporter;

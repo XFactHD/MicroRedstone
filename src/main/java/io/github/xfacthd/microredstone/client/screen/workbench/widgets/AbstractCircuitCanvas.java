@@ -22,7 +22,7 @@ public abstract class AbstractCircuitCanvas
 {
     private static final ResourceLocation BLUEPRINT = Utils.rl("blueprint");
     public static final int PART_COUNT_X = 48;
-    public static final int PART_COUNT_Y = 24;
+    public static final int PART_COUNT_Y = 24; // TODO: consider increasing height to 36 cells
     public static final int PART_COUNT = PART_COUNT_X * PART_COUNT_Y;
     public static final int PART_SIZE = 8;
     public static final int PART_SLOT_SIZE = PART_SIZE + 1;
