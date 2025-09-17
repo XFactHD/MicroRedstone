@@ -53,6 +53,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
 
         if (rootNode == null) return;
 
+        Set<NodePos> partPositions = new HashSet<>();
         for (Connector connector : Utils.concatArrays(rootNode.getInputs(), rootNode.getOutputs()))
         {
             Connection connection = new Connection(connector.type());
@@ -60,6 +61,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
             connection.setPortDir(connector.dir());
             connection.setName(connector.name());
             parts.add(new PartRenderState(connection));
+            partPositions.add(connector.pos());
         }
         rootNode.forAllNodes(entry ->
         {
@@ -68,6 +70,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
                 int inputWire = lamp.getInputWire();
                 DyeColor color = lamp.getColor();
                 lamps.add(new LampRenderState(entry.pos(), entry.rotation(), inputWire, color, false));
+                partPositions.add(entry.pos());
                 for (LampCircuitNode.ChainEntry node : lamp.getChainedNodes())
                 {
                     lamps.add(new LampRenderState(node.pos(), node.rotation(), inputWire, color, true));
@@ -77,6 +80,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
 
             IconConfig icon = CircuitUtils.makeIconConfig(entry.node());
             parts.add(new PartRenderState(entry.pos(), icon, entry.rotation()));
+            partPositions.add(entry.pos());
         });
         rootNode.getWires().forEach(wire ->
         {
@@ -104,7 +108,7 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
                     case WireNode.Dangling ignored -> {}
                 }
             }
-            renderState.addSections(sections);
+            renderState.addSections(partPositions, sections);
             if (!renderState.isEmpty())
             {
                 wires.add(renderState);

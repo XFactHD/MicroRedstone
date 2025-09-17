@@ -41,10 +41,11 @@ import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 
 public final class CircuitCanvas extends AbstractCircuitCanvas implements CircuitCanvasAccess
@@ -90,6 +91,33 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
             int mouseY
     )
     {
+        Set<NodePos> partPositions = new HashSet<>();
+        partGrid.forEach(node ->
+        {
+            if (!owner.isNodeFloating(node))
+            {
+                if (node instanceof LampPrototypeNode lamp)
+                {
+                    LampPrototypeNode chainedLamp = lamp.getNodeChainedTo();
+                    boolean chained = chainedLamp != null && !owner.isNodeFloating(chainedLamp);
+                    lamps.add(new LampRenderState(lamp, chained));
+                }
+                else
+                {
+                    parts.add(new PartRenderState(node));
+                }
+                partPositions.add(node.getPos());
+            }
+        });
+        for (Connection connection : circuit.getConnections())
+        {
+            if (connection != null && !owner.isNodeFloating(connection))
+            {
+                parts.add(new PartRenderState(connection));
+                partPositions.add(connection.getPos());
+            }
+        }
+
         for (RoutedWire wire : wireGrid)
         {
             WireType type = wire.wire().getWireType();
@@ -100,7 +128,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
             {
                 renderState.addNode(node);
             }
-            renderState.addSections(wire.sections());
+            renderState.addSections(partPositions, wire.sections());
             wires.add(renderState);
         }
 
@@ -120,50 +148,23 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
                     renderState.addNode(node);
                 }
             }
-            renderState.addSections(wireInProgress.getSections());
+            renderState.addSections(partPositions, wireInProgress.getSections());
             List<WireNode> floatingNodes = wireInProgress.getFloatingNodes();
             if (!floatingNodes.isEmpty())
             {
-                List<RoutedWire.Section> sections = new ArrayList<>(floatingNodes.size());
                 // If a floating node is present, then at least one pinned node exists
                 NodePos lastPos = wireNodes.getLast().pos();
                 for (WireNode node : floatingNodes)
                 {
-                    sections.add(new RoutedWire.Section(lastPos, node.pos()));
+                    renderState.addSection(partPositions, lastPos, node.pos());
                     renderState.addNode(node);
                     lastPos = node.pos();
                 }
-                renderState.addSections(sections);
             }
 
             if (!renderState.isEmpty())
             {
                 wires.add(renderState);
-            }
-        }
-
-        partGrid.forEach(node ->
-        {
-            if (!owner.isNodeFloating(node))
-            {
-                if (node instanceof LampPrototypeNode lamp)
-                {
-                    LampPrototypeNode chainedLamp = lamp.getNodeChainedTo();
-                    boolean chained = chainedLamp != null && !owner.isNodeFloating(chainedLamp);
-                    lamps.add(new LampRenderState(lamp, chained));
-                }
-                else
-                {
-                    parts.add(new PartRenderState(node));
-                }
-            }
-        });
-
-        for (Connection connection : circuit.getConnections())
-        {
-            if (connection != null && !owner.isNodeFloating(connection))
-            {
-                parts.add(new PartRenderState(connection));
             }
         }
     }
