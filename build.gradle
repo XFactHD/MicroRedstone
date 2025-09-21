@@ -137,7 +137,8 @@ tasks.withType(ProcessResources).configureEach {
             minecraft_version_range: minecraft_version_range,
             neoforge_version: neoforge_version,
             neoforge_version_range: neoforge_version_range,
-            mod_version: mod_version
+            mod_version: mod_version,
+            exmachina_version: exmachina_version
     ]
     inputs.properties replaceProperties
 
