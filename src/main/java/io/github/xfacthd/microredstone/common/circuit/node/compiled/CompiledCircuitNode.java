@@ -1,7 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.node.compiled;
 
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
@@ -13,9 +12,9 @@ public abstract class CompiledCircuitNode extends RootCircuitNode
     private final Runnable releaser;
     private final int wireCount;
 
-    CompiledCircuitNode(CompoundCircuitNode originalNode, Runnable releaser, Connector[] inputs, Connector[] outputs)
+    CompiledCircuitNode(CompoundCircuitNode originalNode, Runnable releaser)
     {
-        super(inputs, outputs);
+        super(originalNode.getInputs(), originalNode.getOutputs());
         this.originalNode = originalNode;
         this.releaser = releaser;
         this.wireCount = originalNode.getWireCount();
