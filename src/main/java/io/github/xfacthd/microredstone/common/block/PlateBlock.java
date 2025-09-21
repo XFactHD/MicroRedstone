@@ -68,6 +68,12 @@ public abstract class PlateBlock extends Block implements EntityBlock
     }
 
     @Override
+    protected boolean isSignalSource(BlockState state)
+    {
+        return true;
+    }
+
+    @Override
     protected int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction dir)
     {
         return getSignal(state, level, pos, dir);

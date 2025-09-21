@@ -28,3 +28,10 @@ license="LGPL v3"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.microredstone]]
+modId="exmachina"
+type="optional"
+versionRange="${exmachina_version}"
+ordering="NONE"
+side="SERVER"

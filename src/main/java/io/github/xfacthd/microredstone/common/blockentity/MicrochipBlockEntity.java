@@ -8,15 +8,16 @@ import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.data.PropertyHolder;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.menu.MicrochipCircuitMenu;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
-import io.github.xfacthd.microredstone.common.redstone.BundledWireSupport;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneLevelAdapter;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneType;
+import io.github.xfacthd.microredstone.common.redstone.WireSupport;
 import io.github.xfacthd.microredstone.common.util.SerdesUtils;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
@@ -50,6 +51,7 @@ import net.neoforged.neoforge.model.data.ModelData;
 import net.neoforged.neoforge.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
@@ -61,6 +63,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     private static final Rotation[] ROTATIONS = Rotation.values();
 
     private final RedstoneType[] portTypes = Utils.fillArray(new RedstoneType[4], $ -> RedstoneType.NONE);
+    private final PortDir[] portDirs = Utils.fillArray(new PortDir[4], $ -> PortDir.INPUT);
     private final short[] portStates = new short[4];
     private final Set<WireStateListener> wireStateListeners = new ReferenceOpenHashSet<>();
     private Direction facing = Direction.DOWN;
@@ -108,20 +111,12 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     {
         if (level().isClientSide()) return;
 
-        boolean[] signalUpdates = new boolean[4];
         boolean hadCircuit = this.circuit != null;
         if (hadCircuit)
         {
-            Utils.fillArray(portTypes, $ -> RedstoneType.NONE);
-            for (Connector output : this.circuit.getOutputs())
-            {
-                int portIdx = output.port().ordinal();
-                if (portStates[portIdx] != 0)
-                {
-                    portStates[portIdx] = 0;
-                    signalUpdates[portIdx] = true;
-                }
-            }
+            Arrays.fill(portTypes, RedstoneType.NONE);
+            Arrays.fill(portDirs, PortDir.INPUT);
+            Arrays.fill(portStates, (short) 0);
         }
         this.circuit = circuit;
         this.circuitName = circuitName;
@@ -130,11 +125,15 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         {
             for (Connector input : circuit.getInputs())
             {
-                portTypes[input.port().ordinal()] = RedstoneType.of(input.type());
+                int idx = input.port().ordinal();
+                portTypes[idx] = RedstoneType.of(input.type());
+                portDirs[idx] = PortDir.INPUT;
             }
             for (Connector output : circuit.getOutputs())
             {
-                portTypes[output.port().ordinal()] = RedstoneType.of(output.type());
+                int idx = output.port().ordinal();
+                portTypes[idx] = RedstoneType.of(output.type());
+                portDirs[idx] = PortDir.OUTPUT;
             }
             scheduleCircuitCompilation(circuit);
         }
@@ -152,11 +151,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         setChangedWithoutSignalUpdate();
         for (Port port : PORTS)
         {
-            int portIdx = port.ordinal();
-            if (signalUpdates[portIdx])
-            {
-                triggerSignalUpdate(portIdx);
-            }
+            triggerSignalUpdate(port.ordinal());
         }
     }
 
@@ -229,6 +224,8 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     public int getRedstoneOutput(Direction side)
     {
         Rotation sideRot = getSideRotation(facing, side);
+        if (portDirs[sideRot.ordinal()] == PortDir.INPUT) return 0;
+
         return switch (portTypes[sideRot.ordinal()])
         {
             case NONE -> 0;
@@ -241,8 +238,39 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     public void handleNeighborUpdate(BlockPos adjPos, Direction side)
     {
         Rotation sideRot = getSideRotation(facing, side);
+        if (portDirs[sideRot.ordinal()] == PortDir.OUTPUT) return;
+
         RedstoneType portType = portTypes[sideRot.ordinal()];
-        portStates[sideRot.ordinal()] = readExternalInput(adjPos, side, portType);
+        if (portType != RedstoneType.NONE)
+        {
+            short result = WireSupport.getInput(level(), worldPosition, adjPos, side, portType);
+            if (result != -1)
+            {
+                portStates[sideRot.ordinal()] = result;
+            }
+        }
+    }
+
+    /**
+     * Receive updated input value on the given side. Handles bundle signals per-bit
+     */
+    public void receiveExternalInput(Direction side, int value, int bundleBit)
+    {
+        Rotation sideRot = getSideRotation(facing, side);
+        if (portDirs[sideRot.ordinal()] == PortDir.OUTPUT) return;
+
+        RedstoneType portType = portTypes[sideRot.ordinal()];
+        portStates[sideRot.ordinal()] = switch (portType)
+        {
+            case NONE -> (short) 0;
+            case SINGLE -> (short) (value > 0 ? 1 : 0);
+            case BUNDLED ->
+            {
+                int portValue = portStates[sideRot.ordinal()] & ~(1 << bundleBit);
+                if (value > 0) portValue |= 1 << bundleBit;
+                yield (short) portValue;
+            }
+        };
     }
 
     private Rotation getSideRotation(Direction facing, Direction side)
@@ -251,26 +279,15 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         return sideRot.getRotated(Utils.invertRotation(rotation));
     }
 
-    private short readExternalInput(BlockPos adjPos, Direction side, RedstoneType portType)
-    {
-        return switch (portType)
-        {
-            case NONE -> 0;
-            case SINGLE -> (short) (level().hasSignal(adjPos, side) ? 1 : 0);
-            case BUNDLED -> BundledWireSupport.getBundledInput(level(), worldPosition, adjPos, side);
-        };
-    }
-
     private void triggerSignalUpdate(int port)
     {
-        Rotation sideRot = rotation.getRotated(ROTATIONS[port]);
-        Direction side = Utils.getSideFromFacingRotation(facing, sideRot);
-        BlockPos adjPos = worldPosition.relative(side);
-        switch (portTypes[port])
+        RedstoneType type = portTypes[port];
+        if (type != RedstoneType.NONE)
         {
-            case NONE -> { }
-            case SINGLE -> level().neighborChanged(adjPos, getBlockState().getBlock(), null);
-            case BUNDLED -> BundledWireSupport.updateNeighbor(level(), worldPosition, adjPos, side);
+            Rotation sideRot = rotation.getRotated(ROTATIONS[port]);
+            Direction side = Utils.getSideFromFacingRotation(facing, sideRot);
+            BlockPos adjPos = worldPosition.relative(side);
+            WireSupport.updateNeighbor(level(), worldPosition, getBlockState(), adjPos, side, type);
         }
     }
 
@@ -401,6 +418,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     {
         super.loadAdditional(input);
         SerdesUtils.readTypedArray(input, "port_types", RedstoneType.CODEC, portTypes);
+        SerdesUtils.readTypedArray(input, "port_dirs", PortDir.CODEC, portDirs);
         SerdesUtils.readShortArray(input, "port_states", portStates);
         circuit = input.read("circuit", Circuit.CODEC).orElse(null);
         circuitName = input.getStringOr("circuit_name", "");
@@ -411,6 +429,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     {
         super.saveAdditional(output);
         SerdesUtils.writeTypedArray(output, "port_types", RedstoneType.CODEC, portTypes);
+        SerdesUtils.writeTypedArray(output, "port_dirs", PortDir.CODEC, portDirs);
         SerdesUtils.writeShortArray(output, "port_states", portStates);
         output.storeNullable("circuit", Circuit.CODEC, circuit);
         output.putString("circuit_name", circuitName);

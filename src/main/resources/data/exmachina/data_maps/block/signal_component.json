@@ -1,0 +1,13 @@
+{
+    "values": {
+        "microredstone:microchip": {
+            "neoforge:conditions": [
+                {
+                    "type": "neoforge:mod_loaded",
+                    "modid": "exmachina"
+                }
+            ],
+            "type": "microredstone:microchip"
+        }
+    }
+}
