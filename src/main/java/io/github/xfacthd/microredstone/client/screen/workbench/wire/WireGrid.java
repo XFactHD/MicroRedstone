@@ -8,7 +8,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;

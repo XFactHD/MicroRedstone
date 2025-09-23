@@ -7,7 +7,7 @@ import io.github.xfacthd.microredstone.client.texture.StackingSource;
 import io.github.xfacthd.microredstone.client.util.PortOverlays;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.client.resources.model.AtlasIds;

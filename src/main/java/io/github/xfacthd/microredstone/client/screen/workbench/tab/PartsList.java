@@ -14,7 +14,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.Fi
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.data.library.CircuitLibraryEntry;
 import io.github.xfacthd.microredstone.common.data.library.ClientCircuitLibrary;

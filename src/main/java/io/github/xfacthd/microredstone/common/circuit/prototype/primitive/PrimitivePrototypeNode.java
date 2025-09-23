@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.common.circuit.prototype;
+package io.github.xfacthd.microredstone.common.circuit.prototype.primitive;
 
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
@@ -12,6 +12,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.primitive.ThreeInputL
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.TwoInputLogicCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;

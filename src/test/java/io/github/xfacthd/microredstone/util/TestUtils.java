@@ -5,7 +5,7 @@ import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;

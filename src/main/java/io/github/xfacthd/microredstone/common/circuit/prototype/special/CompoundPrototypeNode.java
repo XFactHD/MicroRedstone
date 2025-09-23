@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.common.circuit.prototype;
+package io.github.xfacthd.microredstone.common.circuit.prototype.special;
 
 import com.google.common.collect.Sets;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
@@ -14,6 +14,8 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;

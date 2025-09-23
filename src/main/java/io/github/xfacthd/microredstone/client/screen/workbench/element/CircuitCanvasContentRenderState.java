@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.PartBlitter;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;

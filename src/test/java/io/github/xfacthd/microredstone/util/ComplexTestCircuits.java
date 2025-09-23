@@ -5,9 +5,9 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.ConverterPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.PrimitivePrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.PrimitivePrototypeNode;
 
 public final class ComplexTestCircuits
 {

@@ -10,7 +10,7 @@ import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
-import io.github.xfacthd.microredstone.common.circuit.prototype.BufferPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;

@@ -4,7 +4,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuBui
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuUtils;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.SubMenuKey;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
-import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;

@@ -18,7 +18,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.PrimitiveCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.ReferencePrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntIterators;

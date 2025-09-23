@@ -1,7 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.element;
 
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.DyeColor;
 

@@ -1,69 +1,59 @@
-package io.github.xfacthd.microredstone.common.circuit.prototype;
+package io.github.xfacthd.microredstone.common.circuit.prototype.special;
 
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
-import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
+import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.primitive.ConstantCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.util.ProblemReporter;
 
-public final class ConstantPrototypeNode extends PrototypeNode
+public final class BufferPrototypeNode extends PrototypeNode
 {
     private static final PortConfig PORTS_SINGLE = PortConfig.builder()
+            .addPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
             .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
             .build();
     private static final PortConfig PORTS_BUNDLED = PortConfig.builder()
+            .addPort(Port.LEFT, WireType.BUNDLED, PortDir.INPUT)
             .addPort(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT)
             .build();
-    public static final IconConfig ICON_SINGLE = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_single"), false);
-    public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_bundled"), false);
+    public static final IconConfig ICON_SINGLE = new IconConfig(Utils.rl("part/buffer"), Utils.rl("port/hor_single"));
+    public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.rl("part/buffer"), Utils.rl("port/hor_bundled"));
 
     private final WireType wireType;
-    private short value = 0;
 
-    public ConstantPrototypeNode(WireType wireType)
+    public BufferPrototypeNode(WireType wireType)
     {
         super(wireType.select(PORTS_SINGLE, PORTS_BUNDLED), wireType.select(ICON_SINGLE, ICON_BUNDLED));
         this.wireType = wireType;
     }
 
-    public WireType getWireType()
-    {
-        return wireType;
-    }
-
-    public short getValue()
-    {
-        return value;
-    }
-
-    public void setValue(short value)
-    {
-        this.value = value;
-    }
-
     @Override
     public void validate(ProblemReporter reporter)
     {
+        if (!isConnectedNormalized(Port.LEFT)) reporter.report(UnspecifiedConnectionProblem.input(Port.LEFT));
         if (!isConnectedNormalized(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
     }
 
     @Override
-    public CircuitNode assemble(WireMapper wireMapper)
+    public BufferCircuitNode assemble(WireMapper wireMapper)
     {
+        int inputWire = wireMapper.resolveWire(getWireOrThrow(Port.LEFT));
         int outputWire = wireMapper.resolveWire(getWireOrThrow(Port.RIGHT));
-        Connector output = new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, wireType);
-        return new ConstantCircuitNode(value, output);
+        return new BufferCircuitNode(
+                new Connector(getPos(), Port.LEFT, inputWire, PortDir.INPUT, wireType),
+                new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, wireType)
+        );
     }
 
-    public static IconConfig icon(ConstantCircuitNode node)
+    public static IconConfig icon(BufferCircuitNode node)
     {
-        return node.getOutputs()[0].type().select(ICON_SINGLE, ICON_BUNDLED);
+        return node.getInputs()[0].type().select(ICON_SINGLE, ICON_BUNDLED);
     }
 }

@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.common.circuit.prototype;
+package io.github.xfacthd.microredstone.common.circuit.prototype.special;
 
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
@@ -11,6 +11,8 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.node.special.LampCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.CircuitCanvasAccess;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;

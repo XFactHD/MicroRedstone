@@ -5,7 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.dialog.QueryWidget;
 import io.github.xfacthd.microredstone.client.screen.widgets.NumberEditBox;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuBuilder;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
-import io.github.xfacthd.microredstone.common.circuit.prototype.ConstantPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConstantPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMaps;

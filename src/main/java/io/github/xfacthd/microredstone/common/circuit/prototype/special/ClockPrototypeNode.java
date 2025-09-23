@@ -1,4 +1,4 @@
-package io.github.xfacthd.microredstone.common.circuit.prototype;
+package io.github.xfacthd.microredstone.common.circuit.prototype.special;
 
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
@@ -7,6 +7,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;

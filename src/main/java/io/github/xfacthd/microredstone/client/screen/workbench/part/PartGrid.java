@@ -4,7 +4,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCa
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.CompoundPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import org.jetbrains.annotations.Nullable;
