@@ -281,7 +281,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
     @Override
     public boolean isMouseOver(double mouseX, double mouseY)
     {
-        return super.isMouseOver(mouseX, mouseY) && !owner.getLibraryBrowser().isCoveredByInventory(mouseX, mouseY);
+        return super.isMouseOver(mouseX, mouseY) && !owner.getToolPane().getLibraryBrowser().isCoveredByInventory(mouseX, mouseY);
     }
 
     public CompoundPrototypeNode getRootNode()

@@ -9,6 +9,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.FloatingNode;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.ImportEntryContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.NodeListWidget;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ToolPane;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.FilterToggleButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
@@ -64,9 +65,9 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     private Mode mode = Mode.GATES;
     private boolean wasModeLibrary = true;
 
-    public PartsList(CircuitWorkbenchScreen owner)
+    public PartsList(CircuitWorkbenchScreen owner, ToolPane toolPane)
     {
-        super(owner);
+        super(owner, toolPane);
         this.modeBtnGates = new ModeButton<>(this, Mode.GATES, 0, 0);
         this.modeBtnLibrary = new ModeButton<>(this, Mode.LIBRARY, 0, 0);
         this.partListWidget = new NodeListWidget(owner, () -> LogicGateList.ENTRY_COUNT, idx -> LogicGateList.ENTRIES[idx]);
@@ -174,7 +175,7 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     }
 
     @Override
-    public void init(Consumer<AbstractWidget> widgetAdder)
+    public void initContent(Consumer<AbstractWidget> widgetAdder)
     {
         widgetAdder.accept(modeBtnGates);
         widgetAdder.accept(modeBtnLibrary);

@@ -1,9 +1,9 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets.button;
 
 import io.github.xfacthd.microredstone.client.screen.widgets.button.SimpleButton;
-import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ToolPane;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,11 +18,11 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
     private static final WidgetSprites SPRITES_CENTER = sprites(Utils.rl("tab/tab_selected_center"));
     private static final WidgetSprites SPRITES_RIGHT = sprites(Utils.rl("tab/tab_selected_right"));
 
-    private final CircuitWorkbenchScreen owner;
+    private final ToolPane owner;
     private final ToolPaneTab tab;
     private final WidgetSprites selectedSprites;
 
-    public ToolPaneTabButton(CircuitWorkbenchScreen owner, ToolPaneTab tab, int x, int y)
+    public ToolPaneTabButton(ToolPane owner, ToolPaneTab tab, int x, int y)
     {
         super(x, y, WIDTH, HEIGHT, tab.getTitle());
         this.owner = owner;
@@ -44,7 +44,7 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
     @Override
     protected WidgetSprites getSprites()
     {
-        return owner.getToolPaneTab() == tab ? selectedSprites : SPRITES_UNSELECTED;
+        return owner.getActiveTab() == tab ? selectedSprites : SPRITES_UNSELECTED;
     }
 
     @Override
@@ -56,6 +56,6 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
     @Override
     public void onPress()
     {
-        owner.setToolPaneTab(tab);
+        owner.setActiveTab(tab);
     }
 }

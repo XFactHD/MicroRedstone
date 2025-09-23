@@ -187,7 +187,7 @@ public final class ImportExportHandler
             rootNode.setConnection(connector.port(), connection);
         }
 
-        owner.getLibraryBrowser().setExportName(name);
+        owner.getToolPane().getLibraryBrowser().setExportName(name);
 
         if (probablyBroken.isTrue())
         {

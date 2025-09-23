@@ -41,13 +41,13 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
 
         canvas.computeWindowPos(leftPos, topPos);
         canvas.drag(0, 0); // Clamp canvas offset
+        addRenderableOnly(canvas);
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
     {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
-        canvas.render(graphics, mouseX, mouseY);
     }
 
     @Override

@@ -116,7 +116,7 @@ public final class ClientCircuitLibrary
         {
             if (Minecraft.getInstance().screen instanceof CircuitWorkbenchScreen workbench)
             {
-                workbench.getPartsList().updateImportList();
+                workbench.getToolPane().getPartsList().updateImportList();
             }
         });
     }

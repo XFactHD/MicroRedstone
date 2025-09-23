@@ -10,6 +10,7 @@ import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractCircuitCanvas
+public abstract class AbstractCircuitCanvas implements Renderable
 {
     private static final ResourceLocation BLUEPRINT = Utils.rl("blueprint");
     public static final int PART_COUNT_X = 48;
@@ -39,7 +40,8 @@ public abstract class AbstractCircuitCanvas
     protected float canvasOffY;
     protected float canvasScale = 1F; // TODO: implement zoom support
 
-    public final void render(GuiGraphics graphics, int mouseX, int mouseY)
+    @Override
+    public final void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         graphics.enableScissor(x, y, x + width, y + height);
         {

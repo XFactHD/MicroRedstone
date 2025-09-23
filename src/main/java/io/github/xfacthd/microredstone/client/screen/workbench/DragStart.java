@@ -113,7 +113,7 @@ public sealed interface DragStart
         @Nullable
         public PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen)
         {
-            return workbenchScreen.getPartsList().instantiateLibraryNode(entryIdx);
+            return workbenchScreen.getToolPane().getPartsList().instantiateLibraryNode(entryIdx);
         }
     }
 }

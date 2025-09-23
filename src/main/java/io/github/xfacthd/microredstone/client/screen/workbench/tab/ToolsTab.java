@@ -6,6 +6,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchS
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.menu.WireToolActionContextMenuProvider;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ToolPane;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireInProgress;
 import io.github.xfacthd.microredstone.client.util.Icon;
@@ -32,9 +33,9 @@ public final class ToolsTab extends ToolPaneTabWidget
 
     private final List<ToolActionButton> actionButtons;
 
-    public ToolsTab(CircuitWorkbenchScreen owner)
+    public ToolsTab(CircuitWorkbenchScreen owner, ToolPane toolPane)
     {
-        super(owner);
+        super(owner, toolPane);
         this.actionButtons = makeActionButtons(this, ToolAction.ACTIONS, ToolActionButton::new);
     }
 
@@ -45,7 +46,7 @@ public final class ToolsTab extends ToolPaneTabWidget
     }
 
     @Override
-    public void init(Consumer<AbstractWidget> widgetAdder)
+    public void initContent(Consumer<AbstractWidget> widgetAdder)
     {
         actionButtons.forEach(widgetAdder);
     }

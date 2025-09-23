@@ -4,22 +4,25 @@ import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ToolPane;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolPaneTabButton;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, LibraryBrowser
+public abstract sealed class ToolPaneTabWidget implements GuiEventListener permits PartsList, ToolsTab, LibraryBrowser
 {
     public static final int TOOL_PANE_WIDTH = 144;
     private static final int MAX_HEIGHT = CircuitCanvas.HEIGHT;
@@ -27,15 +30,17 @@ public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, Libr
     private static final ResourceLocation BACKGROUND = Utils.rl("minecraft", "toast/tutorial");
 
     protected final CircuitWorkbenchScreen owner;
+    protected final ToolPane toolPane;
     private final ToolPaneTabButton tabButton;
     protected int paneX;
     protected int paneY;
     protected int height;
 
-    protected ToolPaneTabWidget(CircuitWorkbenchScreen owner)
+    protected ToolPaneTabWidget(CircuitWorkbenchScreen owner, ToolPane toolPane)
     {
         this.owner = owner;
-        this.tabButton = new ToolPaneTabButton(owner, getType(), 0, 0);
+        this.toolPane = toolPane;
+        this.tabButton = new ToolPaneTabButton(toolPane, getType(), 0, 0);
     }
 
     public final void render(GuiGraphics graphics, int mouseX, int mouseY)
@@ -51,7 +56,7 @@ public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, Libr
         widgetAdder.accept(tabButton);
     }
 
-    public abstract void init(Consumer<AbstractWidget> widgetAdder);
+    public abstract void initContent(Consumer<AbstractWidget> widgetAdder);
 
     public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight)
     {
@@ -83,4 +88,51 @@ public abstract sealed class ToolPaneTabWidget permits PartsList, ToolsTab, Libr
                 .map(action -> buttonFactory.apply(tab, action))
                 .toList();
     }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        ScrollableWidget scrollable = getScrollableWidget();
+        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(mouseX, mouseY)))
+        {
+            scrollable.dragScrollBar(mouseY);
+            scrollable.setDragging(true);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    {
+        ScrollableWidget scrollable = getScrollableWidget();
+        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(mouseX, mouseY)))
+        {
+            scrollable.dragScrollBar(mouseY);
+            scrollable.setDragging(true);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    {
+        ScrollableWidget scrollable = getScrollableWidget();
+        if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY))
+        {
+            scrollable.scroll(-scrollY);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public final boolean isFocused()
+    {
+        return false;
+    }
+
+    @Override
+    public final void setFocused(boolean focused) { }
 }

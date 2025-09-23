@@ -5,6 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchS
 import io.github.xfacthd.microredstone.client.screen.workbench.ExportTarget;
 import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
 import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
+import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ToolPane;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.LibraryActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ModeButton;
 import io.github.xfacthd.microredstone.client.util.ScreenUtils;
@@ -68,9 +69,9 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     private boolean wasImport = true;
     private boolean wasExport = true;
 
-    public LibraryBrowser(CircuitWorkbenchScreen owner)
+    public LibraryBrowser(CircuitWorkbenchScreen owner, ToolPane toolPane)
     {
-        super(owner);
+        super(owner, toolPane);
         this.modeBtnImport = new ModeButton<>(this, Mode.IMPORT, 0, 0);
         this.modeBtnExport = new ModeButton<>(this, Mode.EXPORT, 0, 0);
         this.importActionButtons = makeActionButtons(this, ImportAction.ACTIONS, LibraryActionButton::new);
@@ -115,16 +116,25 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
 
     public boolean isCoveredByInventory(double mouseX, double mouseY)
     {
-        return owner.getToolPaneTab() == getType() && mouseX >= invX && mouseY >= invY;
-    }
-
-    public boolean isEditBoxFocused()
-    {
-        return mode == Mode.EXPORT && exportNameEditBox.isFocused();
+        return toolPane.getActiveTab() == getType() && mouseX >= invX && mouseY >= invY;
     }
 
     @Override
-    public void init(Consumer<AbstractWidget> widgetAdder)
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        if (mode == Mode.EXPORT && exportNameEditBox.isFocused())
+        {
+            if (ScreenUtils.isInventoryKey(keyCode, scanCode))
+            {
+                return true;
+            }
+            return exportNameEditBox.keyPressed(keyCode, scanCode, modifiers);
+        }
+        return false;
+    }
+
+    @Override
+    public void initContent(Consumer<AbstractWidget> widgetAdder)
     {
         widgetAdder.accept(modeBtnImport);
         widgetAdder.accept(modeBtnExport);
