@@ -143,8 +143,8 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE)
         {
-            type.escCallbackSelector.apply(okCallback, cancelCallback).run();
             onClose();
+            type.escCallbackSelector.apply(okCallback, cancelCallback).run();
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -213,8 +213,8 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
             return screen.addRenderableWidget(
                     Button.builder(text, btn ->
                             {
-                                callback.run();
                                 screen.onClose();
+                                callback.run();
                             })
                             .bounds(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
                             .build()
