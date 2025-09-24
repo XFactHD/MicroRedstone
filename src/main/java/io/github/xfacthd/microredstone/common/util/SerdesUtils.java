@@ -5,6 +5,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
@@ -55,6 +57,16 @@ public final class SerdesUtils
     public static <T> Codec<T[]> arrayCodec(Codec<T> codec, IntFunction<T[]> arrayFactory)
     {
         return codec.listOf().xmap(list -> list.toArray(arrayFactory), List::of);
+    }
+
+    public static <T> Codec<Set<T>> setCodec(Codec<T> codec)
+    {
+        return setCodec(codec, Set::copyOf);
+    }
+
+    public static <T> Codec<Set<T>> setCodec(Codec<T> codec, Function<List<T>, Set<T>> setFactory)
+    {
+        return codec.listOf().xmap(setFactory, List::copyOf);
     }
 
     private SerdesUtils() { }

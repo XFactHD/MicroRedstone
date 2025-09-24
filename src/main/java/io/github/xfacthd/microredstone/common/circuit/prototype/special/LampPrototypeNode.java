@@ -1,20 +1,27 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype.special;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
+import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
+import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.node.special.LampCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.CircuitCanvasAccess;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ProtoNodeType;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
+import io.github.xfacthd.microredstone.common.util.SerdesUtils;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.util.ProblemReporter;
@@ -23,7 +30,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class LampPrototypeNode extends PrototypeNode
 {
@@ -39,10 +49,19 @@ public final class LampPrototypeNode extends PrototypeNode
     @Nullable
     private LampPrototypeNode chainedTo = null;
     private DyeColor color = DyeColor.RED;
+    @Nullable
+    private LampChain chainToResolve = null;
 
     public LampPrototypeNode()
     {
         super(PORT_CONFIG, ICON);
+    }
+
+    private LampPrototypeNode(LampChain chain, DyeColor color)
+    {
+        this();
+        this.chainToResolve = chain;
+        this.color = color;
     }
 
     public DyeColor getColor()
@@ -190,5 +209,93 @@ public final class LampPrototypeNode extends PrototypeNode
     public void performPreRemoveAction(CircuitCanvasAccess canvas)
     {
         unchainOnDelete();
+    }
+
+    @Override
+    public Serializable serialize(List<Wire> wires)
+    {
+        Set<NodePos> chainedToThis = this.chainedToThis.stream()
+                .map(LampPrototypeNode::getPos)
+                .collect(Collectors.toSet());
+        Optional<NodePos> chainedTo = Optional.ofNullable(this.chainedTo).map(LampPrototypeNode::getPos);
+        return new Serializable(this, wires, new LampChain(chainedToThis, chainedTo), color);
+    }
+
+    @Override
+    public void finishDeserialization(List<PrototypeNode> nodes)
+    {
+        if (chainToResolve != null && !chainToResolve.isEmpty())
+        {
+            chainToResolve.chainedToThis.stream()
+                    .map(pos -> findNode(nodes, pos))
+                    .filter(LampPrototypeNode.class::isInstance)
+                    .map(LampPrototypeNode.class::cast)
+                    .forEach(chainedToThis::add);
+            chainedTo = chainToResolve.chainedTo
+                    .map(pos -> findNode(nodes, pos))
+                    .filter(LampPrototypeNode.class::isInstance)
+                    .map(LampPrototypeNode.class::cast)
+                    .orElse(null);
+        }
+        chainToResolve = null;
+    }
+
+    @Nullable
+    private static PrototypeNode findNode(List<PrototypeNode> nodes, NodePos pos)
+    {
+        return nodes.stream()
+                .filter(node -> node.getPos().equals(pos))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static final class Serializable extends PrototypeNode.Serializable
+    {
+        public static final MapCodec<Serializable> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                LampChain.CODEC.fieldOf("chain").forGetter(node -> node.chain),
+                DyeColor.CODEC.fieldOf("color").forGetter(node -> node.color)
+        ).and(commonFields(inst)).apply(inst, Serializable::new));
+
+        private final LampChain chain;
+        private final DyeColor color;
+
+        private Serializable(PrototypeNode node, List<Wire> wires, LampChain chain, DyeColor color)
+        {
+            super(node, wires);
+            this.chain = chain;
+            this.color = color;
+        }
+
+        private Serializable(LampChain chain, DyeColor color, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
+        {
+            super(connectedWires, pos, rotation);
+            this.chain = chain;
+            this.color = color;
+        }
+
+        @Override
+        protected PrototypeNode buildInternal()
+        {
+            return new LampPrototypeNode(chain, color);
+        }
+
+        @Override
+        public ProtoNodeType<? extends PrototypeNode.Serializable> type()
+        {
+            return MRContent.PROTO_TYPE_LAMP.value();
+        }
+    }
+
+    private record LampChain(Set<NodePos> chainedToThis, Optional<NodePos> chainedTo)
+    {
+        public static final Codec<LampChain> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                SerdesUtils.setCodec(NodePos.CODEC).fieldOf("chained_to_this").forGetter(LampChain::chainedToThis),
+                NodePos.CODEC.optionalFieldOf("chained_to").forGetter(LampChain::chainedTo)
+        ).apply(inst, LampChain::new));
+
+        private boolean isEmpty()
+        {
+            return chainedToThis.isEmpty() && chainedTo.isEmpty();
+        }
     }
 }

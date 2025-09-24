@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.data;
 
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ProtoNodeType;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -15,6 +16,10 @@ public final class MRRegistries
             ResourceKey.createRegistryKey(Utils.rl("circuit_node_types")),
             builder -> builder.sync(true)
     );
+    public static final Registry<ProtoNodeType<?>> PROTO_NODE_TYPES = create(
+            ResourceKey.createRegistryKey(Utils.rl("proto_node_types")),
+            builder -> {}
+    );
 
     private static <T> Registry<T> create(ResourceKey<Registry<T>> key, Consumer<RegistryBuilder<T>> consumer)
     {
@@ -26,6 +31,7 @@ public final class MRRegistries
     public static void onRegisterNewRegistries(final NewRegistryEvent event)
     {
         event.register(CIRCUIT_NODE_TYPES);
+        event.register(PROTO_NODE_TYPES);
     }
 
     private MRRegistries() { }

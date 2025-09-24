@@ -1,5 +1,8 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype;
 
+import com.mojang.datafixers.Products;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -10,10 +13,12 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
+import io.github.xfacthd.microredstone.common.data.MRRegistries;
 import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -24,7 +29,7 @@ public abstract class PrototypeNode implements PlaceableNode
     protected final PortConfig portConfig;
     @Nullable
     private final IconConfig icon;
-    private final Map<Port, Wire> connectedWires = new EnumMap<>(Port.class);
+    final Map<Port, Wire> connectedWires = new EnumMap<>(Port.class);
     private NodePos pos = new NodePos(0, 0);
     private int rotation = 0;
 
@@ -136,4 +141,71 @@ public abstract class PrototypeNode implements PlaceableNode
     public void performPostPlaceAction(CircuitCanvasAccess canvas, int mouseX, int mouseY, @Nullable PartSetMode mode, boolean revertToLast) {}
 
     public void performPreRemoveAction(CircuitCanvasAccess canvas) {}
+
+    public abstract Serializable serialize(List<Wire> wires);
+
+    public void finishDeserialization(List<PrototypeNode> nodes) {}
+
+    public abstract static class Serializable
+    {
+        public static final Codec<Serializable> CODEC = MRRegistries.PROTO_NODE_TYPES.byNameCodec()
+                .dispatch(PrototypeNode.Serializable::type, ProtoNodeType::codec);
+
+        final Map<Port, Integer> connectedWires;
+        final NodePos pos;
+        final int rotation;
+
+        protected Serializable(PrototypeNode node, List<Wire> wires)
+        {
+            this.connectedWires = new EnumMap<>(Port.class);
+            node.connectedWires.forEach((port, wire) ->
+            {
+                int wireIdx = wires.indexOf(wire);
+                if (wireIdx >= 0)
+                {
+                    connectedWires.put(port, wireIdx);
+                }
+            });
+            this.pos = node.getPos();
+            this.rotation = node.getRotation();
+        }
+
+        protected Serializable(Map<Port, Integer> connectedWires, NodePos pos, int rotation)
+        {
+            this.connectedWires = connectedWires;
+            this.pos = pos;
+            this.rotation = rotation;
+        }
+
+        public final PrototypeNode build(List<Wire> wires)
+        {
+            PrototypeNode node = buildInternal();
+            connectedWires.forEach((port, wireIdx) ->
+            {
+                Wire wire = wires.get(wireIdx);
+                if (wire != null)
+                {
+                    node.setConnection(port, wire, true);
+                }
+            });
+            node.setPos(pos);
+            node.setRotation(rotation);
+            return node;
+        }
+
+        protected abstract PrototypeNode buildInternal();
+
+        public abstract ProtoNodeType<? extends Serializable> type();
+
+        protected static <T extends Serializable> Products.P3<RecordCodecBuilder.Mu<T>, Map<Port, Integer>, NodePos, Integer> commonFields(
+                RecordCodecBuilder.Instance<T> inst
+        )
+        {
+            return inst.group(
+                    Codec.unboundedMap(Port.CODEC, Codec.INT).fieldOf("connected_wires").forGetter(node -> node.connectedWires),
+                    NodePos.CODEC.fieldOf("pos").forGetter(node -> node.pos),
+                    Codec.intRange(0, 3).fieldOf("rotation").forGetter(node -> node.rotation)
+            );
+        }
+    }
 }

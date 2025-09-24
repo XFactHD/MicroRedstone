@@ -96,7 +96,6 @@ public final class CircuitAssembler
             {
                 case ClockPrototypeNode ignored -> throw new IllegalStateException();
                 case BufferPrototypeNode ignored -> throw new IllegalStateException();
-                case CompoundPrototypeNode ignored -> throw new IllegalStateException();
                 case ReferencePrototypeNode reference ->
                 {
                     CompoundCircuitNode assembled = reference.assemble(wireMapper);

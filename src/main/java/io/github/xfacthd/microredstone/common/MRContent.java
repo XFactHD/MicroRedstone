@@ -17,6 +17,15 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuit
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.LampCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.ProtoNodeType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConstantPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.PrimitivePrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.ClockPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
 import io.github.xfacthd.microredstone.common.data.MRRegistries;
 import io.github.xfacthd.microredstone.common.data.component.StoredCircuit;
 import io.github.xfacthd.microredstone.common.item.CircuitItem;
@@ -59,6 +68,7 @@ public final class MRContent
     private static final DeferredBlockEntityRegister BLOCK_ENTITIES = DeferredBlockEntityRegister.create(MicroRedstone.MOD_ID);
     private static final DeferredMenuTypeRegister MENU_TYPES = DeferredMenuTypeRegister.create(MicroRedstone.MOD_ID);
     private static final DeferredRegister<CircuitNodeType<?>> CIRCUIT_NODES = DeferredRegister.create(MRRegistries.CIRCUIT_NODE_TYPES, MicroRedstone.MOD_ID);
+    private static final DeferredRegister<ProtoNodeType<?>> PROTO_NODES = DeferredRegister.create(MRRegistries.PROTO_NODE_TYPES, MicroRedstone.MOD_ID);
     // endregion
 
     // region Blocks
@@ -130,6 +140,30 @@ public final class MRContent
     );
     // endregion
 
+    // region ProtoNodeTypes
+    public static final Holder<ProtoNodeType<?>> PROTO_TYPE_CONSTANT = registerProtoNodeType(
+            "constant", ConstantPrototypeNode.Serializable.CODEC
+    );
+    public static final Holder<ProtoNodeType<?>> PROTO_TYPE_CLOCK = registerProtoNodeType(
+            "clock", ClockPrototypeNode.Serializable.CODEC
+    );
+    public static final Holder<ProtoNodeType<?>> PROTO_TYPE_LAMP = registerProtoNodeType(
+            "lamp", LampPrototypeNode.Serializable.CODEC
+    );
+    public static final Holder<ProtoNodeType<?>> PROTO_TYPE_BUFFER = registerProtoNodeType(
+            "buffer", BufferPrototypeNode.Serializable.CODEC
+    );
+    public static final Holder<ProtoNodeType<?>> PROTO_TYPE_REFERENCE = registerProtoNodeType(
+            "reference", ReferencePrototypeNode.Serializable.CODEC
+    );
+    public static final Holder<ProtoNodeType<?>> PROTO_TYPE_PRIMITIVE = registerProtoNodeType(
+            "primitive", PrimitivePrototypeNode.Serializable.CODEC
+    );
+    public static final Holder<ProtoNodeType<?>> PROTO_TYPE_CONVERTER = registerProtoNodeType(
+            "converter", ConverterPrototypeNode.Serializable.CODEC
+    );
+    // endregion
+
     private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory)
     {
         return registerBlock(name, blockFactory, BlockItem::new);
@@ -158,6 +192,11 @@ public final class MRContent
         return CIRCUIT_NODES.register(name, () -> new CircuitNodeType<>(codec, streamCodec));
     }
 
+    private static <T extends PrototypeNode.Serializable> Holder<ProtoNodeType<?>> registerProtoNodeType(String name, MapCodec<T> codec)
+    {
+        return PROTO_NODES.register(name, () -> new ProtoNodeType<>(codec));
+    }
+
     public static void init(IEventBus modBus)
     {
         modBus.addListener(MRRegistries::onRegisterNewRegistries);
@@ -168,6 +207,7 @@ public final class MRContent
         BLOCK_ENTITIES.register(modBus);
         MENU_TYPES.register(modBus);
         CIRCUIT_NODES.register(modBus);
+        PROTO_NODES.register(modBus);
     }
 
     @FunctionalInterface

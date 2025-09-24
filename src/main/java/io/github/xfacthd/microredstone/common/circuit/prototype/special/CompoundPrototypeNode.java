@@ -1,7 +1,10 @@
 package io.github.xfacthd.microredstone.common.circuit.prototype.special;
 
 import com.google.common.collect.Sets;
-import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.pathelement.ChildNodePathElement;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.pathelement.ConnectionPathElement;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.BundledWireDrivingPackerProblem;
@@ -9,14 +12,12 @@ import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.U
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WireDriverCountProblem;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WirePortTypeMismatchProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
@@ -32,18 +33,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public final class CompoundPrototypeNode extends PrototypeNode
+public final class CompoundPrototypeNode
 {
-    private static final PortConfig PORT_CONFIG = PortConfig.builder().build();
-
     private final List<PrototypeNode> childNodes = new ArrayList<>();
     private final Set<Wire> wires = new HashSet<>();
     private final @Nullable Connection[] connections = new Connection[4];
-
-    public CompoundPrototypeNode()
-    {
-        super(PORT_CONFIG, null);
-    }
 
     public void addChild(PrototypeNode node)
     {
@@ -112,7 +106,6 @@ public final class CompoundPrototypeNode extends PrototypeNode
         }
     }
 
-    @Override
     public void validate(ProblemReporter reporter)
     {
         WireValidator wireValidator = new WireValidator();
@@ -165,12 +158,6 @@ public final class CompoundPrototypeNode extends PrototypeNode
         }
     }
 
-    @Override
-    public CircuitNode assemble(WireMapper wireMapper)
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public void clear()
     {
         childNodes.clear();
@@ -181,6 +168,41 @@ public final class CompoundPrototypeNode extends PrototypeNode
     public boolean isEmpty()
     {
         return childNodes.isEmpty() && wires.isEmpty() && Arrays.stream(connections).allMatch(Objects::isNull);
+    }
+
+    public <T> DataResult<T> serialize(DynamicOps<T> ops)
+    {
+        List<Wire> wires = List.copyOf(this.wires);
+        List<PrototypeNode.Serializable> childNodes = this.childNodes.stream().map(node -> node.serialize(wires)).toList();
+        List<Connection.Serializable> connections = Arrays.stream(this.connections)
+                .filter(Objects::nonNull)
+                .map(con -> con.serialize(Port.ofPartRotation(con.getRotation()), wires))
+                .toList();
+        return CompoundPrototypeNode.Serializable.CODEC.encodeStart(ops, new Serializable(childNodes, connections, wires));
+    }
+
+    public static <T> DataResult<CompoundPrototypeNode> deserialize(DynamicOps<T> ops, T input)
+    {
+        return CompoundPrototypeNode.Serializable.CODEC.parse(ops, input).map(CompoundPrototypeNode.Serializable::build);
+    }
+
+    private record Serializable(List<PrototypeNode.Serializable> childNodes, List<Connection.Serializable> connections, List<Wire> wires)
+    {
+        private static final Codec<Serializable> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                PrototypeNode.Serializable.CODEC.listOf().fieldOf("child_nodes").forGetter(CompoundPrototypeNode.Serializable::childNodes),
+                Connection.Serializable.CODEC.listOf().fieldOf("connections").forGetter(CompoundPrototypeNode.Serializable::connections),
+                Wire.CODEC.listOf().fieldOf("wires").forGetter(CompoundPrototypeNode.Serializable::wires)
+        ).apply(inst, CompoundPrototypeNode.Serializable::new));
+
+        private CompoundPrototypeNode build()
+        {
+            CompoundPrototypeNode cmpNode = new CompoundPrototypeNode();
+            cmpNode.wires.addAll(wires);
+            childNodes.stream().map(node -> node.build(wires)).forEach(cmpNode::addChild);
+            connections.forEach(con -> cmpNode.setConnection(con.port(), con.build(wires)));
+            cmpNode.childNodes.forEach(node -> node.finishDeserialization(cmpNode.childNodes));
+            return cmpNode;
+        }
     }
 
     private static final class WireValidator
