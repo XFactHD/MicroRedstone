@@ -1,6 +1,5 @@
 package io.github.xfacthd.microredstone.util;
 
-import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import org.junit.jupiter.api.extension.Extension;
 
@@ -30,7 +29,7 @@ public final class DebugExportConfigExtension implements Extension
             return;
         }
 
-        CircuitCompiler.EXPORT_PATH_OVERRIDE = Path.of("./", MicroRedstone.MOD_ID, "test");
+        CircuitCompiler.setExportPathOverride(Path.of("./"), "test");
         CircuitCompiler.clearDumpDirectory();
         CONFIGURED.set(true);
     }

@@ -54,9 +54,8 @@ public final class CircuitCompiler
     private static final AtomicLong CLASS_COUNTER = new AtomicLong();
     private static final boolean DUMP_TO_FILE = !FMLEnvironment.production;
     @Nullable
-    @VisibleForTesting
-    public static Path EXPORT_PATH_OVERRIDE = null;
-    private static final Lazy<Path> EXPORT_PATH = Lazy.of(() -> FMLPaths.GAMEDIR.get().resolve(MicroRedstone.MOD_ID).resolve("runtime"));
+    private static Path EXPORT_PATH_OVERRIDE = null;
+    private static final Lazy<Path> EXPORT_PATH = Lazy.of(() -> buildExportPath(FMLPaths.GAMEDIR.get(), "runtime"));
 
     private static final String SUPER_CLASS = CompiledCircuitNode.class.getName().replace(".", "/");
     private static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
@@ -335,6 +334,17 @@ public final class CircuitCompiler
         {
             LOGGER.error("Failed to clear export directory", e);
         }
+    }
+
+    @VisibleForTesting
+    public static void setExportPathOverride(Path rootDir, String dumpDirName)
+    {
+        EXPORT_PATH_OVERRIDE = buildExportPath(rootDir, dumpDirName);
+    }
+
+    private static Path buildExportPath(Path rootDir, String dumpDirName)
+    {
+        return rootDir.resolve(MicroRedstone.MOD_ID).resolve("dump").resolve(dumpDirName);
     }
 
     private CircuitCompiler() { }
