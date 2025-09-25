@@ -90,7 +90,7 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
     {
         ScrollableWidget scrollable = getScrollableWidget();
         if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(mouseX, mouseY)))
@@ -103,13 +103,12 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
         ScrollableWidget scrollable = getScrollableWidget();
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(mouseX, mouseY)))
+        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && scrollable.isDragging())
         {
-            scrollable.dragScrollBar(mouseY);
-            scrollable.setDragging(true);
+            scrollable.setDragging(false);
             return true;
         }
         return false;
