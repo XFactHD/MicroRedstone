@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.datagen.providers;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
+import io.github.xfacthd.microredstone.client.screen.filebrowser.FileBrowserScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
@@ -160,6 +161,20 @@ public final class MRLanguageProvider extends LanguageProvider
         add(DialogScreen.Type.CONFIRM.getDefaultTitle(), "Confirm");
         add(DialogScreen.Type.PROPERTIES.getDefaultTitle(), "Properties");
         add(DialogScreen.Type.QUERY.getDefaultTitle(), "Set Value");
+        add(FileBrowserScreen.Type.OPEN.getTitle(), "Open %s");
+        add(FileBrowserScreen.Type.SAVE.getTitle(), "Save %s");
+        add(FileBrowserScreen.Type.OPEN.getButtonTitle(), "Open");
+        add(FileBrowserScreen.Type.SAVE.getButtonTitle(), "Save");
+        add(FileBrowserScreen.MSG_DIR_EMPTY, "This directory is empty.");
+        add(FileBrowserScreen.MSG_DIR_NO_MATCHING_FILES, "This directory contains no matching files.");
+        add(FileBrowserScreen.LABEL_FILE_NAME, "File Name:");
+        add(FileBrowserScreen.LABEL_FILE_TYPE, "File Type:");
+        add(FileBrowserScreen.VALUE_FILE_TYPE_ALL, "[All Files]");
+        add(FileBrowserScreen.MSG_FILE_NOT_FOUND_LINE_ONE, "File could not be found.");
+        add(FileBrowserScreen.MSG_FILE_NOT_FOUND_LINE_TWO, "Check the file name and try again.");
+        add(FileBrowserScreen.TITLE_SAVE_CONFIRM_OVERWRITE, "Confirm Save %s");
+        add(FileBrowserScreen.MSG_SAVE_CONFIRM_OVERWRITE_LINE_ONE, "%s already exists.");
+        add(FileBrowserScreen.MSG_SAVE_CONFIRM_OVERWRITE_LINE_TWO, "Are you sure you want to overwrite it?");
         add(KeyHint.WRAPPER, "[%s]");
     }
 
