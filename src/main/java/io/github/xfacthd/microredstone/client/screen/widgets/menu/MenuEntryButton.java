@@ -1,11 +1,13 @@
 package io.github.xfacthd.microredstone.client.screen.widgets.menu;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -122,9 +124,13 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
         renderString(graphics, font, ARGB.color(alpha, active ? 0xFFFFFFFF : 0xFFA0A0A0));
         handleSubMenuState(mouseX, mouseY);
 
-        if (isHovered && ellipsized)
+        if (isHovered() && ellipsized)
         {
             graphics.setTooltipForNextFrame(getMessage(), mouseX, mouseY);
+        }
+        if (isHovered())
+        {
+            graphics.requestCursor(isActive() ? CursorTypes.POINTING_HAND : CursorTypes.NOT_ALLOWED);
         }
     }
 
@@ -182,7 +188,7 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
     }
 
     @Override
-    public void onPress()
+    public void onPress(InputWithModifiers input)
     {
         action.execute(this);
     }

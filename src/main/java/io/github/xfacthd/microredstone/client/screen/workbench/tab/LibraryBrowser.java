@@ -15,6 +15,7 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -120,15 +121,15 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
         if (mode == Mode.EXPORT && exportNameEditBox.isFocused())
         {
-            if (ScreenUtils.isInventoryKey(keyCode, scanCode))
+            if (ScreenUtils.isInventoryKey(event))
             {
                 return true;
             }
-            return exportNameEditBox.keyPressed(keyCode, scanCode, modifiers);
+            return exportNameEditBox.keyPressed(event);
         }
         return false;
     }

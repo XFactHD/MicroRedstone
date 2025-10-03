@@ -9,11 +9,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -187,9 +191,9 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
     {
-        if (super.mouseClicked(mouseX, mouseY, button))
+        if (super.mouseClicked(event, doubleClick))
         {
             if (getFocused() instanceof DropFocusAfterClick)
             {
@@ -201,15 +205,15 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
         if (getFocused() instanceof ContextMenu menu)
         {
-            return menu.keyPressed(keyCode, scanCode, modifiers);
+            return menu.keyPressed(event);
         }
 
-        ArrowKey.Direction arrow = ArrowKey.Direction.of(keyCode);
-        return arrow != null ? handleArrowKey(arrow) : super.keyPressed(keyCode, scanCode, modifiers);
+        ArrowKey.Direction arrow = ArrowKey.Direction.of(event.key());
+        return arrow != null ? handleArrowKey(arrow) : super.keyPressed(event);
     }
 
     private boolean handleArrowKey(ArrowKey.Direction arrow)
@@ -244,7 +248,7 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     {
         if (getFocused() instanceof MenuEntryButton button && button.opensSubMenuOn(this) && openSubMenu == null)
         {
-            button.onPress();
+            button.onPress(new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_1, 0));
             if (openSubMenu != null)
             {
                 MenuEntryButton first = openSubMenu.menu.entries.getFirst();

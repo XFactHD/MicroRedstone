@@ -9,6 +9,8 @@ import io.github.xfacthd.microredstone.client.util.Icon;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -62,16 +64,16 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY, int button)
+    public void onClick(MouseButtonEvent event, boolean doubleClick)
     {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1)
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1)
         {
-            onClick(mouseX, mouseY);
+            onPress(event);
         }
     }
 
     @Override
-    public void onPress()
+    public void onPress(InputWithModifiers input)
     {
         action.execute(owner);
     }

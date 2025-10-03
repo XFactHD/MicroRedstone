@@ -15,6 +15,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -64,21 +67,21 @@ public final class ToolPane implements GuiEventListener, Renderable
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
     {
-        return getActiveTabWidget().mouseClicked(mouseX, mouseY, button);
+        return getActiveTabWidget().mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(MouseButtonEvent event)
     {
-        return getActiveTabWidget().mouseReleased(mouseX, mouseY, button);
+        return getActiveTabWidget().mouseReleased(event);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
     {
-        return getActiveTabWidget().mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return getActiveTabWidget().mouseDragged(event, dragX, dragY);
     }
 
     @Override
@@ -88,21 +91,21 @@ public final class ToolPane implements GuiEventListener, Renderable
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
-        return getActiveTabWidget().keyPressed(keyCode, scanCode, modifiers);
+        return getActiveTabWidget().keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    public boolean keyReleased(KeyEvent event)
     {
-        return getActiveTabWidget().keyReleased(keyCode, scanCode, modifiers);
+        return getActiveTabWidget().keyReleased(event);
     }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers)
+    public boolean charTyped(CharacterEvent event)
     {
-        return getActiveTabWidget().charTyped(codePoint, modifiers);
+        return getActiveTabWidget().charTyped(event);
     }
 
     public boolean canDeletePart(FloatingNode floatingNode, @Nullable NodePos target, double mouseX, double mouseY)

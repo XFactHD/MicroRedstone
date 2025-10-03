@@ -30,7 +30,7 @@ public final class SyncCircuitLibraryTask implements ConfigurationTask
     public void start(Consumer<Packet<?>> sender)
     {
         ServerCircuitLibrary library = ServerCircuitLibrary.get(server);
-        List<CircuitLibraryEntry> entries = library.getEntriesForPlayer(listener.getOwner().getId());
+        List<CircuitLibraryEntry> entries = library.getEntriesForPlayer(listener.getOwner().id());
         if (!entries.isEmpty())
         {
             sender.accept(new ClientboundCircuitLibraryPayload(entries).toVanillaClientbound());

@@ -1,14 +1,15 @@
 package io.github.xfacthd.microredstone.client.screen.dialog;
 
+import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.Font;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.function.Supplier;
 
 record FormattedProperty(Component label, Value value)
@@ -49,9 +50,8 @@ record FormattedProperty(Component label, Value value)
 
     private static final class DelayedValue implements Value
     {
-        private static final FormattedCharSequence[] THROBBER = Arrays.stream(new String[] { "|", "/", "-", "\\" })
-                .map(string -> FormattedCharSequence.forward(string, Style.EMPTY))
-                .toArray(FormattedCharSequence[]::new);
+        // TODO: make throbber sprite
+        private static final Component THROBBER = Component.object(new AtlasSprite(AtlasIds.GUI, Utils.rl("dialog/throbber"))).withColor(0xFFFFFFFF);
 
         private final Supplier<@Nullable Component> source;
         private final Font font;
@@ -82,10 +82,7 @@ record FormattedProperty(Component label, Value value)
                 return resolved.text;
             }
 
-            // TODO - 1.21.9: try replace this with a throbber sprite
-            long time = System.currentTimeMillis() / 200;
-            int idx = (int) (time % THROBBER.length);
-            return THROBBER[idx];
+            return THROBBER.getVisualOrderText();
         }
 
         @Override

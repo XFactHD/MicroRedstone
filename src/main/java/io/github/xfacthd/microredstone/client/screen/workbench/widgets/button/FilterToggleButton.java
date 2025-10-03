@@ -5,10 +5,11 @@ import io.github.xfacthd.microredstone.client.screen.workbench.WorkbenchConfig;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
@@ -53,9 +54,9 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     }
 
     @Override
-    public void onPress()
+    public void onPress(InputWithModifiers input)
     {
-        owner.setFilter(filter, Screen.hasShiftDown());
+        owner.setFilter(filter, Minecraft.getInstance().hasShiftDown());
     }
 
     public void updateTooltip()

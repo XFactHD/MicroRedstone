@@ -14,12 +14,12 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.network.ConfigurationTask;
+import net.minecraft.server.players.ProfileResolver;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -193,13 +194,13 @@ public final class Utils
         return Component.literal(INSTANT_FORMATTER.format(dateTime));
     }
 
-    public static Supplier<Component> resolvePlayerName(UUID playerId, Executor mainThread)
+    public static Supplier<Component> resolvePlayerName(ProfileResolver resolver, UUID playerId, Executor mainThread)
     {
         MutableObject<Component> playerName = new MutableObject<>();
-        SkullBlockEntity.fetchGameProfile(playerId)
+        CompletableFuture.supplyAsync(() -> resolver.fetchById(playerId))
                 .thenAcceptAsync(profile ->
                 {
-                    String name = profile.map(GameProfile::getName).orElseGet(playerId::toString);
+                    String name = profile.map(GameProfile::name).orElseGet(playerId::toString);
                     playerName.setValue(Component.literal(name));
                 }, mainThread);
         return playerName::getValue;

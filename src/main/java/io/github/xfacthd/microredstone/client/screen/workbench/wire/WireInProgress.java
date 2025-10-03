@@ -9,7 +9,6 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +27,6 @@ public final class WireInProgress
     @Nullable
     private NodePos lastCursorPos = null;
     private List<WireNode> floatingNodes = List.of();
-    private long lastClick = -1;
 
     public WireInProgress(WireType wireType)
     {
@@ -79,11 +77,8 @@ public final class WireInProgress
         }
     }
 
-    public PlaceResult placeNextNode(CircuitCanvas canvas, double mouseX, double mouseY)
+    public PlaceResult placeNextNode(CircuitCanvas canvas, double mouseX, double mouseY, boolean doubleClick)
     {
-        boolean doubleClick = System.currentTimeMillis() - lastClick < GuiEventListener.DOUBLE_CLICK_THRESHOLD_MS;
-        lastClick = System.currentTimeMillis();
-
         if (wireNodes.isEmpty())
         {
             ExactNodePos exactPos = canvas.getExactNodePos(mouseX, mouseY);

@@ -12,8 +12,10 @@ import net.minecraft.client.renderer.texture.atlas.sources.LazyLoadedImage;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public record StackingSource(ResourceLocation primary, List<ResourceLocation> secondaries, ResourceLocation sprite) implements SpriteSource
 {
@@ -34,6 +37,12 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
 
     @Override
     public void run(ResourceManager resourceManager, Output output)
+    {
+        run(resourceManager, output, Set.of());
+    }
+
+    @Override
+    public void run(ResourceManager resourceManager, Output output, Set<MetadataSectionType<?>> additionalMetadata)
     {
         ResourceLocation primaryFile = TEXTURE_ID_CONVERTER.idToFile(primary);
         Optional<Resource> optPrimary = resourceManager.getResource(primaryFile);
@@ -58,7 +67,7 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
             secondaryImages.add(new InputImage(secondaryFile, optSecondary.get(), 1));
         }
 
-        output.add(sprite, new StackingSupplier(primaryImage, secondaryImages, sprite));
+        output.add(sprite, new StackingSupplier(primaryImage, secondaryImages, sprite, additionalMetadata));
     }
 
     @Override
@@ -70,7 +79,8 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
     public record StackingSupplier(
             InputImage primaryImage,
             List<InputImage> secondaryImages,
-            ResourceLocation sprite
+            ResourceLocation sprite,
+            Set<MetadataSectionType<?>> additionalMetadata
     ) implements SpriteSupplier
     {
         @Override
@@ -93,8 +103,8 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
                         .map(Utils.uncheckIO(LazyLoadedImage::get))
                         .toList();
 
-                AnimationMetadataSection sourceAnim = primaryImage.resource()
-                        .metadata()
+                ResourceMetadata primaryMeta = primaryImage.resource().metadata();
+                AnimationMetadataSection sourceAnim = primaryMeta
                         .getSection(AnimationMetadataSection.TYPE)
                         .orElse(null);
                 FrameSize frameSize = SpriteSourceUtils.calculateFrameSize(primarySource, sourceAnim);
@@ -113,7 +123,8 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
                 NativeImage imageOut = new NativeImage(NativeImage.Format.RGBA, primarySource.getWidth(), primarySource.getHeight(), false);
                 List<FrameInfo> frames = SpriteSourceUtils.collectFrames(primarySource, frameSize, sourceAnim);
                 buildOutputImage(frames, primarySource, secondarySources, imageOut, frameSize);
-                return new SpriteContents(sprite, frameSize, imageOut, primaryImage.resource().metadata());
+                List<MetadataSectionType.WithValue<?>> metaSections = primaryMeta.getTypedSections(additionalMetadata);
+                return new SpriteContents(sprite, frameSize, imageOut, Optional.ofNullable(sourceAnim), metaSections);
             }
             catch (Exception e)
             {

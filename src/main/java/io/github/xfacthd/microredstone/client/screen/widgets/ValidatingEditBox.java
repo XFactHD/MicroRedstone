@@ -42,7 +42,7 @@ public class ValidatingEditBox extends EditBox
         boolean focusedNonEmpty = isFocused() && !getValue().isEmpty();
         if ((focusedNonEmpty || wasFocusedNonEmpty) && !isInputValid())
         {
-            graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), 0xFFFF0000);
+            graphics.submitOutline(getX(), getY(), getWidth(), getHeight(), 0xFFFF0000);
 
             Component tooltip;
             if (isMouseOver(mouseX, mouseY) && (tooltip = validator.getInvalidValueTooltip()) != null)

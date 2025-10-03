@@ -2,9 +2,9 @@ package io.github.xfacthd.microredstone.client.screen.dialog;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,17 +111,17 @@ final class QueryDialogScreen extends DialogScreen
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
-        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
+        if (event.isConfirmation())
         {
             if (!buttonPair.isFocused() && buttonPair.okButton().active)
             {
-                buttonPair.okButton().onPress();
+                buttonPair.okButton().onPress(event);
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     private static Runnable mergeCallbacks(List<QueryWidget> queryWidgets, Runnable okCallback)

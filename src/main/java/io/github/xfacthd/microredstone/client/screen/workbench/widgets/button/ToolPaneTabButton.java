@@ -8,6 +8,7 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.InputWithModifiers;
 
 public final class ToolPaneTabButton extends SimpleButton implements DropFocusAfterClick
 {
@@ -54,7 +55,7 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
     }
 
     @Override
-    public void onPress()
+    public void onPress(InputWithModifiers input)
     {
         owner.setActiveTab(tab);
     }

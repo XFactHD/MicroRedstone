@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.widgets.button;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,6 +28,10 @@ public abstract class SimpleButton extends AbstractButton
         ResourceLocation texture = getSprites().get(active, isHoveredOrFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, getX(), getY(), getWidth(), getHeight(), ARGB.white(alpha));
         renderForeground(graphics, mouseX, mouseY);
+        if (isHovered())
+        {
+            graphics.requestCursor(isActive() ? CursorTypes.POINTING_HAND : CursorTypes.NOT_ALLOWED);
+        }
     }
 
     protected void renderForeground(GuiGraphics graphics, int mouseX, int mouseY)

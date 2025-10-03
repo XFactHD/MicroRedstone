@@ -20,7 +20,6 @@ import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceMetadata;
 import net.minecraft.util.ARGB;
 import org.apache.commons.io.function.Uncheck;
 import org.slf4j.Logger;
@@ -103,7 +102,7 @@ public record PortOverlaySource(ResourceLocation sprite, Map<Port, WireType> por
                         case LEFT -> copyRect(image, imageOut, false, false);
                     }
                 });
-                return new SpriteContents(sprite, size, imageOut, ResourceMetadata.EMPTY);
+                return new SpriteContents(sprite, size, imageOut);
             }
             catch (Throwable t)
             {

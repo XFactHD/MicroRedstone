@@ -4,6 +4,7 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -107,12 +108,12 @@ public final class Scrollbar implements GuiEventListener, Renderable
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
     {
-        if (active && button == GLFW.GLFW_MOUSE_BUTTON_1 && (dragging || isMouseOver(mouseX, mouseY)))
+        if (active && event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && (dragging || isMouseOver(event.x(), event.y())))
         {
             int maxOffset = contentHeight - listHeight;
-            double offset = (mouseY - y - (SCROLLER_HEIGHT / 2F)) / (barHeight - SCROLLER_HEIGHT);
+            double offset = (event.y() - y - (SCROLLER_HEIGHT / 2F)) / (barHeight - SCROLLER_HEIGHT);
             this.offset = (int) Mth.clamp(offset * maxOffset, 0, maxOffset);
             dragging = true;
             return true;
@@ -121,9 +122,9 @@ public final class Scrollbar implements GuiEventListener, Renderable
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(MouseButtonEvent event)
     {
-        if (active && dragging && button == GLFW.GLFW_MOUSE_BUTTON_1)
+        if (active && dragging && event.button() == GLFW.GLFW_MOUSE_BUTTON_1)
         {
             dragging = false;
             return true;

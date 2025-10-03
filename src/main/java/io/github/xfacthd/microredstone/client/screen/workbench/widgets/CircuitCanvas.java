@@ -36,6 +36,7 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ import java.util.function.ToIntFunction;
 
 public final class CircuitCanvas extends AbstractCircuitCanvas implements CircuitCanvasAccess
 {
-    private static final ResourceLocation MONOSPACE_FONT = Utils.rl("monospace");
+    private static final FontDescription MONOSPACE_FONT = new FontDescription.Resource(Utils.rl("monospace"));
     private static final ResourceLocation[] PORT_BORDERS = Util.make(new ResourceLocation[8], arr ->
     {
         for (Port port : Port.values())
@@ -231,7 +232,13 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
 
     private static void drawNodeFrame(GuiGraphics graphics, int x, int y, int color)
     {
-        graphics.renderOutline(x, y, PART_SLOT_SIZE + 1, PART_SLOT_SIZE + 1, color);
+        // Can't use GuiGraphics#submitOutline() as it renders too late
+        int width = PART_SLOT_SIZE + 1;
+        int height = PART_SLOT_SIZE + 1;
+        graphics.fill(x,             y,              x + width, y + 1,          color);
+        graphics.fill(x,             y + height - 1, x + width, y + height,     color);
+        graphics.fill(x,             y + 1,          x + 1,     y + height - 1, color);
+        graphics.fill(x + width - 1, y + 1,          x + width, y + height - 1, color);
     }
 
     public static void drawPartNode(GuiGraphics graphics, IconConfig icon, int x, int y, int rotation, int partSize)
@@ -329,11 +336,11 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         wireInProgress = null;
     }
 
-    public void pullWire(double mouseX, double mouseY)
+    public void pullWire(double mouseX, double mouseY, boolean doubleClick)
     {
         Objects.requireNonNull(wireInProgress);
         // TODO: inform user on failure
-        wireInProgress.placeNextNode(this, mouseX, mouseY);
+        wireInProgress.placeNextNode(this, mouseX, mouseY, doubleClick);
     }
 
     @Nullable

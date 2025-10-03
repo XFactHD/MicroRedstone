@@ -12,6 +12,8 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -19,7 +21,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -129,8 +130,6 @@ public final class FileBrowserScreen extends Screen
     private int historyIdx = -1;
     private FormattedPath formattedPath = new FormattedPath("", 0);
     private int selectedEntry = -1;
-    private long lastClickTime = -1;
-    private int lastClickButton = -1;
 
     public static FileBrowserScreenBuilder builder(Type type)
     {
@@ -266,22 +265,9 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
     {
-        long time = System.currentTimeMillis();
-        boolean doubleClick = time - lastClickTime < GuiEventListener.DOUBLE_CLICK_THRESHOLD_MS && lastClickButton == button;
-        if (mouseClicked(mouseX, mouseY, button, doubleClick))
-        {
-            lastClickTime = time;
-            lastClickButton = button;
-            return true;
-        }
-        return false;
-    }
-
-    private boolean mouseClicked(double mouseX, double mouseY, int button, boolean doubleClick)
-    {
-        if (getFocused() != null && !getFocused().isMouseOver(mouseX, mouseY))
+        if (getFocused() != null && !getFocused().isMouseOver(event.x(), event.y()))
         {
             setFocused(null);
         }
@@ -294,9 +280,9 @@ public final class FileBrowserScreen extends Screen
         {
             maxX -= scrollbar.getWidth();
         }
-        if (mouseX >= minX && mouseX < maxX && mouseY >= minY && mouseY < maxY)
+        if (event.x() >= minX && event.x() < maxX && event.y() >= minY && event.y() < maxY)
         {
-            int idx = (int)(mouseY - minY + scrollbar.getOffset()) / ENTRY_HEIGHT;
+            int idx = (int)(event.y() - minY + scrollbar.getOffset()) / ENTRY_HEIGHT;
             if (idx >= 0 && idx < currEntries.size())
             {
                 if (doubleClick && selectedEntry == idx)
@@ -329,7 +315,7 @@ public final class FileBrowserScreen extends Screen
             }
             return true;
         }
-        boolean handled = super.mouseClicked(mouseX, mouseY, button);
+        boolean handled = super.mouseClicked(event, doubleClick);
         if (handled && getFocused() != null && dropFocusAfterClick.contains(getFocused()))
         {
             setFocused(null);
@@ -338,23 +324,23 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
     {
-        if (scrollbar.mouseDragged(mouseX, mouseY, button, dragX, dragY))
+        if (scrollbar.mouseDragged(event, dragX, dragY))
         {
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(MouseButtonEvent event)
     {
-        if (scrollbar.mouseReleased(mouseX, mouseY, button))
+        if (scrollbar.mouseReleased(event))
         {
             return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override
@@ -368,14 +354,14 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent event)
     {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE)
+        if (event.isEscape())
         {
             cancel(cancelButton);
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override

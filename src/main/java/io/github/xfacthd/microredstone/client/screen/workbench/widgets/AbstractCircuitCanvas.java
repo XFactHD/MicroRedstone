@@ -119,6 +119,11 @@ public abstract class AbstractCircuitCanvas implements Renderable
                 mouseY < (y + height - 1);
     }
 
+    public boolean canDrag(double mouseX, double mouseY)
+    {
+        return (width < WIDTH || height < HEIGHT) && isMouseOver(mouseX, mouseY);
+    }
+
     @Nullable
     public final NodePos getNodePos(int mouseX, int mouseY)
     {

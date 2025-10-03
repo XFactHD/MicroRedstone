@@ -14,13 +14,16 @@ import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fallback, ResourceLocation sprite, int x, int y, int w, int h) implements SpriteSource
 {
@@ -44,6 +47,12 @@ public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fa
     @Override
     public void run(ResourceManager manager, Output out)
     {
+        run(manager, out, Set.of());
+    }
+
+    @Override
+    public void run(ResourceManager manager, Output out, Set<MetadataSectionType<?>> additionalMetadata)
+    {
         ResourceLocation srcPath = TEXTURE_ID_CONVERTER.idToFile(src);
         Optional<Resource> optSource = manager.getResource(srcPath);
         if (optSource.isEmpty() && fallback.isPresent())
@@ -59,7 +68,7 @@ public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fa
 
         Resource srcRes = optSource.get();
         Rect2i rect = new Rect2i(x, y, w - 1, h - 1);
-        out.add(sprite, new AreaMaskInstance(new InputImage(srcPath, srcRes, 1), rect, sprite));
+        out.add(sprite, new AreaMaskInstance(new InputImage(srcPath, srcRes, 1), rect, sprite, additionalMetadata));
     }
 
     @Override
@@ -68,7 +77,12 @@ public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fa
         return CODEC;
     }
 
-    public record AreaMaskInstance(InputImage srcImg, Rect2i rect, ResourceLocation sprite) implements SpriteSupplier
+    public record AreaMaskInstance(
+            InputImage srcImg,
+            Rect2i rect,
+            ResourceLocation sprite,
+            Set<MetadataSectionType<?>> additionalMetadata
+    ) implements SpriteSupplier
     {
         @Override
         @Nullable
@@ -78,8 +92,8 @@ public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fa
             {
                 NativeImage source = srcImg.image().get();
 
-                AnimationMetadataSection sourceAnim = srcImg.resource()
-                        .metadata()
+                ResourceMetadata srcMeta = srcImg.resource().metadata();
+                AnimationMetadataSection sourceAnim = srcMeta
                         .getSection(AnimationMetadataSection.TYPE)
                         .orElse(null);
                 FrameSize frameSize = SpriteSourceUtils.calculateFrameSize(source, sourceAnim);
@@ -92,7 +106,8 @@ public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fa
                 NativeImage imageOut = new NativeImage(NativeImage.Format.RGBA, source.getWidth(), source.getHeight(), false);
                 List<FrameInfo> frames = SpriteSourceUtils.collectFrames(source, frameSize, sourceAnim);
                 buildOutputImage(frames, source, rect, imageOut, frameSize);
-                return new SpriteContents(sprite, frameSize, imageOut, srcImg.resource().metadata());
+                List<MetadataSectionType.WithValue<?>> metaSections = srcMeta.getTypedSections(additionalMetadata);
+                return new SpriteContents(sprite, frameSize, imageOut, Optional.ofNullable(sourceAnim), metaSections);
             }
             catch (Exception e)
             {

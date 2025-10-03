@@ -1,7 +1,4 @@
 {
-    "net/minecraft/client/resources/TextureAtlasHolder": [
-        "io/github/xfacthd/microredstone/client/util/duck/DefaultedAccessorTextureAtlasHolder"
-    ],
     "net/minecraft/client/gui/components/EditBox": [
         "io/github/xfacthd/microredstone/client/util/duck/EditBoxExtensions"
     ]

@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.105'
+    id 'net.neoforged.moddev' version '2.0.110'
     id "me.champeau.jmh" version "0.7.3"
 }
 
@@ -40,6 +40,9 @@ neoForge {
         client {
             client()
             gameDirectory = project.file('run')
+
+            // TODO: this should be moved to a NeoForge patch or MDG
+            programArgument '--offlineDeveloperMode'
         }
 
         server {
@@ -93,27 +96,37 @@ sourceSets {
 }
 
 repositories {
-    maven {
-        name = 'CurseMaven'
-        url = 'https://www.cursemaven.com'
-        content {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'CurseMaven'
+                url = 'https://www.cursemaven.com'
+            }
+        }
+        filter {
             includeGroup('curse.maven')
         }
     }
-    maven {
-        name = "Commoble's Maven"
-        url = 'https://maven.commoble.net'
-        content {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Commoble\'s Maven'
+                url = 'https://maven.commoble.net'
+            }
+        }
+        filter {
             includeGroup('net.commoble.exmachina')
         }
     }
 }
 
 dependencies {
-    implementation("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
+    compileOnly("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
+    runtimeOnly("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
 
-    implementation("net.commoble.exmachina:exmachina-${exmachina_mc_version}:${exmachina_version}")
-    runtimeOnly("curse.maven:morered-387638:${morered_coord}")
+    compileOnly("net.commoble.exmachina:exmachina-${exmachina_mc_version}:${exmachina_version}")
+    //runtimeOnly("net.commoble.exmachina:exmachina-${exmachina_mc_version}:${exmachina_version}")
+    //runtimeOnly("curse.maven:morered-387638:${morered_coord}")
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

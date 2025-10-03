@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.client.util;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.item.ItemStack;
 
 public final class ScreenUtils
@@ -13,9 +14,9 @@ public final class ScreenUtils
         graphics.fill(x, y, x + 16, y + 16, 0x80888888);
     }
 
-    public static boolean isInventoryKey(int keyCode, int scanCode)
+    public static boolean isInventoryKey(KeyEvent event)
     {
-        InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
+        InputConstants.Key key = InputConstants.getKey(event);
         return Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key);
     }
 

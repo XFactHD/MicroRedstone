@@ -4,6 +4,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.button.SimpleButton
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.MultiModeTab;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.InputWithModifiers;
 
 public final class ModeButton<E extends MultiModeTab.Mode> extends SimpleButton implements DropFocusAfterClick
 {
@@ -29,7 +30,7 @@ public final class ModeButton<E extends MultiModeTab.Mode> extends SimpleButton 
     }
 
     @Override
-    public void onPress()
+    public void onPress(InputWithModifiers input)
     {
         owner.setMode(mode);
     }

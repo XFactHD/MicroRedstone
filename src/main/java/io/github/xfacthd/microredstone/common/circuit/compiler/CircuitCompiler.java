@@ -52,7 +52,7 @@ public final class CircuitCompiler
         }
     });
     private static final AtomicLong CLASS_COUNTER = new AtomicLong();
-    private static final boolean DUMP_TO_FILE = !FMLEnvironment.production;
+    private static final boolean DUMP_TO_FILE = !FMLEnvironment.isProduction();
     @Nullable
     private static Path EXPORT_PATH_OVERRIDE = null;
     private static final Lazy<Path> EXPORT_PATH = Lazy.of(() -> buildExportPath(FMLPaths.GAMEDIR.get(), "runtime"));

@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.client.screen.widgets.button;
 
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 public final class BasicButton extends SimpleButton implements DropFocusAfterClick
@@ -21,7 +22,7 @@ public final class BasicButton extends SimpleButton implements DropFocusAfterCli
     }
 
     @Override
-    public void onPress()
+    public void onPress(InputWithModifiers input)
     {
         onPress.run();
     }

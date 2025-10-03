@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import io.github.xfacthd.microredstone.client.screen.widgets.ScrollableWidget;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
@@ -98,6 +99,11 @@ public final class NodeListWidget extends ScrollableWidget
             {
                 graphics.drawScrollingString(owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY, 0xFFFFFFFF);
             }
+
+            if (hovered)
+            {
+                graphics.requestCursor(CursorTypes.POINTING_HAND);
+            }
         }
 
         graphics.disableScissor();
@@ -108,6 +114,15 @@ public final class NodeListWidget extends ScrollableWidget
             float scrollFactor = (float) getScrollOffset() / (entriesHeight - innerHeight);
             int scrollerY = minY + (int) (scrollFactor * (innerHeight - SCROLLER_HANDLE_HEIGHT));
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_HANDLE, innerScrollbarX, scrollerY, SCROLLER_HANDLE_WIDTH, SCROLLER_HANDLE_HEIGHT);
+        }
+
+        if (isDragging())
+        {
+            graphics.requestCursor(CursorTypes.RESIZE_NS);
+        }
+        else if (isMouseOverScrollBar(mouseX, mouseY))
+        {
+            graphics.requestCursor(CursorTypes.POINTING_HAND);
         }
     }
 

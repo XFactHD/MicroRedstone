@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.microchip;
 
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
@@ -7,6 +8,8 @@ import io.github.xfacthd.microredstone.common.menu.MicrochipCircuitMenu;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -48,6 +51,11 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
     {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
+
+        if (isDragging())
+        {
+            graphics.requestCursor(CursorTypes.RESIZE_ALL);
+        }
     }
 
     @Override
@@ -57,38 +65,50 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
     {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_3 && canvas.isMouseOver(mouseX, mouseY))
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && canvas.canDrag(event.x(), event.y()))
         {
             canvas.drag((float) -dragX, (float) -dragY);
+            setDragging(true);
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean mouseReleased(MouseButtonEvent event)
     {
-        ArrowKey.Direction arrowDir = ArrowKey.Direction.of(keyCode);
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && isDragging())
+        {
+            setDragging(false);
+            return true;
+        }
+        return super.mouseReleased(event);
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event)
+    {
+        ArrowKey.Direction arrowDir = ArrowKey.Direction.of(event.key());
         if (arrowDir != null)
         {
             activeArrowKey = new ArrowKey(arrowDir, System.currentTimeMillis());
             canvas.drag(arrowDir);
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    public boolean keyReleased(KeyEvent event)
     {
-        if (activeArrowKey != null && ArrowKey.Direction.of(keyCode) == activeArrowKey.dir())
+        if (activeArrowKey != null && ArrowKey.Direction.of(event.key()) == activeArrowKey.dir())
         {
             activeArrowKey = null;
             return true;
         }
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(event);
     }
 
     @Override

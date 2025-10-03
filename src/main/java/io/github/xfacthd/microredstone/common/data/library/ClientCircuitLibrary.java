@@ -53,7 +53,7 @@ public final class ClientCircuitLibrary
         }
         else
         {
-            UUID player = Minecraft.getInstance().getGameProfile().getId();
+            UUID player = Minecraft.getInstance().getGameProfile().id();
             entry = CircuitLibraryEntry.createCircuit(name, circuitNode, player);
         }
         ClientPacketDistributor.sendToServer(new ServerboundModifyCircuitLibraryPayload(Either.left(entry)));
@@ -81,7 +81,7 @@ public final class ClientCircuitLibrary
     {
         ENTRIES_BY_ID.clear();
         OWNED_ENTRIES_BY_NAME.clear();
-        UUID player = Minecraft.getInstance().getGameProfile().getId();
+        UUID player = Minecraft.getInstance().getGameProfile().id();
         for (CircuitLibraryEntry entry : entries)
         {
             ENTRIES_BY_ID.put(entry.id(), entry);
@@ -94,7 +94,7 @@ public final class ClientCircuitLibrary
 
     public static void handleUpdateSync(List<CircuitLibraryEntry> addedOrModified, List<UUID> removed)
     {
-        UUID player = Minecraft.getInstance().getGameProfile().getId();
+        UUID player = Minecraft.getInstance().getGameProfile().id();
         for (CircuitLibraryEntry entry : addedOrModified)
         {
             ENTRIES_BY_ID.put(entry.id(), entry);

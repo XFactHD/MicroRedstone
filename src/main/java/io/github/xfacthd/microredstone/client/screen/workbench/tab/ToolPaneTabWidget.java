@@ -12,6 +12,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -90,12 +91,12 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
     {
         ScrollableWidget scrollable = getScrollableWidget();
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(mouseX, mouseY)))
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(event.x(), event.y())))
         {
-            scrollable.dragScrollBar(mouseY);
+            scrollable.dragScrollBar(event.y());
             scrollable.setDragging(true);
             return true;
         }
@@ -103,10 +104,10 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(MouseButtonEvent event)
     {
         ScrollableWidget scrollable = getScrollableWidget();
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && scrollable.isDragging())
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && scrollable.isDragging())
         {
             scrollable.setDragging(false);
             return true;

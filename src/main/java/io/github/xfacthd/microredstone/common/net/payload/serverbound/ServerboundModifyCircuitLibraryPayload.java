@@ -9,11 +9,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-
-import java.util.Objects;
 
 public record ServerboundModifyCircuitLibraryPayload(Either<CircuitLibraryEntry, String> entry) implements CustomPacketPayload
 {
@@ -28,8 +25,7 @@ public record ServerboundModifyCircuitLibraryPayload(Either<CircuitLibraryEntry,
     {
         if (!(ctx.player() instanceof ServerPlayer player)) throw new IllegalStateException("");
 
-        MinecraftServer server = Objects.requireNonNull(player.getServer());
-        ServerCircuitLibrary library = ServerCircuitLibrary.get(server);
+        ServerCircuitLibrary library = ServerCircuitLibrary.get(player.level().getServer());
         boolean success = entry.map(
                 entry -> library.addOrModifyEntry(player, entry),
                 entry -> library.removeEntry(player, entry)

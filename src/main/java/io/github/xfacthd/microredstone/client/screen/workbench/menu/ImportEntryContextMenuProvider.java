@@ -48,7 +48,7 @@ public final class ImportEntryContextMenuProvider implements ContextMenuProvider
     private void makeDetailsDialog()
     {
         CircuitLibraryEntry libEntry = ClientCircuitLibrary.getEntryById(entry.id());
-        Supplier<Component> author = Utils.resolvePlayerName(libEntry.author(), Minecraft.getInstance());
+        Supplier<Component> author = Utils.resolvePlayerName(Minecraft.getInstance().services().profileResolver(), libEntry.author(), Minecraft.getInstance());
         DialogScreen.builder(DialogScreen.Type.PROPERTIES)
                 .withTitle(TITLE_DETAILS)
                 .withProperty(PROP_NAME, entry.title())

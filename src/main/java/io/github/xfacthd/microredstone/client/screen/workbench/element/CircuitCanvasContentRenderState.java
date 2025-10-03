@@ -14,6 +14,7 @@ import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
@@ -46,18 +47,18 @@ public record CircuitCanvasContentRenderState(
     )
     {
         ScreenRectangle bounds = getBounds(canvasX, canvasY, scissorArea);
-        TextureAtlas guiAtlas = Minecraft.getInstance().getGuiSprites().microredstone$getTextureAtlas();
+        TextureAtlas guiAtlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI);
         TextureAtlasSprite whiteSprite = guiAtlas.getSprite(WHITE_SPRITE);
         TextureSetup textureSetup = TextureSetup.singleTexture(guiAtlas.getTextureView());
         return new CircuitCanvasContentRenderState(parts, wires, lamps, canvasX, canvasY, guiAtlas, whiteSprite, textureSetup, bounds, scissorArea);
     }
 
     @Override
-    public void buildVertices(VertexConsumer buffer, float z)
+    public void buildVertices(VertexConsumer buffer)
     {
         Matrix3x2fStack pose = new Matrix3x2fStack(2);
 
-        PartBlitter blitter = (blitPose, icon, x, y, size) -> blit(buffer, blitPose, icon, x, y, x + size, y + size, z);
+        PartBlitter blitter = (blitPose, icon, x, y, size) -> blit(buffer, blitPose, icon, x, y, x + size, y + size);
         for (PartRenderState part : parts)
         {
             NodePos pos = part.pos();
@@ -72,7 +73,7 @@ public record CircuitCanvasContentRenderState(
             int y = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE;
 
             CircuitCanvas.drawPartNode(pose, LampPrototypeNode.ICON_BG, x, y, lamp.rotation(), CircuitCanvas.PART_SIZE, blitter);
-            fill(buffer, pose, x + 1, y + 1, x + CircuitCanvas.PART_SIZE - 1, y + CircuitCanvas.PART_SIZE - 1, z, lamp.packedColor());
+            fill(buffer, pose, x + 1, y + 1, x + CircuitCanvas.PART_SIZE - 1, y + CircuitCanvas.PART_SIZE - 1, lamp.packedColor());
             CircuitCanvas.drawPartNode(pose, LampPrototypeNode.ICON_FG, x, y, 0, CircuitCanvas.PART_SIZE, blitter);
         }
         for (LampRenderState lamp : lamps)
@@ -93,7 +94,7 @@ public record CircuitCanvasContentRenderState(
             {
                 pose.rotateAbout((float) Math.toRadians(90 * rotation), size / 2F, size / 2F);
             }
-            fill(buffer, pose, 0, 3, 3, CircuitCanvas.PART_SIZE + 1, z, lamp.packedColor());
+            fill(buffer, pose, 0, 3, 3, CircuitCanvas.PART_SIZE + 1, lamp.packedColor());
             pose.popMatrix();
         }
 
@@ -108,37 +109,37 @@ public record CircuitCanvasContentRenderState(
                 int y0 = canvasY + section.minY();
                 int x1 = canvasX + section.maxX();
                 int y1 = canvasY + section.maxY();
-                fill(buffer, pose, x0, y0, x1, y1, z, packedColor);
+                fill(buffer, pose, x0, y0, x1, y1, packedColor);
             }
             for (NodePos pos : wire.nodes())
             {
                 int x = canvasX + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.x() * CircuitCanvas.PART_SLOT_SIZE + 4;
                 int y = canvasY + CircuitCanvas.BORDER_TOP_LEFT + 1 + pos.y() * CircuitCanvas.PART_SLOT_SIZE + 4;
-                fill(buffer, pose, x - 2, y - 2, x + 2, y + 2, z, packedColor);
+                fill(buffer, pose, x - 2, y - 2, x + 2, y + 2, packedColor);
             }
         }
     }
 
-    private void blit(VertexConsumer buffer, Matrix3x2f pose, ResourceLocation texture, int x0, int y0, int x1, int y1, float z)
+    private void blit(VertexConsumer buffer, Matrix3x2f pose, ResourceLocation texture, int x0, int y0, int x1, int y1)
     {
-        blit(buffer, pose, texture, x0, y0, x1, y1, z, 0xFFFFFFFF);
+        blit(buffer, pose, texture, x0, y0, x1, y1, 0xFFFFFFFF);
     }
 
-    private void blit(VertexConsumer buffer, Matrix3x2f pose, ResourceLocation texture, int x0, int y0, int x1, int y1, float z, int color)
+    private void blit(VertexConsumer buffer, Matrix3x2f pose, ResourceLocation texture, int x0, int y0, int x1, int y1, int color)
     {
         TextureAtlasSprite sprite = guiAtlas.getSprite(texture);
-        buffer.addVertexWith2DPose(pose, x0, y0, z).setUv(sprite.getU0(), sprite.getV0()).setColor(color);
-        buffer.addVertexWith2DPose(pose, x0, y1, z).setUv(sprite.getU0(), sprite.getV1()).setColor(color);
-        buffer.addVertexWith2DPose(pose, x1, y1, z).setUv(sprite.getU1(), sprite.getV1()).setColor(color);
-        buffer.addVertexWith2DPose(pose, x1, y0, z).setUv(sprite.getU1(), sprite.getV0()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x0, y0).setUv(sprite.getU0(), sprite.getV0()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x0, y1).setUv(sprite.getU0(), sprite.getV1()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x1, y1).setUv(sprite.getU1(), sprite.getV1()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x1, y0).setUv(sprite.getU1(), sprite.getV0()).setColor(color);
     }
 
-    private void fill(VertexConsumer buffer, Matrix3x2f pose, int x0, int y0, int x1, int y1, float z, int color)
+    private void fill(VertexConsumer buffer, Matrix3x2f pose, int x0, int y0, int x1, int y1, int color)
     {
-        buffer.addVertexWith2DPose(pose, x0, y0, z).setUv(whiteSprite.getU0(), whiteSprite.getV0()).setColor(color);
-        buffer.addVertexWith2DPose(pose, x0, y1, z).setUv(whiteSprite.getU0(), whiteSprite.getV1()).setColor(color);
-        buffer.addVertexWith2DPose(pose, x1, y1, z).setUv(whiteSprite.getU1(), whiteSprite.getV1()).setColor(color);
-        buffer.addVertexWith2DPose(pose, x1, y0, z).setUv(whiteSprite.getU1(), whiteSprite.getV0()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x0, y0).setUv(whiteSprite.getU0(), whiteSprite.getV0()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x0, y1).setUv(whiteSprite.getU0(), whiteSprite.getV1()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x1, y1).setUv(whiteSprite.getU1(), whiteSprite.getV1()).setColor(color);
+        buffer.addVertexWith2DPose(pose, x1, y0).setUv(whiteSprite.getU1(), whiteSprite.getV0()).setColor(color);
     }
 
     @Override
