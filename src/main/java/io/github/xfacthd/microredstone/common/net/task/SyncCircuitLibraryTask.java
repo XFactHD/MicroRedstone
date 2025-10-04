@@ -9,8 +9,10 @@ import net.minecraft.network.protocol.configuration.ServerConfigurationPacketLis
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class SyncCircuitLibraryTask implements ConfigurationTask
@@ -23,7 +25,7 @@ public final class SyncCircuitLibraryTask implements ConfigurationTask
     public SyncCircuitLibraryTask(ServerConfigurationPacketListener listener)
     {
         this.listener = (ServerConfigurationPacketListenerImpl) listener;
-        this.server = (MinecraftServer) listener.getMainThreadEventLoop();
+        this.server = Objects.requireNonNull(ServerLifecycleHooks.getCurrentServer());
     }
 
     @Override
