@@ -25,12 +25,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fallback, ResourceLocation sprite, int x, int y, int w, int h) implements SpriteSource
+public record AreaMaskSource(ResourceLocation src, ResourceLocation sprite, int x, int y, int w, int h) implements SpriteSource
 {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final MapCodec<AreaMaskSource> CODEC = RecordCodecBuilder.<AreaMaskSource>mapCodec(inst -> inst.group(
             ResourceLocation.CODEC.fieldOf("src").forGetter(AreaMaskSource::src),
-            ResourceLocation.CODEC.optionalFieldOf("fallback").forGetter(AreaMaskSource::fallback),
             ResourceLocation.CODEC.fieldOf("sprite").forGetter(AreaMaskSource::sprite),
             Codec.intRange(0, 15).fieldOf("x").forGetter(AreaMaskSource::x),
             Codec.intRange(0, 15).fieldOf("y").forGetter(AreaMaskSource::y),
@@ -55,11 +54,6 @@ public record AreaMaskSource(ResourceLocation src, Optional<ResourceLocation> fa
     {
         ResourceLocation srcPath = TEXTURE_ID_CONVERTER.idToFile(src);
         Optional<Resource> optSource = manager.getResource(srcPath);
-        if (optSource.isEmpty() && fallback.isPresent())
-        {
-            srcPath = TEXTURE_ID_CONVERTER.idToFile(fallback.get());
-            optSource = manager.getResource(srcPath);
-        }
         if (optSource.isEmpty())
         {
             LOGGER.warn("Missing source texture: {}", srcPath);
