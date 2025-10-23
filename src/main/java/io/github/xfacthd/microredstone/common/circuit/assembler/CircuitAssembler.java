@@ -53,7 +53,7 @@ public final class CircuitAssembler
     private static final Port[] PORTS = Port.values();
 
     @Nullable
-    public static CompoundCircuitNode assemble(CompoundPrototypeNode node, ProblemReporter problemReporter)
+    public static CompoundCircuitNode assemble(String name, CompoundPrototypeNode node, ProblemReporter problemReporter)
     {
         CountingProblemReporter reporter = CountingProblemReporter.of(problemReporter);
 
@@ -153,7 +153,7 @@ public final class CircuitAssembler
         }
 
         List<Wire> wires = wireMapper.getSortedWireCopies();
-        return new CompoundCircuitNode(childNodes, clockNodes, bufferNodes, wires, inputs, outputs);
+        return new CompoundCircuitNode(name, childNodes, clockNodes, bufferNodes, wires, inputs, outputs);
     }
 
     private static <P extends PrototypeNode, C extends CircuitNode> void buildPrimitiveNode(

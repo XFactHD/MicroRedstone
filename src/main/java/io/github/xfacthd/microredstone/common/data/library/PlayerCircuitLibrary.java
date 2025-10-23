@@ -54,7 +54,7 @@ final class PlayerCircuitLibrary
     @Nullable
     CircuitLibraryEntry addOrModifyEntry(CircuitLibraryEntry entry)
     {
-        if (entry.author().equals(owner) && CircuitValidator.validate(entry.name(), entry.circuitNode()))
+        if (entry.author().equals(owner) && CircuitValidator.validate(entry.circuitNode()))
         {
             CircuitLibraryEntry existing = ownedByName.get(entry.name());
             if (existing != null)

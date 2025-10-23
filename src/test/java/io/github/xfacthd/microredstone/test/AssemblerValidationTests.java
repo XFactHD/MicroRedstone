@@ -39,7 +39,7 @@ public final class AssemblerValidationTests
 
         CompoundPrototypeNode protoNode = builder.build();
         // TODO: assert error "message" in returned reporter
-        TestUtils.assertAssemblyFails(protoNode);
+        TestUtils.assertAssemblyFails(protoNode, "BundlePackDriverCollision");
     }
 
     @Test
@@ -70,6 +70,6 @@ public final class AssemblerValidationTests
 
         CompoundPrototypeNode protoNode = builder.build();
         // TODO: assert error "message" in returned reporter
-        TestUtils.assertAssemblyFails(protoNode);
+        TestUtils.assertAssemblyFails(protoNode, "BundleMultiPackDriverCollision");
     }
 }

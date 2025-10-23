@@ -28,7 +28,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -61,7 +60,6 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     private final List<LibraryEntry> importEntries;
     private final NodeListWidget importListWidget;
     private final List<FilterToggleButton> filterButtons;
-    private final EnumSet<ShareType> filters = EnumSet.allOf(ShareType.class);
     private Mode mode = Mode.GATES;
     private boolean wasModeLibrary = true;
 
@@ -238,12 +236,12 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
         }
     }
 
-    public record LibraryEntry(UUID id, CompoundCircuitNode node, IconConfig icon, String name, Component title) implements NodeListWidget.Entry
+    public record LibraryEntry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
     {
         private static LibraryEntry create(CircuitLibraryEntry entry)
         {
             IconConfig icon = ReferencePrototypeNode.makeIconConfig(entry.circuitNode());
-            return new LibraryEntry(entry.id(), entry.circuitNode(), icon, entry.name(), Component.literal(entry.name()));
+            return new LibraryEntry(entry.id(), entry.circuitNode(), icon, Component.literal(entry.name()));
         }
 
         @Nullable

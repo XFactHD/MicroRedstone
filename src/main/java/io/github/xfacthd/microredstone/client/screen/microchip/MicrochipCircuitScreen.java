@@ -17,20 +17,26 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Objects;
+
 public final class MicrochipCircuitScreen extends AbstractContainerScreen<MicrochipCircuitMenu>
 {
     private static final ResourceLocation BACKGROUND = Utils.rl("background");
+    public static final String TITLE_WITH_CIRCUIT = Utils.translationKey("title", "microchip.circuit");
+    public static final String TITLE_WITH_CIRCUIT_DEBUG = Utils.translationKey("title", "microchip.circuit_debug");
     static final int CANVAS_BORDER = 10;
     private static final long ARROW_REPEAT_DELAY_INITIAL = 300;
 
     private final MicrochipCircuitCanvas canvas = new MicrochipCircuitCanvas();
+    private Component fullTitle;
     @Nullable
     private ArrowKey activeArrowKey = null;
 
     public MicrochipCircuitScreen(MicrochipCircuitMenu menu, Inventory playerInventory, Component title)
     {
         super(menu, playerInventory, title);
-        canvas.update(menu.getInitialRootNode());
+        this.fullTitle = title;
+        handleCircuitUpdate(menu.getInitialRootNode(), menu.getInitialNodeClassName());
     }
 
     @Override
@@ -61,7 +67,7 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
+        guiGraphics.drawString(font, fullTitle, titleLabelX, titleLabelY, 0xFF404040, false);
     }
 
     @Override
@@ -124,9 +130,18 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
         }
     }
 
-    public void handleCircuitUpdate(@Nullable CompoundCircuitNode rootNode)
+    public void handleCircuitUpdate(@Nullable CompoundCircuitNode rootNode, @Nullable String nodeClassName)
     {
         canvas.update(rootNode);
+        if (rootNode != null)
+        {
+            String key = Utils.PRODUCTION ? TITLE_WITH_CIRCUIT : TITLE_WITH_CIRCUIT_DEBUG;
+            fullTitle = Component.translatable(key, title, rootNode.getName(), Objects.toString(nodeClassName));
+        }
+        else
+        {
+            fullTitle = title;
+        }
     }
 
     public void handleWireStateUpdate(WireStates wireStates)

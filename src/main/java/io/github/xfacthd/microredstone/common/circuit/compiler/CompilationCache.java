@@ -5,7 +5,6 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircu
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.neoforged.neoforge.common.util.Lazy;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -28,18 +27,18 @@ final class CompilationCache
         return executor;
     });
 
-    static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
+    static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, boolean suppressExport)
     {
-        return CompletableFuture.supplyAsync(() -> getOrCompileNode0(node, name, suppressExport), COMPILATION_EXECUTOR.get());
+        return CompletableFuture.supplyAsync(() -> getOrCompileNode0(node, suppressExport), COMPILATION_EXECUTOR.get());
     }
 
-    private static RootCircuitNode getOrCompileNode0(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
+    private static RootCircuitNode getOrCompileNode0(CompoundCircuitNode node, boolean suppressExport)
     {
         CompilationKey cacheKey = CompilationKey.of(node);
         CompilationResult result = COMPILATION_CACHE.get(cacheKey);
         if (result == null)
         {
-            result = CompilationResult.of(CircuitCompiler.compileNode(node, name, suppressExport));
+            result = CompilationResult.of(CircuitCompiler.compileNode(node, suppressExport));
             COMPILATION_CACHE.put(cacheKey, result);
         }
         try
@@ -48,8 +47,7 @@ final class CompilationCache
         }
         catch (Throwable t)
         {
-            String logName = name != null ? name : "<unnamed>";
-            LOGGER.error("Failed to instantiate compiled node {} (name: {}), falling back to interpreted eval", node, logName, t);
+            LOGGER.error("Failed to instantiate compiled node {} (name: {}), falling back to interpreted eval", node, node.getName(), t);
             COMPILATION_CACHE.put(cacheKey, CompilationResult.of(null));
         }
         return node;

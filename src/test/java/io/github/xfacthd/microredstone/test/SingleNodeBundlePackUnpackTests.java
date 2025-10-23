@@ -43,9 +43,9 @@ public final class SingleNodeBundlePackUnpackTests
             packProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
             CompoundPrototypeNode protoNode = builder.build();
-            CompoundCircuitNode node = TestUtils.assemble(protoNode);
+            CompoundCircuitNode node = TestUtils.assemble(protoNode, "PACK_bit" + bit);
 
-            RootCircuitNode compiled = TestUtils.compile(node, "PACK_bit" + bit);
+            RootCircuitNode compiled = TestUtils.compile(node);
             Assertions.assertNotNull(compiled, "Compilation failed");
 
             Circuit circuitInterp = new Circuit(node);
@@ -101,9 +101,9 @@ public final class SingleNodeBundlePackUnpackTests
         packProtoNodeTwo.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "PACK_MULTI");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "PACK_MULTI");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -147,9 +147,9 @@ public final class SingleNodeBundlePackUnpackTests
             packProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
             CompoundPrototypeNode protoNode = builder.build();
-            CompoundCircuitNode node = TestUtils.assemble(protoNode);
+            CompoundCircuitNode node = TestUtils.assemble(protoNode, "UNPACK_bit" + bit);
 
-            RootCircuitNode compiled = TestUtils.compile(node, "UNPACK_bit" + bit);
+            RootCircuitNode compiled = TestUtils.compile(node);
             Assertions.assertNotNull(compiled, "Compilation failed");
 
             Circuit circuitInterp = new Circuit(node);

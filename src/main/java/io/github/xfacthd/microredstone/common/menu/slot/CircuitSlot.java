@@ -59,8 +59,7 @@ public final class CircuitSlot extends Slot
                 {
                     ItemStack stack = new ItemStack(MRContent.ITEM_INTEGRATED_CIRCUIT);
                     CompoundCircuitNode rootNode = circuit.getSerializableRootNode();
-                    StoredCircuit storedCircuit = new StoredCircuit(blockEntity.getCircuitName(), rootNode);
-                    stack.set(MRContent.DC_TYPE_CIRCUIT, storedCircuit);
+                    stack.set(MRContent.DC_TYPE_CIRCUIT, new StoredCircuit(rootNode));
                     cachedStack = stack;
                 }
                 else
@@ -83,7 +82,7 @@ public final class CircuitSlot extends Slot
         {
             Objects.checkIndex(slot, 1);
             cachedStack = stack.copy();
-            blockEntity.setCircuit(stack.get(MRContent.DC_TYPE_CIRCUIT));
+            blockEntity.setCircuit(stack.getOrDefault(MRContent.DC_TYPE_CIRCUIT, StoredCircuit.EMPTY).toCircuit());
         }
 
         @Override

@@ -95,19 +95,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         }
     }
 
-    public void setCircuit(@Nullable StoredCircuit circuit)
-    {
-        if (circuit != null && circuit.rootNode() != null)
-        {
-            setCircuit(circuit.name(), circuit.toCircuit());
-        }
-        else
-        {
-            setCircuit("", null);
-        }
-    }
-
-    public void setCircuit(String circuitName, @Nullable Circuit circuit)
+    public void setCircuit(@Nullable Circuit circuit)
     {
         if (level().isClientSide()) return;
 
@@ -119,7 +107,6 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
             Arrays.fill(portStates, (short) 0);
         }
         this.circuit = circuit;
-        this.circuitName = circuitName;
         boolean hasCircuit = circuit != null;
         if (hasCircuit)
         {
@@ -160,7 +147,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
         if (prevCircuit.getRootNode() instanceof CompoundCircuitNode circuitNode)
         {
             MinecraftServer server = Objects.requireNonNull(level().getServer());
-            CircuitCompiler.tryCompileNode(circuitNode, circuitName)
+            CircuitCompiler.tryCompileNode(circuitNode)
                     .thenAcceptAsync(node ->
                     {
                         if (circuit != prevCircuit)
@@ -180,11 +167,6 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     public Circuit getCircuit()
     {
         return circuit;
-    }
-
-    public String getCircuitName()
-    {
-        return circuitName;
     }
 
     public void addWireStateListener(WireStateListener listener)
@@ -392,15 +374,14 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     {
         if (circuit != null)
         {
-            StoredCircuit storedCircuit = new StoredCircuit(circuitName, circuit.getSerializableRootNode());
-            components.set(MRContent.DC_TYPE_CIRCUIT, storedCircuit);
+            components.set(MRContent.DC_TYPE_CIRCUIT, new StoredCircuit(circuit.getSerializableRootNode()));
         }
     }
 
     @Override
     protected void applyImplicitComponents(DataComponentGetter componentGetter)
     {
-        setCircuit(componentGetter.get(MRContent.DC_TYPE_CIRCUIT));
+        setCircuit(componentGetter.getOrDefault(MRContent.DC_TYPE_CIRCUIT, StoredCircuit.EMPTY).toCircuit());
     }
 
     @Override

@@ -81,7 +81,7 @@ public final class EvalMethodCompiler
             NodeCompiler compiler
     )
     {
-        Method evalMth = makeNestedEvalMethod(node.getInputs().length, node.getOutputs().length);
+        Method evalMth = makeNestedEvalMethod(node.getName(), node.getInputs().length, node.getOutputs().length);
 
         // Load input params onto stack and call nested eval method from outer method
         outerGenerator.loadThis();
@@ -221,9 +221,9 @@ public final class EvalMethodCompiler
         generator.endMethod();
     }
 
-    private Method makeNestedEvalMethod(int inputCount, int outputCount)
+    private Method makeNestedEvalMethod(String nodeName, int inputCount, int outputCount)
     {
-        String methodName = "evaluate$nested$" + nestedNodeCounter;
+        String methodName = "evaluate$nested$" + nodeName.replace(" ", "_") + "$" + nestedNodeCounter;
         nestedNodeCounter++;
         Type[] paramTypes = Utils.fillArray(new Type[inputCount], $ -> Type.SHORT_TYPE);
         Type retType = switch (outputCount)

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public record ClientboundMicrochipChangeCircuitPayload(int containerId, Optional<CompoundCircuitNode> rootNode) implements CustomPacketPayload
+public record ClientboundMicrochipChangeCircuitPayload(int containerId, Optional<CompoundCircuitNode> rootNode, Optional<String> nodeClassName) implements CustomPacketPayload
 {
     public static final Type<ClientboundMicrochipChangeCircuitPayload> TYPE = Utils.payloadType("clientbound_microchip_change_circuit");
     public static final StreamCodec<ByteBuf, ClientboundMicrochipChangeCircuitPayload> STREAM_CODEC = StreamCodec.composite(
@@ -19,12 +19,14 @@ public record ClientboundMicrochipChangeCircuitPayload(int containerId, Optional
             ClientboundMicrochipChangeCircuitPayload::containerId,
             MicrochipCircuitMenu.ROOT_NODE_CODEC,
             ClientboundMicrochipChangeCircuitPayload::rootNode,
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8),
+            ClientboundMicrochipChangeCircuitPayload::nodeClassName,
             ClientboundMicrochipChangeCircuitPayload::new
     );
 
-    public ClientboundMicrochipChangeCircuitPayload(int containerId, @Nullable CompoundCircuitNode rootNode)
+    public ClientboundMicrochipChangeCircuitPayload(int containerId, @Nullable CompoundCircuitNode rootNode, @Nullable String nodeClassName)
     {
-        this(containerId, Optional.ofNullable(rootNode));
+        this(containerId, Optional.ofNullable(rootNode), Optional.ofNullable(nodeClassName));
     }
 
     @Override

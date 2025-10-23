@@ -20,25 +20,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public record StoredCircuit(String name, @Nullable CompoundCircuitNode rootNode) implements TooltipProvider
+public record StoredCircuit(@Nullable CompoundCircuitNode rootNode) implements TooltipProvider
 {
     public static final Codec<StoredCircuit> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            Codec.STRING.fieldOf("name").forGetter(StoredCircuit::name),
             CompoundCircuitNode.CODEC.codec().optionalFieldOf("root_node").forGetter(StoredCircuit::rootNodeForSerialization)
     ).apply(inst, StoredCircuit::of));
     public static final StreamCodec<ByteBuf, StoredCircuit> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8,
-            StoredCircuit::name,
             ByteBufCodecs.optional(CompoundCircuitNode.STREAM_CODEC),
             StoredCircuit::rootNodeForSerialization,
             StoredCircuit::of
     );
-    public static final StoredCircuit EMPTY = new StoredCircuit("", null);
+    public static final StoredCircuit EMPTY = new StoredCircuit(null);
     public static final String LABEL_CIRCUIT = Utils.translationKey("label", "stored_circuit");
 
-    private static StoredCircuit of(String name, Optional<CompoundCircuitNode> rootNode)
+    private static StoredCircuit of(Optional<CompoundCircuitNode> rootNode)
     {
-        return new StoredCircuit(name, rootNode.orElse(null));
+        return new StoredCircuit(rootNode.orElse(null));
     }
 
     private Optional<CompoundCircuitNode> rootNodeForSerialization()
@@ -57,7 +54,7 @@ public record StoredCircuit(String name, @Nullable CompoundCircuitNode rootNode)
     {
         if (rootNode != null)
         {
-            tooltipAdder.accept(Component.translatable(LABEL_CIRCUIT, name));
+            tooltipAdder.accept(Component.translatable(LABEL_CIRCUIT, rootNode.getName()));
         }
     }
 

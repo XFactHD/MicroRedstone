@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.node.special;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
@@ -36,6 +37,7 @@ import java.util.function.Consumer;
 public final class CompoundCircuitNode extends RootCircuitNode
 {
     public static final MapCodec<CompoundCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+            Codec.STRING.fieldOf("name").forGetter(CompoundCircuitNode::getName),
             NodeEntry.CODEC.listOf().fieldOf("child_nodes").forGetter(node -> node.childNodes),
             NodeEntry.codec(ClockCircuitNode.CODEC.codec()).listOf().fieldOf("clock_nodes").forGetter(node -> node.clockNodes),
             NodeEntry.codec(BufferCircuitNode.CODEC.codec()).listOf().fieldOf("buffer_nodes").forGetter(node -> node.bufferNodes),
@@ -44,6 +46,8 @@ public final class CompoundCircuitNode extends RootCircuitNode
             Connector.CODEC.listOf().fieldOf("outputs").forGetter(node -> List.of(node.outputs))
     ).apply(inst, CompoundCircuitNode::new));
     public static final StreamCodec<ByteBuf, CompoundCircuitNode> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8,
+            CompoundCircuitNode::getName,
             NodeEntry.STREAM_CODEC.apply(ByteBufCodecs.list()),
             node -> node.childNodes,
             NodeEntry.streamCodec(ClockCircuitNode.STREAM_CODEC).apply(ByteBufCodecs.list()),
@@ -59,6 +63,7 @@ public final class CompoundCircuitNode extends RootCircuitNode
             CompoundCircuitNode::new
     );
 
+    private final String name;
     private final List<NodeEntry<CircuitNode>> childNodes;
     private final List<NodeEntry<ClockCircuitNode>> clockNodes;
     private final List<NodeEntry<BufferCircuitNode>> bufferNodes;
@@ -66,6 +71,7 @@ public final class CompoundCircuitNode extends RootCircuitNode
     private final EvalContext.Nested nestedContext;
 
     public CompoundCircuitNode(
+            String name,
             List<NodeEntry<CircuitNode>> childNodes,
             List<NodeEntry<ClockCircuitNode>> clockNodes,
             List<NodeEntry<BufferCircuitNode>> bufferNodes,
@@ -75,6 +81,7 @@ public final class CompoundCircuitNode extends RootCircuitNode
     )
     {
         super(inputs, outputs);
+        this.name = name;
         this.childNodes = childNodes;
         this.clockNodes = clockNodes;
         this.bufferNodes = bufferNodes;
@@ -208,6 +215,11 @@ public final class CompoundCircuitNode extends RootCircuitNode
         {
             buffer.node().compileCapture(generator, selfType, fieldAppender, localWires);
         }
+    }
+
+    public String getName()
+    {
+        return name;
     }
 
     public List<Wire> getWires()

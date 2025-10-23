@@ -43,10 +43,10 @@ public final class ClientCircuitLibrary
         return Objects.requireNonNull(ENTRIES_BY_ID.get(id));
     }
 
-    public static void addOrModifyCircuit(String name, CompoundCircuitNode circuitNode)
+    public static void addOrModifyCircuit(CompoundCircuitNode circuitNode)
     {
         CircuitLibraryEntry entry;
-        CircuitLibraryEntry existing = OWNED_ENTRIES_BY_NAME.get(name);
+        CircuitLibraryEntry existing = OWNED_ENTRIES_BY_NAME.get(circuitNode.getName());
         if (existing != null)
         {
             entry = existing.modifyCircuit(circuitNode);
@@ -54,7 +54,7 @@ public final class ClientCircuitLibrary
         else
         {
             UUID player = Minecraft.getInstance().getGameProfile().id();
-            entry = CircuitLibraryEntry.createCircuit(name, circuitNode, player);
+            entry = CircuitLibraryEntry.createCircuit(circuitNode, player);
         }
         ClientPacketDistributor.sendToServer(new ServerboundModifyCircuitLibraryPayload(Either.left(entry)));
     }

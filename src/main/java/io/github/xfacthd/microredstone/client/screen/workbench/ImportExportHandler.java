@@ -81,7 +81,7 @@ public final class ImportExportHandler
         StoredCircuit circuit = stack.get(MRContent.DC_TYPE_CIRCUIT);
         if (circuit != null && circuit.rootNode() != null)
         {
-            importCircuit(circuit.name(), circuit.rootNode());
+            importCircuit(circuit.rootNode());
         }
     }
 
@@ -117,20 +117,20 @@ public final class ImportExportHandler
             return;
         }
 
-        if (!CircuitValidator.validate(null, circuitNode))
+        if (!CircuitValidator.validate(circuitNode))
         {
             displayImportError(ImportError.VALIDATE_FAILED);
             return;
         }
 
-        importCircuit("", circuitNode);
+        importCircuit(circuitNode);
     }
 
-    public void importCircuit(String name, CompoundCircuitNode circuitNode)
+    public void importCircuit(CompoundCircuitNode circuitNode)
     {
         if (canvas.isEmpty())
         {
-            doImportCircuit(name, circuitNode);
+            doImportCircuit(circuitNode);
             return;
         }
 
@@ -138,11 +138,11 @@ public final class ImportExportHandler
                 .withTitle(TITLE_CONFIRM_IMPORT)
                 .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_ONE)
                 .withMessage(MESSAGE_CONFIRM_IMPORT_LINE_TWO)
-                .withOkCallback(() -> doImportCircuit(name, circuitNode))
+                .withOkCallback(() -> doImportCircuit(circuitNode))
                 .show();
     }
 
-    private void doImportCircuit(String name, CompoundCircuitNode circuitNode)
+    private void doImportCircuit(CompoundCircuitNode circuitNode)
     {
         canvas.clear();
 
@@ -187,7 +187,7 @@ public final class ImportExportHandler
             rootNode.setConnection(connector.port(), connection);
         }
 
-        owner.getToolPane().getLibraryBrowser().setExportName(name);
+        owner.getToolPane().getLibraryBrowser().setExportName(circuitNode.getName());
 
         if (probablyBroken.isTrue())
         {
@@ -269,7 +269,7 @@ public final class ImportExportHandler
     public void assembleAndExport(String name, ExportTarget target)
     {
         ProblemReporter.Collector reporter = new ProblemReporter.Collector();
-        CompoundCircuitNode assembled = CircuitAssembler.assemble(canvas.getRootNode(), reporter);
+        CompoundCircuitNode assembled = CircuitAssembler.assemble(name, canvas.getRootNode(), reporter);
         if (assembled == null)
         {
             // TODO: unpack reporter and set up error annotations, replacing temporary error dialog
@@ -288,29 +288,29 @@ public final class ImportExportHandler
         };
         if (!exists)
         {
-            exportCircuit(name, assembled, target);
+            exportCircuit(assembled, target);
             return;
         }
 
         DialogScreen.builder(DialogScreen.Type.CONFIRM)
                 .withTitle(TITLE_CONFIRM_EXPORT)
                 .withMessage(MESSAGE_CONFIRM_EXPORT)
-                .withOkCallback(() -> exportCircuit(name, assembled, target))
+                .withOkCallback(() -> exportCircuit(assembled, target))
                 .show();
     }
 
-    private void exportCircuit(String name, CompoundCircuitNode circuitNode, ExportTarget target)
+    private void exportCircuit(CompoundCircuitNode circuitNode, ExportTarget target)
     {
         switch (target)
         {
             case LIBRARY ->
             {
-                ClientCircuitLibrary.addOrModifyCircuit(name, circuitNode);
+                ClientCircuitLibrary.addOrModifyCircuit(circuitNode);
                 waitingForExportResult = true;
             }
             case CIRCUIT_ITEM ->
             {
-                var payload = new ServerboundWorkbenchWriteCircuitPayload(menu.containerId, name, circuitNode);
+                var payload = new ServerboundWorkbenchWriteCircuitPayload(menu.containerId, circuitNode);
                 ClientPacketDistributor.sendToServer(payload);
                 waitingForExportResult = true;
             }

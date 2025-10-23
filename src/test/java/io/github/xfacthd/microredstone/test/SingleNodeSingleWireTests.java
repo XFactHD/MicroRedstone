@@ -38,9 +38,9 @@ public final class SingleNodeSingleWireTests
         conOut.connect(wire);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "WIRE");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "WIRE");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -83,9 +83,9 @@ public final class SingleNodeSingleWireTests
         clockProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "CLOCK_one_tick");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "CLOCK_one_tick");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -126,9 +126,9 @@ public final class SingleNodeSingleWireTests
         clockProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "CLOCK_two_tick");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "CLOCK_two_tick");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -172,9 +172,9 @@ public final class SingleNodeSingleWireTests
         bufProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "BUFFER_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "BUFFER_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -224,9 +224,9 @@ public final class SingleNodeSingleWireTests
         notProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "NOT_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "NOT_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -276,9 +276,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "AND_two_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "AND_two_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -334,9 +334,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "AND_three_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "AND_three_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -390,9 +390,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "OR_two_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "OR_two_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -448,9 +448,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "OR_three_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "OR_three_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -504,9 +504,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "XOR_two_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "XOR_two_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -562,9 +562,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "XOR_three_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "XOR_three_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -618,9 +618,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "NAND_two_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "NAND_two_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -676,9 +676,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "NAND_three_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "NAND_three_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -732,9 +732,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "NOR_two_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "NOR_two_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -790,9 +790,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "NOR_three_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "NOR_three_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -846,9 +846,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "XNOR_two_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "XNOR_two_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);
@@ -904,9 +904,9 @@ public final class SingleNodeSingleWireTests
         andProtoNode.setConnection(Port.RIGHT, wireOut, true);
 
         CompoundPrototypeNode protoNode = builder.build();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "XNOR_three_single");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "XNOR_three_single");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(node);

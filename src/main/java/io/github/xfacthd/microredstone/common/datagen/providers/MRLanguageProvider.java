@@ -3,6 +3,7 @@ package io.github.xfacthd.microredstone.common.datagen.providers;
 import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.filebrowser.FileBrowserScreen;
+import io.github.xfacthd.microredstone.client.screen.microchip.MicrochipCircuitScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.KeyHint;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
 import io.github.xfacthd.microredstone.client.screen.workbench.ImportExportHandler;
@@ -71,6 +72,8 @@ public final class MRLanguageProvider extends LanguageProvider
     private void addScreenTranslations()
     {
         add(MicrochipBlockEntity.MENU_TITLE, "Microchip");
+        add(MicrochipCircuitScreen.TITLE_WITH_CIRCUIT, "%s - %s");
+        add(MicrochipCircuitScreen.TITLE_WITH_CIRCUIT_DEBUG, "%s - %s (%s)");
     }
 
     private void addWorkbenchScreenTranslations()

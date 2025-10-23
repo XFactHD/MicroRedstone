@@ -81,28 +81,23 @@ public final class CircuitCompiler
     static final Type WIRE_STATES_TYPE = Type.getType(WireStates.class);
     static final Method WIRE_STATES_SET_MTH = findMethod(WireStates.class, "set", int.class, int.class);
 
-    public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, @Nullable String name)
+    public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node)
     {
-        return tryCompileNode(node, name, false);
+        return tryCompileNode(node, false);
     }
 
-    public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
+    public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node, boolean suppressExport)
     {
-        return CompilationCache.tryCompileNode(node, name, suppressExport);
+        return CompilationCache.tryCompileNode(node, suppressExport);
     }
 
     @Nullable
-    static MethodHandle compileNode(CompoundCircuitNode node, @Nullable String name, boolean suppressExport)
+    static MethodHandle compileNode(CompoundCircuitNode node, boolean suppressExport)
     {
         try
         {
             ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-            String className = CLASS_NAME_PREFIX;
-            if (name != null)
-            {
-                className += name.replaceAll(" ", "_") + "$";
-            }
-            className += CLASS_COUNTER.getAndIncrement();
+            String className = CLASS_NAME_PREFIX + node.getName().replaceAll(" ", "_") + "$" + CLASS_COUNTER.getAndIncrement();
             Type selfType = Type.getType("L" + className + ";");
             writer.visit(Opcodes.V21, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, className, null, SUPER_CLASS, null);
 

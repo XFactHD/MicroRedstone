@@ -12,25 +12,25 @@ import org.junit.jupiter.api.Assertions;
 
 public final class TestUtils
 {
-    public static CompoundCircuitNode assemble(CompoundPrototypeNode protoNode)
+    public static CompoundCircuitNode assemble(CompoundPrototypeNode protoNode, String name)
     {
         ProblemReporter.Collector reporter = new ProblemReporter.Collector();
-        CompoundCircuitNode node = CircuitAssembler.assemble(protoNode, reporter);
+        CompoundCircuitNode node = CircuitAssembler.assemble(name, protoNode, reporter);
         Assertions.assertNotNull(node, () -> "Assembler returned null: " + reporter.getReport());
         return node;
     }
 
     @Nullable
-    public static CompiledCircuitNode compile(CompoundCircuitNode circuitNode, String name)
+    public static CompiledCircuitNode compile(CompoundCircuitNode circuitNode)
     {
-        RootCircuitNode node = CircuitCompiler.tryCompileNode(circuitNode, name).join();
+        RootCircuitNode node = CircuitCompiler.tryCompileNode(circuitNode).join();
         return node instanceof CompiledCircuitNode compiled ? compiled : null;
     }
 
-    public static ProblemReporter.Collector assertAssemblyFails(CompoundPrototypeNode protoNode)
+    public static ProblemReporter.Collector assertAssemblyFails(CompoundPrototypeNode protoNode, String name)
     {
         ProblemReporter.Collector reporter = new ProblemReporter.Collector();
-        CompoundCircuitNode node = CircuitAssembler.assemble(protoNode, reporter);
+        CompoundCircuitNode node = CircuitAssembler.assemble(name, protoNode, reporter);
         Assertions.assertNull(node, "Assembler returned non-null");
         return reporter;
     }

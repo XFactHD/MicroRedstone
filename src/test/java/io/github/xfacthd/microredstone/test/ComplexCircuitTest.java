@@ -29,9 +29,9 @@ public final class ComplexCircuitTest
     void testComplexCircuit()
     {
         CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
-        CompoundCircuitNode node = TestUtils.assemble(protoNode);
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "BCD_2_7SEG");
 
-        RootCircuitNode compiled = TestUtils.compile(node, "BCD_2_7SEG");
+        RootCircuitNode compiled = TestUtils.compile(node);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         int[] expectedOutputs = new int[] {
@@ -89,7 +89,7 @@ public final class ComplexCircuitTest
         innerNotProtoNode.setConnection(Port.RIGHT, innerWireOut, true);
 
         CompoundPrototypeNode innerProtoNode = innerBuilder.build();
-        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode);
+        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode, "NESTED_OneInOneOut_Inner");
 
         TestBuilder outerBuilder = new TestBuilder();
 
@@ -110,9 +110,9 @@ public final class ComplexCircuitTest
         outerNotProtoNode.setConnection(Port.RIGHT, outerWireOut, true);
 
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
-        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
+        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode, "NESTED_OneInOneOut");
 
-        RootCircuitNode compiled = TestUtils.compile(outerNode, "NESTED_OneInOneOut");
+        RootCircuitNode compiled = TestUtils.compile(outerNode);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);
@@ -160,7 +160,7 @@ public final class ComplexCircuitTest
         innerNotProtoNode.setConnection(Port.RIGHT, innerWireOut, true);
 
         CompoundPrototypeNode innerProtoNode = innerBuilder.build();
-        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode);
+        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode, "NESTED_OneInTwoOut_Inner");
 
         TestBuilder outerBuilder = new TestBuilder();
 
@@ -192,9 +192,9 @@ public final class ComplexCircuitTest
         outerBundlerProtoNodeTwo.setConnection(Port.RIGHT, outerWireOut, true);
 
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
-        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
+        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode, "NESTED_OneInTwoOut");
 
-        RootCircuitNode compiled = TestUtils.compile(outerNode, "NESTED_OneInTwoOut");
+        RootCircuitNode compiled = TestUtils.compile(outerNode);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);
@@ -246,7 +246,7 @@ public final class ComplexCircuitTest
         innerNotProtoNode.setConnection(Port.RIGHT, innerWireOut, true);
 
         CompoundPrototypeNode innerProtoNode = innerBuilder.build();
-        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode);
+        CompoundCircuitNode innerNode = TestUtils.assemble(innerProtoNode, "NESTED_OneInThreeOut_Inner");
 
         TestBuilder outerBuilder = new TestBuilder();
 
@@ -284,9 +284,9 @@ public final class ComplexCircuitTest
         outerBundlerProtoNodeThree.setConnection(Port.RIGHT, outerWireOut, true);
 
         CompoundPrototypeNode outerProtoNode = outerBuilder.build();
-        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode);
+        CompoundCircuitNode outerNode = TestUtils.assemble(outerProtoNode, "NESTED_OneInThreeOut");
 
-        RootCircuitNode compiled = TestUtils.compile(outerNode, "NESTED_OneInThreeOut");
+        RootCircuitNode compiled = TestUtils.compile(outerNode);
         Assertions.assertNotNull(compiled, "Compilation failed");
 
         Circuit circuitInterp = new Circuit(outerNode);

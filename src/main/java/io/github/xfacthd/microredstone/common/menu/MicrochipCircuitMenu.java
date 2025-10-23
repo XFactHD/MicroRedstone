@@ -5,9 +5,11 @@ import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.WireStateListener;
 import io.github.xfacthd.microredstone.common.circuit.WireStates;
+import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundMicrochipChangeCircuitPayload;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundMicrochipUpdateWireStatesPayload;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -37,6 +39,8 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
     @Nullable
     private final CompoundCircuitNode initialRootNode;
     @Nullable
+    private final String initialNodeClassName;
+    @Nullable
     private Circuit lastCircuit;
     @Nullable
     private WireStates currStates = null;
@@ -47,13 +51,15 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
     {
         Level level = Objects.requireNonNull(blockEntity.getLevel());
         ContainerLevelAccess levelAccess = ContainerLevelAccess.create(level, blockEntity.getBlockPos());
-        return new MicrochipCircuitMenu(containerId, blockEntity, player, levelAccess, null);
+        return new MicrochipCircuitMenu(containerId, blockEntity, player, levelAccess, null, null);
     }
 
     public static MicrochipCircuitMenu createClient(int containerId, Inventory ignored, RegistryFriendlyByteBuf buffer)
     {
-        CompoundCircuitNode rootNode = ROOT_NODE_CODEC.decode(buffer).orElse(null);
-        return new MicrochipCircuitMenu(containerId, null, null, ContainerLevelAccess.NULL, rootNode);
+        ClientboundMicrochipChangeCircuitPayload payload = ClientboundMicrochipChangeCircuitPayload.STREAM_CODEC.decode(buffer);
+        CompoundCircuitNode rootNode = payload.rootNode().orElse(null);
+        String nodeClassName = payload.nodeClassName().orElse(null);
+        return new MicrochipCircuitMenu(containerId, null, null, ContainerLevelAccess.NULL, rootNode, nodeClassName);
     }
 
     private MicrochipCircuitMenu(
@@ -61,7 +67,8 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
             @Nullable MicrochipBlockEntity blockEntity,
             @Nullable ServerPlayer player,
             ContainerLevelAccess levelAccess,
-            @Nullable CompoundCircuitNode initialRootNode
+            @Nullable CompoundCircuitNode initialRootNode,
+            @Nullable String initialNodeClassName
     )
     {
         super(MRContent.MENU_TYPE_MICROCHIP_CIRCUIT.value(), containerId);
@@ -69,6 +76,7 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
         this.player = player;
         this.levelAccess = levelAccess;
         this.initialRootNode = initialRootNode;
+        this.initialNodeClassName = initialNodeClassName;
         this.lastCircuit = blockEntity != null ? blockEntity.getCircuit() : null;
         if (blockEntity != null)
         {
@@ -78,8 +86,7 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
 
     public void encodeInitialCircuit(ByteBuf buffer)
     {
-        CompoundCircuitNode rootNode = lastCircuit != null ? lastCircuit.getSerializableRootNode() : null;
-        MicrochipCircuitMenu.ROOT_NODE_CODEC.encode(buffer, Optional.ofNullable(rootNode));
+        ClientboundMicrochipChangeCircuitPayload.STREAM_CODEC.encode(buffer, buildCircuitUpdate(lastCircuit));
     }
 
     @Override
@@ -92,8 +99,7 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
             Circuit circuit = blockEntity.getCircuit();
             if (circuit != lastCircuit)
             {
-                CompoundCircuitNode rootNode = circuit != null ? circuit.getSerializableRootNode() : null;
-                PacketDistributor.sendToPlayer(player, new ClientboundMicrochipChangeCircuitPayload(containerId, rootNode));
+                PacketDistributor.sendToPlayer(player, buildCircuitUpdate(circuit));
                 lastCircuit = circuit;
                 currStates = null;
                 lastStates = null;
@@ -106,6 +112,19 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
         }
     }
 
+    private ClientboundMicrochipChangeCircuitPayload buildCircuitUpdate(@Nullable Circuit circuit)
+    {
+        CompoundCircuitNode rootNode = circuit != null ? circuit.getSerializableRootNode() : null;
+        String nodeClassName = null;
+        if (!Utils.PRODUCTION && circuit != null && circuit.getRootNode() instanceof CompiledCircuitNode compiled)
+        {
+            nodeClassName = compiled.getClass().getSimpleName();
+            // Strip unnecessary suffix appended to hidden classes
+            nodeClassName = nodeClassName.substring(0, nodeClassName.indexOf('/'));
+        }
+        return new ClientboundMicrochipChangeCircuitPayload(containerId, rootNode, nodeClassName);
+    }
+
     @Override
     public void handleWireStates(WireStates wireStates)
     {
@@ -116,6 +135,12 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
     public CompoundCircuitNode getInitialRootNode()
     {
         return initialRootNode;
+    }
+
+    @Nullable
+    public String getInitialNodeClassName()
+    {
+        return initialNodeClassName;
     }
 
     @Override

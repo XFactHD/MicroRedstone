@@ -27,14 +27,14 @@ public class CircuitPerformanceTests
     private static final CompoundCircuitNode BCD_7SEG_DEC_INTERP = Util.make(() ->
     {
         CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
-        CompoundCircuitNode assembled = CircuitAssembler.assemble(protoNode, ProblemReporter.DISCARDING);
+        CompoundCircuitNode assembled = CircuitAssembler.assemble("BCD_7SEG_DEC", protoNode, ProblemReporter.DISCARDING);
         return Objects.requireNonNull(assembled);
     });
     private static final Circuit BCD_7SEG_DEC_INTERP_CIRCUIT = new Circuit(BCD_7SEG_DEC_INTERP);
     private static final TestInterfaceAdapter BCD_7SEG_DEC_INTERP_ADAPTER = new TestInterfaceAdapter();
     private static final RootCircuitNode BCD_7SEG_DEC_COMPILED = Util.make(() ->
     {
-        CompletableFuture<RootCircuitNode> future = CircuitCompiler.tryCompileNode(BCD_7SEG_DEC_INTERP, null, true);
+        CompletableFuture<RootCircuitNode> future = CircuitCompiler.tryCompileNode(BCD_7SEG_DEC_INTERP, true);
         if (future.join() instanceof CompiledCircuitNode compiled) return compiled;
         throw new IllegalStateException("Test circuit failed to compile");
     });

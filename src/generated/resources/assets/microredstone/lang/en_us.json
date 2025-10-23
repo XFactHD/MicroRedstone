@@ -228,6 +228,8 @@
   "title.microredstone.file_browser.save": "Save %s",
   "title.microredstone.filebrowser.save.confirm_overwrite": "Confirm Save %s",
   "title.microredstone.microchip": "Microchip",
+  "title.microredstone.microchip.circuit": "%s - %s",
+  "title.microredstone.microchip.circuit_debug": "%s - %s (%s)",
   "tooltip.microredstone.circuit_workbench.canvas.node.clock.set_perdiod.invalid_value": "Period must be higher or equal to 2 and a multiple of 2",
   "tooltip.microredstone.circuit_workbench.canvas.node.constant.set_value.invalid_value.bundled": "Value must be binary or hex between 0 and 65_535 (inclusive)",
   "tooltip.microredstone.circuit_workbench.canvas.node.constant.set_value.invalid_value.single": "Value must be binary 0 or 1",

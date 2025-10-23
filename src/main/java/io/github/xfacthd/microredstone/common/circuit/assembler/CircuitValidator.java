@@ -1,7 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.assembler;
 
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
@@ -10,9 +9,9 @@ public final class CircuitValidator
     private static final Pattern NAME_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9 ]*)$");
     public static final int MAX_CON_NAME_LEN = 32;
 
-    public static boolean validate(@Nullable String name, CompoundCircuitNode circuitNode)
+    public static boolean validate(CompoundCircuitNode circuitNode)
     {
-        if (name != null && !validateName(name, true))
+        if (!validateName(circuitNode.getName(), true))
         {
             return false;
         }

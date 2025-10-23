@@ -57,7 +57,7 @@ public final class ClientNetworkHandler
     {
         if (Minecraft.getInstance().screen instanceof MicrochipCircuitScreen screen && screen.getMenu().containerId == payload.containerId())
         {
-            screen.handleCircuitUpdate(payload.rootNode().orElse(null));
+            screen.handleCircuitUpdate(payload.rootNode().orElse(null), payload.nodeClassName().orElse(null));
         }
     }
 

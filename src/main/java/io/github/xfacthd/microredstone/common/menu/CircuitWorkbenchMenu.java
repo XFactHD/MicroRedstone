@@ -97,9 +97,9 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
         return circuitSlot;
     }
 
-    public ClientboundWorkbenchWriteCircuitResultPayload applyCircuitToItem(String name, CompoundCircuitNode circuitNode)
+    public ClientboundWorkbenchWriteCircuitResultPayload applyCircuitToItem(CompoundCircuitNode circuitNode)
     {
-        if (!CircuitValidator.validate(name, circuitNode))
+        if (!CircuitValidator.validate(circuitNode))
         {
             return result(false);
         }
@@ -108,8 +108,7 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
             return result(false);
         }
 
-        StoredCircuit circuit = new StoredCircuit(name, circuitNode);
-        circuitSlot.getItem().set(MRContent.DC_TYPE_CIRCUIT, circuit);
+        circuitSlot.getItem().set(MRContent.DC_TYPE_CIRCUIT, new StoredCircuit(circuitNode));
         return result(true);
     }
 

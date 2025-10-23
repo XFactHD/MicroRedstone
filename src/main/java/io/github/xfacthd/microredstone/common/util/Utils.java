@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +52,7 @@ public final class Utils
                     Long2ObjectOpenHashMap::new
             ));
     private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss");
+    public static final boolean PRODUCTION = FMLEnvironment.isProduction();
 
     public static Direction getDirection(BlockPos srcPos, BlockPos destPos)
     {

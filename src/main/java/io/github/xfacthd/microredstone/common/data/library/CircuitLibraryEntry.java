@@ -7,7 +7,6 @@ import io.github.xfacthd.microredstone.common.net.MRStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 
@@ -17,7 +16,6 @@ import java.util.UUID;
 
 public record CircuitLibraryEntry(
         UUID id,
-        String name,
         CompoundCircuitNode circuitNode,
         UUID author,
         Instant timeCreated,
@@ -27,7 +25,6 @@ public record CircuitLibraryEntry(
 {
     static final Codec<CircuitLibraryEntry> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             UUIDUtil.CODEC.fieldOf("id").forGetter(CircuitLibraryEntry::id),
-            Codec.STRING.fieldOf("name").forGetter(CircuitLibraryEntry::name),
             CompoundCircuitNode.CODEC.codec().fieldOf("circuit").forGetter(CircuitLibraryEntry::circuitNode),
             UUIDUtil.CODEC.fieldOf("author").forGetter(CircuitLibraryEntry::author),
             ExtraCodecs.INSTANT_ISO8601.fieldOf("time_created").forGetter(CircuitLibraryEntry::timeCreated),
@@ -37,8 +34,6 @@ public record CircuitLibraryEntry(
     public static final StreamCodec<ByteBuf, CircuitLibraryEntry> STREAM_CODEC = StreamCodec.composite(
             UUIDUtil.STREAM_CODEC,
             CircuitLibraryEntry::id,
-            ByteBufCodecs.STRING_UTF8,
-            CircuitLibraryEntry::name,
             CompoundCircuitNode.STREAM_CODEC,
             CircuitLibraryEntry::circuitNode,
             UUIDUtil.STREAM_CODEC,
@@ -52,22 +47,27 @@ public record CircuitLibraryEntry(
             CircuitLibraryEntry::new
     );
 
-    public static CircuitLibraryEntry createCircuit(String name, CompoundCircuitNode circuitNode, UUID author)
+    public static CircuitLibraryEntry createCircuit(CompoundCircuitNode circuitNode, UUID author)
     {
         Instant time = Instant.now();
-        return new CircuitLibraryEntry(Util.NIL_UUID, name, circuitNode, author, time, time, ShareInfo.Private.INSTANCE);
+        return new CircuitLibraryEntry(Util.NIL_UUID, circuitNode, author, time, time, ShareInfo.Private.INSTANCE);
+    }
+
+    public String name()
+    {
+        return circuitNode.getName();
     }
 
     public CircuitLibraryEntry modifyCircuit(CompoundCircuitNode circuitNode)
     {
-        return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, Instant.now(), shareInfo);
+        return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, Instant.now(), shareInfo);
     }
 
     public CircuitLibraryEntry modifyShareInfo(ShareInfo shareInfo)
     {
         if (!this.shareInfo.equals(shareInfo))
         {
-            return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, Instant.now(), shareInfo);
+            return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, Instant.now(), shareInfo);
         }
         return this;
     }
@@ -76,7 +76,7 @@ public record CircuitLibraryEntry(
     {
         if (!this.id.equals(id))
         {
-            return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, timeModified, shareInfo);
+            return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, timeModified, shareInfo);
         }
         return this;
     }
@@ -85,7 +85,7 @@ public record CircuitLibraryEntry(
     {
         if (shareInfo instanceof ShareInfo.Shared(Set<UUID> sharedTo) && !sharedTo.isEmpty())
         {
-            return new CircuitLibraryEntry(id, name, circuitNode, author, timeCreated, timeModified, shareInfo.withoutShareTargets());
+            return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, timeModified, shareInfo.withoutShareTargets());
         }
         return this;
     }
