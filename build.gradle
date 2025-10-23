@@ -40,9 +40,6 @@ neoForge {
         client {
             client()
             gameDirectory = project.file('run')
-
-            // TODO: this should be moved to a NeoForge patch or MDG
-            programArgument '--offlineDeveloperMode'
         }
 
         server {
