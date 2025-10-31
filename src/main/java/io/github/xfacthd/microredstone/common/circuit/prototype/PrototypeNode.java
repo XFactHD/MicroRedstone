@@ -5,6 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnexpectedConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WirePortTypeMismatchProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -26,6 +29,8 @@ import java.util.stream.Collectors;
 
 public abstract class PrototypeNode implements PlaceableNode
 {
+    private static final Port[] PORTS = Port.values();
+
     protected final PortConfig portConfig;
     @Nullable
     private final IconConfig icon;
@@ -102,7 +107,40 @@ public abstract class PrototypeNode implements PlaceableNode
         connectedWires.clear();
     }
 
-    public abstract void validate(ProblemReporter reporter);
+    public final void validate(ProblemReporter reporter)
+    {
+        for (Port port : PORTS)
+        {
+            boolean hasPort = portConfig.hasPort(port);
+            boolean connected = isConnectedNormalized(port);
+            if (!hasPort)
+            {
+                if (connected)
+                {
+                    reporter.report(new UnexpectedConnectionProblem(this, port));
+                }
+                continue;
+            }
+            if (!connected)
+            {
+                if (portConfig.isRequired(this, port))
+                {
+                    PortDir portDir = Objects.requireNonNull(portConfig.getPortDir(port));
+                    reporter.report(new UnspecifiedConnectionProblem(this, port, portDir));
+                }
+                continue;
+            }
+            Wire wire = getWireOrThrow(port);
+            WireType portType = Objects.requireNonNull(portConfig.getPortType(port));
+            if (wire.getWireType() != portType)
+            {
+                reporter.report(new WirePortTypeMismatchProblem(this, port, portType, wire.getWireType()));
+            }
+        }
+        validateInternal(reporter);
+    }
+
+    protected void validateInternal(ProblemReporter reporter) {}
 
     @Nullable
     public abstract CircuitNode assemble(WireMapper wireMapper);

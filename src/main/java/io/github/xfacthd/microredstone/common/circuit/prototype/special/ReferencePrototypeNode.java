@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.client.util.PortOverlays;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
@@ -17,7 +16,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,7 +24,6 @@ import java.util.Map;
 public final class ReferencePrototypeNode extends PrototypeNode
 {
     private final CompoundCircuitNode referenced;
-    private final Connector[] connectors;
 
     public static ReferencePrototypeNode create(CompoundCircuitNode referenced, @Nullable IconConfig icon)
     {
@@ -39,19 +36,6 @@ public final class ReferencePrototypeNode extends PrototypeNode
     {
         super(makePortConfig(connectors), icon);
         this.referenced = referenced;
-        this.connectors = connectors;
-    }
-
-    @Override
-    public void validate(ProblemReporter reporter)
-    {
-        for (Connector connector : connectors)
-        {
-            if (!isConnectedNormalized(connector.port()))
-            {
-                reporter.report(new UnspecifiedConnectionProblem(connector.port(), connector.dir()));
-            }
-        }
     }
 
     @Override
@@ -68,7 +52,7 @@ public final class ReferencePrototypeNode extends PrototypeNode
 
     private static PortConfig makePortConfig(Connector[] connectors)
     {
-        PortConfig.Builder builder = PortConfig.builder();
+        PortConfig.Builder<?> builder = PortConfig.builder();
         for (Connector connector : connectors)
         {
             builder.addPort(connector.port(), connector.type(), connector.dir());

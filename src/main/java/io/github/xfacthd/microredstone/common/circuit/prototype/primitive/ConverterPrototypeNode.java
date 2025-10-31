@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.InvalidConverterBitIndexProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -65,10 +65,12 @@ public final class ConverterPrototypeNode extends PrototypeNode
     }
 
     @Override
-    public void validate(ProblemReporter reporter)
+    protected void validateInternal(ProblemReporter reporter)
     {
-        if (!isConnectedNormalized(Port.LEFT)) reporter.report(UnspecifiedConnectionProblem.input(Port.LEFT));
-        if (!isConnectedNormalized(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
+        if (bitIndex < 0 || bitIndex > 15)
+        {
+            reporter.report(new InvalidConverterBitIndexProblem(this, bitIndex));
+        }
     }
 
     @Override

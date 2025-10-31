@@ -7,7 +7,6 @@ import io.github.xfacthd.microredstone.client.screen.workbench.ExactNodePos;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -24,7 +23,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.SerdesUtils;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,8 +35,8 @@ import java.util.stream.Collectors;
 
 public final class LampPrototypeNode extends PrototypeNode
 {
-    private static final PortConfig PORT_CONFIG = PortConfig.builder()
-            .addPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
+    private static final PortConfig PORT_CONFIG = PortConfig.<LampPrototypeNode>builder()
+            .addPredicatedPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT, node -> node.chainedTo == null)
             .build();
     public static final IconConfig ICON = new IconConfig(Utils.rl("part/lamp"), Utils.rl("port/left_single"), false);
     public static final IconConfig ICON_BG = new IconConfig(Utils.rl("part/untyped"), Utils.rl("port/left_single"), false);
@@ -138,15 +136,6 @@ public final class LampPrototypeNode extends PrototypeNode
     {
         unchain();
         chainedToThis.forEach(LampPrototypeNode::unchain);
-    }
-
-    @Override
-    public void validate(ProblemReporter reporter)
-    {
-        if (chainedTo == null && !isConnectedNormalized(Port.LEFT))
-        {
-            reporter.report(UnspecifiedConnectionProblem.input(Port.LEFT));
-        }
     }
 
     @Override

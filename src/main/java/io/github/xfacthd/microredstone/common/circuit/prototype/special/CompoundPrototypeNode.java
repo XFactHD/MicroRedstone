@@ -10,7 +10,7 @@ import io.github.xfacthd.microredstone.common.circuit.assembler.report.patheleme
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.BundledWireDrivingPackerProblem;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnknownWiresProblem;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WireDriverCountProblem;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WirePortTypeMismatchProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WireTypeMismatchProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -236,7 +236,7 @@ public final class CompoundPrototypeNode
             WireType prevType = types.put(wire, type);
             if (prevType != null && prevType != type)
             {
-                reporter.report(new WirePortTypeMismatchProblem(wire, prevType, type));
+                reporter.report(new WireTypeMismatchProblem(wire, prevType, type));
             }
         }
 

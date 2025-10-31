@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.InvalidConstantValueProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -34,9 +34,11 @@ public final class ConstantPrototypeNode extends PrototypeNode
             .build();
     public static final IconConfig ICON_SINGLE = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_single"), false);
     public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_bundled"), false);
+    private static final int MAX_VAL_SINGLE = 1;
+    private static final int MAX_VAL_BUNDLED = 65535;
 
     private final WireType wireType;
-    private short value = 0;
+    private int value = 0;
 
     public ConstantPrototypeNode(WireType wireType)
     {
@@ -44,7 +46,7 @@ public final class ConstantPrototypeNode extends PrototypeNode
         this.wireType = wireType;
     }
 
-    private ConstantPrototypeNode(WireType wireType, short value)
+    private ConstantPrototypeNode(WireType wireType, int value)
     {
         this(wireType);
         this.value = value;
@@ -55,20 +57,24 @@ public final class ConstantPrototypeNode extends PrototypeNode
         return wireType;
     }
 
-    public short getValue()
+    public int getValue()
     {
         return value;
     }
 
-    public void setValue(short value)
+    public void setValue(int value)
     {
         this.value = value;
     }
 
     @Override
-    public void validate(ProblemReporter reporter)
+    protected void validateInternal(ProblemReporter reporter)
     {
-        if (!isConnectedNormalized(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
+        int maxValue = wireType.select(MAX_VAL_SINGLE, MAX_VAL_BUNDLED);
+        if (value < 0 || value > maxValue)
+        {
+            reporter.report(new InvalidConstantValueProblem(this, value));
+        }
     }
 
     @Override
@@ -76,7 +82,7 @@ public final class ConstantPrototypeNode extends PrototypeNode
     {
         int outputWire = wireMapper.resolveWire(getWireOrThrow(Port.RIGHT));
         Connector output = new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, wireType);
-        return new ConstantCircuitNode(value, output);
+        return new ConstantCircuitNode((short) value, output);
     }
 
     @Override
@@ -94,20 +100,20 @@ public final class ConstantPrototypeNode extends PrototypeNode
     {
         public static final MapCodec<Serializable> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 WireType.CODEC.fieldOf("wire_type").forGetter(node -> node.wireType),
-                Codec.SHORT.fieldOf("value").forGetter(node -> node.value)
+                Codec.INT.fieldOf("value").forGetter(node -> node.value)
         ).and(commonFields(inst)).apply(inst, Serializable::new));
 
         private final WireType wireType;
-        private final short value;
+        private final int value;
 
-        private Serializable(PrototypeNode node, List<Wire> wires, WireType wireType, short value)
+        private Serializable(PrototypeNode node, List<Wire> wires, WireType wireType, int value)
         {
             super(node, wires);
             this.wireType = wireType;
             this.value = value;
         }
 
-        private Serializable(WireType wireType, short value, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
+        private Serializable(WireType wireType, int value, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
         {
             super(connectedWires, pos, rotation);
             this.wireType = wireType;

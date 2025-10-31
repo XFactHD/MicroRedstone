@@ -102,7 +102,7 @@ public final class ConstantPartNodeContextMenuProvider extends PartNodeContextMe
         @Override
         public void saveQueryResult()
         {
-            node.setValue((short) editBox.getIntValue());
+            node.setValue(editBox.getIntValue());
         }
     }
 }

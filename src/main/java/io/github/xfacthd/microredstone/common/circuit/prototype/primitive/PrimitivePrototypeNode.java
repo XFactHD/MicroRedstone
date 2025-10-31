@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -27,7 +26,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ByIdMap;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.ArrayList;
@@ -60,19 +58,6 @@ public final class PrimitivePrototypeNode extends PrototypeNode
     public boolean isMultiBit()
     {
         return wireType == WireType.BUNDLED;
-    }
-
-    @Override
-    public void validate(ProblemReporter reporter)
-    {
-        portConfig.getPortsWithDir(PortDir.INPUT).forEach(port ->
-        {
-            if (!isConnectedNormalized(port))
-            {
-                reporter.report(UnspecifiedConnectionProblem.input(port));
-            }
-        });
-        if (!isConnectedNormalized(Port.RIGHT)) reporter.report(UnspecifiedConnectionProblem.output(Port.RIGHT));
     }
 
     @Override
