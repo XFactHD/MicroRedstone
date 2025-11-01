@@ -68,10 +68,15 @@ neoForge {
     }
 
     mods {
-        simpleminimap {
+        microredstone {
             sourceSet(project.sourceSets.main)
             sourceSet(project.sourceSets.test)
         }
+    }
+
+    unitTest {
+        enable()
+        testedMod = mods.microredstone
     }
 
     addModdingDependenciesTo(project.sourceSets.test)
