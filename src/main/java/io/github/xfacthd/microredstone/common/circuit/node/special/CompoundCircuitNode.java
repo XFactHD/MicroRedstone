@@ -92,11 +92,11 @@ public final class CompoundCircuitNode extends RootCircuitNode
     @Override
     public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs, @Nullable WireStates wireStates)
     {
+        nestedContext.prepare(context, inputs);
         for (NodeEntry<ClockCircuitNode> clock : clockNodes)
         {
             clock.evaluate(nestedContext);
         }
-        nestedContext.prepare(context, inputs);
         for (NodeEntry<CircuitNode> child : childNodes)
         {
             child.evaluate(nestedContext);

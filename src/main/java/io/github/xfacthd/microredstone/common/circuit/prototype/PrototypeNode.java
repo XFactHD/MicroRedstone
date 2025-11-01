@@ -92,6 +92,12 @@ public abstract class PrototypeNode implements PlaceableNode
         return Objects.requireNonNull(connectedWires.get(port));
     }
 
+    @Nullable
+    public final Wire getWireOptional(Port port)
+    {
+        return connectedWires.get(port);
+    }
+
     public final void replaceWire(Wire oldWire, Wire newWire)
     {
         connectedWires.replaceAll((port, wire) -> wire == oldWire ? newWire : wire);

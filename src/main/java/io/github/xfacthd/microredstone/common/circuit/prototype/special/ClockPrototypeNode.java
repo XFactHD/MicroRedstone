@@ -22,15 +22,15 @@ import net.minecraft.util.ProblemReporter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-// TODO: add inhibit input (requires support for optional connections)
 public final class ClockPrototypeNode extends PrototypeNode
 {
     private static final PortConfig PORT_CONFIG = PortConfig.builder()
-            //.addOptionalPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
+            .addOptionalPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
             .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
             .build();
-    public static final IconConfig ICON = new IconConfig(Utils.rl("part/clock"), Utils.rl("port/right_single"), false);
+    public static final IconConfig ICON = new IconConfig(Utils.rl("part/clock"), Utils.rl("port/hor_single"), false);
 
     private int halfPeriodLength = 10;
 
@@ -67,9 +67,16 @@ public final class ClockPrototypeNode extends PrototypeNode
     @Override
     public ClockCircuitNode assemble(WireMapper wireMapper)
     {
+        Connector inhibitCon = null;
+        Wire inhibitWireOpt = getWireOptional(Port.LEFT);
+        if (inhibitWireOpt != null)
+        {
+            int inhibitWire = wireMapper.resolveWire(inhibitWireOpt);
+            inhibitCon = new Connector(getPos(), Port.LEFT, inhibitWire, PortDir.INPUT, WireType.SINGLE);
+        }
         int outputWire = wireMapper.resolveWire(getWireOrThrow(Port.RIGHT));
         Connector outCon = new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, WireType.SINGLE);
-        return new ClockCircuitNode(halfPeriodLength, outCon);
+        return new ClockCircuitNode(halfPeriodLength, Optional.ofNullable(inhibitCon), outCon);
     }
 
     @Override

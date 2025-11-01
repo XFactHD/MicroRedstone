@@ -23,30 +23,36 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class ClockCircuitNode extends CircuitNode
 {
     public static final MapCodec<ClockCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             ExtraCodecs.POSITIVE_INT.fieldOf("half_period").forGetter(node -> node.halfPeriodLength),
+            Connector.CODEC.optionalFieldOf("inhibit_input").forGetter(ClockCircuitNode::getInhibitInput),
             Connector.CODEC.fieldOf("output").forGetter(node -> node.getOutputs()[0])
     ).apply(inst, ClockCircuitNode::new));
     public static final StreamCodec<ByteBuf, ClockCircuitNode> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,
             node -> node.halfPeriodLength,
+            ByteBufCodecs.optional(Connector.STREAM_CODEC),
+            ClockCircuitNode::getInhibitInput,
             Connector.STREAM_CODEC,
             node -> node.getOutputs()[0],
             ClockCircuitNode::new
     );
 
     private final int halfPeriodLength;
+    private final int inhibitInputWire;
     private final int outputWire;
     private int periodCounter;
     private short state = 0;
 
-    public ClockCircuitNode(int halfPeriodLength, Connector output)
+    public ClockCircuitNode(int halfPeriodLength, Optional<Connector> inhibitInput, Connector output)
     {
-        super(List.of(), List.of(output));
+        super(inhibitInput.map(List::of).orElse(List.of()), List.of(output));
         this.halfPeriodLength = halfPeriodLength;
+        this.inhibitInputWire = inhibitInput.map(Connector::wire).orElse(-1);
         this.outputWire = output.wire();
         this.periodCounter = halfPeriodLength - 1;
     }
@@ -54,11 +60,14 @@ public final class ClockCircuitNode extends CircuitNode
     @Override
     public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
     {
-        periodCounter++;
-        if (periodCounter >= halfPeriodLength)
+        if (inhibitInputWire == -1 || context.loadInput(inhibitInputWire) == 0)
         {
-            periodCounter = 0;
-            state ^= 1;
+            periodCounter++;
+            if (periodCounter >= halfPeriodLength)
+            {
+                periodCounter = 0;
+                state ^= 1;
+            }
         }
         context.storeOutput(outputWire, state);
     }
@@ -66,12 +75,20 @@ public final class ClockCircuitNode extends CircuitNode
     public void compile(GeneratorAdapter methodGen, FieldAppender fieldAppender, Type selfType, LocalWireMapper localWires)
     {
         boolean needCounter = halfPeriodLength > 1;
+        boolean needInhibit = inhibitInputWire != -1;
         Fields clockFields = fieldAppender.addClockField(needCounter, halfPeriodLength - 1);
         String stateField = clockFields.stateField;
         Label avoidToggleLabel = new Label();
+        Label avoidFullyLabel = new Label();
         // Preload state field onto stack
         methodGen.loadThis();
         methodGen.getField(selfType, stateField, Type.INT_TYPE);
+        if (needInhibit)
+        {
+            localWires.generateLoad(inhibitInputWire);
+            methodGen.push(0);
+            methodGen.ifCmp(Type.INT_TYPE, GeneratorAdapter.NE, avoidFullyLabel);
+        }
         int counterLocal = -1;
         if (needCounter)
         {
@@ -106,8 +123,17 @@ public final class ClockCircuitNode extends CircuitNode
             methodGen.loadLocal(counterLocal);
             methodGen.putField(selfType, counterField, Type.INT_TYPE);
         }
+        if (needInhibit)
+        {
+            methodGen.mark(avoidFullyLabel);
+        }
         // wireLocal/context[wire] = state
         localWires.generateStore(outputWire);
+    }
+
+    private Optional<Connector> getInhibitInput()
+    {
+        return inputs.length > 0 ? Optional.of(inputs[0]) : Optional.empty();
     }
 
     public int getCounter()
@@ -145,13 +171,13 @@ public final class ClockCircuitNode extends CircuitNode
     {
         if (obj == this) return true;
         if (!(obj instanceof ClockCircuitNode other)) return false;
-        return other.halfPeriodLength == halfPeriodLength && other.outputWire == outputWire;
+        return other.halfPeriodLength == halfPeriodLength && other.inhibitInputWire == inhibitInputWire && other.outputWire == outputWire;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(halfPeriodLength, outputWire);
+        return Objects.hash(halfPeriodLength, inhibitInputWire, outputWire);
     }
 
     public record Fields(@Nullable String counterField, String stateField) { }

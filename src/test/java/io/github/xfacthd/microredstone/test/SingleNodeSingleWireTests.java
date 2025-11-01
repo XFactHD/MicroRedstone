@@ -112,6 +112,57 @@ public final class SingleNodeSingleWireTests
     }
 
     @Test
+    void testClockOneTickInhibit()
+    {
+        TestBuilder builder = new TestBuilder();
+
+        Wire wireInhibit = builder.addWire(WireType.SINGLE);
+        Wire wireOut = builder.addWire(WireType.SINGLE);
+
+        Connection conInhibit = builder.addConnection(Port.LEFT, WireType.SINGLE, PortDir.INPUT);
+        conInhibit.connect(wireInhibit);
+        Connection conOut = builder.addConnection(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT);
+        conOut.connect(wireOut);
+
+        ClockPrototypeNode clockProtoNode = builder.addNode(new ClockPrototypeNode());
+        clockProtoNode.setHalfPeriodLength(1);
+        clockProtoNode.setConnection(Port.LEFT, wireInhibit, true);
+        clockProtoNode.setConnection(Port.RIGHT, wireOut, true);
+
+        CompoundPrototypeNode protoNode = builder.build();
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "CLOCK_one_tick_inhbit");
+
+        RootCircuitNode compiled = TestUtils.compile(node);
+        Assertions.assertNotNull(compiled, "Compilation failed");
+
+        Circuit circuitInterp = new Circuit(node);
+        Circuit circuitCompiled = new Circuit(compiled);
+        TestInterfaceAdapter adapter = new TestInterfaceAdapter();
+
+        for (int i = 0; i < 16; i++)
+        {
+            int inhibit = adapter.setValue(Port.LEFT, (i & 0b1000) >> 3);
+            circuitInterp.evaluate(adapter, null);
+            int expected = inhibit > 0 ? 0 : (~i & 0x1);
+            Assertions.assertEquals(expected, adapter.getValue(Port.RIGHT), "Interpreted CLOCK_INHIBIT cycle " + i);
+        }
+        for (int i = 0; i < 16; i++)
+        {
+            int inhibit = adapter.setValue(Port.LEFT, (i & 0b1000) >> 3);
+            circuitCompiled.evaluate(adapter, null);
+            int expected = inhibit > 0 ? 0 : (~i & 0x1);
+            Assertions.assertEquals(expected, adapter.getValue(Port.RIGHT), "Compiled CLOCK_INHIBIT cycle " + i);
+        }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted CLOCK_INHIBIT serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled CLOCK_INHIBIT serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted CLOCK_INHIBIT apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted CLOCK_INHIBIT apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled CLOCK_INHIBIT apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled CLOCK_INHIBIT apply interpreted state");
+    }
+
+    @Test
     void testClockTwoTick()
     {
         TestBuilder builder = new TestBuilder();
@@ -152,6 +203,57 @@ public final class SingleNodeSingleWireTests
         Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted CLOCK apply compiled state");
         Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled CLOCK apply compiled state");
         Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled CLOCK apply interpreted state");
+    }
+
+    @Test
+    void testClockTwoTickInhibit()
+    {
+        TestBuilder builder = new TestBuilder();
+
+        Wire wireInhibit = builder.addWire(WireType.SINGLE);
+        Wire wireOut = builder.addWire(WireType.SINGLE);
+
+        Connection conInhibit = builder.addConnection(Port.LEFT, WireType.SINGLE, PortDir.INPUT);
+        conInhibit.connect(wireInhibit);
+        Connection conOut = builder.addConnection(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT);
+        conOut.connect(wireOut);
+
+        ClockPrototypeNode clockProtoNode = builder.addNode(new ClockPrototypeNode());
+        clockProtoNode.setHalfPeriodLength(2);
+        clockProtoNode.setConnection(Port.LEFT, wireInhibit, true);
+        clockProtoNode.setConnection(Port.RIGHT, wireOut, true);
+
+        CompoundPrototypeNode protoNode = builder.build();
+        CompoundCircuitNode node = TestUtils.assemble(protoNode, "CLOCK_two_tick_inhibit");
+
+        RootCircuitNode compiled = TestUtils.compile(node);
+        Assertions.assertNotNull(compiled, "Compilation failed");
+
+        Circuit circuitInterp = new Circuit(node);
+        Circuit circuitCompiled = new Circuit(compiled);
+        TestInterfaceAdapter adapter = new TestInterfaceAdapter();
+
+        for (int i = 0; i < 32; i++)
+        {
+            int inhibit = adapter.setValue(Port.LEFT, (i & 0b10000) >> 4);
+            circuitInterp.evaluate(adapter, null);
+            int expected = inhibit > 0 ? 0 : ((~i & 0b10) >> 1);
+            Assertions.assertEquals(expected, adapter.getValue(Port.RIGHT), "Interpreted CLOCK_INHIBIT cycle " + i);
+        }
+        for (int i = 0; i < 32; i++)
+        {
+            int inhibit = adapter.setValue(Port.LEFT, (i & 0b10000) >> 4);
+            circuitCompiled.evaluate(adapter, null);
+            int expected = inhibit > 0 ? 0 : ((~i & 0b10) >> 1);
+            Assertions.assertEquals(expected, adapter.getValue(Port.RIGHT), "Compiled CLOCK_INHIBIT cycle " + i);
+        }
+
+        CircuitState stateInterp = Assertions.assertDoesNotThrow(node::serializeState, "Interpreted CLOCK_INHIBIT serialize state");
+        CircuitState stateCompiled = Assertions.assertDoesNotThrow(compiled::serializeState, "Compiled CLOCK_INHIBIT serialize state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateInterp), "Interpreted CLOCK_INHIBIT apply interpreted state");
+        Assertions.assertDoesNotThrow(() -> node.applyState(stateCompiled), "Interpreted CLOCK_INHIBIT apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateCompiled), "Compiled CLOCK_INHIBIT apply compiled state");
+        Assertions.assertDoesNotThrow(() -> compiled.applyState(stateInterp), "Compiled CLOCK_INHIBIT apply interpreted state");
     }
 
     @Test
