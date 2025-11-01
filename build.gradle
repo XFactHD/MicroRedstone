@@ -40,6 +40,9 @@ neoForge {
         client {
             client()
             gameDirectory = project.file('run')
+
+            systemProperty('microredstone.compiler_dump.root_dir', file('./run').getAbsolutePath())
+            systemProperty('microredstone.compiler_dump.sub_dir', 'runtime')
         }
 
         server {
@@ -137,7 +140,8 @@ dependencies {
 test {
     useJUnitPlatform()
 
-    workingDir = project.file('run')
+    systemProperty('microredstone.compiler_dump.root_dir', file('./run').getAbsolutePath())
+    systemProperty('microredstone.compiler_dump.sub_dir', 'test')
 }
 
 jmh {

@@ -3,7 +3,6 @@ package io.github.xfacthd.microredstone.util;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import org.junit.jupiter.api.extension.Extension;
 
-import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,7 +28,6 @@ public final class DebugExportConfigExtension implements Extension
             return;
         }
 
-        CircuitCompiler.setExportPathOverride(Path.of("./"), "test");
         CircuitCompiler.clearDumpDirectory();
         CONFIGURED.set(true);
     }

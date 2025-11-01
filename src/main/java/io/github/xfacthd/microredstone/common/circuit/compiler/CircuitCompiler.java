@@ -10,12 +10,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCirc
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import net.minecraft.Util;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.common.util.Lazy;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -52,10 +48,10 @@ public final class CircuitCompiler
         }
     });
     private static final AtomicLong CLASS_COUNTER = new AtomicLong();
-    private static final boolean DUMP_TO_FILE = !FMLEnvironment.isProduction();
+    private static final String DUMP_ROOT_DIR_PROPERTY = "microredstone.compiler_dump.root_dir";
+    private static final String DUMP_SUB_DIR_PROPERTY = "microredstone.compiler_dump.sub_dir";
     @Nullable
-    private static Path EXPORT_PATH_OVERRIDE = null;
-    private static final Lazy<Path> EXPORT_PATH = Lazy.of(() -> buildExportPath(FMLPaths.GAMEDIR.get(), "runtime"));
+    private static final Path EXPORT_PATH = buildExportPath();
 
     private static final String SUPER_CLASS = CompiledCircuitNode.class.getName().replace(".", "/");
     private static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
@@ -110,7 +106,7 @@ public final class CircuitCompiler
             compileStateSerdes(writer, selfType, evalCompiler.getBufferFields(), evalCompiler.getClockFields());
 
             byte[] bytes = writer.toByteArray();
-            if (DUMP_TO_FILE && !suppressExport)
+            if (EXPORT_PATH != null && !suppressExport)
             {
                 exportClassBytes(className, bytes);
             }
@@ -290,7 +286,7 @@ public final class CircuitCompiler
 
     private static void exportClassBytes(String name, byte[] bytes)
     {
-        Path exportPath = Objects.requireNonNullElseGet(EXPORT_PATH_OVERRIDE, EXPORT_PATH);
+        Path exportPath = Objects.requireNonNull(EXPORT_PATH);
         String fileName = name.substring(name.lastIndexOf("/") + 1);
         Path path = exportPath.resolve(fileName + ".class");
         try
@@ -306,12 +302,9 @@ public final class CircuitCompiler
 
     public static void clearDumpDirectory()
     {
-        if (!DUMP_TO_FILE) return;
+        if (EXPORT_PATH == null || !Files.isDirectory(EXPORT_PATH)) { return; }
 
-        Path exportPath = Objects.requireNonNullElseGet(EXPORT_PATH_OVERRIDE, EXPORT_PATH);
-        if (!Files.isDirectory(exportPath)) return;
-
-        try (Stream<Path> paths = Files.list(exportPath))
+        try (Stream<Path> paths = Files.list(EXPORT_PATH))
         {
             List<Path> files = paths.filter(Files::isRegularFile)
                     .filter(file ->
@@ -331,15 +324,14 @@ public final class CircuitCompiler
         }
     }
 
-    @VisibleForTesting
-    public static void setExportPathOverride(Path rootDir, String dumpDirName)
+    @Nullable
+    private static Path buildExportPath()
     {
-        EXPORT_PATH_OVERRIDE = buildExportPath(rootDir, dumpDirName);
-    }
+        String rootDir = System.getProperty(DUMP_ROOT_DIR_PROPERTY);
+        String dumpDirName = System.getProperty(DUMP_SUB_DIR_PROPERTY);
+        if (rootDir == null || dumpDirName == null) return null;
 
-    private static Path buildExportPath(Path rootDir, String dumpDirName)
-    {
-        return rootDir.resolve(MicroRedstone.MOD_ID).resolve("dump").resolve(dumpDirName);
+        return Path.of(rootDir).resolve(MicroRedstone.MOD_ID).resolve("dump").resolve(dumpDirName);
     }
 
     private CircuitCompiler() { }
