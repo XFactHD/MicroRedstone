@@ -2,7 +2,6 @@ package io.github.xfacthd.microredstone.common.circuit.prototype.special;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.xfacthd.microredstone.client.util.PortOverlays;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
@@ -15,7 +14,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -27,14 +25,12 @@ public final class ReferencePrototypeNode extends PrototypeNode
 
     public static ReferencePrototypeNode create(CompoundCircuitNode referenced, @Nullable IconConfig icon)
     {
-        Connector[] connectors = Utils.concatArrays(referenced.getInputs(), referenced.getOutputs());
-        if (icon == null) icon = makeIconConfig(connectors);
-        return new ReferencePrototypeNode(referenced, connectors, icon);
+        return new ReferencePrototypeNode(referenced, makePortConfig(referenced), icon);
     }
 
-    private ReferencePrototypeNode(CompoundCircuitNode referenced, Connector[] connectors, IconConfig icon)
+    private ReferencePrototypeNode(CompoundCircuitNode referenced, PortConfig portConfig, @Nullable IconConfig icon)
     {
-        super(makePortConfig(connectors), icon);
+        super(portConfig, icon != null ? icon : makeIconConfig(portConfig));
         this.referenced = referenced;
     }
 
@@ -50,10 +46,10 @@ public final class ReferencePrototypeNode extends PrototypeNode
         return new Serializable(this, wires, referenced);
     }
 
-    private static PortConfig makePortConfig(Connector[] connectors)
+    private static PortConfig makePortConfig(CompoundCircuitNode referenced)
     {
         PortConfig.Builder<?> builder = PortConfig.builder();
-        for (Connector connector : connectors)
+        for (Connector connector : Utils.concatArrays(referenced.getInputs(), referenced.getOutputs()))
         {
             builder.addPort(connector.port(), connector.type(), connector.dir());
         }
@@ -62,18 +58,12 @@ public final class ReferencePrototypeNode extends PrototypeNode
 
     public static IconConfig makeIconConfig(CompoundCircuitNode referenced)
     {
-        return makeIconConfig(Utils.concatArrays(referenced.getInputs(), referenced.getOutputs()));
+        return makeIconConfig(makePortConfig(referenced));
     }
 
-    private static IconConfig makeIconConfig(Connector[] connectors)
+    private static IconConfig makeIconConfig(PortConfig portConfig)
     {
-        int portMask = 0;
-        for (Connector connector : connectors)
-        {
-            portMask = connector.port().appendMask(portMask, connector.type());
-        }
-        ResourceLocation portOverlay = PortOverlays.get(portMask);
-        return new IconConfig(Utils.rl("part/reference"), portOverlay);
+        return IconConfig.of(Utils.rl("part/reference"), portConfig);
     }
 
     public static final class Serializable extends PrototypeNode.Serializable

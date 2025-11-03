@@ -157,10 +157,10 @@ public final class PrimitivePrototypeNode extends PrototypeNode
                         .build();
                 this.portsSingle = inputs -> inputs == 2 ? portsSingleTwo : portsSingleThree;
                 this.portsBundled = inputs -> inputs == 2 ? portsBundledTwo : portsBundledThree;
-                IconConfig iconSingleTwo = new IconConfig(icon, Utils.rl("port/up_down_right_single"));
-                IconConfig iconBundledTwo = new IconConfig(icon, Utils.rl("port/up_down_right_bundled"));
-                IconConfig iconSingleThree = new IconConfig(icon, Utils.rl("port/full_single"));
-                IconConfig iconBundledThree = new IconConfig(icon, Utils.rl("port/full_bundled"));
+                IconConfig iconSingleTwo = IconConfig.of(icon, portsSingleTwo);
+                IconConfig iconBundledTwo = IconConfig.of(icon, portsBundledTwo);
+                IconConfig iconSingleThree = IconConfig.of(icon, portsSingleThree);
+                IconConfig iconBundledThree = IconConfig.of(icon, portsBundledThree);
                 this.iconSingle = inputs -> inputs == 2 ? iconSingleTwo : iconSingleThree;
                 this.iconBundled = inputs -> inputs == 2 ? iconBundledTwo : iconBundledThree;
             }
@@ -176,8 +176,8 @@ public final class PrimitivePrototypeNode extends PrototypeNode
                         .build();
                 this.portsSingle = inputs -> portsSingle;
                 this.portsBundled = inputs -> portsBundled;
-                IconConfig iconSingle = new IconConfig(icon, Utils.rl("port/hor_single"));
-                IconConfig iconBundled = new IconConfig(icon, Utils.rl("port/hor_bundled"));
+                IconConfig iconSingle = IconConfig.of(icon, portsSingle);
+                IconConfig iconBundled = IconConfig.of(icon, portsBundled);
                 this.iconSingle = inputs -> iconSingle;
                 this.iconBundled = inputs -> iconBundled;
             }

@@ -30,8 +30,8 @@ public final class BufferPrototypeNode extends PrototypeNode
             .addPort(Port.LEFT, WireType.BUNDLED, PortDir.INPUT)
             .addPort(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT)
             .build();
-    public static final IconConfig ICON_SINGLE = new IconConfig(Utils.rl("part/buffer"), Utils.rl("port/hor_single"));
-    public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.rl("part/buffer"), Utils.rl("port/hor_bundled"));
+    public static final IconConfig ICON_SINGLE = IconConfig.of(Utils.rl("part/buffer"), PORTS_SINGLE);
+    public static final IconConfig ICON_BUNDLED = IconConfig.of(Utils.rl("part/buffer"), PORTS_BUNDLED);
 
     private final WireType wireType;
 

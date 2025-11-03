@@ -15,10 +15,12 @@ import java.util.stream.Stream;
 public final class PortConfig
 {
     private final Map<Port, PortEntry> ports;
+    private final int portMask;
 
-    private PortConfig(Map<Port, PortEntry> ports)
+    private PortConfig(Map<Port, PortEntry> ports, int portMask)
     {
         this.ports = ports;
+        this.portMask = portMask;
     }
 
     public boolean hasPort(Port port)
@@ -58,6 +60,11 @@ public final class PortConfig
                 .map(Map.Entry::getKey);
     }
 
+    public int getPortMask()
+    {
+        return portMask;
+    }
+
     public static <T extends PrototypeNode> Builder<T> builder()
     {
         return new Builder<>();
@@ -68,6 +75,7 @@ public final class PortConfig
     public static final class Builder<T extends PrototypeNode>
     {
         private final Map<Port, PortEntry> ports = new EnumMap<>(Port.class);
+        private int portMask = 0;
 
         private Builder() {}
 
@@ -93,12 +101,13 @@ public final class PortConfig
             {
                 throw new IllegalStateException("Duplicate port declaration: " + port);
             }
+            portMask = port.appendMask(portMask, type);
             return this;
         }
 
         public PortConfig build()
         {
-            return new PortConfig(ports);
+            return new PortConfig(ports, portMask);
         }
     }
 }

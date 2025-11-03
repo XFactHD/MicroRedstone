@@ -20,6 +20,7 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.StringRepresentable;
 
@@ -95,8 +96,8 @@ public final class ConverterPrototypeNode extends PrototypeNode
 
     public enum Type implements StringRepresentable
     {
-        PACK(WireType.SINGLE, WireType.BUNDLED, new IconConfig(Utils.rl("part/packer"), Utils.rl("port/left_single_right_bundled"))),
-        UNPACK(WireType.BUNDLED, WireType.SINGLE, new IconConfig(Utils.rl("part/unpacker"), Utils.rl("port/left_bundled_right_single")));
+        PACK(WireType.SINGLE, WireType.BUNDLED, Utils.rl("part/packer")),
+        UNPACK(WireType.BUNDLED, WireType.SINGLE, Utils.rl("part/unpacker"));
 
         private static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
 
@@ -106,7 +107,7 @@ public final class ConverterPrototypeNode extends PrototypeNode
         private final PortConfig portConfig;
         private final IconConfig icon;
 
-        Type(WireType inType, WireType outType, IconConfig icon)
+        Type(WireType inType, WireType outType, ResourceLocation icon)
         {
             this.inType = inType;
             this.outType = outType;
@@ -114,7 +115,7 @@ public final class ConverterPrototypeNode extends PrototypeNode
                     .addPort(Port.LEFT, inType, PortDir.INPUT)
                     .addPort(Port.RIGHT, outType, PortDir.OUTPUT)
                     .build();
-            this.icon = icon;
+            this.icon = IconConfig.of(icon, portConfig);
         }
 
         public IconConfig getIcon()

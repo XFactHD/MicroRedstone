@@ -38,10 +38,10 @@ public final class LampPrototypeNode extends PrototypeNode
     private static final PortConfig PORT_CONFIG = PortConfig.<LampPrototypeNode>builder()
             .addPredicatedPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT, node -> node.chainedTo == null)
             .build();
-    public static final IconConfig ICON = new IconConfig(Utils.rl("part/lamp"), Utils.rl("port/left_single"), false);
-    public static final IconConfig ICON_BG = new IconConfig(Utils.rl("part/untyped"), Utils.rl("port/left_single"), false);
+    public static final IconConfig ICON = IconConfig.of(Utils.rl("part/lamp"), PORT_CONFIG, false);
+    public static final IconConfig ICON_BG = IconConfig.of(Utils.rl("part/untyped"), PORT_CONFIG, false);
     public static final IconConfig ICON_FG = new IconConfig(Utils.rl("part/lamp_overlay"), null, false);
-    public static final IconConfig ICON_CHAIN = new IconConfig(Utils.rl("part/lamp_chain"), null);
+    public static final IconConfig ICON_CHAIN = new IconConfig(Utils.rl("part/lamp_chain"), null, true);
 
     private final Set<LampPrototypeNode> chainedToThis = new ReferenceOpenHashSet<>();
     @Nullable
