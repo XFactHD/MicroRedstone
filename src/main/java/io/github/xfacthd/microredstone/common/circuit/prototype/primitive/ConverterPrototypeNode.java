@@ -5,7 +5,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.InvalidConverterBitIndexProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.NodeError;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -21,7 +22,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.List;
@@ -66,11 +66,11 @@ public final class ConverterPrototypeNode extends PrototypeNode
     }
 
     @Override
-    protected void validateInternal(ProblemReporter reporter)
+    protected void validateInternal(CircuitErrorCollector errors)
     {
         if (bitIndex < 0 || bitIndex > 15)
         {
-            reporter.report(new InvalidConverterBitIndexProblem(this, bitIndex));
+            errors.submit(new NodeError.InvalidConverterBit(this, bitIndex));
         }
     }
 

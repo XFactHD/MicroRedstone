@@ -5,7 +5,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.InvalidClockPeriodProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.NodeError;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -18,7 +19,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.util.ProblemReporter;
 
 import java.util.List;
 import java.util.Map;
@@ -56,11 +56,11 @@ public final class ClockPrototypeNode extends PrototypeNode
     }
 
     @Override
-    protected void validateInternal(ProblemReporter reporter)
+    protected void validateInternal(CircuitErrorCollector errors)
     {
         if (halfPeriodLength < 1)
         {
-            reporter.report(new InvalidClockPeriodProblem(this, halfPeriodLength));
+            errors.submit(new NodeError.InvalidClockPeriod(this, halfPeriodLength));
         }
     }
 

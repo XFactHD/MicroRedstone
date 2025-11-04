@@ -5,9 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.client.screen.workbench.part.PartSetMode;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnexpectedConnectionProblem;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnspecifiedConnectionProblem;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WirePortTypeMismatchProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.NodeError;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
@@ -17,7 +16,6 @@ import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.data.MRRegistries;
-import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -113,7 +111,7 @@ public abstract class PrototypeNode implements PlaceableNode
         connectedWires.clear();
     }
 
-    public final void validate(ProblemReporter reporter)
+    public final void validate(CircuitErrorCollector errors)
     {
         for (Port port : PORTS)
         {
@@ -123,7 +121,7 @@ public abstract class PrototypeNode implements PlaceableNode
             {
                 if (connected)
                 {
-                    reporter.report(new UnexpectedConnectionProblem(this, port));
+                    errors.submit(new NodeError.UnexpectedConnection(this, port));
                 }
                 continue;
             }
@@ -132,7 +130,7 @@ public abstract class PrototypeNode implements PlaceableNode
                 if (portConfig.isRequired(this, port))
                 {
                     PortDir portDir = Objects.requireNonNull(portConfig.getPortDir(port));
-                    reporter.report(new UnspecifiedConnectionProblem(this, port, portDir));
+                    errors.submit(new NodeError.MissingConnection(this, port, portDir));
                 }
                 continue;
             }
@@ -140,13 +138,13 @@ public abstract class PrototypeNode implements PlaceableNode
             WireType portType = Objects.requireNonNull(portConfig.getPortType(port));
             if (wire.getWireType() != portType)
             {
-                reporter.report(new WirePortTypeMismatchProblem(this, port, portType, wire.getWireType()));
+                errors.submit(new NodeError.MismatchedConnection(this, port, portType, wire.getWireType()));
             }
         }
-        validateInternal(reporter);
+        validateInternal(errors);
     }
 
-    protected void validateInternal(ProblemReporter reporter) {}
+    protected void validateInternal(CircuitErrorCollector errors) {}
 
     @Nullable
     public abstract CircuitNode assemble(WireMapper wireMapper);

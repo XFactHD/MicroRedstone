@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone;
 
 import io.github.xfacthd.microredstone.common.circuit.Circuit;
 import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitAssembler;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
@@ -11,7 +12,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.special.Compound
 import io.github.xfacthd.microredstone.util.ComplexTestCircuits;
 import io.github.xfacthd.microredstone.util.TestInterfaceAdapter;
 import net.minecraft.Util;
-import net.minecraft.util.ProblemReporter;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -27,7 +27,7 @@ public class CircuitPerformanceTests
     private static final CompoundCircuitNode BCD_7SEG_DEC_INTERP = Util.make(() ->
     {
         CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
-        CompoundCircuitNode assembled = CircuitAssembler.assemble("BCD_7SEG_DEC", protoNode, ProblemReporter.DISCARDING);
+        CompoundCircuitNode assembled = CircuitAssembler.assemble("BCD_7SEG_DEC", protoNode, new CircuitErrorCollector());
         return Objects.requireNonNull(assembled);
     });
     private static final Circuit BCD_7SEG_DEC_INTERP_CIRCUIT = new Circuit(BCD_7SEG_DEC_INTERP);

@@ -15,6 +15,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireGrid;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitAssembler;
 import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitValidator;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
@@ -35,7 +36,6 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -268,14 +268,14 @@ public final class ImportExportHandler
 
     public void assembleAndExport(String name, ExportTarget target)
     {
-        ProblemReporter.Collector reporter = new ProblemReporter.Collector();
-        CompoundCircuitNode assembled = CircuitAssembler.assemble(name, canvas.getRootNode(), reporter);
+        CircuitErrorCollector errors = new CircuitErrorCollector();
+        CompoundCircuitNode assembled = CircuitAssembler.assemble(name, canvas.getRootNode(), errors);
         if (assembled == null)
         {
             // TODO: unpack reporter and set up error annotations, replacing temporary error dialog
             DialogScreen.builder(DialogScreen.Type.ERROR)
                     .withTitle(Component.literal("Circuit Assembly Failed"))
-                    .withMessage(Component.literal(reporter.getReport()))
+                    .withMessages(errors.getErrorMessages())
                     .show();
             return;
         }

@@ -3,12 +3,12 @@ package io.github.xfacthd.microredstone.common.circuit.connection;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.DanglingConnectionProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.NodeError;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.util.ProblemReporter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -117,12 +117,16 @@ public final class Connection implements PlaceableNode
         return Objects.requireNonNull(wire);
     }
 
-    public boolean validate(ProblemReporter conReporter)
+    public boolean validate(CircuitErrorCollector errors)
     {
         if (wire == null)
         {
-            conReporter.report(DanglingConnectionProblem.INSTANCE);
+            errors.submit(new NodeError.DanglingConnection(this));
             return false;
+        }
+        if (wire.getWireType() != wireType)
+        {
+            errors.submit(new NodeError.MismatchedConnection(this, Port.RIGHT, wireType, wire.getWireType()));
         }
         return true;
     }

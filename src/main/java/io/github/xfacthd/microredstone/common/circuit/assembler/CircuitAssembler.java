@@ -7,11 +7,9 @@ import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 import com.mojang.logging.LogUtils;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.pathelement.RootNodePathElement;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.DirectCyclicConnectionProblem;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.IndirectCyclicConnectionProblem;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.UnexpectedErrorProblem;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.WireCountMismatchProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.NodeError;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.RootError;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
@@ -29,10 +27,8 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
-import io.github.xfacthd.microredstone.common.util.CountingProblemReporter;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.util.ProblemReporter;
 import net.neoforged.fml.loading.toposort.CyclePresentException;
 import net.neoforged.fml.loading.toposort.TopologicalSort;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +40,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -53,28 +50,26 @@ public final class CircuitAssembler
     private static final Port[] PORTS = Port.values();
 
     @Nullable
-    public static CompoundCircuitNode assemble(String name, CompoundPrototypeNode node, ProblemReporter problemReporter)
+    public static CompoundCircuitNode assemble(String name, CompoundPrototypeNode node, CircuitErrorCollector errors)
     {
-        CountingProblemReporter reporter = CountingProblemReporter.of(problemReporter);
-
         try
         {
-            node.validate(reporter.forChild(new RootNodePathElement(node)));
+            node.validate(errors);
         }
         catch (Throwable t)
         {
-            reporter.report(new UnexpectedErrorProblem(t));
+            errors.submit(new RootError.UnexpectedError(t));
             LOGGER.error("Encountered an unexpected error validating the circuit prototype. This is a bug!", t);
         }
-        if (reporter.hasIssues()) return null;
+        if (errors.hasErrors()) return null;
 
         List<ClockPrototypeNode> clockProtoNodes = new ArrayList<>();
         List<BufferPrototypeNode> bufferProtoNodes = new ArrayList<>();
-        Graph<PrototypeNode> nodeGraph = buildNodeGraph(node, clockProtoNodes, bufferProtoNodes, reporter);
+        Graph<PrototypeNode> nodeGraph = buildNodeGraph(node, clockProtoNodes, bufferProtoNodes, errors);
         if (nodeGraph == null) return null;
 
-        List<PrototypeNode> childProtoNodes = buildSortedNodeList(nodeGraph, reporter);
-        if (reporter.hasIssues()) return null;
+        List<PrototypeNode> childProtoNodes = buildSortedNodeList(nodeGraph, errors);
+        if (errors.hasErrors()) return null;
 
         WireMapper wireMapper = new WireMapper();
 
@@ -148,7 +143,7 @@ public final class CircuitAssembler
         }
         if (wireMapper.size() != node.getWireCount())
         {
-            reporter.report(new WireCountMismatchProblem(node.getWireCount(), wireMapper.size()));
+            errors.submit(new RootError.WireCountMismatch(node.getWireCount(), wireMapper.size()));
             return null;
         }
 
@@ -177,7 +172,7 @@ public final class CircuitAssembler
             CompoundPrototypeNode node,
             List<ClockPrototypeNode> clockProtoNodes,
             List<BufferPrototypeNode> bufferProtoNodes,
-            ProblemReporter reporter
+            CircuitErrorCollector errors
     )
     {
         MutableGraph<PrototypeNode> graph = GraphBuilder.directed().nodeOrder(ElementOrder.insertion()).build();
@@ -216,7 +211,7 @@ public final class CircuitAssembler
             {
                 if (driverNode == readerNode)
                 {
-                    reporter.report(new DirectCyclicConnectionProblem(driverNode));
+                    errors.submit(new NodeError.DirectCycle(driverNode));
                     return null;
                 }
                 graph.putEdge(driverNode, Objects.requireNonNull(readerNode));
@@ -225,7 +220,7 @@ public final class CircuitAssembler
         return graph;
     }
 
-    private static List<PrototypeNode> buildSortedNodeList(Graph<PrototypeNode> nodeGraph, ProblemReporter reporter)
+    private static List<PrototypeNode> buildSortedNodeList(Graph<PrototypeNode> nodeGraph, CircuitErrorCollector errors)
     {
         try
         {
@@ -233,7 +228,10 @@ public final class CircuitAssembler
         }
         catch (CyclePresentException e)
         {
-            reporter.report(new IndirectCyclicConnectionProblem(e.getCycles()));
+            for (Set<PrototypeNode> cycle : e.<PrototypeNode>getCycles())
+            {
+                errors.submit(new NodeError.IndirectCycle(cycle));
+            }
             return List.of();
         }
     }

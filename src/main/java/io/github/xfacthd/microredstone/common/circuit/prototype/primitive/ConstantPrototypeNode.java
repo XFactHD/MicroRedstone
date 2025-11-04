@@ -5,7 +5,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.WireMapper;
-import io.github.xfacthd.microredstone.common.circuit.assembler.report.problem.InvalidConstantValueProblem;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
+import io.github.xfacthd.microredstone.common.circuit.assembler.report.NodeError;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
@@ -19,7 +20,6 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.util.ProblemReporter;
 
 import java.util.List;
 import java.util.Map;
@@ -68,12 +68,12 @@ public final class ConstantPrototypeNode extends PrototypeNode
     }
 
     @Override
-    protected void validateInternal(ProblemReporter reporter)
+    protected void validateInternal(CircuitErrorCollector errors)
     {
         int maxValue = wireType.select(MAX_VAL_SINGLE, MAX_VAL_BUNDLED);
         if (value < 0 || value > maxValue)
         {
-            reporter.report(new InvalidConstantValueProblem(this, value));
+            errors.submit(new NodeError.InvalidConstantValue(this, value));
         }
     }
 
