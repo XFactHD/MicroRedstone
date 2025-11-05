@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.datagen.providers;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.client.data.LocalCircuitStorage;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.filebrowser.FileBrowserScreen;
 import io.github.xfacthd.microredstone.client.screen.microchip.MicrochipCircuitScreen;
@@ -125,7 +126,13 @@ public final class MRLanguageProvider extends LanguageProvider
         add(FilterToggleButton.TOOLTIP_ON, "%s Circuits: Shown");
         add(ToolsTab.ToolAction.CREATE_SINGLE_WIRE.getTitle(), "Add Wire");
         add(ToolsTab.ToolAction.CREATE_BUNDLED_WIRE.getTitle(), "Add Bundled Wire");
+        add(ToolsTab.ToolAction.LOAD_LOCAL.getTitle(), "Load Circuit Design");
+        add(ToolsTab.ToolAction.SAVE_LOCAL.getTitle(), "Save Circuit Design");
         add(ToolsTab.ToolAction.CLEAR_CANVAS.getTitle(), "Clear Canvas");
+        add(ToolsTab.TITLE_LOAD_FAILED, "Error loading circuit");
+        add(ToolsTab.MESSAGE_LOAD_FAILED, "An error occured while loading the circuit design, this is likely a bug.");
+        add(ToolsTab.TITLE_SAVE_FAILED, "Error saving circuit");
+        add(ToolsTab.MESSAGE_SAVE_FAILED, "An error occured while saving the circuit design, this is likely a bug.");
         add(ToolsTab.TITLE_CONFIRM_CLEAR, "Confirm Clear Canvas");
         add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_ONE, "Are you sure you want to clear the canvas?");
         add(ToolsTab.MESSAGE_CONFIRM_CLEAR_LINE_TWO, "All unsaved changes will be lost.");
@@ -179,6 +186,7 @@ public final class MRLanguageProvider extends LanguageProvider
         add(FileBrowserScreen.MSG_SAVE_CONFIRM_OVERWRITE_LINE_ONE, "%s already exists.");
         add(FileBrowserScreen.MSG_SAVE_CONFIRM_OVERWRITE_LINE_TWO, "Are you sure you want to overwrite it?");
         add(KeyHint.WRAPPER, "[%s]");
+        add(LocalCircuitStorage.FILE_TYPE_DESCRIPTION, "Circuit Design");
     }
 
     private void addPartTranslations()

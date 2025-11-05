@@ -354,6 +354,15 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         return errorAnnotations;
     }
 
+    public void importPrototype(CompoundPrototypeNode circuit)
+    {
+        clear();
+
+        circuit.getWires().forEach(wireGrid::importWireDirect);
+        circuit.getChildNodes().forEach(partGrid::importPartNode);
+        this.circuit.copyConnectionsFrom(circuit);
+    }
+
     @Nullable
     public ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY)
     {

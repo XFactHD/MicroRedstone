@@ -38,6 +38,11 @@ public final class PartGrid
         return null;
     }
 
+    public void importPartNode(PrototypeNode node)
+    {
+        setPartNode(node.getPos(), node, node.getRotation(), PartSetMode.ADD);
+    }
+
     public void setPartNode(NodePos pos, @Nullable PrototypeNode node, int rotation, PartSetMode mode)
     {
         int idx = index(pos);

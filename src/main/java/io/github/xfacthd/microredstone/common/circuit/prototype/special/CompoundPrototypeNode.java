@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -75,7 +76,12 @@ public final class CompoundPrototypeNode
 
     public List<PrototypeNode> getChildNodes()
     {
-        return childNodes;
+        return Collections.unmodifiableList(childNodes);
+    }
+
+    public Set<Wire> getWires()
+    {
+        return Collections.unmodifiableSet(wires);
     }
 
     public int getWireCount()
@@ -86,6 +92,11 @@ public final class CompoundPrototypeNode
     public Connection[] getConnections()
     {
         return connections;
+    }
+
+    public void copyConnectionsFrom(CompoundPrototypeNode other)
+    {
+        System.arraycopy(other.connections, 0, connections, 0, connections.length);
     }
 
     public void replaceWireInConnections(Wire oldWire, Wire newWire)

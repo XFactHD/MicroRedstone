@@ -149,6 +149,12 @@ public final class WireGrid implements Iterable<RoutedWire>
     public Wire importWire(Wire wire)
     {
         wire = wire.copy();
+        importWireDirect(wire);
+        return wire;
+    }
+
+    public void importWireDirect(Wire wire)
+    {
         canvas.getRootNode().addWire(wire);
 
         Set<RoutedWire.Section> sections = new HashSet<>();
@@ -188,8 +194,6 @@ public final class WireGrid implements Iterable<RoutedWire>
         {
             section.forNonVertexNodes(pos -> addOrUpdateWireNode(pos, routed));
         }
-
-        return wire;
     }
 
     public void trimConnectedWires(NodePos pos, PlaceableNode partNode)

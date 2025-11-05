@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.tab;
 
+import io.github.xfacthd.microredstone.client.data.LocalCircuitStorage;
 import io.github.xfacthd.microredstone.client.screen.dialog.DialogScreen;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.workbench.CircuitWorkbenchScreen;
@@ -11,8 +12,8 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.To
 import io.github.xfacthd.microredstone.client.screen.workbench.wire.WireInProgress;
 import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
@@ -24,6 +25,10 @@ import java.util.function.Consumer;
 
 public final class ToolsTab extends ToolPaneTabWidget
 {
+    public static final Component TITLE_LOAD_FAILED = Utils.translate("title", "circuit_workbench.tools_tab.tool_action.load.failed");
+    public static final Component MESSAGE_LOAD_FAILED = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.load.failed");
+    public static final Component TITLE_SAVE_FAILED = Utils.translate("title", "circuit_workbench.tools_tab.tool_action.save.failed");
+    public static final Component MESSAGE_SAVE_FAILED = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.save.failed");
     public static final Component TITLE_CONFIRM_CLEAR = Utils.translate("title", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm");
     public static final Component MESSAGE_CONFIRM_CLEAR_LINE_ONE = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_one");
     public static final Component MESSAGE_CONFIRM_CLEAR_LINE_TWO = Utils.translate("msg", "circuit_workbench.tools_tab.tool_action.clear_canvas.confirm_line_two");
@@ -75,6 +80,7 @@ public final class ToolsTab extends ToolPaneTabWidget
         return ToolPaneTab.TOOLS;
     }
 
+    // TODO: make save/load icons
     public enum ToolAction
     {
         CREATE_SINGLE_WIRE(
@@ -92,6 +98,22 @@ public final class ToolsTab extends ToolPaneTabWidget
                 WireType.BUNDLED.getIcon(),
                 WireToolActionContextMenuProvider.INSTANCE_BUNDLED
         ),
+        LOAD_LOCAL(new Icon(Utils.rl("button/load_circuit")), null)
+        {
+            @Override
+            int computeButtonY(int paneY, int paneHeight)
+            {
+                return paneY + paneHeight - TOOL_BTN_Y - (ToolActionButton.HEIGHT * 3) - (TOOL_BTN_PADDING * 2);
+            }
+        },
+        SAVE_LOCAL(new Icon(Utils.rl("button/save_circuit")), null)
+        {
+            @Override
+            int computeButtonY(int paneY, int paneHeight)
+            {
+                return paneY + paneHeight - TOOL_BTN_Y - (ToolActionButton.HEIGHT * 2) - TOOL_BTN_PADDING;
+            }
+        },
         CLEAR_CANVAS(new Icon(Utils.rl("minecraft", "spectator/close")), null)
         {
             @Override
@@ -129,7 +151,8 @@ public final class ToolsTab extends ToolPaneTabWidget
                 {
                     case CREATE_SINGLE_WIRE -> wire != null && (wire.getType() == WireType.SINGLE || wire.isEmpty());
                     case CREATE_BUNDLED_WIRE -> wire != null && (wire.getType() == WireType.BUNDLED || wire.isEmpty());
-                    case CLEAR_CANVAS -> true;
+                    case LOAD_LOCAL, CLEAR_CANVAS -> true;
+                    case SAVE_LOCAL -> !tab.owner.getCanvas().isEmpty();
                 };
             }
             return true;
@@ -142,7 +165,7 @@ public final class ToolsTab extends ToolPaneTabWidget
             {
                 case CREATE_SINGLE_WIRE -> wire != null && wire.getType() == WireType.SINGLE;
                 case CREATE_BUNDLED_WIRE -> wire != null && wire.getType() == WireType.BUNDLED;
-                case CLEAR_CANVAS -> false;
+                case LOAD_LOCAL, SAVE_LOCAL, CLEAR_CANVAS -> false;
             };
         }
 
@@ -165,17 +188,41 @@ public final class ToolsTab extends ToolPaneTabWidget
                         tab.owner.getCanvas().startWirePull(WireType.BUNDLED);
                     }
                 }
-                case CLEAR_CANVAS ->
+                case LOAD_LOCAL -> LocalCircuitStorage.load(result ->
                 {
-                    DialogScreen dialog = DialogScreen.builder(DialogScreen.Type.CONFIRM)
-                            .withTitle(TITLE_CONFIRM_CLEAR)
-                            .withMessage(MESSAGE_CONFIRM_CLEAR_LINE_ONE)
-                            .withMessage(MESSAGE_CONFIRM_CLEAR_LINE_TWO)
-                            .withOkCallback(tab.owner.getCanvas()::clear)
-                            .build();
-                    Minecraft.getInstance().pushGuiLayer(dialog);
-                }
+                    switch (result)
+                    {
+                        case LocalCircuitStorage.LoadResult.Success(CompoundPrototypeNode circuit) -> tab.owner.getCanvas().importPrototype(circuit);
+                        case LocalCircuitStorage.LoadResult.Canceled ignored -> { }
+                        case LocalCircuitStorage.LoadResult.Error(Throwable error) -> openErrorDialog(TITLE_SAVE_FAILED, MESSAGE_SAVE_FAILED, error);
+                    }
+                });
+                case SAVE_LOCAL -> LocalCircuitStorage.store(tab.owner.getCanvas().getRootNode(), result ->
+                {
+                    if (result instanceof LocalCircuitStorage.StoreResult.Error(Throwable error))
+                    {
+                        openErrorDialog(TITLE_LOAD_FAILED, MESSAGE_LOAD_FAILED, error);
+                    }
+                });
+                case CLEAR_CANVAS -> DialogScreen.builder(DialogScreen.Type.CONFIRM)
+                        .withTitle(TITLE_CONFIRM_CLEAR)
+                        .withMessage(MESSAGE_CONFIRM_CLEAR_LINE_ONE)
+                        .withMessage(MESSAGE_CONFIRM_CLEAR_LINE_TWO)
+                        .withOkCallback(tab.owner.getCanvas()::clear)
+                        .show();
             }
+        }
+
+        private static void openErrorDialog(Component title, Component message, Throwable error)
+        {
+            Component errorMessage = Component.literal(error.getClass().getName())
+                    .append(": ")
+                    .append(error.getMessage());
+            DialogScreen.builder(DialogScreen.Type.ERROR)
+                    .withTitle(title)
+                    .withMessage(message)
+                    .withMessage(errorMessage)
+                    .show();
         }
 
         public Icon getIcon()
