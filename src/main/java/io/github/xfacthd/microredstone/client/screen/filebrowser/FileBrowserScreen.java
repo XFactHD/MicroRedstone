@@ -492,14 +492,14 @@ public final class FileBrowserScreen extends Screen
 
     private void doExecute(Path filePath)
     {
-        pathConsumer.accept(filePath);
         onClose();
+        pathConsumer.accept(filePath);
     }
 
     private void cancel(Button btn)
     {
-        pathConsumer.accept(null);
         onClose();
+        pathConsumer.accept(null);
     }
 
     private void listCurrentPath()
