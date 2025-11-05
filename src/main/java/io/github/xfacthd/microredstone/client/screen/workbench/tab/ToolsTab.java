@@ -83,10 +83,7 @@ public final class ToolsTab extends ToolPaneTabWidget
     // TODO: make save/load icons
     public enum ToolAction
     {
-        CREATE_SINGLE_WIRE(
-                WireType.SINGLE.getIcon(),
-                WireToolActionContextMenuProvider.INSTANCE_SINGLE
-        )
+        CREATE_SINGLE_WIRE(WireType.SINGLE.getIcon(), WireToolActionContextMenuProvider.INSTANCE_SINGLE, Alignment.TOP)
         {
             @Override
             public Icon getIcon()
@@ -94,34 +91,11 @@ public final class ToolsTab extends ToolPaneTabWidget
                 return super.getIcon().withColor(WorkbenchConfig.INSTANCE.getWireColor());
             }
         },
-        CREATE_BUNDLED_WIRE(
-                WireType.BUNDLED.getIcon(),
-                WireToolActionContextMenuProvider.INSTANCE_BUNDLED
-        ),
-        LOAD_LOCAL(new Icon(Utils.rl("button/load_circuit")), null)
-        {
-            @Override
-            int computeButtonY(int paneY, int paneHeight)
-            {
-                return paneY + paneHeight - TOOL_BTN_Y - (ToolActionButton.HEIGHT * 3) - (TOOL_BTN_PADDING * 2);
-            }
-        },
-        SAVE_LOCAL(new Icon(Utils.rl("button/save_circuit")), null)
-        {
-            @Override
-            int computeButtonY(int paneY, int paneHeight)
-            {
-                return paneY + paneHeight - TOOL_BTN_Y - (ToolActionButton.HEIGHT * 2) - TOOL_BTN_PADDING;
-            }
-        },
-        CLEAR_CANVAS(new Icon(Utils.rl("minecraft", "spectator/close")), null)
-        {
-            @Override
-            int computeButtonY(int paneY, int paneHeight)
-            {
-                return paneY + paneHeight - TOOL_BTN_Y - ToolActionButton.HEIGHT;
-            }
-        };
+        CREATE_BUNDLED_WIRE(WireType.BUNDLED.getIcon(), WireToolActionContextMenuProvider.INSTANCE_BUNDLED, Alignment.TOP),
+        LOAD_LOCAL(new Icon(Utils.rl("button/load_circuit")), null, Alignment.BOTTOM),
+        SAVE_LOCAL(new Icon(Utils.rl("button/save_circuit")), null, Alignment.BOTTOM),
+        CLEAR_CANVAS(new Icon(Utils.rl("minecraft", "spectator/close")), null, Alignment.BOTTOM),
+        ;
 
         private static final ToolAction[] ACTIONS = values();
 
@@ -130,16 +104,26 @@ public final class ToolsTab extends ToolPaneTabWidget
         private final Icon icon;
         @Nullable
         private final ContextMenuProvider menuProvider;
+        private final Alignment alignment;
 
-        ToolAction(Icon icon, @Nullable ContextMenuProvider menuProvider)
+        ToolAction(Icon icon, @Nullable ContextMenuProvider menuProvider, Alignment alignment)
         {
             this.icon = icon;
             this.menuProvider = menuProvider;
+            this.alignment = alignment;
         }
 
         int computeButtonY(int paneY, int paneHeight)
         {
-            return paneY + TOOL_BTN_Y + (ToolActionButton.HEIGHT + TOOL_BTN_PADDING) * ordinal();
+            return switch (alignment)
+            {
+                case TOP -> paneY + TOOL_BTN_Y + (ToolActionButton.HEIGHT + TOOL_BTN_PADDING) * ordinal();
+                case BOTTOM ->
+                {
+                    int idx = ACTIONS.length - 1 - ordinal();
+                    yield paneY + paneHeight - TOOL_BTN_Y - ToolActionButton.HEIGHT * (idx + 1) - TOOL_BTN_PADDING * idx;
+                }
+            };
         }
 
         private boolean isActive(ToolsTab tab)
@@ -239,6 +223,12 @@ public final class ToolsTab extends ToolPaneTabWidget
         public ContextMenuProvider getContextMenuProvider()
         {
             return menuProvider;
+        }
+
+        private enum Alignment
+        {
+            TOP,
+            BOTTOM
         }
     }
 }
