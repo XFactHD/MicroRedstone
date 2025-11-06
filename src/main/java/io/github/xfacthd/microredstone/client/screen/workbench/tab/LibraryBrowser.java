@@ -120,6 +120,11 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         return toolPane.getActiveTab() == getType() && mouseX >= invX && mouseY >= invY;
     }
 
+    public boolean isNameEditFocused()
+    {
+        return mode == Mode.EXPORT && exportNameEditBox.isFocused();
+    }
+
     @Override
     public boolean keyPressed(KeyEvent event)
     {

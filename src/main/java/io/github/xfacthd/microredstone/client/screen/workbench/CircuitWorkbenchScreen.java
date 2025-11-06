@@ -332,7 +332,7 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
             }
             return contextMenu.keyPressed(event);
         }
-        if (toolPane.keyPressed(event))
+        if (toolPane.keyPressed(event) || (toolPane.getLibraryBrowser().isNameEditFocused() && !event.isEscape()))
         {
             return true;
         }
