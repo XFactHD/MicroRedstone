@@ -12,8 +12,8 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.ConstantCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.ProtoNodeType;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
@@ -34,8 +34,8 @@ public final class ConstantPrototypeNode extends PrototypeNode
             .build();
     public static final IconConfig ICON_SINGLE = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_single"), false);
     public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_bundled"), false);
-    private static final int MAX_VAL_SINGLE = 1;
-    private static final int MAX_VAL_BUNDLED = 65535;
+    public static final int MAX_VAL_SINGLE = 1;
+    public static final int MAX_VAL_BUNDLED = 65535;
 
     private final WireType wireType;
     private int value = 0;

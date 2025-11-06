@@ -4,26 +4,29 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
-import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
-import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
+import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
+import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
-import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.base.LeafCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * Special buffer node to use for safely evaluating circular dependencies
  */
-public final class BufferCircuitNode extends CircuitNode
+public final class BufferCircuitNode extends LeafCircuitNode
 {
     public static final MapCodec<BufferCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Connector.CODEC.fieldOf("input").forGetter(node -> node.getInputs()[0]),
@@ -79,6 +82,12 @@ public final class BufferCircuitNode extends CircuitNode
     public int getOutputWire()
     {
         return outputWire;
+    }
+
+    @Override
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
+    {
+        return true;
     }
 
     @Override

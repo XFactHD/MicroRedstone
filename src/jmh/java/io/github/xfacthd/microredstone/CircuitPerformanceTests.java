@@ -5,9 +5,9 @@ import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitAssembler
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
 import io.github.xfacthd.microredstone.common.circuit.compiler.CircuitCompiler;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
+import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.util.ComplexTestCircuits;
 import io.github.xfacthd.microredstone.util.TestInterfaceAdapter;

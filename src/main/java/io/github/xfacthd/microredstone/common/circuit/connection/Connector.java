@@ -2,6 +2,7 @@ package io.github.xfacthd.microredstone.common.circuit.connection;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitValidator;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -29,7 +30,7 @@ public record Connector(NodePos pos, Port port, int wire, PortDir dir, WireType 
             Connector::dir,
             WireType.STREAM_CODEC,
             Connector::type,
-            ByteBufCodecs.STRING_UTF8,
+            ByteBufCodecs.stringUtf8(CircuitValidator.MAX_CON_NAME_LEN),
             Connector::name,
             Connector::new
     );

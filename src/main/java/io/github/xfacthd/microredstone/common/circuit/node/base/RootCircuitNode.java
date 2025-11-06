@@ -1,16 +1,16 @@
-package io.github.xfacthd.microredstone.common.circuit.node.special;
+package io.github.xfacthd.microredstone.common.circuit.node.base;
 
 import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class RootCircuitNode extends CircuitNode
+public non-sealed abstract class RootCircuitNode extends CircuitNode
 {
     protected RootCircuitNode(List<Connector> inputs, List<Connector> outputs)
     {

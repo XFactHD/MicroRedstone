@@ -1,8 +1,8 @@
 package io.github.xfacthd.microredstone.common.circuit.compiler;
 
 import com.mojang.logging.LogUtils;
+import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.neoforged.neoforge.common.util.Lazy;
 import org.slf4j.Logger;

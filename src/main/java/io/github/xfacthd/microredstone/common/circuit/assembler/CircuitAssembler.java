@@ -10,22 +10,22 @@ import com.mojang.logging.LogUtils;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.CircuitErrorCollector;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.NodeError;
 import io.github.xfacthd.microredstone.common.circuit.assembler.report.RootError;
+import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
+import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.PortDir;
-import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
-import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
+import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
+import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundlePackerCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.connection.Connection;
-import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -117,7 +117,7 @@ public final class CircuitAssembler
         }
 
         Int2ObjectMap<List<BundlePackerCircuitNode>> packersPerWire = new Int2ObjectOpenHashMap<>();
-        for (NodeEntry<? extends CircuitNode> childNode : childNodes)
+        for (NodeEntry<?> childNode : childNodes)
         {
             if (childNode.node() instanceof BundlePackerCircuitNode packer)
             {

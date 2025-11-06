@@ -4,20 +4,22 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
-import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
-import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
+import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
-import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -79,6 +81,12 @@ public final class BundlePackerCircuitNode extends PrimitiveCircuitNode
             methodGen.math(GeneratorAdapter.OR, Type.SHORT_TYPE);
         }
         localWires.generateStore(outputWire);
+    }
+
+    @Override
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
+    {
+        return bitIndex >= 0 && bitIndex < 16;
     }
 
     @Override

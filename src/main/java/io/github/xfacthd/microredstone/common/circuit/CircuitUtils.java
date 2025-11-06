@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit;
 
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundlePackerCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.BundleUnpackerCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.ConstantCircuitNode;
@@ -9,14 +9,14 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.BufferCircuit
 import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.LampCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.special.ClockPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConstantPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.PrimitivePrototypeNode;
-import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.ClockPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
 
 public final class CircuitUtils
 {

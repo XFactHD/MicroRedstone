@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.circuit.node.special;
 
+import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -7,16 +8,17 @@ import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.compiler.EvalMethodCompiler;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
+import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
-import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
-import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.primitive.PrimitiveCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
@@ -31,10 +33,11 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-public final class CompoundCircuitNode extends RootCircuitNode
+public final class CompoundCircuitNode extends RootCircuitNode implements Iterable<NodeEntry<?>>
 {
     public static final MapCodec<CompoundCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Codec.STRING.fieldOf("name").forGetter(CompoundCircuitNode::getName),
@@ -238,6 +241,12 @@ public final class CompoundCircuitNode extends RootCircuitNode
         childNodes.forEach(consumer);
         clockNodes.forEach(consumer);
         bufferNodes.forEach(consumer);
+    }
+
+    @Override
+    public Iterator<NodeEntry<?>> iterator()
+    {
+        return Iterables.concat(childNodes, clockNodes, bufferNodes).iterator();
     }
 
     @Override

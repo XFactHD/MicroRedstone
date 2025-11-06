@@ -1,9 +1,9 @@
 package io.github.xfacthd.microredstone.common.circuit.node.compiled;
 
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
-import io.github.xfacthd.microredstone.common.circuit.node.special.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 
 public abstract class CompiledCircuitNode extends RootCircuitNode

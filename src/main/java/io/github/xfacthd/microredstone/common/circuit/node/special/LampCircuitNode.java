@@ -5,22 +5,28 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
+import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
+import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.base.LeafCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.DyeColor;
 
+import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
-public final class LampCircuitNode extends CircuitNode
+public final class LampCircuitNode extends LeafCircuitNode
 {
     public static final MapCodec<LampCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             DyeColor.CODEC.fieldOf("color").forGetter(node -> node.color),
@@ -65,6 +71,23 @@ public final class LampCircuitNode extends CircuitNode
     public List<ChainEntry> getChainedNodes()
     {
         return chainedNodes;
+    }
+
+    @Override
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
+    {
+        Set<NodePos> lamps = new HashSet<>();
+        lamps.add(entry.pos());
+        chainedNodes.forEach(node -> lamps.add(node.pos));
+        for (ChainEntry node : chainedNodes)
+        {
+            NodePos target = node.pos.offset(Port.LEFT.rotate(node.rotation));
+            if (!lamps.contains(target))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

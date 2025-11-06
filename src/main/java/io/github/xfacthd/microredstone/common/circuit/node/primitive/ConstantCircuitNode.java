@@ -8,15 +8,17 @@ import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
-import io.github.xfacthd.microredstone.common.circuit.node.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.CircuitNodeType;
-import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConstantPrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
+import io.github.xfacthd.microredstone.common.circuit.node.base.CircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
+import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConstantPrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -55,6 +57,16 @@ public final class ConstantCircuitNode extends PrimitiveCircuitNode
     {
         methodGen.push(value);
         localWires.generateStore(outputWire);
+    }
+
+    @Override
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
+    {
+        int maxValue = getOutputs()[0].type().select(
+                ConstantPrototypeNode.MAX_VAL_SINGLE,
+                ConstantPrototypeNode.MAX_VAL_BUNDLED
+        );
+        return (value & 0xFFFF) <= maxValue;
     }
 
     @Override
