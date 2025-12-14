@@ -8,7 +8,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -19,7 +19,7 @@ import java.util.function.BinaryOperator;
 
 public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, QueryDialogScreen
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("dialog/background");
+    private static final Identifier BACKGROUND = Utils.rl("dialog/background");
     protected static final int PADDING = 5;
     private static final int ICON_SIZE = 10;
     private static final int TITLE_X = PADDING + ICON_SIZE + PADDING;
@@ -172,13 +172,13 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
         QUERY(Utils.rl("dialog/icon_query"), true, CommonComponents.GUI_DONE, (ok, cancel) -> cancel),
         ;
 
-        private final ResourceLocation icon;
+        private final Identifier icon;
         final Component defaultTitle = Utils.translate("title", "dialog.title." + toString().toLowerCase(Locale.ROOT));
         final boolean hasCancel;
         private final Component okText;
         private final BinaryOperator<Runnable> escCallbackSelector;
 
-        Type(ResourceLocation icon, boolean hasCancel, Component okText, BinaryOperator<Runnable> escCallbackSelector)
+        Type(Identifier icon, boolean hasCancel, Component okText, BinaryOperator<Runnable> escCallbackSelector)
         {
             this.icon = icon;
             this.hasCancel = hasCancel;

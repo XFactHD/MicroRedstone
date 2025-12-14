@@ -38,7 +38,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.item.DyeColor;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class MRLanguageProvider extends LanguageProvider
 {

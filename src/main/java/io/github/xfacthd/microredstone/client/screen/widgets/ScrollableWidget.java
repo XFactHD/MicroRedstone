@@ -2,7 +2,7 @@ package io.github.xfacthd.microredstone.client.screen.widgets;
 
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class ScrollableWidget
 {

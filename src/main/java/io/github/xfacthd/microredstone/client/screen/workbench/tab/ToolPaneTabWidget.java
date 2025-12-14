@@ -14,8 +14,8 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     public static final int TOOL_PANE_WIDTH = 144;
     private static final int MAX_HEIGHT = CircuitCanvas.HEIGHT;
     private static final int HEADER_HEIGHT = 15;
-    private static final ResourceLocation BACKGROUND = Utils.rl("minecraft", "toast/tutorial");
+    private static final Identifier BACKGROUND = Utils.rl("minecraft", "toast/tutorial");
 
     protected final CircuitWorkbenchScreen owner;
     protected final ToolPane toolPane;

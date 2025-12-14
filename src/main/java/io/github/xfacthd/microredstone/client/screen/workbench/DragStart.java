@@ -3,7 +3,7 @@ package io.github.xfacthd.microredstone.client.screen.workbench;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.LogicGateList;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.OptionalInt;

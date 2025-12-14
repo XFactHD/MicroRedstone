@@ -6,17 +6,17 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.IntSupplier;
 
 public final class Scrollbar implements GuiEventListener, Renderable
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("node_list_background");
-    private static final ResourceLocation SCROLLER = Utils.rl("minecraft", "container/villager/scroller");
+    private static final Identifier BACKGROUND = Utils.rl("node_list_background");
+    private static final Identifier SCROLLER = Utils.rl("minecraft", "container/villager/scroller");
     public static final int BACKGROUND_WIDTH = 8;
     public static final int SCROLLER_WIDTH = 6;
     private static final int SCROLLER_HEIGHT = 27;

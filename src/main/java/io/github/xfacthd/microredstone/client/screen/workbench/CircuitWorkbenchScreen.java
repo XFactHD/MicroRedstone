@@ -29,10 +29,10 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Objects;
@@ -44,8 +44,8 @@ import java.util.stream.Stream;
 // TODO: add local storage for (partial) designs in prototype stage
 public final class CircuitWorkbenchScreen extends AbstractContainerScreen<CircuitWorkbenchMenu>
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("background");
-    public static final ResourceLocation WINDOW_FRAME = Utils.rl("window_frame");
+    private static final Identifier BACKGROUND = Utils.rl("background");
+    public static final Identifier WINDOW_FRAME = Utils.rl("window_frame");
     public static final Component TITLE_CONFIRM_CLOSE = Utils.translate("title", "circuit_workbench.close.confirm");
     public static final Component MESSAGE_CONFIRM_CLOSE_LINE_ONE = Utils.translate("msg", "circuit_workbench.close.confirm_line_one", CircuitWorkbenchBlock.MENU_TITLE);
     public static final Component MESSAGE_CONFIRM_CLOSE_LINE_TWO = Utils.translate("msg", "circuit_workbench.close.confirm_line_two");

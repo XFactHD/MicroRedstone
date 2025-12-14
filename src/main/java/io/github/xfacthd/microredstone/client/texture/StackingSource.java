@@ -11,13 +11,14 @@ import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.sources.LazyLoadedImage;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceMetadata;
 import net.minecraft.util.ARGB;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -25,15 +26,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public record StackingSource(ResourceLocation primary, List<ResourceLocation> secondaries, ResourceLocation sprite) implements SpriteSource
+public record StackingSource(Identifier primary, List<Identifier> secondaries, Identifier sprite) implements SpriteSource
 {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final MapCodec<StackingSource> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-            ResourceLocation.CODEC.fieldOf("primary_texture").forGetter(StackingSource::primary),
-            ResourceLocation.CODEC.listOf(1, Integer.MAX_VALUE).fieldOf("secondary_textures").forGetter(StackingSource::secondaries),
-            ResourceLocation.CODEC.fieldOf("sprite").forGetter(StackingSource::sprite)
+            Identifier.CODEC.fieldOf("primary_texture").forGetter(StackingSource::primary),
+            Identifier.CODEC.listOf(1, Integer.MAX_VALUE).fieldOf("secondary_textures").forGetter(StackingSource::secondaries),
+            Identifier.CODEC.fieldOf("sprite").forGetter(StackingSource::sprite)
     ).apply(inst, StackingSource::new));
-    public static final ResourceLocation ID = Utils.rl("stacking");
+    public static final Identifier ID = Utils.rl("stacking");
 
     @Override
     public void run(ResourceManager resourceManager, Output output)
@@ -44,7 +45,7 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
     @Override
     public void run(ResourceManager resourceManager, Output output, Set<MetadataSectionType<?>> additionalMetadata)
     {
-        ResourceLocation primaryFile = TEXTURE_ID_CONVERTER.idToFile(primary);
+        Identifier primaryFile = TEXTURE_ID_CONVERTER.idToFile(primary);
         Optional<Resource> optPrimary = resourceManager.getResource(primaryFile);
         if (optPrimary.isEmpty())
         {
@@ -54,9 +55,9 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
         InputImage primaryImage = new InputImage(primaryFile, optPrimary.get(), 1);
 
         List<InputImage> secondaryImages = new ArrayList<>(secondaries.size());
-        for (ResourceLocation secondary : secondaries)
+        for (Identifier secondary : secondaries)
         {
-            ResourceLocation secondaryFile = TEXTURE_ID_CONVERTER.idToFile(secondary);
+            Identifier secondaryFile = TEXTURE_ID_CONVERTER.idToFile(secondary);
             Optional<Resource> optSecondary = resourceManager.getResource(secondaryFile);
             if (optSecondary.isEmpty())
             {
@@ -79,13 +80,13 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
     public record StackingSupplier(
             InputImage primaryImage,
             List<InputImage> secondaryImages,
-            ResourceLocation sprite,
+            Identifier sprite,
             Set<MetadataSectionType<?>> additionalMetadata
-    ) implements SpriteSupplier
+    ) implements DiscardableLoader
     {
         @Override
         @Nullable
-        public SpriteContents apply(SpriteResourceLoader loader)
+        public SpriteContents get(SpriteResourceLoader loader)
         {
             try
             {
@@ -124,7 +125,8 @@ public record StackingSource(ResourceLocation primary, List<ResourceLocation> se
                 List<FrameInfo> frames = SpriteSourceUtils.collectFrames(primarySource, frameSize, sourceAnim);
                 buildOutputImage(frames, primarySource, secondarySources, imageOut, frameSize);
                 List<MetadataSectionType.WithValue<?>> metaSections = primaryMeta.getTypedSections(additionalMetadata);
-                return new SpriteContents(sprite, frameSize, imageOut, Optional.ofNullable(sourceAnim), metaSections);
+                Optional<TextureMetadataSection> texMeta = primaryMeta.getSection(TextureMetadataSection.TYPE);
+                return new SpriteContents(sprite, frameSize, imageOut, Optional.ofNullable(sourceAnim), metaSections, texMeta);
             }
             catch (Exception e)
             {

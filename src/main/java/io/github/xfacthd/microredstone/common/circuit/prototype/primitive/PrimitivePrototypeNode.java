@@ -24,7 +24,7 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 
@@ -127,7 +127,7 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         private final IntFunction<IconConfig> iconSingle;
         private final IntFunction<IconConfig> iconBundled;
 
-        Type(boolean multiInput, boolean invertsResult, ResourceLocation icon)
+        Type(boolean multiInput, boolean invertsResult, Identifier icon)
         {
             this.multiInput = multiInput;
             this.invertsResult = invertsResult;

@@ -24,7 +24,7 @@ import io.github.xfacthd.microredstone.common.util.SerdesUtils;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.world.item.DyeColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

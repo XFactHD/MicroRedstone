@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.client.util;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 public record ArrowKey(Direction dir, long startTime)

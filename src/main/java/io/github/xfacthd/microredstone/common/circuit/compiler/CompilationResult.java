@@ -2,7 +2,7 @@ package io.github.xfacthd.microredstone.common.circuit.compiler;
 
 import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.util.concurrent.atomic.AtomicInteger;

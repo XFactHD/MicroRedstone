@@ -24,8 +24,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.parts_list.mode");
     public static final Component LABEL_FILTER = Utils.translate("label", "circuit_workbench.parts_list.filter");
     public static final Component MSG_DROP_TO_DELETE = Utils.translate("msg", "circuit_workbench.parts_list.drop_to_delete");
-    private static final ResourceLocation ICON_DELETE = Utils.rl("delete");
+    private static final Identifier ICON_DELETE = Utils.rl("delete");
     private static final ShareType[] SHARE_TYPES = ShareType.values();
     private static final int LABEL_X = 5;
     private static final int MODE_LABEL_Y = 10;

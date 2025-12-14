@@ -12,16 +12,16 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Objects;
 
 public final class MicrochipCircuitScreen extends AbstractContainerScreen<MicrochipCircuitMenu>
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("background");
+    private static final Identifier BACKGROUND = Utils.rl("background");
     public static final String TITLE_WITH_CIRCUIT = Utils.translationKey("title", "microchip.circuit");
     public static final String TITLE_WITH_CIRCUIT_DEBUG = Utils.translationKey("title", "microchip.circuit_debug");
     static final int CANVAS_BORDER = 10;

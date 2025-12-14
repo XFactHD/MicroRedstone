@@ -5,10 +5,10 @@ import io.github.xfacthd.microredstone.client.screen.workbench.ToolPaneTab;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ToolPane;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.util.CommonColors;
 
 public final class ToolPaneTabButton extends SimpleButton implements DropFocusAfterClick
 {
@@ -25,7 +25,7 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
 
     public ToolPaneTabButton(ToolPane owner, ToolPaneTab tab, int x, int y)
     {
-        super(x, y, WIDTH, HEIGHT, tab.getTitle());
+        super(x, y, WIDTH, HEIGHT, tab.getTitle().copy().withColor(CommonColors.DARK_GRAY).withoutShadow());
         this.owner = owner;
         this.tab = tab;
         if (tab.ordinal() == 0)
@@ -49,9 +49,9 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
     }
 
     @Override
-    public void renderString(GuiGraphics graphics, Font font, int color)
+    protected void renderDefaultLabel(ActiveTextCollector textCollector)
     {
-        graphics.drawString(font, getMessage(), getX() + 5, getY() + 5, 0xFF404040, false);
+        textCollector.accept(getX() + 5, getY() + 5, getMessage());
     }
 
     @Override

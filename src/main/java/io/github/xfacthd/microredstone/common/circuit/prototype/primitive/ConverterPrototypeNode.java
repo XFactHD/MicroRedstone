@@ -21,7 +21,7 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.PortConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.List;
@@ -107,7 +107,7 @@ public final class ConverterPrototypeNode extends PrototypeNode
         private final PortConfig portConfig;
         private final IconConfig icon;
 
-        Type(WireType inType, WireType outType, ResourceLocation icon)
+        Type(WireType inType, WireType outType, Identifier icon)
         {
             this.inType = inType;
             this.outType = outType;

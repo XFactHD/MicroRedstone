@@ -1,19 +1,19 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.widgets.button;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.xfacthd.microredstone.client.screen.widgets.button.SimpleButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProvider;
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProviderProxy;
 import io.github.xfacthd.microredstone.client.util.Icon;
-import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.jspecify.annotations.Nullable;
 
 public final class ToolActionButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ToolsTab.ToolAction>, ContextMenuProviderProxy
 {
@@ -34,11 +34,11 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     }
 
     @Override
-    public void renderString(GuiGraphics guiGraphics, Font font, int color)
+    protected void renderDefaultLabel(ActiveTextCollector textCollector)
     {
         int minX = getX() + TEXT_OFFSET;
         int maxX = getX() + getWidth() - 2;
-        renderScrollingString(guiGraphics, font, getMessage(), minX, getY(), maxX, getY() + getHeight(), color);
+        textCollector.acceptScrollingWithDefaultCenter(getMessage(), minX, maxX, getY(), getY() + getHeight());
     }
 
     @Override
@@ -66,7 +66,7 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick)
     {
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1)
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
         {
             onPress(event);
         }

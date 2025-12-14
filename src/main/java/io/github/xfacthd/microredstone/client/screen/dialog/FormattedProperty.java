@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.util.FormattedCharSequence;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -55,8 +55,8 @@ record FormattedProperty(Component label, Value value)
         private final Supplier<@Nullable Component> source;
         private final Font font;
         private final int maxValueWidth;
-        @Nullable
-        FormattedProperty.ImmediateValue resolved = null;
+
+        FormattedProperty.@Nullable ImmediateValue resolved = null;
 
         private DelayedValue(Supplier<@Nullable Component> source, Font font, int maxValueWidth)
         {

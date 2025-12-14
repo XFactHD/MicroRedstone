@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 
@@ -28,14 +28,14 @@ public enum ShareType implements StringRepresentable
 
     private final String name = toString().toLowerCase(Locale.ROOT);
     private final Component title = Utils.translate("label", "circuit_workbench.library_browser.filter." + name);
-    private final ResourceLocation icon = Utils.rl("filter/type_" + name);
+    private final Identifier icon = Utils.rl("filter/type_" + name);
 
     public Component getTitle()
     {
         return title;
     }
 
-    public ResourceLocation getIcon()
+    public Identifier getIcon()
     {
         return icon;
     }

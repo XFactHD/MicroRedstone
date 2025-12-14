@@ -3,15 +3,19 @@ package io.github.xfacthd.microredstone.common.data.library;
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryUpdatePayload;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.Optionull;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,6 +35,7 @@ public final class ServerCircuitLibrary extends SavedData
             null
     );
 
+    @Nullable
     private final MinecraftServer server;
     private final Map<UUID, PlayerCircuitLibrary> playerLibraries;
 
@@ -75,9 +80,9 @@ public final class ServerCircuitLibrary extends SavedData
         return library != null ? library.packEntries(playerLibraries.values()) : List.of();
     }
 
-    private ServerCircuitLibrary(Context ctx, Map<UUID, PlayerCircuitLibrary> playerLibraries)
+    private ServerCircuitLibrary(@Nullable ServerLevel level, Map<UUID, PlayerCircuitLibrary> playerLibraries)
     {
-        this.server = ctx.levelOrThrow().getServer();
+        this.server = Optionull.map(level, ServerLevel::getServer);
         this.playerLibraries = playerLibraries;
     }
 
@@ -98,7 +103,7 @@ public final class ServerCircuitLibrary extends SavedData
         {
             if (info.isEmpty()) return;
 
-            ServerPlayer player = server.getPlayerList().getPlayer(owner);
+            ServerPlayer player = Objects.requireNonNull(server).getPlayerList().getPlayer(owner);
             if (player != null)
             {
                 sendUpdatePacket(player, info.addedOrModified, info.removed);

@@ -1,12 +1,12 @@
 package io.github.xfacthd.microredstone.client.util;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-public record Icon(ResourceLocation texture, int color)
+public record Icon(Identifier texture, int color)
 {
-    public Icon(ResourceLocation texture)
+    public Icon(Identifier texture)
     {
         this(texture, 0xFFFFFFFF);
     }

@@ -1,7 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.filebrowser;
 
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 record FileNameSuffix(String suffix, boolean autoSuffix, boolean filterBySuffix, Component label)
 {

@@ -32,14 +32,14 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 
 import java.util.HashSet;
@@ -52,7 +52,7 @@ import java.util.function.ToIntFunction;
 public final class CircuitCanvas extends AbstractCircuitCanvas implements CircuitCanvasAccess
 {
     private static final FontDescription MONOSPACE_FONT = new FontDescription.Resource(Utils.rl("monospace"));
-    private static final ResourceLocation[] PORT_BORDERS = Util.make(new ResourceLocation[8], arr ->
+    private static final Identifier[] PORT_BORDERS = Util.make(new Identifier[8], arr ->
     {
         for (Port port : Port.values())
         {
@@ -204,7 +204,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
             WireType type = wireInProgress.getType();
             if (port != null && canConnectToPart(node, hovered, port, type))
             {
-                ResourceLocation icon = PORT_BORDERS[port.ordinal() << 1 | type.ordinal()];
+                Identifier icon = PORT_BORDERS[port.ordinal() << 1 | type.ordinal()];
                 int iconX = canvasX + BORDER_TOP_LEFT + hovered.x() * PART_SLOT_SIZE;
                 int iconY = canvasY + BORDER_TOP_LEFT + hovered.y() * PART_SLOT_SIZE;
                 graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, iconX, iconY, PART_SIZE + 2, PART_SIZE + 2);

@@ -3,8 +3,8 @@ package io.github.xfacthd.microredstone.client.util;
 import io.github.xfacthd.microredstone.common.circuit.connection.Port;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -17,14 +17,14 @@ public final class PortOverlays
 {
     private static final Port[] PORTS = Port.values();
     private static final List<Port> OVERLAY_PORT_ORDER = List.of(Port.UP, Port.DOWN, Port.LEFT, Port.RIGHT);
-    private static final ResourceLocation[] OVERLAY_LOCATIONS = buildOverlayLocations();
+    private static final Identifier[] OVERLAY_LOCATIONS = buildOverlayLocations();
 
-    public static ResourceLocation get(int portMask)
+    public static Identifier get(int portMask)
     {
         return Objects.requireNonNull(OVERLAY_LOCATIONS[portMask]);
     }
 
-    public static void forEach(BiConsumer<ResourceLocation, Map<Port, WireType>> consumer)
+    public static void forEach(BiConsumer<Identifier, Map<Port, WireType>> consumer)
     {
         for (int i = 1; i < OVERLAY_LOCATIONS.length; i++)
         {
@@ -46,10 +46,10 @@ public final class PortOverlays
         }
     }
 
-    private static ResourceLocation[] buildOverlayLocations()
+    private static Identifier[] buildOverlayLocations()
     {
         WireType[] types = Arrays.copyOf(WireType.values(), 5);
-        ResourceLocation[] map = new ResourceLocation[256];
+        Identifier[] map = new Identifier[256];
         for (WireType typeUp : types)
         {
             for (WireType typeRight : types)
@@ -72,7 +72,7 @@ public final class PortOverlays
     }
 
     @Nullable
-    private static ResourceLocation buildOverlayLocation(int portMask)
+    private static Identifier buildOverlayLocation(int portMask)
     {
         return switch (portMask)
         {

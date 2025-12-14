@@ -6,7 +6,7 @@ import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

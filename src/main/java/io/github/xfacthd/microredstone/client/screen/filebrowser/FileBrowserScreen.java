@@ -17,9 +17,9 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.io.IOException;
@@ -39,9 +39,9 @@ import java.util.stream.Stream;
 // TODO: make title and dir/file icons
 public final class FileBrowserScreen extends Screen
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("textures/gui/filebrowser.png");
-    private static final ResourceLocation ICON_DIRECTORY = Utils.rl("filebrowser/icon_directory");
-    private static final ResourceLocation ICON_FILE = Utils.rl("filebrowser/icon_file");
+    private static final Identifier BACKGROUND = Utils.rl("textures/gui/filebrowser.png");
+    private static final Identifier ICON_DIRECTORY = Utils.rl("filebrowser/icon_directory");
+    private static final Identifier ICON_FILE = Utils.rl("filebrowser/icon_file");
     public static final Component MSG_DIR_EMPTY = Utils.translate("msg", "filebrowser.dir_empty");
     public static final Component MSG_DIR_NO_MATCHING_FILES = Utils.translate("msg", "filebrowser.dir_no_matching_file");
     public static final Component LABEL_FILE_NAME = Utils.translate("label", "filebrowser.file_name");
@@ -569,7 +569,7 @@ public final class FileBrowserScreen extends Screen
 
     private static WidgetSprites actionSprites(String type)
     {
-        ResourceLocation prefix = Utils.rl("filebrowser/button_" + type);
+        Identifier prefix = Utils.rl("filebrowser/button_" + type);
         return new WidgetSprites(prefix, prefix.withSuffix("_disabled"), prefix.withSuffix("_focused"));
     }
 
@@ -581,12 +581,12 @@ public final class FileBrowserScreen extends Screen
 
         String name();
 
-        ResourceLocation icon();
+        Identifier icon();
 
         record Directory(Path path, String name) implements DirEntry
         {
             @Override
-            public ResourceLocation icon()
+            public Identifier icon()
             {
                 return ICON_DIRECTORY;
             }
@@ -595,7 +595,7 @@ public final class FileBrowserScreen extends Screen
         record File(Path path, String name) implements DirEntry
         {
             @Override
-            public ResourceLocation icon()
+            public Identifier icon()
             {
                 return ICON_FILE;
             }
@@ -611,9 +611,9 @@ public final class FileBrowserScreen extends Screen
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final String title = Utils.translationKey("title", "file_browser." + name);
         private final Component buttonTitle = Utils.translate("button", "file_browser." + name);
-        private final ResourceLocation icon;
+        private final Identifier icon;
 
-        Type(ResourceLocation icon)
+        Type(Identifier icon)
         {
             this.icon = icon;
         }

@@ -2,7 +2,7 @@ package io.github.xfacthd.microredstone.common.util.registration;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -14,7 +14,7 @@ public final class DeferredMenuType<T extends AbstractContainerMenu> extends Def
         super(key);
     }
 
-    public static <T extends AbstractContainerMenu> DeferredMenuType<T> createMenuType(ResourceLocation name)
+    public static <T extends AbstractContainerMenu> DeferredMenuType<T> createMenuType(Identifier name)
     {
         return createMenuType(ResourceKey.create(Registries.MENU, name));
     }

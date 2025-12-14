@@ -8,14 +8,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public final class MicrochipScreen extends AbstractContainerScreen<MicrochipMenu>
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("textures/gui/microchip.png");
+    private static final Identifier BACKGROUND = Utils.rl("textures/gui/microchip.png");
 
     private final ItemStack icStack = new ItemStack(MRContent.ITEM_INTEGRATED_CIRCUIT);
 
@@ -38,9 +38,9 @@ public final class MicrochipScreen extends AbstractContainerScreen<MicrochipMenu
     }
 
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot)
+    protected void renderSlot(GuiGraphics graphics, Slot slot, int mouseX, int mouseY)
     {
-        super.renderSlot(graphics, slot);
+        super.renderSlot(graphics, slot, mouseX, mouseY);
         if (slot == menu.getCircuitSlot() && !slot.hasItem())
         {
             ScreenUtils.renderTransparentFakeItem(graphics, icStack, slot.x, slot.y);

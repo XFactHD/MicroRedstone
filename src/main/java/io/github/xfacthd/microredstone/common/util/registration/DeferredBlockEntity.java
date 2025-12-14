@@ -2,7 +2,7 @@ package io.github.xfacthd.microredstone.common.util.registration;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -14,7 +14,7 @@ public final class DeferredBlockEntity<T extends BlockEntity> extends DeferredHo
         super(key);
     }
 
-    public static <T extends BlockEntity> DeferredBlockEntity<T> createBlockEntity(ResourceLocation name)
+    public static <T extends BlockEntity> DeferredBlockEntity<T> createBlockEntity(Identifier name)
     {
         return createBlockEntity(ResourceKey.create(Registries.BLOCK_ENTITY_TYPE, name));
     }

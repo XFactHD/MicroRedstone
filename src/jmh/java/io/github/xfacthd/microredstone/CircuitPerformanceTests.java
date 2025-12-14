@@ -11,7 +11,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircu
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.util.ComplexTestCircuits;
 import io.github.xfacthd.microredstone.util.TestInterfaceAdapter;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;

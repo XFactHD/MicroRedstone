@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
-public final class LibraryActionButton<A extends Enum<A> & LibraryActionButton.Action<LibraryBrowser>> extends Button implements DropFocusAfterClick, ActionButton<A>
+public final class LibraryActionButton<A extends Enum<A> & LibraryActionButton.Action<LibraryBrowser>> extends Button.Plain implements DropFocusAfterClick, ActionButton<A>
 {
     private static final int WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH - 10;
     public static final int HEIGHT = 20;
@@ -22,10 +22,10 @@ public final class LibraryActionButton<A extends Enum<A> & LibraryActionButton.A
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         active = action.isActive(owner);
-        super.renderWidget(graphics, mouseX, mouseY, partialTick);
+        super.renderContents(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override

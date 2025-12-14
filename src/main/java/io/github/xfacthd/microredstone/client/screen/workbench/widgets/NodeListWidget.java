@@ -8,21 +8,22 @@ import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWi
 import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
 public final class NodeListWidget extends ScrollableWidget
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("node_list_background");
-    private static final ResourceLocation BUTTON = Utils.rl("minecraft", "widget/button");
-    private static final ResourceLocation BUTTON_HOVER = Utils.rl("minecraft", "widget/button_highlighted");
-    private static final ResourceLocation SCROLLER_HANDLE = Utils.rl("minecraft", "container/villager/scroller");
+    private static final Identifier BACKGROUND = Utils.rl("node_list_background");
+    private static final Identifier BUTTON = Utils.rl("minecraft", "widget/button");
+    private static final Identifier BUTTON_HOVER = Utils.rl("minecraft", "widget/button_highlighted");
+    private static final Identifier SCROLLER_HANDLE = Utils.rl("minecraft", "container/villager/scroller");
 
     private static final int PADDING = 5;
     private static final int BORDER = 5;
@@ -82,7 +83,7 @@ public final class NodeListWidget extends ScrollableWidget
             Entry entry = entryGetter.apply(i);
 
             boolean hovered = mouseOverX && mouseOverY && mouseY >= y && mouseY < y + ENTRY_HEIGHT;
-            ResourceLocation sprite = hovered ? BUTTON_HOVER : BUTTON;
+            Identifier sprite = hovered ? BUTTON_HOVER : BUTTON;
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, minX, y, ENTRY_WIDTH, ENTRY_HEIGHT);
 
             CircuitCanvas.drawPartNode(graphics, entry.icon(), minX + CircuitWorkbenchScreen.PADDING, y + ICON_OFF_Y, 0, ENTRY_ICON_SIZE);
@@ -90,14 +91,15 @@ public final class NodeListWidget extends ScrollableWidget
             int nameX = minX + ENTRY_NAME_OFF_X;
             int nameY = y + ENTRY_NAME_OFF_Y;
             Component subTitle = entry.subTitle();
+            ActiveTextCollector textCollector = graphics.textRenderer(GuiGraphics.HoveredTextEffects.NONE);
             if (subTitle != null)
             {
-                graphics.drawScrollingString(owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY - 6, 0xFFFFFFFF);
-                graphics.drawScrollingString(owner.getFont(), subTitle, nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY + 5, 0xFFFFFFFF);
+                graphics.drawScrollingString(textCollector, owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY - 6);
+                graphics.drawScrollingString(textCollector, owner.getFont(), subTitle, nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY + 5);
             }
             else
             {
-                graphics.drawScrollingString(owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY, 0xFFFFFFFF);
+                graphics.drawScrollingString(textCollector, owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY);
             }
 
             if (hovered)
@@ -185,7 +187,7 @@ public final class NodeListWidget extends ScrollableWidget
     }
 
     @Nullable
-    public <T> T getClickedEntryIdx(double mouseY, IntFunction<T> resultFactory)
+    public <T> T getClickedEntryIdx(double mouseY, IntFunction<@Nullable T> resultFactory)
     {
         int relY = (int) (mouseY - innerY + getScrollOffset());
         if (relY < 0) return null;

@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.block.model.SingleVariant;
 import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.NeoForgeModelProperties;
 import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
@@ -19,24 +19,24 @@ import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
 {
     public static final MapCodec<UnbakedMicrochipModel> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-            ResourceLocation.CODEC.fieldOf("model").forGetter(model -> model.baseModel),
+            Identifier.CODEC.fieldOf("model").forGetter(model -> model.baseModel),
             Variant.SimpleModelState.MAP_CODEC.forGetter(model -> model.variantState),
             Codec.BOOL.optionalFieldOf("up", false).forGetter(model -> model.up)
     ).apply(inst, UnbakedMicrochipModel::new));
     private static final String[] EDGE_SUFFIXES = new String[] { "n", "e", "s", "w" };
-    public static final ResourceLocation[] LOCATIONS_SINGLE = Utils.fillArray(new ResourceLocation[4], edge ->
+    public static final Identifier[] LOCATIONS_SINGLE = Utils.fillArray(new Identifier[4], edge ->
             Utils.rl("block/type_single_" + EDGE_SUFFIXES[edge])
     );
-    public static final ResourceLocation[] LOCATIONS_BUNDLED = Utils.fillArray(new ResourceLocation[4], edge ->
+    public static final Identifier[] LOCATIONS_BUNDLED = Utils.fillArray(new Identifier[4], edge ->
             Utils.rl("block/type_bundled_" + EDGE_SUFFIXES[edge])
     );
 
-    private final ResourceLocation baseModel;
+    private final Identifier baseModel;
     private final Variant.SimpleModelState variantState;
     private final ModelState modelState;
     private final boolean up;
 
-    UnbakedMicrochipModel(ResourceLocation baseModel, Variant.SimpleModelState variantState, boolean up)
+    UnbakedMicrochipModel(Identifier baseModel, Variant.SimpleModelState variantState, boolean up)
     {
         this.baseModel = baseModel;
         this.variantState = variantState;
@@ -64,7 +64,7 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
         return new MicrochipBlockStateModel(bakePart(baker, baseModel, modelState), singleModels, bundledModels);
     }
 
-    private static BlockStateModel bakePart(ModelBaker baker, ResourceLocation model, ModelState modelState)
+    private static BlockStateModel bakePart(ModelBaker baker, Identifier model, ModelState modelState)
     {
         return new SingleVariant(SimpleModelWrapper.bake(baker, model, modelState));
     }

@@ -18,7 +18,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
 import net.minecraft.world.item.ItemStack;
 
@@ -30,8 +30,8 @@ import java.util.function.Consumer;
 public final class LibraryBrowser extends ToolPaneTabWidget implements MultiModeTab<LibraryBrowser.Mode>
 {
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.library_browser.mode");
-    private static final ResourceLocation INVENTORY = Utils.rl("workbench_inventory");
-    private static final ResourceLocation SLOT = Utils.rl("minecraft", "container/slot");
+    private static final Identifier INVENTORY = Utils.rl("workbench_inventory");
+    private static final Identifier SLOT = Utils.rl("minecraft", "container/slot");
     private static final int INVENTORY_WIDTH = 172;
     private static final int INVENTORY_HEIGHT = 94;
     private static final int LABEL_X = 5;

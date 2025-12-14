@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.util.Lazy;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;

@@ -12,16 +12,16 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractCircuitCanvas implements Renderable
 {
-    private static final ResourceLocation BLUEPRINT = Utils.rl("blueprint");
+    private static final Identifier BLUEPRINT = Utils.rl("blueprint");
     public static final int PART_COUNT_X = 48;
     public static final int PART_COUNT_Y = 24; // TODO: consider increasing height to 36 cells
     public static final int PART_COUNT = PART_COUNT_X * PART_COUNT_Y;

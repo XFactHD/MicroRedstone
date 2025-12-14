@@ -115,7 +115,7 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
     {
         if (isHoveredOrFocused())
         {
@@ -134,8 +134,7 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
         }
     }
 
-    @Override
-    public void renderString(GuiGraphics graphics, Font font, int color)
+    private void renderString(GuiGraphics graphics, Font font, int color)
     {
         int textY = getY() + 3;
         graphics.drawString(font, text, getX() + HOR_PADDING, textY, color);

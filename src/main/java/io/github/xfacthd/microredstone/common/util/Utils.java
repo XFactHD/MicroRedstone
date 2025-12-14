@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.players.ProfileResolver;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.loading.FMLEnvironment;
 import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 public final class Utils
 {
-    private static final ResourceLocation RL_TEMPLATE = ResourceLocation.fromNamespaceAndPath(MicroRedstone.MOD_ID, "");
+    private static final Identifier RL_TEMPLATE = Identifier.fromNamespaceAndPath(MicroRedstone.MOD_ID, "");
     private static final Long2ObjectMap<Direction> DIRECTION_BY_NORMAL = Arrays.stream(Direction.values())
             .collect(Collectors.toMap(
                     side -> new BlockPos(side.getUnitVec3i()).asLong(),
@@ -64,14 +64,14 @@ public final class Utils
         return DIRECTION_BY_NORMAL.get(BlockPos.asLong(x, y, z));
     }
 
-    public static ResourceLocation rl(String path)
+    public static Identifier rl(String path)
     {
         return RL_TEMPLATE.withPath(path);
     }
 
-    public static ResourceLocation rl(String namespace, String path)
+    public static Identifier rl(String namespace, String path)
     {
-        return ResourceLocation.fromNamespaceAndPath(namespace, path);
+        return Identifier.fromNamespaceAndPath(namespace, path);
     }
 
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String path)

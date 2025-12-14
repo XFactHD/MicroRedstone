@@ -3,7 +3,7 @@ package io.github.xfacthd.microredstone.common.redstone;
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 

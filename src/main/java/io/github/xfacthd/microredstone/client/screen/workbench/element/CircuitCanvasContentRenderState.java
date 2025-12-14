@@ -1,6 +1,8 @@
 package io.github.xfacthd.microredstone.client.screen.workbench.element;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.CircuitCanvas;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.PartBlitter;
@@ -15,8 +17,8 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.data.AtlasIds;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 
@@ -35,7 +37,7 @@ public record CircuitCanvasContentRenderState(
         @Nullable ScreenRectangle scissorArea
 ) implements GuiElementRenderState
 {
-    static final ResourceLocation WHITE_SPRITE = Utils.rl("neoforge", "white");
+    static final Identifier WHITE_SPRITE = Utils.rl("neoforge", "white");
 
     public static CircuitCanvasContentRenderState create(
             List<PartRenderState> parts,
@@ -49,7 +51,7 @@ public record CircuitCanvasContentRenderState(
         ScreenRectangle bounds = getBounds(canvasX, canvasY, scissorArea);
         TextureAtlas guiAtlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI);
         TextureAtlasSprite whiteSprite = guiAtlas.getSprite(WHITE_SPRITE);
-        TextureSetup textureSetup = TextureSetup.singleTexture(guiAtlas.getTextureView());
+        TextureSetup textureSetup = TextureSetup.singleTexture(guiAtlas.getTextureView(), RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST));
         return new CircuitCanvasContentRenderState(parts, wires, lamps, canvasX, canvasY, guiAtlas, whiteSprite, textureSetup, bounds, scissorArea);
     }
 
@@ -120,12 +122,12 @@ public record CircuitCanvasContentRenderState(
         }
     }
 
-    private void blit(VertexConsumer buffer, Matrix3x2f pose, ResourceLocation texture, int x0, int y0, int x1, int y1)
+    private void blit(VertexConsumer buffer, Matrix3x2f pose, Identifier texture, int x0, int y0, int x1, int y1)
     {
         blit(buffer, pose, texture, x0, y0, x1, y1, 0xFFFFFFFF);
     }
 
-    private void blit(VertexConsumer buffer, Matrix3x2f pose, ResourceLocation texture, int x0, int y0, int x1, int y1, int color)
+    private void blit(VertexConsumer buffer, Matrix3x2f pose, Identifier texture, int x0, int y0, int x1, int y1, int color)
     {
         TextureAtlasSprite sprite = guiAtlas.getSprite(texture);
         buffer.addVertexWith2DPose(pose, x0, y0).setUv(sprite.getU0(), sprite.getV0()).setColor(color);

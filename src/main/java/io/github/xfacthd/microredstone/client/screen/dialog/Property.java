@@ -2,7 +2,7 @@ package io.github.xfacthd.microredstone.client.screen.dialog;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
 

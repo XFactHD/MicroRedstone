@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.block.model.VariantMutator;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
@@ -58,17 +58,17 @@ public final class MRBlockModelProvider extends ModelProvider
 
     private static void makeMicrochipBlockModel(BlockModelGenerators blockModels)
     {
-        ResourceLocation name = Utils.getKeyOrThrow(MRContent.BLOCK_MICROCHIP).location();
-        ResourceLocation baseLoc = name.withPrefix("block/");
-        ResourceLocation baseLocCircuit = baseLoc.withSuffix("_circuit");
+        Identifier name = Utils.getKeyOrThrow(MRContent.BLOCK_MICROCHIP).identifier();
+        Identifier baseLoc = name.withPrefix("block/");
+        Identifier baseLocCircuit = baseLoc.withSuffix("_circuit");
 
-        ResourceLocation[] modelsWithoutCircuit = new ResourceLocation[] {
+        Identifier[] modelsWithoutCircuit = new Identifier[] {
                 baseLoc,
                 rotateAroundZ(blockModels, baseLoc, baseLoc.withSuffix("_cw90"), 90),
                 rotateAroundZ(blockModels, baseLoc, baseLoc.withSuffix("_cw180"), 180),
                 rotateAroundZ(blockModels, baseLoc, baseLoc.withSuffix("_ccw90"), -90)
         };
-        ResourceLocation[] modelsWithCircuit = new ResourceLocation[] {
+        Identifier[] modelsWithCircuit = new Identifier[] {
                 baseLocCircuit,
                 rotateAroundZ(blockModels, baseLocCircuit, baseLocCircuit.withSuffix("_cw90"), 90),
                 rotateAroundZ(blockModels, baseLocCircuit, baseLocCircuit.withSuffix("_cw180"), 180),
@@ -78,14 +78,14 @@ public final class MRBlockModelProvider extends ModelProvider
         MultiVariantGenerator generator = MultiVariantGenerator.dispatch(MRContent.BLOCK_MICROCHIP.value())
                 .with(PropertyDispatch.initial(BlockStateProperties.FACING, PropertyHolder.ROTATION, PropertyHolder.HAS_CIRCUIT).generate((dir, rot, hasCircuit) ->
                 {
-                    ResourceLocation[] models = hasCircuit ? modelsWithCircuit : modelsWithoutCircuit;
+                    Identifier[] models = hasCircuit ? modelsWithCircuit : modelsWithoutCircuit;
                     int idx = switch (dir)
                     {
                         case UP -> (rot.ordinal() + 1) % 4;
                         case DOWN -> rot == Rotation.NONE || rot == Rotation.CLOCKWISE_180 ? rot.ordinal() : ((rot.ordinal() + 2) % 4);
                         default -> rot == Rotation.NONE || rot == Rotation.CLOCKWISE_180 ? ((rot.ordinal() + 2) % 4) : rot.ordinal();
                     };
-                    ResourceLocation model = models[idx];
+                    Identifier model = models[idx];
 
                     Quadrant rotX = switch (dir)
                     {
@@ -109,7 +109,7 @@ public final class MRBlockModelProvider extends ModelProvider
         blockModels.registerSimpleItemModel(MRContent.BLOCK_MICROCHIP.value(), baseLocCircuit);
     }
 
-    private static ResourceLocation rotateAroundZ(BlockModelGenerators blockModels, ResourceLocation parent, ResourceLocation name, int rot)
+    private static Identifier rotateAroundZ(BlockModelGenerators blockModels, Identifier parent, Identifier name, int rot)
     {
         ModelTemplate template = ExtendedModelTemplateBuilder.builder()
                 .parent(parent)
@@ -122,7 +122,7 @@ public final class MRBlockModelProvider extends ModelProvider
         return template.create(name, new TextureMapping(), blockModels.modelOutput);
     }
 
-    private static void plateOverlay(BlockModelGenerators blockModels, ResourceLocation name, ResourceLocation texture, int edge, boolean withSide, boolean mirrorTopX)
+    private static void plateOverlay(BlockModelGenerators blockModels, Identifier name, Identifier texture, int edge, boolean withSide, boolean mirrorTopX)
     {
         ExtendedModelTemplate template = ExtendedModelTemplateBuilder.builder()
                 .requiredTextureSlot(OVERLAY)

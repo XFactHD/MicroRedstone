@@ -5,7 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.TriState;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ValidatingEditBox extends EditBox
 {
@@ -42,7 +42,7 @@ public class ValidatingEditBox extends EditBox
         boolean focusedNonEmpty = isFocused() && !getValue().isEmpty();
         if ((focusedNonEmpty || wasFocusedNonEmpty) && !isInputValid())
         {
-            graphics.submitOutline(getX(), getY(), getWidth(), getHeight(), 0xFFFF0000);
+            graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), 0xFFFF0000);
 
             Component tooltip;
             if (isMouseOver(mouseX, mouseY) && (tooltip = validator.getInvalidValueTooltip()) != null)

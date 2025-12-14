@@ -5,7 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.wire.RoutedWire;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireNode;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public record WireRenderState(WireType type, DyeColor color, List<NodePos> nodes
 
     public record WireSection(int minX, int minY, int maxX, int maxY) {}
 
-    public record Sprites(ResourceLocation nodeSprite, ResourceLocation sectionSpriteHor, ResourceLocation sectionSpriteVert)
+    public record Sprites(Identifier nodeSprite, Identifier sectionSpriteHor, Identifier sectionSpriteVert)
     {
         private static final Sprites DEFAULT = new Sprites(
                 CircuitCanvasContentRenderState.WHITE_SPRITE,

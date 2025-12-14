@@ -7,7 +7,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
 public final class TestUtils

@@ -3,7 +3,7 @@ package io.github.xfacthd.microredstone.common.util.registration;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 public final class DeferredDataComponentType<T> extends DeferredHolder<DataComponentType<?>, DataComponentType<T>>
@@ -13,7 +13,7 @@ public final class DeferredDataComponentType<T> extends DeferredHolder<DataCompo
         super(key);
     }
 
-    public static <T> DeferredDataComponentType<T> createDataComponent(ResourceLocation name)
+    public static <T> DeferredDataComponentType<T> createDataComponent(Identifier name)
     {
         return createDataComponent(ResourceKey.create(Registries.DATA_COMPONENT_TYPE, name));
     }

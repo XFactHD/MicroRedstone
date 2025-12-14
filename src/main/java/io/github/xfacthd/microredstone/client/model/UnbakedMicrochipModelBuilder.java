@@ -2,7 +2,7 @@ package io.github.xfacthd.microredstone.client.model;
 
 import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.client.renderer.block.model.VariantMutator;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 import net.neoforged.neoforge.client.model.generators.blockstate.CustomBlockStateModelBuilder;
 import net.neoforged.neoforge.client.model.generators.blockstate.UnbakedMutator;
@@ -12,7 +12,7 @@ public final class UnbakedMicrochipModelBuilder extends CustomBlockStateModelBui
     private final Variant variant;
     private final boolean up;
 
-    public UnbakedMicrochipModelBuilder(ResourceLocation baseModel, Variant.SimpleModelState modelState, boolean up)
+    public UnbakedMicrochipModelBuilder(Identifier baseModel, Variant.SimpleModelState modelState, boolean up)
     {
         this(new Variant(baseModel, modelState), up);
     }

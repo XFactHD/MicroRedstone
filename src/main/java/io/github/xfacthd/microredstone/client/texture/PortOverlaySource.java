@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.sources.LazyLoadedImage;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ARGB;
@@ -29,17 +29,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record PortOverlaySource(ResourceLocation sprite, Map<Port, WireType> portOverlays, Optional<String> typePrefix) implements SpriteSource
+public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverlays, Optional<String> typePrefix) implements SpriteSource
 {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final MapCodec<PortOverlaySource> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-            ResourceLocation.CODEC.fieldOf("sprite").forGetter(PortOverlaySource::sprite),
+            Identifier.CODEC.fieldOf("sprite").forGetter(PortOverlaySource::sprite),
             Codec.unboundedMap(Port.CODEC, WireType.CODEC).fieldOf("ports").forGetter(PortOverlaySource::portOverlays),
             Codec.STRING.optionalFieldOf("type_prefix").forGetter(PortOverlaySource::typePrefix)
     ).apply(inst, PortOverlaySource::new));
-    public static final ResourceLocation ID = Utils.rl("port_overlay");
+    public static final Identifier ID = Utils.rl("port_overlay");
 
-    public PortOverlaySource(ResourceLocation sprite, Map<Port, WireType> portOverlays)
+    public PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverlays)
     {
         this(sprite, portOverlays, Optional.empty());
     }
@@ -60,8 +60,8 @@ public record PortOverlaySource(ResourceLocation sprite, Map<Port, WireType> por
         for (Object2IntMap.Entry<WireType> entry : types.object2IntEntrySet())
         {
             WireType type = entry.getKey();
-            ResourceLocation sprite = Utils.rl("gui/sprites/port/" + prefix + type.getSerializedName());
-            ResourceLocation location = TEXTURE_ID_CONVERTER.idToFile(sprite);
+            Identifier sprite = Utils.rl("gui/sprites/port/" + prefix + type.getSerializedName());
+            Identifier location = TEXTURE_ID_CONVERTER.idToFile(sprite);
             Optional<Resource> typeResource = resourceManager.getResource(location);
             if (typeResource.isEmpty())
             {
@@ -81,10 +81,10 @@ public record PortOverlaySource(ResourceLocation sprite, Map<Port, WireType> por
         return CODEC;
     }
 
-    public record PortOverlaySupplier(ResourceLocation sprite, Map<Port, Pair<Resource, LazyLoadedImage>> portImages) implements SpriteSupplier
+    public record PortOverlaySupplier(Identifier sprite, Map<Port, Pair<Resource, LazyLoadedImage>> portImages) implements DiscardableLoader
     {
         @Override
-        public SpriteContents apply(SpriteResourceLoader loader)
+        public SpriteContents get(SpriteResourceLoader loader)
         {
             try
             {

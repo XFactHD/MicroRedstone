@@ -13,10 +13,10 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.OptionalInt;
 
 public final class ContextMenu extends SimpleTransientContainerWidget
 {
-    private static final ResourceLocation BACKGROUND = Utils.rl("context_menu_background");
+    private static final Identifier BACKGROUND = Utils.rl("context_menu_background");
     static final int HIGHLIGHT_COLOR = CommonColors.LIGHT_GRAY;
     static final int MIN_WIDTH = 70;
     static final int MAX_WIDTH = 160;
