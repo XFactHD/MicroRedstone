@@ -16,9 +16,8 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.Conver
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.lang.classfile.CodeBuilder;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
@@ -61,16 +60,16 @@ public final class BundleUnpackerCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
     {
         localWires.generateLoad(inputWire);
         if (bitIndex > 0)
         {
-            methodGen.push(bitIndex);
-            methodGen.math(GeneratorAdapter.USHR, Type.SHORT_TYPE);
+            mthBody.loadConstant(bitIndex)
+                    .iushr();
         }
-        methodGen.push(0x1);
-        methodGen.math(GeneratorAdapter.AND, Type.SHORT_TYPE);
+        mthBody.loadConstant(0x1)
+                .iand();
         localWires.generateStore(outputWire);
     }
 

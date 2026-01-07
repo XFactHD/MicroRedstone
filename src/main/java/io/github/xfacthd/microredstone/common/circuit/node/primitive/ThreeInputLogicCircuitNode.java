@@ -17,12 +17,12 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.Primit
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.lang.classfile.CodeBuilder;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
 {
@@ -85,24 +85,24 @@ public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
     {
         localWires.generateLoad(inputOneWire);
         localWires.generateLoad(inputTwoWire);
-        int opcode = switch (type)
+        UnaryOperator<CodeBuilder> opcode = switch (type)
         {
-            case AND, NAND -> GeneratorAdapter.AND;
-            case OR, NOR -> GeneratorAdapter.OR;
-            case XOR, XNOR -> GeneratorAdapter.XOR;
+            case AND, NAND -> CodeBuilder::iand;
+            case OR, NOR -> CodeBuilder::ior;
+            case XOR, XNOR -> CodeBuilder::ixor;
             default -> throw new UnsupportedOperationException("Invalid logic op: " + type);
         };
-        methodGen.math(opcode, Type.SHORT_TYPE);
+        opcode.apply(mthBody);
         localWires.generateLoad(inputThreeWire);
-        methodGen.math(opcode, Type.SHORT_TYPE);
+        opcode.apply(mthBody);
         if (invertResult)
         {
-            methodGen.push(inversionMask);
-            methodGen.math(GeneratorAdapter.XOR, Type.SHORT_TYPE);
+            mthBody.loadConstant(inversionMask)
+                    .ixor();
         }
         localWires.generateStore(outputWire);
     }

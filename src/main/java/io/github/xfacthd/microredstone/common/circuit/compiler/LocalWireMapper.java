@@ -1,19 +1,19 @@
 package io.github.xfacthd.microredstone.common.circuit.compiler;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.TypeKind;
+import java.lang.constant.ConstantDescs;
 import java.util.Arrays;
 
 public final class LocalWireMapper
 {
-    private final GeneratorAdapter methodGen;
+    private final CodeBuilder mthBody;
     private final int[] wireParams;
     private final int[] wireLocals;
 
-    LocalWireMapper(GeneratorAdapter methodGen, int wireCount)
+    LocalWireMapper(CodeBuilder mthBody, int wireCount)
     {
-        this.methodGen = methodGen;
+        this.mthBody = mthBody;
         this.wireParams = new int[wireCount];
         Arrays.fill(wireParams, -1);
         this.wireLocals = new int[wireCount];
@@ -22,7 +22,8 @@ public final class LocalWireMapper
 
     void captureParam(int wire, int param)
     {
-        wireParams[wire] = param;
+        // Add one to "jump" over "this"
+        wireParams[wire] = param + 1;
     }
 
     public boolean hasLocalOrParam(int wire)
@@ -35,7 +36,8 @@ public final class LocalWireMapper
         int local = wireLocals[wire];
         if (local == -1)
         {
-            local = wireLocals[wire] = methodGen.newLocal(Type.SHORT_TYPE);
+            local = wireLocals[wire] = mthBody.allocateLocal(TypeKind.SHORT);
+            mthBody.localVariable(local, "wire" + wire, ConstantDescs.CD_short, mthBody.startLabel(), mthBody.endLabel());
         }
         return local;
     }
@@ -43,14 +45,7 @@ public final class LocalWireMapper
     public void generateLoad(int inputWire)
     {
         int param = wireParams[inputWire];
-        if (param != -1)
-        {
-            methodGen.loadArg(param);
-        }
-        else
-        {
-            methodGen.loadLocal(getLocal(inputWire));
-        }
+        mthBody.iload(param != -1 ? param : getLocal(inputWire));
     }
 
     public void generateStore(int outputWire)
@@ -60,6 +55,6 @@ public final class LocalWireMapper
         {
             throw new IllegalStateException("Cannot store into input parameter");
         }
-        methodGen.storeLocal(getLocal(outputWire));
+        mthBody.istore(getLocal(outputWire));
     }
 }

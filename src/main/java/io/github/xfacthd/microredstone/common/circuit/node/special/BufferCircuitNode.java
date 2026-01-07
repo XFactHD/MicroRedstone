@@ -3,7 +3,7 @@ package io.github.xfacthd.microredstone.common.circuit.node.special;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
-import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldGetter;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
@@ -16,9 +16,10 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.BufferPrototypeNode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.lang.classfile.CodeBuilder;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
@@ -56,22 +57,22 @@ public final class BufferCircuitNode extends LeafCircuitNode
         context.copyState(inputWire, outputWire);
     }
 
-    public void compileReadBack(GeneratorAdapter methodGen, Type selfType, FieldAppender fieldAppender, LocalWireMapper localWires)
+    public void compileReadBack(CodeBuilder mthBody, ClassDesc selfType, FieldGetter fieldGetter, LocalWireMapper localWires)
     {
-        String stateField = fieldAppender.getOrAddBufferField(this);
+        String stateField = fieldGetter.buffer(this);
 
-        methodGen.loadThis();
-        methodGen.getField(selfType, stateField, Type.SHORT_TYPE);
+        mthBody.aload(0); // this
+        mthBody.getfield(selfType, stateField, ConstantDescs.CD_short);
         localWires.generateStore(outputWire);
     }
 
-    public void compileCapture(GeneratorAdapter methodGen, Type selfType, FieldAppender fieldAppender, LocalWireMapper localWires)
+    public void compileCapture(CodeBuilder mthBody, ClassDesc selfType, FieldGetter fieldGetter, LocalWireMapper localWires)
     {
-        String stateField = fieldAppender.getOrAddBufferField(this);
+        String stateField = fieldGetter.buffer(this);
 
-        methodGen.loadThis();
+        mthBody.aload(0); // this
         localWires.generateLoad(inputWire);
-        methodGen.putField(selfType, stateField, Type.SHORT_TYPE);
+        mthBody.putfield(selfType, stateField, ConstantDescs.CD_short);
     }
 
     public int getInputWire()

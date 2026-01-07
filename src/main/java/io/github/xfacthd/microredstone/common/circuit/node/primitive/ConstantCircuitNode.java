@@ -16,8 +16,8 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.Consta
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.lang.classfile.CodeBuilder;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
@@ -53,9 +53,9 @@ public final class ConstantCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
     {
-        methodGen.push(value);
+        mthBody.loadConstant(value);
         localWires.generateStore(outputWire);
     }
 

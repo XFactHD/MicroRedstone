@@ -17,9 +17,8 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.Primit
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.lang.classfile.CodeBuilder;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
@@ -82,23 +81,21 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void compile(GeneratorAdapter methodGen, LocalWireMapper localWires)
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
     {
-        int opcode = switch (type)
-        {
-            case AND, NAND -> GeneratorAdapter.AND;
-            case OR, NOR -> GeneratorAdapter.OR;
-            case XOR, XNOR -> GeneratorAdapter.XOR;
-            default -> throw new UnsupportedOperationException("Invalid logic op: " + type);
-        };
-
         localWires.generateLoad(inputOneWire);
         localWires.generateLoad(inputTwoWire);
-        methodGen.math(opcode, Type.SHORT_TYPE);
+        switch (type)
+        {
+            case AND, NAND -> mthBody.iand();
+            case OR, NOR -> mthBody.ior();
+            case XOR, XNOR -> mthBody.ixor();
+            default -> throw new UnsupportedOperationException("Invalid logic op: " + type);
+        }
         if (invertResult)
         {
-            methodGen.push(inversionMask);
-            methodGen.math(GeneratorAdapter.XOR, Type.SHORT_TYPE);
+            mthBody.loadConstant(inversionMask)
+                    .ixor();
         }
         localWires.generateStore(outputWire);
     }

@@ -3,7 +3,7 @@ package io.github.xfacthd.microredstone.common.circuit.node.special;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.MRContent;
-import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldGetter;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
@@ -19,10 +19,12 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import org.jspecify.annotations.Nullable;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.Label;
+import java.lang.classfile.TypeKind;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
@@ -75,68 +77,75 @@ public final class ClockCircuitNode extends LeafCircuitNode
         context.storeOutput(outputWire, state);
     }
 
-    public void compile(GeneratorAdapter methodGen, FieldAppender fieldAppender, Type selfType, LocalWireMapper localWires)
+    public void compile(CodeBuilder mthBody, FieldGetter fieldGetter, ClassDesc selfType, LocalWireMapper localWires)
     {
         boolean needCounter = halfPeriodLength > 1;
         boolean needInhibit = inhibitInputWire != -1;
-        Fields clockFields = fieldAppender.addClockField(needCounter, halfPeriodLength - 1);
-        String stateField = clockFields.stateField;
-        Label avoidToggleLabel = new Label();
-        Label avoidFullyLabel = new Label();
+        Fields clockFields = fieldGetter.clock(this);
+        String stateField = clockFields.stateField();
+        Label avoidToggleLabel = mthBody.newLabel();
+        Label avoidFullyLabel = mthBody.newLabel();
         // Preload state field onto stack
-        methodGen.loadThis();
-        methodGen.getField(selfType, stateField, Type.INT_TYPE);
+        mthBody.aload(0) // this
+                .getfield(selfType, stateField, ConstantDescs.CD_int);
         if (needInhibit)
         {
             localWires.generateLoad(inhibitInputWire);
-            methodGen.push(0);
-            methodGen.ifCmp(Type.INT_TYPE, GeneratorAdapter.NE, avoidFullyLabel);
+            mthBody.loadConstant(0)
+                    .if_icmpne(avoidFullyLabel);
         }
         int counterLocal = -1;
         if (needCounter)
         {
-            String counterField = Objects.requireNonNull(clockFields.counterField);
-            counterLocal = methodGen.newLocal(Type.INT_TYPE);
-            methodGen.loadThis();
+            String counterField = Objects.requireNonNull(clockFields.counterField());
+            counterLocal = mthBody.allocateLocal(TypeKind.INT);
+            mthBody.localVariable(counterLocal, "local$" + counterField, ConstantDescs.CD_int, mthBody.startLabel(), mthBody.endLabel());
+
+            mthBody.aload(0) // this
             // periodCounter++
-            methodGen.getField(selfType, counterField, Type.INT_TYPE);
-            methodGen.push(1);
-            methodGen.math(GeneratorAdapter.ADD, Type.INT_TYPE);
-            methodGen.dup();
-            methodGen.storeLocal(counterLocal);
+                    .getfield(selfType, counterField, ConstantDescs.CD_int)
+                    .loadConstant(1)
+                    .iadd()
+                    .dup()
+                    .istore(counterLocal)
             // periodCounter >= halfPeriodMax
-            methodGen.push(halfPeriodLength);
-            methodGen.ifICmp(GeneratorAdapter.LT, avoidToggleLabel);
+                    .loadConstant(halfPeriodLength)
+                    .if_icmplt(avoidToggleLabel)
             // periodCounter = 0
-            methodGen.push(0);
-            methodGen.storeLocal(counterLocal);
+                    .loadConstant(0)
+                    .istore(counterLocal);
         }
         // state ^= 1
-        methodGen.push(1);
-        methodGen.math(GeneratorAdapter.XOR, Type.INT_TYPE);
-        methodGen.dup();
-        methodGen.loadThis();
-        methodGen.swap();
-        methodGen.putField(selfType, stateField, Type.INT_TYPE);
+        mthBody.loadConstant(1)
+                .ixor()
+                .dup()
+                .aload(0) // this
+                .swap()
+                .putfield(selfType, stateField, ConstantDescs.CD_int);
         if (needCounter)
         {
-            String counterField = Objects.requireNonNull(clockFields.counterField);
-            methodGen.mark(avoidToggleLabel);
-            methodGen.loadThis();
-            methodGen.loadLocal(counterLocal);
-            methodGen.putField(selfType, counterField, Type.INT_TYPE);
+            String counterField = Objects.requireNonNull(clockFields.counterField());
+            mthBody.labelBinding(avoidToggleLabel)
+                    .aload(0) // this
+                    .iload(counterLocal)
+                    .putfield(selfType, counterField, ConstantDescs.CD_int);
         }
         if (needInhibit)
         {
-            methodGen.mark(avoidFullyLabel);
+            mthBody.labelBinding(avoidFullyLabel);
         }
-        // wireLocal/context[wire] = state
+        // wireLocal = state
         localWires.generateStore(outputWire);
     }
 
     private Optional<Connector> getInhibitInput()
     {
         return inputs.length > 0 ? Optional.of(inputs[0]) : Optional.empty();
+    }
+
+    public int getHalfPeriodLength()
+    {
+        return halfPeriodLength;
     }
 
     public int getCounter()
@@ -189,5 +198,11 @@ public final class ClockCircuitNode extends LeafCircuitNode
         return Objects.hash(halfPeriodLength, inhibitInputWire, outputWire);
     }
 
-    public record Fields(@Nullable String counterField, String stateField) { }
+    public interface Fields
+    {
+        @Nullable
+        String counterField();
+
+        String stateField();
+    }
 }

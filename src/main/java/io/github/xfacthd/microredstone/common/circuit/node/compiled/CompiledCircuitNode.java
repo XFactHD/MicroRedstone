@@ -39,7 +39,7 @@ public abstract class CompiledCircuitNode extends RootCircuitNode
     }
 
     @Override
-    public PrototypeNode disassemble()
+    public final PrototypeNode disassemble()
     {
         // CompiledCircuitNodes can never reach the client
         throw new UnsupportedOperationException();
@@ -53,13 +53,13 @@ public abstract class CompiledCircuitNode extends RootCircuitNode
     }
 
     @Override
-    public boolean equals(Object obj)
+    public final boolean equals(Object obj)
     {
         return this == obj;
     }
 
     @Override
-    public int hashCode()
+    public final int hashCode()
     {
         return System.identityHashCode(this);
     }

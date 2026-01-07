@@ -8,25 +8,26 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WirePair;
 import io.github.xfacthd.microredstone.common.circuit.eval.EvalContext;
 import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.compiled.CompiledCircuitNode;
+import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import net.minecraft.util.Util;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import org.jspecify.annotations.Nullable;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.classfile.ClassBuilder;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.TypeKind;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
+import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.AccessFlag;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -52,30 +53,34 @@ public final class CircuitCompiler
     private static final String DUMP_SUB_DIR_PROPERTY = "microredstone.compiler_dump.sub_dir";
     @Nullable
     private static final Path EXPORT_PATH = buildExportPath();
+    // Disable stack map generation to allow dumping broken code
+    private static final boolean DISABLE_STACK_MAP_GEN = false;
 
-    private static final String SUPER_CLASS = CompiledCircuitNode.class.getName().replace(".", "/");
-    private static final Type SUPER_TYPE = Type.getType(CompiledCircuitNode.class);
-    private static final String CLASS_NAME_PREFIX = SUPER_CLASS + "$";
+    private static final ClassDesc CMP_NODE_TYPE = classDesc(CompoundCircuitNode.class);
+    private static final ClassDesc SUPER_TYPE = classDesc(CompiledCircuitNode.class);
+    private static final String CLASS_NAME_PREFIX = CompiledCircuitNode.class.getName() + "$";
     private static final MethodType CTOR_MTH_TYPE = MethodType.methodType(void.class, CompoundCircuitNode.class, Runnable.class);
     private static final MethodType CTOR_HANDLE_MTH_TYPE = CTOR_MTH_TYPE.changeReturnType(RootCircuitNode.class);
-    private static final Method CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, Runnable.class);
-    private static final Method SUPER_CTOR_MTH = method("<init>", Type.VOID_TYPE, CompoundCircuitNode.class, Runnable.class);
-    private static final Type INT_ARRAY_TYPE = Type.getType(int[].class);
-    private static final Type CIRCUIT_STATE_TYPE = Type.getType(CircuitState.class);
-    private static final Method CIRCUIT_STATE_CTOR_MTH = method("<init>", Type.VOID_TYPE, int[].class, int[].class, int[].class);
-    private static final Method STATE_SERIALIZE_MTH = method("serializeState", CIRCUIT_STATE_TYPE);
-    private static final Method STATE_DESERIALIZE_MTH = method("applyState", Type.VOID_TYPE, CircuitState.class);
-    private static final Method STATE_BUFFER_STATES_MTH = findMethod(CircuitState.class, "bufferStates");
-    private static final Method STATE_CLOCK_COUNTERS_MTH = findMethod(CircuitState.class, "clockCounters");
-    private static final Method STATE_CLOCK_STATES_MTH = findMethod(CircuitState.class, "clockStates");
-    static final Method NODE_EVAL_MTH = findMethod(RootCircuitNode.class, "evaluate", EvalContext.class, WirePair[].class, WirePair[].class, WireStates.class);
-    static final Type EVAL_CONTEXT_TYPE = Type.getType(EvalContext.class);
-    static final Method EVAL_CONTEXT_LOAD_MTH = findMethod(EvalContext.class, "loadInput", int.class);
-    static final Method EVAL_CONTEXT_STORE_MTH = findMethod(EvalContext.class, "storeOutput", int.class, short.class);
-    static final Type WIRE_PAIR_TYPE = Type.getType(WirePair.class);
-    static final Method WIRE_PAIR_EXTERNAL_MTH = findMethod(WirePair.class, "external");
-    static final Type WIRE_STATES_TYPE = Type.getType(WireStates.class);
-    static final Method WIRE_STATES_SET_MTH = findMethod(WireStates.class, "set", int.class, int.class);
+    private static final ClassDesc RUNNABLE_TYPE = classDesc(Runnable.class);
+    private static final MethodTypeDesc CTOR_MTH = MethodTypeDesc.of(ConstantDescs.CD_void, CMP_NODE_TYPE, RUNNABLE_TYPE);
+    private static final MethodTypeDesc SUPER_CTOR_MTH = MethodTypeDesc.of(ConstantDescs.CD_void, CMP_NODE_TYPE, RUNNABLE_TYPE);
+    private static final ClassDesc INT_ARRAY_TYPE = ConstantDescs.CD_int.arrayType();
+    private static final ClassDesc CIRCUIT_STATE_TYPE = classDesc(CircuitState.class);
+    private static final MethodTypeDesc CIRCUIT_STATE_CTOR_MTH = MethodTypeDesc.of(ConstantDescs.CD_void, INT_ARRAY_TYPE, INT_ARRAY_TYPE, INT_ARRAY_TYPE);
+    private static final MethodTypeDesc STATE_SERIALIZE_MTH = MethodTypeDesc.of(CIRCUIT_STATE_TYPE);
+    private static final MethodTypeDesc STATE_DESERIALIZE_MTH = MethodTypeDesc.of(ConstantDescs.CD_void, CIRCUIT_STATE_TYPE);
+    private static final MethodTypeDesc STATE_BUFFER_STATES_MTH = MethodTypeDesc.of(INT_ARRAY_TYPE);
+    private static final MethodTypeDesc STATE_CLOCK_COUNTERS_MTH = MethodTypeDesc.of(INT_ARRAY_TYPE);
+    private static final MethodTypeDesc STATE_CLOCK_STATES_MTH = MethodTypeDesc.of(INT_ARRAY_TYPE);
+    static final ClassDesc EVAL_CONTEXT_TYPE = classDesc(EvalContext.class);
+    static final ClassDesc WIRE_PAIR_TYPE = classDesc(WirePair.class);
+    static final ClassDesc WIRE_PAIR_ARR_TYPE = WIRE_PAIR_TYPE.arrayType();
+    static final ClassDesc WIRE_STATES_TYPE = classDesc(WireStates.class);
+    static final MethodTypeDesc NODE_EVAL_MTH = MethodTypeDesc.of(ConstantDescs.CD_void, EVAL_CONTEXT_TYPE, WIRE_PAIR_ARR_TYPE, WIRE_PAIR_ARR_TYPE, WIRE_STATES_TYPE);
+    static final MethodTypeDesc EVAL_CONTEXT_LOAD_MTH = MethodTypeDesc.of(ConstantDescs.CD_short, ConstantDescs.CD_int);
+    static final MethodTypeDesc EVAL_CONTEXT_STORE_MTH = MethodTypeDesc.of(ConstantDescs.CD_void, ConstantDescs.CD_int, ConstantDescs.CD_short);
+    static final MethodTypeDesc WIRE_PAIR_EXTERNAL_MTH = MethodTypeDesc.of(ConstantDescs.CD_int);
+    static final MethodTypeDesc WIRE_STATES_SET_MTH = MethodTypeDesc.of(ConstantDescs.CD_void, ConstantDescs.CD_int, ConstantDescs.CD_int);
 
     public static CompletableFuture<RootCircuitNode> tryCompileNode(CompoundCircuitNode node)
     {
@@ -92,20 +97,27 @@ public final class CircuitCompiler
     {
         try
         {
-            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             String className = CLASS_NAME_PREFIX + node.getName().replaceAll(" ", "_") + "$" + CLASS_COUNTER.getAndIncrement();
-            Type selfType = Type.getType("L" + className + ";");
-            writer.visit(Opcodes.V21, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, className, null, SUPER_CLASS, null);
 
-            GeneratorAdapter ctorGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CTOR_MTH, null, null, writer);
+            ClassDesc selfType = ClassDesc.of(className);
+            ClassFile classFile = ClassFile.of();
+            if (DISABLE_STACK_MAP_GEN)
+            {
+                classFile.withOptions(ClassFile.StackMapsOption.DROP_STACK_MAPS);
+            }
+            byte[] bytes = classFile.build(selfType, clsBuilder ->
+            {
+                clsBuilder.withSuperclass(SUPER_TYPE);
+                clsBuilder.withFlags(AccessFlag.PUBLIC, AccessFlag.FINAL);
 
-            EvalMethodCompiler evalCompiler = new EvalMethodCompiler(writer, selfType);
-            node.compile(evalCompiler);
+                EvalMethodCompiler evalCompiler = new EvalMethodCompiler(clsBuilder, selfType);
+                node.collectFields(evalCompiler.makeFieldCollector());
+                compileConstructor(clsBuilder, selfType, evalCompiler.getClockFields());
+                node.compile(evalCompiler);
+                evalCompiler.executeCompileQueue();
 
-            compileConstructor(ctorGen, selfType, evalCompiler.getClockFields());
-            compileStateSerdes(writer, selfType, evalCompiler.getBufferFields(), evalCompiler.getClockFields());
-
-            byte[] bytes = writer.toByteArray();
+                compileStateSerdes(clsBuilder, selfType, evalCompiler.getBufferFields(), evalCompiler.getClockFields());
+            });
             if (EXPORT_PATH != null && !suppressExport)
             {
                 exportClassBytes(className, bytes);
@@ -121,173 +133,202 @@ public final class CircuitCompiler
         }
     }
 
-    private static void compileConstructor(GeneratorAdapter ctorGen, Type selfType, List<ClockFieldSpec> clockFields)
+    private static void compileConstructor(ClassBuilder clsBuilder, ClassDesc selfType, List<ClockFieldSpec> clockFields)
     {
-        ctorGen.loadThis();
-        ctorGen.loadArg(0);
-        ctorGen.loadArg(1);
-        ctorGen.invokeConstructor(SUPER_TYPE, SUPER_CTOR_MTH);
-        if (!clockFields.isEmpty())
+        clsBuilder.withMethodBody(ConstantDescs.INIT_NAME, CTOR_MTH, ClassFile.ACC_PUBLIC, ctorBody ->
         {
-            for (ClockFieldSpec field : clockFields)
+            ctorBody.localVariable(1, "originalNode", CMP_NODE_TYPE, ctorBody.startLabel(), ctorBody.endLabel());
+            ctorBody.localVariable(2, "releaser", RUNNABLE_TYPE, ctorBody.startLabel(), ctorBody.endLabel());
+
+            ctorBody.aload(0) // this
+                    .aload(1) // arg0
+                    .aload(2) // arg1
+                    .invokespecial(SUPER_TYPE, ConstantDescs.INIT_NAME, SUPER_CTOR_MTH);
+            if (!clockFields.isEmpty())
             {
-                if (field.counterName != null)
+                for (ClockFieldSpec field : clockFields)
                 {
-                    ctorGen.loadThis();
-                    ctorGen.push(field.counterInit);
-                    ctorGen.putField(selfType, field.counterName, Type.INT_TYPE);
+                    if (field.counterField != null)
+                    {
+                        ctorBody.aload(0) // this
+                                .loadConstant(field.counterInit)
+                                .putfield(selfType, field.counterField, ConstantDescs.CD_int);
+                    }
+                    ctorBody.aload(0) // this
+                            .loadConstant(0)
+                            .putfield(selfType, field.stateField, ConstantDescs.CD_int);
                 }
-                ctorGen.loadThis();
-                ctorGen.push(0);
-                ctorGen.putField(selfType, field.stateName, Type.INT_TYPE);
             }
-        }
-        ctorGen.returnValue();
-        ctorGen.endMethod();
+            ctorBody.return_();
+        });
     }
 
-    private static void compileStateSerdes(ClassWriter writer, Type selfType, List<BufferFieldSpec> bufferFields, List<ClockFieldSpec> clockFields)
+    private static void compileStateSerdes(ClassBuilder clsBuilder, ClassDesc selfType, List<BufferFieldSpec> bufferFields, List<ClockFieldSpec> clockFields)
     {
-        GeneratorAdapter serGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, STATE_SERIALIZE_MTH, null, null, writer);
-        GeneratorAdapter desGen = new GeneratorAdapter(Opcodes.ACC_PUBLIC, STATE_DESERIALIZE_MTH, null, null, writer);
-
         boolean hasBuffers = !bufferFields.isEmpty();
         boolean hasClocks = !clockFields.isEmpty();
-        boolean hasClocksWithCounters = hasClocks && clockFields.stream().anyMatch(clock -> clock.counterName != null);
+        boolean hasClocksWithCounters = hasClocks && clockFields.stream().anyMatch(clock -> clock.counterField != null);
 
-        if (hasBuffers || hasClocks)
+        clsBuilder.withMethodBody("serializeState", STATE_SERIALIZE_MTH, ClassFile.ACC_PUBLIC, mthBody ->
         {
-            serGen.newInstance(CIRCUIT_STATE_TYPE);
-            serGen.dup();
+            if (!hasBuffers && !hasClocks)
+            {
+                mthBody.getstatic(CIRCUIT_STATE_TYPE, "EMPTY", CIRCUIT_STATE_TYPE)
+                        .return_(TypeKind.REFERENCE);
+                return;
+            }
 
-            int serBufStateLocal = serGen.newLocal(INT_ARRAY_TYPE);
-            int desBufStateLocal = hasBuffers ? desGen.newLocal(INT_ARRAY_TYPE) : -1;
-            serGen.push(bufferFields.size());
-            serGen.newArray(Type.INT_TYPE);
-            serGen.storeLocal(serBufStateLocal);
+            int bufStateLocal = mthBody.allocateLocal(TypeKind.REFERENCE);
+            mthBody.localVariable(bufStateLocal, "bufferStates", INT_ARRAY_TYPE, mthBody.startLabel(), mthBody.endLabel())
+                    .loadConstant(bufferFields.size())
+                    .newarray(TypeKind.INT)
+                    .storeLocal(TypeKind.REFERENCE, bufStateLocal);
+            for (int i = 0; i < bufferFields.size(); i++)
+            {
+                BufferFieldSpec buffer = bufferFields.get(i);
+
+                mthBody.aload(bufStateLocal)
+                        .loadConstant(i)
+                        .aload(0) // this
+                        .getfield(selfType, buffer.name, ConstantDescs.CD_short)
+                        .arrayStore(TypeKind.INT);
+            }
+
+            int clockCountLocal = mthBody.allocateLocal(TypeKind.REFERENCE);
+            int clockStateLocal = mthBody.allocateLocal(TypeKind.REFERENCE);
+            mthBody.localVariable(clockCountLocal, "clockCounters", INT_ARRAY_TYPE, mthBody.startLabel(), mthBody.endLabel())
+                    .localVariable(clockStateLocal, "clockStates", INT_ARRAY_TYPE, mthBody.startLabel(), mthBody.endLabel())
+                    .loadConstant(clockFields.size())
+                    .dup()
+                    .newarray(TypeKind.INT)
+                    .storeLocal(TypeKind.REFERENCE, clockCountLocal)
+                    .newarray(TypeKind.INT)
+                    .storeLocal(TypeKind.REFERENCE, clockStateLocal);
+            for (int i = 0; i < clockFields.size(); i++)
+            {
+                ClockFieldSpec clock = clockFields.get(i);
+
+                if (clock.counterField != null)
+                {
+                    mthBody.aload(clockCountLocal)
+                            .loadConstant(i)
+                            .aload(0) // this
+                            .getfield(selfType, clock.counterField, ConstantDescs.CD_int)
+                            .arrayStore(TypeKind.INT);
+                }
+
+                mthBody.aload(clockStateLocal)
+                        .loadConstant(i)
+                        .aload(0) // this
+                        .getfield(selfType, clock.stateField, ConstantDescs.CD_int)
+                        .arrayStore(TypeKind.INT);
+            }
+
+            mthBody.new_(CIRCUIT_STATE_TYPE)
+                    .dup()
+                    .aload(bufStateLocal)
+                    .aload(clockCountLocal)
+                    .aload(clockStateLocal)
+                    .invokespecial(CIRCUIT_STATE_TYPE, ConstantDescs.INIT_NAME, CIRCUIT_STATE_CTOR_MTH)
+                    .return_(TypeKind.REFERENCE);
+        });
+        clsBuilder.withMethodBody("applyState", STATE_DESERIALIZE_MTH, ClassFile.ACC_PUBLIC, mthBody ->
+        {
+            mthBody.localVariable(1, "state", CIRCUIT_STATE_TYPE, mthBody.startLabel(), mthBody.endLabel());
+
+            if (!hasBuffers && !hasClocks)
+            {
+                mthBody.return_();
+                return;
+            }
+
+            int bufStateLocal;
             if (hasBuffers)
             {
-                desGen.loadArg(0);
-                desGen.invokeVirtual(CIRCUIT_STATE_TYPE, STATE_BUFFER_STATES_MTH);
-                desGen.storeLocal(desBufStateLocal);
+                bufStateLocal = mthBody.allocateLocal(TypeKind.REFERENCE);
+                mthBody.localVariable(bufStateLocal, "bufferStates", INT_ARRAY_TYPE, mthBody.startLabel(), mthBody.endLabel())
+                        .aload(1) // arg0
+                        .invokevirtual(CIRCUIT_STATE_TYPE, "bufferStates", STATE_BUFFER_STATES_MTH)
+                        .storeLocal(TypeKind.REFERENCE, bufStateLocal);
+            }
+            else
+            {
+                bufStateLocal = -1;
             }
             for (int i = 0; i < bufferFields.size(); i++)
             {
                 BufferFieldSpec buffer = bufferFields.get(i);
 
-                serGen.loadLocal(serBufStateLocal);
-                serGen.push(i);
-                serGen.loadThis();
-                serGen.getField(selfType, buffer.name, Type.SHORT_TYPE);
-                serGen.arrayStore(Type.INT_TYPE);
-
-                desGen.loadThis();
-                desGen.loadLocal(desBufStateLocal);
-                desGen.push(i);
-                desGen.arrayLoad(Type.INT_TYPE);
-                desGen.putField(selfType, buffer.name, Type.SHORT_TYPE);
+                mthBody.aload(0) // this
+                        .aload(bufStateLocal)
+                        .loadConstant(i)
+                        .arrayLoad(TypeKind.INT)
+                        .putfield(selfType, buffer.name, ConstantDescs.CD_short);
             }
 
-            int serClockCountLocal = serGen.newLocal(INT_ARRAY_TYPE);
-            int desClockCountLocal = hasClocksWithCounters ? desGen.newLocal(INT_ARRAY_TYPE) : -1;
-            int serClockStateLocal = serGen.newLocal(INT_ARRAY_TYPE);
-            int desClockStateLocal = hasClocks ? desGen.newLocal(INT_ARRAY_TYPE) : -1;
-            serGen.push(clockFields.size());
-            serGen.dup();
-            serGen.newArray(Type.INT_TYPE);
-            serGen.storeLocal(serClockCountLocal);
-            serGen.newArray(Type.INT_TYPE);
-            serGen.storeLocal(serClockStateLocal);
+            int clockCountLocal;
             if (hasClocksWithCounters)
             {
-                desGen.loadArg(0);
-                desGen.invokeVirtual(CIRCUIT_STATE_TYPE, STATE_CLOCK_COUNTERS_MTH);
-                desGen.storeLocal(desClockCountLocal);
+                clockCountLocal = mthBody.allocateLocal(TypeKind.REFERENCE);
+                mthBody.localVariable(clockCountLocal, "clockCounters", INT_ARRAY_TYPE, mthBody.startLabel(), mthBody.endLabel())
+                        .aload(1) // arg0
+                        .invokevirtual(CIRCUIT_STATE_TYPE, "clockCounters", STATE_CLOCK_COUNTERS_MTH)
+                        .storeLocal(TypeKind.REFERENCE, clockCountLocal);
             }
+            else
+            {
+                clockCountLocal = -1;
+            }
+            int clockStateLocal;
             if (hasClocks)
             {
-                desGen.loadArg(0);
-                desGen.invokeVirtual(CIRCUIT_STATE_TYPE, STATE_CLOCK_STATES_MTH);
-                desGen.storeLocal(desClockStateLocal);
+                clockStateLocal = mthBody.allocateLocal(TypeKind.REFERENCE);
+                mthBody.localVariable(clockStateLocal, "clockStates", INT_ARRAY_TYPE, mthBody.startLabel(), mthBody.endLabel())
+                        .aload(1) // arg0
+                        .invokevirtual(CIRCUIT_STATE_TYPE, "clockStates", STATE_CLOCK_STATES_MTH)
+                        .storeLocal(TypeKind.REFERENCE, clockStateLocal);
+            }
+            else
+            {
+                clockStateLocal = -1;
             }
             for (int i = 0; i < clockFields.size(); i++)
             {
                 ClockFieldSpec clock = clockFields.get(i);
 
-                if (clock.counterName != null)
+                if (clock.counterField != null)
                 {
-                    serGen.loadLocal(serClockCountLocal);
-                    serGen.push(i);
-                    serGen.loadThis();
-                    serGen.getField(selfType, clock.counterName, Type.INT_TYPE);
-                    serGen.arrayStore(Type.INT_TYPE);
-
-                    desGen.loadThis();
-                    desGen.loadLocal(desClockCountLocal);
-                    desGen.push(i);
-                    desGen.arrayLoad(Type.INT_TYPE);
-                    desGen.putField(selfType, clock.counterName, Type.INT_TYPE);
+                    mthBody.aload(0) // this
+                            .aload(clockCountLocal)
+                            .loadConstant(i)
+                            .arrayLoad(TypeKind.INT)
+                            .putfield(selfType, clock.counterField, ConstantDescs.CD_int);
                 }
 
-                serGen.loadLocal(serClockStateLocal);
-                serGen.push(i);
-                serGen.loadThis();
-                serGen.getField(selfType, clock.stateName, Type.INT_TYPE);
-                serGen.arrayStore(Type.INT_TYPE);
-
-                desGen.loadThis();
-                desGen.loadLocal(desClockStateLocal);
-                desGen.push(i);
-                desGen.arrayLoad(Type.INT_TYPE);
-                desGen.putField(selfType, clock.stateName, Type.INT_TYPE);
+                mthBody.aload(0) // this
+                        .aload(clockStateLocal)
+                        .loadConstant(i)
+                        .arrayLoad(TypeKind.INT)
+                        .putfield(selfType, clock.stateField, ConstantDescs.CD_int);
             }
 
-            serGen.loadLocal(serBufStateLocal);
-            serGen.loadLocal(serClockCountLocal);
-            serGen.loadLocal(serClockStateLocal);
-            serGen.invokeConstructor(CIRCUIT_STATE_TYPE, CIRCUIT_STATE_CTOR_MTH);
-        }
-        else
-        {
-            serGen.getStatic(CIRCUIT_STATE_TYPE, "EMPTY", CIRCUIT_STATE_TYPE);
-        }
-
-        serGen.returnValue();
-        serGen.endMethod();
-        desGen.returnValue();
-        desGen.endMethod();
+            mthBody.return_();
+        });
     }
 
     record BufferFieldSpec(String name) {}
 
-    record ClockFieldSpec(@Nullable String counterName, String stateName, int counterInit) {}
+    record ClockFieldSpec(@Nullable String counterField, String stateField, int counterInit) implements ClockCircuitNode.Fields {}
 
-    private static Method findMethod(Class<?> owner, String methodName, Class<?>... parameterTypes)
+    private static ClassDesc classDesc(Class<?> clazz)
     {
-        // ObfuscationReflectionHelper.findMethod() must be duplicated due to ORH's use of LogManager.getLogger() failing with JMH
-        java.lang.reflect.Method method;
-        try
-        {
-            method = owner.getDeclaredMethod(methodName, parameterTypes);
-            method.setAccessible(true);
-        }
-        catch (Exception e)
-        {
-            throw new ObfuscationReflectionHelper.UnableToFindMethodException(e);
-        }
-        return Method.getMethod(method);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    static Method method(String name, Type retType, Class<?>... paramTypes)
-    {
-        return new Method(name, retType, Arrays.stream(paramTypes).map(Type::getType).toArray(Type[]::new));
+        return ClassDesc.of(clazz.getName());
     }
 
     private static void exportClassBytes(String name, byte[] bytes)
     {
         Path exportPath = Objects.requireNonNull(EXPORT_PATH);
-        String fileName = name.substring(name.lastIndexOf("/") + 1);
+        String fileName = name.substring(name.lastIndexOf(".") + 1);
         Path path = exportPath.resolve(fileName + ".class");
         try
         {

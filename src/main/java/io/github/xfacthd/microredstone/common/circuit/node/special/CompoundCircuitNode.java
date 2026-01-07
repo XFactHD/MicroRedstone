@@ -8,7 +8,8 @@ import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.CircuitState;
 import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.compiler.EvalMethodCompiler;
-import io.github.xfacthd.microredstone.common.circuit.compiler.FieldAppender;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldCollector;
+import io.github.xfacthd.microredstone.common.circuit.compiler.FieldGetter;
 import io.github.xfacthd.microredstone.common.circuit.compiler.LocalWireMapper;
 import io.github.xfacthd.microredstone.common.circuit.connection.Connector;
 import io.github.xfacthd.microredstone.common.circuit.connection.Wire;
@@ -30,9 +31,9 @@ import it.unimi.dsi.fastutil.ints.IntListIterator;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import org.jspecify.annotations.Nullable;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.lang.classfile.CodeBuilder;
+import java.lang.constant.ClassDesc;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -181,6 +182,25 @@ public final class CompoundCircuitNode extends RootCircuitNode implements Iterab
         }
     }
 
+    public void collectFields(FieldCollector collector)
+    {
+        for (NodeEntry<ClockCircuitNode> clock : clockNodes)
+        {
+            collector.clock(clock.node());
+        }
+        for (NodeEntry<BufferCircuitNode> buffer : bufferNodes)
+        {
+            collector.buffer(buffer.node());
+        }
+        for (NodeEntry<CircuitNode> child : childNodes)
+        {
+            if (child.node() instanceof CompoundCircuitNode nested)
+            {
+                nested.collectFields(collector);
+            }
+        }
+    }
+
     public void compile(EvalMethodCompiler compiler)
     {
         compiler.compileRootEval(this, CompoundCircuitNode::compileNodeEval);
@@ -188,35 +208,35 @@ public final class CompoundCircuitNode extends RootCircuitNode implements Iterab
 
     private static void compileNodeEval(
             EvalMethodCompiler compiler,
-            GeneratorAdapter generator,
-            Type selfType,
-            FieldAppender fieldAppender,
+            CodeBuilder mthBody,
+            ClassDesc selfType,
+            FieldGetter fieldGetter,
             LocalWireMapper localWires,
             CompoundCircuitNode compoundNode
     )
     {
         for (NodeEntry<ClockCircuitNode> clock : compoundNode.clockNodes)
         {
-            clock.node().compile(generator, fieldAppender, selfType, localWires);
+            clock.node().compile(mthBody, fieldGetter, selfType, localWires);
         }
         for (NodeEntry<BufferCircuitNode> buffer : compoundNode.bufferNodes)
         {
-            buffer.node().compileReadBack(generator, selfType, fieldAppender, localWires);
+            buffer.node().compileReadBack(mthBody, selfType, fieldGetter, localWires);
         }
         for (NodeEntry<CircuitNode> child : compoundNode.childNodes)
         {
             if (child.node() instanceof PrimitiveCircuitNode primitive)
             {
-                primitive.compile(generator, localWires);
+                primitive.compile(mthBody, localWires);
             }
             else if (child.node() instanceof CompoundCircuitNode nested)
             {
-                compiler.compileNestedEval(generator, localWires, nested, child.inputs(), child.outputs(), CompoundCircuitNode::compileNodeEval);
+                compiler.compileNestedEval(mthBody, localWires, nested, child.inputs(), child.outputs(), CompoundCircuitNode::compileNodeEval);
             }
         }
         for (NodeEntry<BufferCircuitNode> buffer : compoundNode.bufferNodes)
         {
-            buffer.node().compileCapture(generator, selfType, fieldAppender, localWires);
+            buffer.node().compileCapture(mthBody, selfType, fieldGetter, localWires);
         }
     }
 

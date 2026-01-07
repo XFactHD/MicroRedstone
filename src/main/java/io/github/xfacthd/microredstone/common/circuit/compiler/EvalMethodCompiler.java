@@ -9,71 +9,84 @@ import io.github.xfacthd.microredstone.common.circuit.node.special.ClockCircuitN
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 
-import java.util.ArrayList;
+import java.lang.classfile.ClassBuilder;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.Label;
+import java.lang.classfile.TypeKind;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDescs;
+import java.lang.constant.MethodTypeDesc;
+import java.lang.reflect.AccessFlag;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class EvalMethodCompiler
 {
     private final Map<BufferCircuitNode, CircuitCompiler.BufferFieldSpec> bufferFields = new Reference2ObjectLinkedOpenHashMap<>();
-    private final List<CircuitCompiler.ClockFieldSpec> clockFields = new ArrayList<>();
-    private final FieldAppender fieldAppender;
-    private final ClassWriter classWriter;
-    private final Type selfType;
+    private final Map<ClockCircuitNode, CircuitCompiler.ClockFieldSpec> clockFields = new Reference2ObjectLinkedOpenHashMap<>();
+    private final FieldGetter fieldGetter = makeFieldGetter();
+    private final ClassBuilder clsBuilder;
+    private final ClassDesc selfType;
+    private final Deque<Runnable> compileQueue = new ArrayDeque<>();
     private int nestedNodeCounter = 0;
 
-    EvalMethodCompiler(ClassWriter classWriter, Type selfType)
+    EvalMethodCompiler(ClassBuilder clsBuilder, ClassDesc selfType)
     {
-        this.classWriter = classWriter;
+        this.clsBuilder = clsBuilder;
         this.selfType = selfType;
-        this.fieldAppender = makeFieldAppender();
+    }
+
+    void executeCompileQueue()
+    {
+        while (!compileQueue.isEmpty())
+        {
+            compileQueue.removeFirst().run();
+        }
     }
 
     public void compileRootEval(CompoundCircuitNode node, NodeCompiler compiler)
     {
         // Read inputs from incoming EvalContext
-        InputOutputCompiler inputCompiler = (generator, localWires, inputCons) ->
-                compileContextReadWrite(generator, 1, inputCons, input ->
+        InputOutputCompiler inputCompiler = (mthBody, localWires, inputCons) ->
+                compileContextReadWrite(mthBody, 1, inputCons, input ->
                 {
-                    generator.invokeVirtual(CircuitCompiler.EVAL_CONTEXT_TYPE, CircuitCompiler.EVAL_CONTEXT_LOAD_MTH);
+                    mthBody.invokevirtual(CircuitCompiler.EVAL_CONTEXT_TYPE, "loadInput", CircuitCompiler.EVAL_CONTEXT_LOAD_MTH);
                     localWires.generateStore(input.wire());
                 });
         // Write outputs to incoming EvalContext
-        InputOutputCompiler outputCompiler = (generator, localWires, outputCons) ->
-                compileContextReadWrite(generator, 2, outputCons, output ->
+        InputOutputCompiler outputCompiler = (mthBody, localWires, outputCons) ->
+                compileContextReadWrite(mthBody, 2, outputCons, output ->
                 {
                     localWires.generateLoad(output.wire());
-                    generator.invokeVirtual(CircuitCompiler.EVAL_CONTEXT_TYPE, CircuitCompiler.EVAL_CONTEXT_STORE_MTH);
+                    mthBody.invokevirtual(CircuitCompiler.EVAL_CONTEXT_TYPE, "storeOutput", CircuitCompiler.EVAL_CONTEXT_STORE_MTH);
                 });
         // Build root eval method
-        compileEval(CircuitCompiler.NODE_EVAL_MTH, true, node, compiler, inputCompiler, outputCompiler);
+        compileEval("evaluate", CircuitCompiler.NODE_EVAL_MTH, true, node, compiler, inputCompiler, outputCompiler);
     }
 
-    private static void compileContextReadWrite(GeneratorAdapter generator, int wirePairParam, Connector[] connectors, Consumer<Connector> compiler)
+    private static void compileContextReadWrite(CodeBuilder mthBody, int wirePairParam, Connector[] connectors, Consumer<Connector> compiler)
     {
         for (int i = 0; i < connectors.length; i++)
         {
             Connector con = connectors[i];
 
-            generator.loadArg(0); // EvalContext
-            generator.loadArg(wirePairParam); // WirePair[]
-            generator.push(i);
-            generator.arrayLoad(CircuitCompiler.WIRE_PAIR_TYPE); // WirePair[i]
-            generator.invokeVirtual(CircuitCompiler.WIRE_PAIR_TYPE, CircuitCompiler.WIRE_PAIR_EXTERNAL_MTH); // WirePair#external()
+            mthBody.aload(1) // EvalContext
+                    .aload(wirePairParam + 1) // WirePair[]
+                    .loadConstant(i)
+                    .aaload() // WirePair[i]
+                    .invokevirtual(CircuitCompiler.WIRE_PAIR_TYPE, "external", CircuitCompiler.WIRE_PAIR_EXTERNAL_MTH); // WirePair#external()
             compiler.accept(con);
         }
     }
 
     public void compileNestedEval(
-            GeneratorAdapter outerGenerator,
+            CodeBuilder outerMthBody,
             LocalWireMapper outerLocalWires,
             CompoundCircuitNode node,
             WirePair[] inputMappings,
@@ -81,18 +94,20 @@ public final class EvalMethodCompiler
             NodeCompiler compiler
     )
     {
-        Method evalMth = makeNestedEvalMethod(node.getName(), node.getInputs().length, node.getOutputs().length);
+        String evalMthName = "evaluate$nested$" + node.getName().replace(" ", "_") + "$" + nestedNodeCounter;
+        nestedNodeCounter++;
+        MethodTypeDesc evalMthDesc = makeNestedEvalMethod(node.getInputs().length, node.getOutputs().length);
 
         // Load input params onto stack and call nested eval method from outer method
-        outerGenerator.loadThis();
+        outerMthBody.aload(0); // this
         for (int i = 0; i < node.getInputs().length; i++)
         {
             outerLocalWires.generateLoad(inputMappings[i].external());
         }
-        outerGenerator.invokeVirtual(selfType, evalMth);
+        outerMthBody.invokevirtual(selfType, evalMthName, evalMthDesc);
 
         // Capture input params in nested method's LocalWireMapper
-        InputOutputCompiler inputCompiler = (generator, localWires, inputCons) ->
+        InputOutputCompiler inputCompiler = (_, localWires, inputCons) ->
         {
             for (int i = 0; i < inputCons.length; i++)
             {
@@ -101,38 +116,42 @@ public final class EvalMethodCompiler
             }
         };
         // Pack nested eval results into return value
-        InputOutputCompiler outputCompiler = (generator, localWires, outputCons) ->
+        InputOutputCompiler outputCompiler = (mthBody, localWires, outputCons) ->
         {
             switch (outputCons.length)
             {
                 case 0 -> {}
-                case 1 -> localWires.generateLoad(outputCons[0].wire());
+                case 1 ->
+                        // return outputLocal0;
+                        localWires.generateLoad(outputCons[0].wire());
                 case 2 ->
                 {
+                    // return (outputLocal1 << 16) | outputLocal0;
                     localWires.generateLoad(outputCons[0].wire());
                     localWires.generateLoad(outputCons[1].wire());
-                    generator.push(16);
-                    generator.math(GeneratorAdapter.SHL, Type.INT_TYPE);
-                    generator.math(GeneratorAdapter.OR, Type.INT_TYPE);
+                    mthBody.loadConstant(16)
+                            .ishl()
+                            .ior();
                 }
                 default ->
                 {
+                    // return (outputLocal1 << 48) | (outputLocal1 << 32) | (outputLocal1 << 16) | outputLocal0;
                     for (int i = 0; i < outputCons.length; i++)
                     {
                         localWires.generateLoad(outputCons[i].wire());
-                        generator.cast(Type.SHORT_TYPE, Type.LONG_TYPE);
+                        mthBody.i2l();
                         if (i > 0)
                         {
-                            generator.push(16 * i);
-                            generator.math(GeneratorAdapter.SHL, Type.LONG_TYPE);
-                            generator.math(GeneratorAdapter.OR, Type.LONG_TYPE);
+                            mthBody.loadConstant(16 * i)
+                                    .lshl()
+                                    .lor();
                         }
                     }
                 }
             }
         };
         // Build nested eval method
-        compileEval(evalMth, false, node, compiler, inputCompiler, outputCompiler);
+        compileEval(evalMthName, evalMthDesc, false, node, compiler, inputCompiler, outputCompiler);
 
         // Unpack results from nested eval call and store back into locals in outer eval method
         Connector[] outputs = node.getOutputs();
@@ -140,40 +159,45 @@ public final class EvalMethodCompiler
         {
             case 0 -> {}
             case 1 ->
-                    // return outputLocal0;
+                    // short local = retVal;
                     outerLocalWires.generateStore(outputMappings[0].external());
             case 2 ->
             {
-                // return (outputLocal1 << 16) | outputLocal0;
-                outerGenerator.dup();
-                outerGenerator.push(0xFFFF);
-                outerGenerator.math(GeneratorAdapter.AND, Type.INT_TYPE);
-                outerGenerator.cast(Type.INT_TYPE, Type.SHORT_TYPE);
+                // short local1 = retVal & 0xFFFF;
+                // short local2 = (retVal >>> 16) & 0xFFFF;
+                outerMthBody.dup()
+                        .loadConstant(0xFFFF)
+                        .iand()
+                        .i2s();
                 outerLocalWires.generateStore(outputMappings[0].external());
-                outerGenerator.push(16);
-                outerGenerator.math(GeneratorAdapter.USHR, Type.INT_TYPE);
-                outerGenerator.push(0xFFFF);
-                outerGenerator.math(GeneratorAdapter.AND, Type.INT_TYPE);
-                outerGenerator.cast(Type.INT_TYPE, Type.SHORT_TYPE);
+                outerMthBody.loadConstant(16)
+                        .iushr()
+                        .loadConstant(0xFFFF)
+                        .iand()
+                        .i2s();
                 outerLocalWires.generateStore(outputMappings[1].external());
             }
             default ->
             {
-                // return (outputLocal3 << 48) | (outputLocal2 << 32) | (outputLocal1 << 16) | outputLocal0;
+                // short local1 = retVal & 0xFFFF;
+                // short local2 = (retVal >>> 16) & 0xFFFF;
+                // short local2 = (retVal >>> 32) & 0xFFFF;
+                // short local3 = (retVal >>> 48) & 0xFFFF;
                 for (int i = 0; i < outputs.length; i++)
                 {
                     if (i < outputs.length - 1)
                     {
-                        outerGenerator.dup2();
+                        outerMthBody.dup2();
                     }
                     if (i > 0)
                     {
-                        outerGenerator.push(16 * i);
-                        outerGenerator.math(GeneratorAdapter.USHR, Type.LONG_TYPE);
+                        outerMthBody.loadConstant(16 * i)
+                                .lushr();
                     }
-                    outerGenerator.push(0xFFFFL);
-                    outerGenerator.math(GeneratorAdapter.AND, Type.LONG_TYPE);
-                    outerGenerator.cast(Type.LONG_TYPE, Type.SHORT_TYPE);
+                    outerMthBody.loadConstant(0xFFFFL)
+                            .land()
+                            .l2i()
+                            .i2s();
                     outerLocalWires.generateStore(outputMappings[i].external());
                 }
             }
@@ -181,7 +205,8 @@ public final class EvalMethodCompiler
     }
 
     private void compileEval(
-            Method evalMth,
+            String evalMthName,
+            MethodTypeDesc evalMthDesc,
             boolean rootMth,
             CompoundCircuitNode node,
             NodeCompiler compiler,
@@ -189,51 +214,77 @@ public final class EvalMethodCompiler
             InputOutputCompiler outputCompiler
     )
     {
-        GeneratorAdapter generator = new GeneratorAdapter(rootMth ? Opcodes.ACC_PUBLIC : Opcodes.ACC_PRIVATE, evalMth, null, null, classWriter);
-        LocalWireMapper localWires = new LocalWireMapper(generator, node.getWireCount());
-
-        inputCompiler.compile(generator, localWires, node.getInputs());
-        compiler.compile(this, generator, selfType, fieldAppender, localWires, node);
-        outputCompiler.compile(generator, localWires, node.getOutputs());
-
-        if (rootMth)
-        {
-            Label skipCaptureLabel = new Label();
-
-            generator.loadArg(3);
-            generator.ifNull(skipCaptureLabel);
-
-            List<Wire> wires = node.getWires();
-            for (int i = 0; i < wires.size(); i++)
-            {
-                if (wires.get(i).getWireType() == WireType.BUNDLED) continue;
-
-                generator.loadArg(3);
-                generator.push(i);
-                localWires.generateLoad(i);
-                generator.invokeVirtual(CircuitCompiler.WIRE_STATES_TYPE, CircuitCompiler.WIRE_STATES_SET_MTH);
-            }
-
-            generator.mark(skipCaptureLabel);
-        }
-
-        generator.returnValue();
-        generator.endMethod();
+        compileQueue.addLast(() -> compileEval0(evalMthName, evalMthDesc, rootMth, node, compiler, inputCompiler, outputCompiler));
     }
 
-    private Method makeNestedEvalMethod(String nodeName, int inputCount, int outputCount)
+    private void compileEval0(
+            String evalMthName,
+            MethodTypeDesc evalMthDesc,
+            boolean rootMth,
+            CompoundCircuitNode node,
+            NodeCompiler compiler,
+            InputOutputCompiler inputCompiler,
+            InputOutputCompiler outputCompiler
+    )
     {
-        String methodName = "evaluate$nested$" + nodeName.replace(" ", "_") + "$" + nestedNodeCounter;
-        nestedNodeCounter++;
-        Type[] paramTypes = Utils.fillArray(new Type[inputCount], $ -> Type.SHORT_TYPE);
-        Type retType = switch (outputCount)
+        clsBuilder.withMethodBody(evalMthName, evalMthDesc, rootMth ? ClassFile.ACC_PUBLIC : ClassFile.ACC_PRIVATE, mthBody ->
         {
-            case 0 -> Type.VOID_TYPE;
-            case 1 -> Type.SHORT_TYPE;
-            case 2 -> Type.INT_TYPE;
-            default -> Type.LONG_TYPE;
+            LocalWireMapper localWires = new LocalWireMapper(mthBody, node.getWireCount());
+
+            if (rootMth)
+            {
+                mthBody.localVariable(1, "context", CircuitCompiler.EVAL_CONTEXT_TYPE, mthBody.startLabel(), mthBody.endLabel());
+                mthBody.localVariable(2, "inputs", CircuitCompiler.WIRE_PAIR_ARR_TYPE, mthBody.startLabel(), mthBody.endLabel());
+                mthBody.localVariable(3, "outputs", CircuitCompiler.WIRE_PAIR_ARR_TYPE, mthBody.startLabel(), mthBody.endLabel());
+                mthBody.localVariable(4, "wireStates", CircuitCompiler.WIRE_STATES_TYPE, mthBody.startLabel(), mthBody.endLabel());
+            }
+
+            inputCompiler.compile(mthBody, localWires, node.getInputs());
+            compiler.compile(this, mthBody, selfType, fieldGetter, localWires, node);
+            outputCompiler.compile(mthBody, localWires, node.getOutputs());
+
+            List<Wire> wires = node.getWires();
+            if (rootMth && wires.stream().anyMatch(wire -> wire.getWireType() == WireType.SINGLE))
+            {
+                Label skipCaptureLabel = mthBody.newLabel();
+
+                mthBody.aload(4); // WireStates
+                mthBody.ifnull(skipCaptureLabel);
+
+                for (int i = 0; i < wires.size(); i++)
+                {
+                    if (wires.get(i).getWireType() == WireType.BUNDLED) continue;
+
+                    mthBody.aload(4); // WireStates
+                    mthBody.loadConstant(i);
+                    localWires.generateLoad(i);
+                    mthBody.invokevirtual(CircuitCompiler.WIRE_STATES_TYPE, "set", CircuitCompiler.WIRE_STATES_SET_MTH);
+                }
+
+                mthBody.labelBinding(skipCaptureLabel);
+            }
+
+            switch (evalMthDesc.returnType().descriptorString())
+            {
+                case "V" -> mthBody.return_();
+                case "S" -> mthBody.return_(TypeKind.SHORT);
+                case "I" -> mthBody.return_(TypeKind.INT);
+                case "J" -> mthBody.return_(TypeKind.LONG);
+            }
+        });
+    }
+
+    private static MethodTypeDesc makeNestedEvalMethod(int inputCount, int outputCount)
+    {
+        ClassDesc[] paramTypes = Utils.fillArray(new ClassDesc[inputCount], _ -> ConstantDescs.CD_short);
+        ClassDesc retType = switch (outputCount)
+        {
+            case 0 -> ConstantDescs.CD_void;
+            case 1 -> ConstantDescs.CD_short;
+            case 2 -> ConstantDescs.CD_int;
+            default -> ConstantDescs.CD_long;
         };
-        return new Method(methodName, retType, paramTypes);
+        return MethodTypeDesc.of(retType, paramTypes);
     }
 
     List<CircuitCompiler.BufferFieldSpec> getBufferFields()
@@ -243,40 +294,67 @@ public final class EvalMethodCompiler
 
     List<CircuitCompiler.ClockFieldSpec> getClockFields()
     {
-        return clockFields;
+        return List.copyOf(clockFields.values());
     }
 
-    private FieldAppender makeFieldAppender()
+    FieldCollector makeFieldCollector()
     {
-        return new FieldAppender()
+        return new FieldCollector()
         {
             @Override
-            public String getOrAddBufferField(BufferCircuitNode buffer)
+            public void buffer(BufferCircuitNode buffer)
             {
                 CircuitCompiler.BufferFieldSpec fieldSpec = bufferFields.get(buffer);
-                if (fieldSpec == null)
-                {
-                    String fieldName = "bufferState" + bufferFields.size();
-                    classWriter.visitField(Opcodes.ACC_PRIVATE, fieldName, Type.SHORT_TYPE.getDescriptor(), null, 0);
-                    fieldSpec = new CircuitCompiler.BufferFieldSpec(fieldName);
-                    bufferFields.put(buffer, fieldSpec);
-                }
-                return fieldSpec.name();
+                if (fieldSpec != null) throw new IllegalStateException("Duplicate buffer field: " + buffer);
+
+                String fieldName = "bufferState" + bufferFields.size();
+                clsBuilder.withField(fieldName, ConstantDescs.CD_short, fieldBuilder ->
+                        fieldBuilder.withFlags(AccessFlag.PRIVATE)
+                );
+                fieldSpec = new CircuitCompiler.BufferFieldSpec(fieldName);
+                bufferFields.put(buffer, fieldSpec);
             }
 
             @Override
-            public ClockCircuitNode.Fields addClockField(boolean needCounter, int counterInit)
+            public void clock(ClockCircuitNode clock)
             {
+                CircuitCompiler.ClockFieldSpec fieldSpec = clockFields.get(clock);
+                if (fieldSpec != null) throw new IllegalStateException("Duplicate clock field: " + clock);
+
                 int index = clockFields.size();
-                String counterName = needCounter ? ("clockCounter" + index) : null;
-                String stateName = "clockState" + index;
-                if (counterName != null)
+                int halfPeriodLength = clock.getHalfPeriodLength();
+                String counterName = null;
+                if (halfPeriodLength > 1)
                 {
-                    classWriter.visitField(Opcodes.ACC_PRIVATE, counterName, Type.INT_TYPE.getDescriptor(), null, null);
+                    counterName = "clockCounter" + index;
+                    clsBuilder.withField(counterName, ConstantDescs.CD_int, fieldBuilder ->
+                            fieldBuilder.withFlags(AccessFlag.PRIVATE)
+                    );
                 }
-                classWriter.visitField(Opcodes.ACC_PRIVATE, stateName, Type.INT_TYPE.getDescriptor(), null, null);
-                clockFields.add(new CircuitCompiler.ClockFieldSpec(counterName, stateName, counterInit));
-                return new ClockCircuitNode.Fields(counterName, stateName);
+                String stateName = "clockState" + index;
+                clsBuilder.withField(stateName, ConstantDescs.CD_int, fieldBuilder ->
+                        fieldBuilder.withFlags(AccessFlag.PRIVATE)
+                );
+                fieldSpec = new CircuitCompiler.ClockFieldSpec(counterName, stateName, halfPeriodLength - 1);
+                clockFields.put(clock, fieldSpec);
+            }
+        };
+    }
+
+    private FieldGetter makeFieldGetter()
+    {
+        return new FieldGetter()
+        {
+            @Override
+            public String buffer(BufferCircuitNode buffer)
+            {
+                return Objects.requireNonNull(bufferFields.get(buffer)).name();
+            }
+
+            @Override
+            public ClockCircuitNode.Fields clock(ClockCircuitNode clock)
+            {
+                return Objects.requireNonNull(clockFields.get(clock));
             }
         };
     }
@@ -284,6 +362,6 @@ public final class EvalMethodCompiler
     @FunctionalInterface
     private interface InputOutputCompiler
     {
-        void compile(GeneratorAdapter generator, LocalWireMapper localWires, Connector[] connectors);
+        void compile(CodeBuilder mthBody, LocalWireMapper localWires, Connector[] connectors);
     }
 }
