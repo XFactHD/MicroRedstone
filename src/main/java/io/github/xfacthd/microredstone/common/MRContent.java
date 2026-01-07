@@ -171,7 +171,7 @@ public final class MRContent
 
     private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory, BlockItemFactory<B> itemFactory)
     {
-        DeferredBlock<B> block = BLOCKS.registerBlock(name, blockFactory, BlockBehaviour.Properties.of());
+        DeferredBlock<B> block = BLOCKS.registerBlock(name, blockFactory);
         ITEMS.registerItem(name, props -> itemFactory.apply(block.value(), props.useBlockDescriptionPrefix()));
         return block;
     }
