@@ -9,7 +9,7 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PlaceableNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -56,7 +56,7 @@ public final class NodeListWidget extends ScrollableWidget
         this.entryGetter = entryGetter;
     }
 
-    public void render(GuiGraphics graphics, int mouseX, int mouseY)
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
         int minX = listX;
         int maxX = minX + ENTRY_WIDTH;
@@ -91,7 +91,7 @@ public final class NodeListWidget extends ScrollableWidget
             int nameX = minX + ENTRY_NAME_OFF_X;
             int nameY = y + ENTRY_NAME_OFF_Y;
             Component subTitle = entry.subTitle();
-            ActiveTextCollector textCollector = graphics.textRenderer(GuiGraphics.HoveredTextEffects.NONE);
+            ActiveTextCollector textCollector = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.NONE);
             if (subTitle != null)
             {
                 graphics.drawScrollingString(textCollector, owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY - 6);

@@ -14,7 +14,7 @@ import io.github.xfacthd.microredstone.client.util.Icon;
 import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
@@ -45,7 +45,7 @@ public final class ToolsTab extends ToolPaneTabWidget
     }
 
     @Override
-    protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
         actionButtons.forEach((button) -> button.active = button.getAction().isActive(this));
     }

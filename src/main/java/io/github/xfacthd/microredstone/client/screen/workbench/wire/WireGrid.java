@@ -28,7 +28,7 @@ public final class WireGrid implements Iterable<RoutedWire>
     private static final Port[] PORTS = Port.values();
 
     private final CircuitCanvas canvas;
-    private final WireGridNode[] grid = new WireGridNode[CircuitCanvas.PART_COUNT];
+    private final @Nullable WireGridNode[] grid = new WireGridNode[CircuitCanvas.PART_COUNT];
     private final Set<RoutedWire> wires = new ReferenceOpenHashSet<>();
 
     public WireGrid(CircuitCanvas canvas)
@@ -222,7 +222,7 @@ public final class WireGrid implements Iterable<RoutedWire>
                 if (conWire != null && connection.neighbor() != null)
                 {
                     conWire.wire().getNodes().remove(connection);
-                    WireNode.Branch branch = conWire.findNode(connection.neighbor(), WireNode.Branch.class, $ -> true);
+                    WireNode.Branch branch = conWire.findNode(connection.neighbor(), WireNode.Branch.class, _ -> true);
                     if (branch != null)
                     {
                         branch.ports().remove(port.getOpposite());
@@ -239,7 +239,7 @@ public final class WireGrid implements Iterable<RoutedWire>
             }
 
             RoutedWire wire = adjNode.wires.getFirst();
-            WireNode.Branch branch = wire.findNode(adjPos, WireNode.Branch.class, $ -> true);
+            WireNode.Branch branch = wire.findNode(adjPos, WireNode.Branch.class, _ -> true);
             if (branch != null)
             {
                 branch.ports().remove(port.getOpposite());

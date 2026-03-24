@@ -15,7 +15,7 @@ public final class WireMapper
 
     public int resolveWire(Wire wire)
     {
-        return assignedWires.computeIfAbsent(wire, $ ->
+        return assignedWires.computeIfAbsent(wire, _ ->
         {
             int value = wireCounter;
             wireCounter++;

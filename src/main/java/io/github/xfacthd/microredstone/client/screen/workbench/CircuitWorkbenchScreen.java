@@ -22,7 +22,7 @@ import io.github.xfacthd.microredstone.common.menu.CircuitWorkbenchMenu;
 import io.github.xfacthd.microredstone.common.menu.slot.ToggleableSlot;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
@@ -116,14 +116,13 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
         boolean overMenu = contextMenu.isOpen() && contextMenu.isMouseOver(mouseX, mouseY);
         lastMouseX = overMenu ? -1 : mouseX;
         lastMouseY = overMenu ? -1 : mouseY;
-        super.render(graphics, lastMouseX, lastMouseY, partialTick);
-        contextMenu.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+        super.extractRenderState(graphics, lastMouseX, lastMouseY, partialTick);
+        contextMenu.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         if (isDraggingCanvas)
         {
@@ -132,15 +131,16 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
     }
 
     @Override
-    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        super.renderContents(graphics, mouseX, mouseY, partialTick);
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
 
         if (floatingNode != null)
         {
@@ -154,12 +154,12 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
-        graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
+        graphics.text(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
         if (toolPane.getActiveTab() == ToolPaneTab.LIBRARY)
         {
-            graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
+            graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
         }
     }
 

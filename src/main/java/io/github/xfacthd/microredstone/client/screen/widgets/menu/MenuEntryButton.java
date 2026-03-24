@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
@@ -115,13 +115,13 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
     }
 
     @Override
-    protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
         if (isHoveredOrFocused())
         {
             graphics.fill(getX(), getY(), getRight(), getBottom(), HIGHLIGHT_COLOR);
         }
-        renderString(graphics, font, ARGB.color(alpha, active ? 0xFFFFFFFF : 0xFFA0A0A0));
+        extractTitle(graphics, font, ARGB.color(alpha, active ? 0xFFFFFFFF : 0xFFA0A0A0));
         handleSubMenuState(mouseX, mouseY);
 
         if (isHovered() && ellipsized)
@@ -134,10 +134,10 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
         }
     }
 
-    private void renderString(GuiGraphics graphics, Font font, int color)
+    private void extractTitle(GuiGraphicsExtractor graphics, Font font, int color)
     {
         int textY = getY() + 3;
-        graphics.drawString(font, text, getX() + HOR_PADDING, textY, color);
+        graphics.text(font, text, getX() + HOR_PADDING, textY, color);
 
         int extraTextX = getRight();
         if (action.hasMarker())
@@ -145,13 +145,13 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
             extraTextX -= HOR_PADDING + markerWidth;
             if (action.isMarkerVisible())
             {
-                graphics.drawString(font, action.getMarker(), extraTextX, textY, color);
+                graphics.text(font, action.getMarker(), extraTextX, textY, color);
             }
         }
         if (keyHint.isPresent())
         {
             extraTextX -= HOR_PADDING + keyHintWidth;
-            graphics.drawString(font, keyHint.get(), extraTextX, textY, color);
+            graphics.text(font, keyHint.get(), extraTextX, textY, color);
         }
     }
 

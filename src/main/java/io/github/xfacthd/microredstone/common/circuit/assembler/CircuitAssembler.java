@@ -122,13 +122,13 @@ public final class CircuitAssembler
             if (childNode.node() instanceof BundlePackerCircuitNode packer)
             {
                 int wire = packer.getOutputs()[0].wire();
-                packersPerWire.computeIfAbsent(wire, $ -> new ArrayList<>()).add(packer);
+                packersPerWire.computeIfAbsent(wire, _ -> new ArrayList<>()).add(packer);
             }
         }
 
         List<Connector> inputs = new ArrayList<>();
         List<Connector> outputs = new ArrayList<>();
-        Connection[] connections = node.getConnections();
+        @Nullable Connection[] connections = node.getConnections();
         for (Port port : PORTS)
         {
             Connection connection = connections[port.ordinal()];

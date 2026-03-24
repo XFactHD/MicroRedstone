@@ -1,27 +1,23 @@
 package io.github.xfacthd.microredstone.client.model;
 
-import com.mojang.math.Transformation;
-import com.mojang.serialization.Codec;
+import com.mojang.math.Quadrant;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
-import net.minecraft.client.renderer.block.model.SingleVariant;
-import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
+import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.client.model.NeoForgeModelProperties;
-import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 
 public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
 {
     public static final MapCodec<UnbakedMicrochipModel> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Identifier.CODEC.fieldOf("model").forGetter(model -> model.baseModel),
-            Variant.SimpleModelState.MAP_CODEC.forGetter(model -> model.variantState),
-            Codec.BOOL.optionalFieldOf("up", false).forGetter(model -> model.up)
+            Variant.SimpleModelState.MAP_CODEC.forGetter(model -> model.variantState)
     ).apply(inst, UnbakedMicrochipModel::new));
     private static final String[] EDGE_SUFFIXES = new String[] { "n", "e", "s", "w" };
     public static final Identifier[] LOCATIONS_SINGLE = Utils.fillArray(new Identifier[4], edge ->
@@ -36,12 +32,12 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
     private final ModelState modelState;
     private final boolean up;
 
-    UnbakedMicrochipModel(Identifier baseModel, Variant.SimpleModelState variantState, boolean up)
+    UnbakedMicrochipModel(Identifier baseModel, Variant.SimpleModelState variantState)
     {
         this.baseModel = baseModel;
         this.variantState = variantState;
         this.modelState = variantState.asModelState();
-        this.up = up;
+        this.up = variantState.x() == Quadrant.R180;
     }
 
     @Override
@@ -50,15 +46,11 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
         BlockStateModel[] singleModels = new BlockStateModel[4];
         BlockStateModel[] bundledModels = new BlockStateModel[4];
 
-        Transformation xform = baker.getModel(baseModel)
-                .getTopAdditionalProperties()
-                .getOrDefault(NeoForgeModelProperties.TRANSFORM, Transformation.identity());
-        ModelState xformModelState = UnbakedElementsHelper.composeRootTransformIntoModelState(modelState, xform);
         for (int edge = 0; edge < 4; edge++)
         {
             int outEdge = (edge + (up ? 1 : 2)) % 4;
-            singleModels[outEdge] = bakePart(baker, LOCATIONS_SINGLE[edge], xformModelState);
-            bundledModels[outEdge] = bakePart(baker, LOCATIONS_BUNDLED[edge], xformModelState);
+            singleModels[outEdge] = bakePart(baker, LOCATIONS_SINGLE[edge], modelState);
+            bundledModels[outEdge] = bakePart(baker, LOCATIONS_BUNDLED[edge], modelState);
         }
 
         return new MicrochipBlockStateModel(bakePart(baker, baseModel, modelState), singleModels, bundledModels);

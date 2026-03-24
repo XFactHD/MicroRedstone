@@ -89,7 +89,7 @@ public final class CompoundPrototypeNode
         return wires.size();
     }
 
-    public Connection[] getConnections()
+    public @Nullable Connection[] getConnections()
     {
         return connections;
     }
@@ -213,7 +213,7 @@ public final class CompoundPrototypeNode
         {
             if (!driver || packerBit == -1)
             {
-                counts.computeInt(wire, ($, val) ->
+                counts.computeInt(wire, (_, val) ->
                 {
                     int inc = driver ? 1 : 0;
                     return val != null ? val + inc : inc;

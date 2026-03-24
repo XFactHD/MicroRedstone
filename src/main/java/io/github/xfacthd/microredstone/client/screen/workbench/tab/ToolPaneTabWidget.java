@@ -8,7 +8,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.widgets.ToolPane;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ActionButton;
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.ToolPaneTabButton;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -44,13 +44,13 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
         this.tabButton = new ToolPaneTabButton(toolPane, getType(), 0, 0);
     }
 
-    public final void render(GuiGraphics graphics, int mouseX, int mouseY)
+    public final void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, paneX, paneY, TOOL_PANE_WIDTH, height);
-        renderContent(graphics, mouseX, mouseY);
+        extractContent(graphics, mouseX, mouseY);
     }
 
-    protected abstract void renderContent(GuiGraphics graphics, int mouseX, int mouseY);
+    protected abstract void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY);
 
     public final void initHeader(Consumer<AbstractWidget> widgetAdder)
     {

@@ -35,7 +35,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "overlay": "microredstone:block/overlay_single",
     "particle": "microredstone:block/overlay_single"

@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.widgets.menu;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 final class Separator implements MenuEntry
 {
@@ -13,9 +13,9 @@ final class Separator implements MenuEntry
     private int width;
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        graphics.hLine(x + LINE_OFF_X, x + width - 1 - LINE_OFF_X, y + LINE_OFF_Y, ContextMenu.HIGHLIGHT_COLOR);
+        graphics.horizontalLine(x + LINE_OFF_X, x + width - 1 - LINE_OFF_X, y + LINE_OFF_Y, ContextMenu.HIGHLIGHT_COLOR);
     }
 
     @Override

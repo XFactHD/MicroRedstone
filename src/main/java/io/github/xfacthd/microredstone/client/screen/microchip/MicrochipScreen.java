@@ -4,7 +4,7 @@ import io.github.xfacthd.microredstone.client.util.ScreenUtils;
 import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.menu.MicrochipMenu;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -25,25 +25,19 @@ public final class MicrochipScreen extends AbstractContainerScreen<MicrochipMenu
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
-    }
-
-    @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
-    {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
     }
 
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot, int mouseX, int mouseY)
+    protected void extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY)
     {
-        super.renderSlot(graphics, slot, mouseX, mouseY);
+        super.extractSlot(graphics, slot, mouseX, mouseY);
         if (slot == menu.getCircuitSlot() && !slot.hasItem())
         {
-            ScreenUtils.renderTransparentFakeItem(graphics, icStack, slot.x, slot.y);
+            ScreenUtils.submitTransparentFakeItem(graphics, icStack, slot.x, slot.y);
         }
     }
 }

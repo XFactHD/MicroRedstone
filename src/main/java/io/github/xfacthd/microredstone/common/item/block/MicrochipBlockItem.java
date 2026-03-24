@@ -15,7 +15,7 @@ public final class MicrochipBlockItem extends BlockItem
 {
     public MicrochipBlockItem(Block block, Properties properties)
     {
-        super(block, properties);
+        super(block, properties.component(MRContent.DC_TYPE_CIRCUIT, StoredCircuit.EMPTY));
     }
 
     @Override

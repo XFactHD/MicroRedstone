@@ -20,7 +20,7 @@ import io.github.xfacthd.microredstone.common.data.library.CircuitLibraryEntry;
 import io.github.xfacthd.microredstone.common.data.library.ClientCircuitLibrary;
 import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -76,17 +76,17 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     }
 
     @Override
-    protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
-        graphics.drawString(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
+        graphics.text(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
 
         switch (mode)
         {
-            case GATES -> partListWidget.render(graphics, mouseX, mouseY);
+            case GATES -> partListWidget.extractRenderState(graphics, mouseX, mouseY);
             case LIBRARY ->
             {
-                graphics.drawString(owner.getFont(), LABEL_FILTER, paneX + LABEL_X, paneY + FILTER_LABEL_Y, 0xFF404040, false);
-                importListWidget.render(graphics, mouseX, mouseY);
+                graphics.text(owner.getFont(), LABEL_FILTER, paneX + LABEL_X, paneY + FILTER_LABEL_Y, 0xFF404040, false);
+                importListWidget.extractRenderState(graphics, mouseX, mouseY);
             }
         }
 

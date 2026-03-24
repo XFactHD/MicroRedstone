@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinEditBox implements EditBoxExtensions
 {
     @WrapOperation(
-            method = "renderWidget",
+            method = "extractWidgetRenderState",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/components/EditBox;getMaxLength()I"

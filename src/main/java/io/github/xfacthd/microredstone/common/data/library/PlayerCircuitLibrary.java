@@ -111,7 +111,7 @@ final class PlayerCircuitLibrary
         {
             if (library == this) continue;
 
-            Map<UUID, CircuitLibraryEntry> foreign = foreignEntries.computeIfAbsent(library.owner, $ -> new Object2ObjectOpenHashMap<>());
+            Map<UUID, CircuitLibraryEntry> foreign = foreignEntries.computeIfAbsent(library.owner, _ -> new Object2ObjectOpenHashMap<>());
             library.ownedById.forEach((id, entry) ->
             {
                 if (entry.shareInfo().isVisibleTo(entry.author(), owner))
@@ -132,7 +132,7 @@ final class PlayerCircuitLibrary
         {
             if (entry.author().equals(owner)) continue;
 
-            Map<UUID, CircuitLibraryEntry> foreign = foreignEntries.computeIfAbsent(entry.author(), $ -> new Object2ObjectOpenHashMap<>());
+            Map<UUID, CircuitLibraryEntry> foreign = foreignEntries.computeIfAbsent(entry.author(), _ -> new Object2ObjectOpenHashMap<>());
             if (entry.shareInfo().isVisibleTo(entry.author(), owner))
             {
                 foreign.put(entry.id(), entry);

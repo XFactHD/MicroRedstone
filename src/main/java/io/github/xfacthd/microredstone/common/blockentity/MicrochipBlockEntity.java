@@ -62,8 +62,8 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     private static final Port[] PORTS = Port.values();
     private static final Rotation[] ROTATIONS = Rotation.values();
 
-    private final RedstoneType[] portTypes = Utils.fillArray(new RedstoneType[4], $ -> RedstoneType.NONE);
-    private final PortDir[] portDirs = Utils.fillArray(new PortDir[4], $ -> PortDir.INPUT);
+    private final RedstoneType[] portTypes = Utils.fillArray(new RedstoneType[4], _ -> RedstoneType.NONE);
+    private final PortDir[] portDirs = Utils.fillArray(new PortDir[4], _ -> PortDir.INPUT);
     private final short[] portStates = new short[4];
     private final Set<WireStateListener> wireStateListeners = new ReferenceOpenHashSet<>();
     private Direction facing = Direction.DOWN;

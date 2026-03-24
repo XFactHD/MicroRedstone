@@ -5,7 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.SimpleTransientCont
 import io.github.xfacthd.microredstone.client.screen.workbench.widgets.button.DropFocusAfterClick;
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -57,7 +57,7 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
         if (!open) return;
 
@@ -75,11 +75,11 @@ public final class ContextMenu extends SimpleTransientContainerWidget
 
         for (Renderable renderable : renderables)
         {
-            renderable.render(graphics, mouseX, mouseY, partialTick);
+            renderable.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
         if (openSubMenu != null)
         {
-            openSubMenu.menu.render(graphics, mouseX, mouseY, partialTick);
+            openSubMenu.menu.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
     }
 

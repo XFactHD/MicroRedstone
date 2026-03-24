@@ -33,7 +33,7 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.util.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
@@ -171,7 +171,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
     }
 
     @Override
-    protected void renderCanvasOverlays(GuiGraphics graphics, int canvasX, int canvasY, int mouseX, int mouseY)
+    protected void extractCanvasOverlays(GuiGraphicsExtractor graphics, int canvasX, int canvasY, int mouseX, int mouseY)
     {
         FloatingNode floatingNode = owner.getFloatingNode();
         NodePos hovered = getNodePlacementPos(mouseX, mouseY, floatingNode);
@@ -213,7 +213,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
     }
 
     @Override
-    protected void renderAdditionalContent(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractAdditionalContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
         NodePos hovered = getNodePos(mouseX, mouseY);
         Component cellText = Component.translatable(
@@ -222,7 +222,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
                 formatCellCoord(hovered, NodePos::y)
         ).withStyle(style -> style.withFont(MONOSPACE_FONT));
         int y = owner.getGuiTop() + owner.getYSize() - CELL_COORD_TEXT_OFF_Y;
-        graphics.drawString(owner.getFont(), cellText, x, y, 0xFF404040, false);
+        graphics.text(owner.getFont(), cellText, x, y, 0xFF404040, false);
     }
 
     private static String formatCellCoord(@Nullable NodePos pos, ToIntFunction<NodePos> coordGetter)
@@ -230,9 +230,9 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         return pos != null ? String.format(Locale.ROOT, "%2d", coordGetter.applyAsInt(pos)) : " -";
     }
 
-    private static void drawNodeFrame(GuiGraphics graphics, int x, int y, int color)
+    private static void drawNodeFrame(GuiGraphicsExtractor graphics, int x, int y, int color)
     {
-        // Can't use GuiGraphics#submitOutline() as it renders too late
+        // Can't use GuiGraphicsExtractor#outline() as it renders too late
         int width = PART_SLOT_SIZE + 1;
         int height = PART_SLOT_SIZE + 1;
         graphics.fill(x,             y,              x + width, y + 1,          color);
@@ -241,7 +241,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         graphics.fill(x + width - 1, y + 1,          x + width, y + height - 1, color);
     }
 
-    public static void drawPartNode(GuiGraphics graphics, IconConfig icon, int x, int y, int rotation, int partSize)
+    public static void drawPartNode(GuiGraphicsExtractor graphics, IconConfig icon, int x, int y, int rotation, int partSize)
     {
         drawPartNode(graphics.pose(), icon, x, y, rotation, partSize, PartBlitter.of(graphics));
     }

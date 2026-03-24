@@ -1,7 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.widgets;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.TriState;
@@ -35,14 +35,14 @@ public class ValidatingEditBox extends EditBox
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        super.renderWidget(graphics, mouseX, mouseY, partialTick);
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, partialTick);
 
         boolean focusedNonEmpty = isFocused() && !getValue().isEmpty();
         if ((focusedNonEmpty || wasFocusedNonEmpty) && !isInputValid())
         {
-            graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), 0xFFFF0000);
+            graphics.outline(getX(), getY(), getWidth(), getHeight(), 0xFFFF0000);
 
             Component tooltip;
             if (isMouseOver(mouseX, mouseY) && (tooltip = validator.getInvalidValueTooltip()) != null)

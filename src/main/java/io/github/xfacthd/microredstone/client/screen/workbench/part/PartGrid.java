@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public final class PartGrid
 {
     private final CircuitCanvas canvas;
-    private final PrototypeNode[] partGrid = new PrototypeNode[CircuitCanvas.PART_COUNT];
+    private final @Nullable PrototypeNode[] partGrid = new PrototypeNode[CircuitCanvas.PART_COUNT];
 
     public PartGrid(CircuitCanvas canvas)
     {

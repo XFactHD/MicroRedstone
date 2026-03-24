@@ -72,11 +72,11 @@ final class MicrochipSignalComponent implements SignalComponent
     {
         return switch (channel)
         {
-            case Channel.Redstone ignored -> $ -> be.getRedstoneOutput(side) * 15;
+            case Channel.Redstone ignored -> _ -> be.getRedstoneOutput(side) * 15;
             case Channel.Single single ->
             {
                 int bitIdx = single.color().ordinal();
-                yield $ ->
+                yield _ ->
                 {
                     int bitVal = be.getRedstoneOutput(side);
                     return ((bitVal >> bitIdx) & 0x1) * 15;
@@ -92,7 +92,7 @@ final class MicrochipSignalComponent implements SignalComponent
             case Channel.Redstone ignored -> -1;
             case Channel.Single single -> single.color().ordinal();
         };
-        return ($, value) ->
+        return (_, value) ->
         {
             be.receiveExternalInput(side, value, bundleBit);
             return Map.of();

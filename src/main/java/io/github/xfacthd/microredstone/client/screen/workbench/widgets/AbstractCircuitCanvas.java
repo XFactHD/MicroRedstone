@@ -9,7 +9,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.element.WireRende
 import io.github.xfacthd.microredstone.client.util.ArrowKey;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
@@ -41,7 +41,7 @@ public abstract class AbstractCircuitCanvas implements Renderable
     protected float canvasScale = 1F; // TODO: implement zoom support
 
     @Override
-    public final void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public final void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
         graphics.enableScissor(x, y, x + width, y + height);
         {
@@ -63,13 +63,13 @@ public abstract class AbstractCircuitCanvas implements Renderable
                 ));
             }
 
-            renderCanvasOverlays(graphics, canvasX, canvasY, mouseX, mouseY);
+            extractCanvasOverlays(graphics, canvasX, canvasY, mouseX, mouseY);
         }
         graphics.disableScissor();
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, CircuitWorkbenchScreen.WINDOW_FRAME, x, y, width, height);
 
-        renderAdditionalContent(graphics, mouseX, mouseY);
+        extractAdditionalContent(graphics, mouseX, mouseY);
     }
 
     protected abstract void collectCanvasContent(
@@ -82,9 +82,9 @@ public abstract class AbstractCircuitCanvas implements Renderable
             int mouseY
     );
 
-    protected void renderCanvasOverlays(GuiGraphics graphics, int canvasX, int canvasY, int mouseX, int mouseY) {}
+    protected void extractCanvasOverlays(GuiGraphicsExtractor graphics, int canvasX, int canvasY, int mouseX, int mouseY) {}
 
-    protected void renderAdditionalContent(GuiGraphics graphics, int mouseX, int mouseY) {}
+    protected void extractAdditionalContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {}
 
     public abstract void computeWindowSize(int width, int height);
 

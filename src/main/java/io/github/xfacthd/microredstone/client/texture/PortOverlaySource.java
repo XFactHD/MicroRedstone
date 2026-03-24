@@ -53,7 +53,7 @@ public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverl
         Object2IntMap<WireType> types = new Object2IntOpenHashMap<>();
         for (WireType type : portOverlays.values())
         {
-            types.compute(type, ($, count) -> count == null ? 1 : (count + 1));
+            types.compute(type, (_, count) -> count == null ? 1 : (count + 1));
         }
         String prefix = typePrefix.map(s -> s + "_").orElse("");
         Map<WireType, Pair<Resource, LazyLoadedImage>> resources = new HashMap<>();

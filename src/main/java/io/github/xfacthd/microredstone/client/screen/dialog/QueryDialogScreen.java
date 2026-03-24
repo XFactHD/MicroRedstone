@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.dialog;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
@@ -99,12 +99,12 @@ final class QueryDialogScreen extends DialogScreen
     }
 
     @Override
-    protected int renderContent(GuiGraphics graphics, int contentX, int mouseX, int mouseY, float partialTick)
+    protected int extractContent(GuiGraphicsExtractor graphics, int contentX, int mouseX, int mouseY, float partialTick)
     {
-        int contentY = super.renderContent(graphics, contentX, mouseX, mouseY, partialTick);
+        int contentY = super.extractContent(graphics, contentX, mouseX, mouseY, partialTick);
         for (BuiltQueryWidget widget : builtQueryWidgets)
         {
-            graphics.drawString(font, widget.label(), contentX, widget.labelY(), 0xFF404040, false);
+            graphics.text(font, widget.label(), contentX, widget.labelY(), 0xFF404040, false);
         }
         okStateUpdater.run();
         return contentY;

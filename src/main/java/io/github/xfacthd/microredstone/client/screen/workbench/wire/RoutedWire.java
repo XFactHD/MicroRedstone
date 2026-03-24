@@ -62,7 +62,7 @@ public record RoutedWire(Wire wire, List<Section> sections)
         {
             if (node instanceof WireNode.Branch branch)
             {
-                branchNodes.computeIfAbsent(node.pos(), $ -> new ArrayList<>()).add(branch);
+                branchNodes.computeIfAbsent(node.pos(), _ -> new ArrayList<>()).add(branch);
             }
         }
         for (List<WireNode.Branch> branches : branchNodes.values())

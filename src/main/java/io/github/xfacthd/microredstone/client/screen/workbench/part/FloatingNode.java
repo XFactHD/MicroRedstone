@@ -90,7 +90,7 @@ public sealed interface FloatingNode
         {
             if (!pos.equals(lastPos) && canvas.isNodeOccupied(pos)) return false;
 
-            Connection[] connections = canvas.getRootNode().getConnections();
+            @Nullable Connection[] connections = canvas.getRootNode().getConnections();
             Connection existing = connections[Port.ofPartRotation(rotation).ordinal()];
             if (existing != null && existing != node)
             {
@@ -113,7 +113,7 @@ public sealed interface FloatingNode
             // Dragging a connection doesn't actually remove it from the grid -> no action required if pos and rotation match
             if (pos.equals(lastPos) && node.getRotation() == rotation) return;
 
-            Connection[] connections = canvas.getRootNode().getConnections();
+            @Nullable Connection[] connections = canvas.getRootNode().getConnections();
             int placeRot = revertToLast ? node.getRotation() : rotation;
             Port prevPort = Port.ofPartRotation(node.getRotation());
             Port newPort = Port.ofPartRotation(placeRot);

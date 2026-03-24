@@ -1,7 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.widgets.button;
 
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -18,20 +18,20 @@ public abstract class SimpleButton extends AbstractButton
     }
 
     @Override
-    protected final void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    protected final void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
         Identifier texture = getSprites().get(active, isHoveredOrFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, getX(), getY(), getWidth(), getHeight(), ARGB.white(alpha));
-        renderForeground(graphics, mouseX, mouseY);
+        extractForeground(graphics, mouseX, mouseY);
         if (isHovered())
         {
             graphics.requestCursor(isActive() ? CursorTypes.POINTING_HAND : CursorTypes.NOT_ALLOWED);
         }
     }
 
-    protected void renderForeground(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
-        renderDefaultLabel(graphics.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE));
+        extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
     }
 
     protected abstract WidgetSprites getSprites();

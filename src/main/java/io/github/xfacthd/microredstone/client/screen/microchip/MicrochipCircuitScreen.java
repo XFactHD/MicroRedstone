@@ -6,7 +6,7 @@ import io.github.xfacthd.microredstone.common.circuit.WireStates;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.menu.MicrochipCircuitMenu;
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -54,8 +54,10 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
 
         if (isDragging())
@@ -65,9 +67,9 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY)
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
-        guiGraphics.drawString(font, fullTitle, titleLabelX, titleLabelY, 0xFF404040, false);
+        graphics.text(font, fullTitle, titleLabelX, titleLabelY, 0xFF404040, false);
     }
 
     @Override

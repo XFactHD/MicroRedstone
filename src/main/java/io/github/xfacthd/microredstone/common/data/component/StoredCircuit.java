@@ -38,6 +38,7 @@ public record StoredCircuit(@Nullable CompoundCircuitNode rootNode) implements T
         return new StoredCircuit(rootNode.orElse(null));
     }
 
+    @SuppressWarnings("NullableProblems")
     private Optional<CompoundCircuitNode> rootNodeForSerialization()
     {
         return Optional.ofNullable(rootNode);

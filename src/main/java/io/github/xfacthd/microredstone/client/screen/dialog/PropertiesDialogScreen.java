@@ -1,6 +1,6 @@
 package io.github.xfacthd.microredstone.client.screen.dialog;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -61,14 +61,14 @@ final class PropertiesDialogScreen extends DialogScreen
     }
 
     @Override
-    protected int renderContent(GuiGraphics graphics, int contentX, int mouseX, int mouseY, float partialTick)
+    protected int extractContent(GuiGraphicsExtractor graphics, int contentX, int mouseX, int mouseY, float partialTick)
     {
-        int contentY = super.renderContent(graphics, contentX, mouseX, mouseY, partialTick);
+        int contentY = super.extractContent(graphics, contentX, mouseX, mouseY, partialTick);
         for (FormattedProperty line : propertyLines)
         {
-            graphics.drawString(font, line.label(), contentX, contentY, 0xFF404040, false);
+            graphics.text(font, line.label(), contentX, contentY, 0xFF404040, false);
             FormattedProperty.Value value = line.value();
-            graphics.drawString(font, value.text(), propValueX, contentY, 0xFF404040, false);
+            graphics.text(font, value.text(), propValueX, contentY, 0xFF404040, false);
             Component tooltip = value.tooltip();
             if (tooltip != null && mouseY >= contentY && mouseY < contentY + font.lineHeight && mouseX >= propValueX && mouseX < propValueX + value.valueWidth())
             {

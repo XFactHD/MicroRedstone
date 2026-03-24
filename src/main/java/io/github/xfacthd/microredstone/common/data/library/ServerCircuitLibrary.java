@@ -2,20 +2,17 @@ package io.github.xfacthd.microredstone.common.data.library;
 
 import com.mojang.serialization.Codec;
 import io.github.xfacthd.microredstone.common.net.payload.clientbound.ClientboundCircuitLibraryUpdatePayload;
+import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Optionull;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,22 +23,17 @@ public final class ServerCircuitLibrary extends SavedData
             ServerCircuitLibrary::serialize
     );
     private static final SavedDataType<ServerCircuitLibrary> TYPE = new SavedDataType<>(
-            "microredstone_circuit_library",
-            ctx -> new ServerCircuitLibrary(ctx, new Object2ObjectOpenHashMap<>()),
-            ctx -> CODEC.xmap(
-                    libraries -> new ServerCircuitLibrary(ctx, libraries),
-                    ServerCircuitLibrary::getLibraries
-            ),
+            Utils.rl("circuit_library"),
+            () -> new ServerCircuitLibrary(new Object2ObjectOpenHashMap<>()),
+            CODEC.xmap(ServerCircuitLibrary::new, ServerCircuitLibrary::getLibraries),
             null
     );
 
-    @Nullable
-    private final MinecraftServer server;
     private final Map<UUID, PlayerCircuitLibrary> playerLibraries;
 
     public static ServerCircuitLibrary get(MinecraftServer server)
     {
-        return server.overworld().getDataStorage().computeIfAbsent(TYPE);
+        return server.getDataStorage().computeIfAbsent(TYPE);
     }
 
     public boolean addOrModifyEntry(ServerPlayer player, CircuitLibraryEntry entry)
@@ -50,7 +42,7 @@ public final class ServerCircuitLibrary extends SavedData
         if (entry != null)
         {
             sendUpdatePacket(player, List.of(entry), List.of());
-            updateReferences(Set.of(entry), Map.of());
+            updateReferences(player.level().getServer(), Set.of(entry), Map.of());
             setDirty();
             return true;
         }
@@ -67,7 +59,7 @@ public final class ServerCircuitLibrary extends SavedData
         if (id != null)
         {
             sendUpdatePacket(player, List.of(), List.of(id));
-            updateReferences(Set.of(), Map.of(playerId, Set.of(id)));
+            updateReferences(player.level().getServer(), Set.of(), Map.of(playerId, Set.of(id)));
             setDirty();
             return true;
         }
@@ -80,9 +72,8 @@ public final class ServerCircuitLibrary extends SavedData
         return library != null ? library.packEntries(playerLibraries.values()) : List.of();
     }
 
-    private ServerCircuitLibrary(@Nullable ServerLevel level, Map<UUID, PlayerCircuitLibrary> playerLibraries)
+    private ServerCircuitLibrary(Map<UUID, PlayerCircuitLibrary> playerLibraries)
     {
-        this.server = Optionull.map(level, ServerLevel::getServer);
         this.playerLibraries = playerLibraries;
     }
 
@@ -91,7 +82,7 @@ public final class ServerCircuitLibrary extends SavedData
         return playerLibraries.computeIfAbsent(player, PlayerCircuitLibrary::new);
     }
 
-    private void updateReferences(Set<CircuitLibraryEntry> addedOrModified, Map<UUID, Set<UUID>> removed)
+    private void updateReferences(MinecraftServer server, Set<CircuitLibraryEntry> addedOrModified, Map<UUID, Set<UUID>> removed)
     {
         Map<UUID, UpdateInfo> updateInfos = new Object2ObjectOpenHashMap<>();
         playerLibraries.forEach((owner, library) ->
@@ -103,7 +94,7 @@ public final class ServerCircuitLibrary extends SavedData
         {
             if (info.isEmpty()) return;
 
-            ServerPlayer player = Objects.requireNonNull(server).getPlayerList().getPlayer(owner);
+            ServerPlayer player = server.getPlayerList().getPlayer(owner);
             if (player != null)
             {
                 sendUpdatePacket(player, info.addedOrModified, info.removed);

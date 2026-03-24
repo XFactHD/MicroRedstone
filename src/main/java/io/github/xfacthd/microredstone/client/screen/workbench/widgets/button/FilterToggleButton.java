@@ -6,7 +6,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.common.data.library.ShareType;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
@@ -35,7 +35,7 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     }
 
     @Override
-    protected void renderForeground(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
         int iconX = getX() + ICON_OFFSET;
         int iconY = getY() + ICON_OFFSET;

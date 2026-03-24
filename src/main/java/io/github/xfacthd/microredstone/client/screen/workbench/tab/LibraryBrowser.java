@@ -13,7 +13,7 @@ import io.github.xfacthd.microredstone.common.MRContent;
 import io.github.xfacthd.microredstone.common.circuit.assembler.CircuitValidator;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -81,16 +81,16 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     }
 
     @Override
-    protected void renderContent(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
-        graphics.drawString(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
+        graphics.text(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, INVENTORY, invX, invY, INVENTORY_WIDTH, INVENTORY_HEIGHT);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, slotX, slotY, SLOT_SIZE, SLOT_SIZE);
         if (!owner.getMenu().getCircuitSlot().hasItem())
         {
-            ScreenUtils.renderTransparentFakeItem(graphics, dummyCircuit, slotX + 1, slotY + 1);
+            ScreenUtils.submitTransparentFakeItem(graphics, dummyCircuit, slotX + 1, slotY + 1);
         }
     }
 

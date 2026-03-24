@@ -8,7 +8,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuPro
 import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuProviderProxy;
 import io.github.xfacthd.microredstone.client.util.Icon;
 import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -34,7 +34,7 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     }
 
     @Override
-    protected void renderDefaultLabel(ActiveTextCollector textCollector)
+    protected void extractDefaultLabel(ActiveTextCollector textCollector)
     {
         int minX = getX() + TEXT_OFFSET;
         int maxX = getX() + getWidth() - 2;
@@ -42,14 +42,14 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     }
 
     @Override
-    protected void renderForeground(GuiGraphics graphics, int mouseX, int mouseY)
+    protected void extractForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
         if (action.isInUse(owner))
         {
             graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0xAA169C9C);
         }
 
-        super.renderForeground(graphics, mouseX, mouseY);
+        super.extractForeground(graphics, mouseX, mouseY);
 
         int iconX = getX() + ICON_PADDING;
         int iconY = getY() + ICON_PADDING;

@@ -2,11 +2,11 @@ package io.github.xfacthd.microredstone.client.model;
 
 import io.github.xfacthd.microredstone.common.blockentity.MicrochipBlockEntity;
 import io.github.xfacthd.microredstone.common.redstone.RedstoneType;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.DelegateBlockStateModel;
 
@@ -25,7 +25,7 @@ public final class MicrochipBlockStateModel extends DelegateBlockStateModel
     }
 
     @Override
-    public void collectParts(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, List<BlockModelPart> parts)
+    public void collectParts(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts)
     {
         super.collectParts(level, pos, state, random, parts);
 

@@ -1,7 +1,7 @@
 package io.github.xfacthd.microredstone.client.screen.dialog;
 
 import io.github.xfacthd.microredstone.common.util.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -111,26 +111,26 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     protected void finalizeContent() { }
 
     @Override
-    public final void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public final void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        renderMenuBackground(graphics);
+        extractMenuBackground(graphics);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, type.icon, leftPos + PADDING, topPos + PADDING, ICON_SIZE, ICON_SIZE);
-        graphics.drawString(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0xFF404040, false);
+        graphics.text(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0xFF404040, false);
 
         int contentX = leftPos + PADDING;
-        renderContent(graphics, contentX, mouseX, mouseY, partialTick);
+        extractContent(graphics, contentX, mouseX, mouseY, partialTick);
     }
 
-    protected int renderContent(GuiGraphics graphics, int contentX, int mouseX, int mouseY, float partialTick)
+    protected int extractContent(GuiGraphicsExtractor graphics, int contentX, int mouseX, int mouseY, float partialTick)
     {
         int contentY = topPos + CONTENT_Y;
         for (List<FormattedCharSequence> block : textBlocks)
         {
             for (FormattedCharSequence line : block)
             {
-                graphics.drawString(font, line, contentX, contentY, 0xFF404040, false);
+                graphics.text(font, line, contentX, contentY, 0xFF404040, false);
                 contentY += font.lineHeight;
             }
             contentY += PADDING;
@@ -164,12 +164,12 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
 
     public enum Type
     {
-        INFO(Utils.rl("dialog/icon_info"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
-        WARNING(Utils.rl("dialog/icon_warning"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
-        ERROR(Utils.rl("dialog/icon_error"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
-        CONFIRM(Utils.rl("dialog/icon_confirm"), true, CommonComponents.GUI_YES, (ok, cancel) -> cancel),
-        PROPERTIES(Utils.rl("dialog/icon_properties"), false, CommonComponents.GUI_OK, (ok, cancel) -> ok),
-        QUERY(Utils.rl("dialog/icon_query"), true, CommonComponents.GUI_DONE, (ok, cancel) -> cancel),
+        INFO(Utils.rl("dialog/icon_info"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        WARNING(Utils.rl("dialog/icon_warning"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        ERROR(Utils.rl("dialog/icon_error"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        CONFIRM(Utils.rl("dialog/icon_confirm"), true, CommonComponents.GUI_YES, (_, cancel) -> cancel),
+        PROPERTIES(Utils.rl("dialog/icon_properties"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        QUERY(Utils.rl("dialog/icon_query"), true, CommonComponents.GUI_DONE, (_, cancel) -> cancel),
         ;
 
         private final Identifier icon;
@@ -211,7 +211,7 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
         {
             int y = screen.topPos + screen.imageHeight - PADDING - BUTTON_HEIGHT;
             return screen.addRenderableWidget(
-                    Button.builder(text, btn ->
+                    Button.builder(text, _ ->
                             {
                                 screen.onClose();
                                 callback.run();

@@ -49,7 +49,7 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
     }
 
     @Override
-    protected void renderDefaultLabel(ActiveTextCollector textCollector)
+    protected void extractDefaultLabel(ActiveTextCollector textCollector)
     {
         textCollector.accept(getX() + 5, getY() + 5, getMessage());
     }

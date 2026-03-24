@@ -5,7 +5,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.Scrollbar;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
@@ -188,30 +188,30 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        renderMenuBackground(graphics);
+        extractMenuBackground(graphics);
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, type.icon, leftPos + PADDING, topPos + PADDING, ICON_SIZE, ICON_SIZE);
-        graphics.drawString(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0xFF404040, false);
+        graphics.text(font, title, leftPos + TITLE_X, topPos + TITLE_Y, 0xFF404040, false);
 
         int nameLabelX = leftPos + FILE_NAME_EDIT_X - 2 - font.width(LABEL_FILE_NAME);
         int nameLabelY = topPos + FILE_NAME_EDIT_Y + 3;
-        graphics.drawString(font, LABEL_FILE_NAME, nameLabelX, nameLabelY, 0xFF404040, false);
+        graphics.text(font, LABEL_FILE_NAME, nameLabelX, nameLabelY, 0xFF404040, false);
 
         int typeLabelX = leftPos + FILE_TYPE_X - 2 - font.width(LABEL_FILE_TYPE);
         int typeLabelY = topPos + FILE_TYPE_Y + 3;
-        graphics.drawString(font, LABEL_FILE_TYPE, typeLabelX, typeLabelY, 0xFF404040, false);
+        graphics.text(font, LABEL_FILE_TYPE, typeLabelX, typeLabelY, 0xFF404040, false);
         int typeValueX = leftPos + FILE_TYPE_X + 2;
-        graphics.drawString(font, fileNameSuffix.label(), typeValueX, typeLabelY, 0xFF404040, false);
+        graphics.text(font, fileNameSuffix.label(), typeValueX, typeLabelY, 0xFF404040, false);
 
-        renderPath(graphics);
+        extractPath(graphics);
         scrollbar.update();
-        renderEntries(graphics, mouseX, mouseY);
+        extractEntries(graphics, mouseX, mouseY);
     }
 
-    private void renderPath(GuiGraphics graphics)
+    private void extractPath(GuiGraphicsExtractor graphics)
     {
         int pathMinX = leftPos + PATH_MIN_X;
         int pathMaxX = leftPos + PATH_MAX_X;
@@ -219,11 +219,11 @@ public final class FileBrowserScreen extends Screen
         int pathMaxY = topPos + PATH_MAX_Y;
         graphics.enableScissor(pathMinX, pathMinY, pathMaxX, pathMaxY);
         int pathX = Math.min(pathMaxX - formattedPath.width, pathMinX);
-        graphics.drawString(font, formattedPath.text, pathX, pathMinY, 0xFF404040, false);
+        graphics.text(font, formattedPath.text, pathX, pathMinY, 0xFF404040, false);
         graphics.disableScissor();
     }
 
-    private void renderEntries(GuiGraphics graphics, int mouseX, int mouseY)
+    private void extractEntries(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
     {
         if (dirEmpty || noMatchingFiles)
         {
@@ -231,7 +231,7 @@ public final class FileBrowserScreen extends Screen
             int textWidth = font.width(text);
             int textX = leftPos + LIST_X + (LIST_WIDTH / 2) - (textWidth / 2);
             int textY = topPos + LIST_Y + PADDING;
-            graphics.drawString(font, text, textX, textY, 0xFF404040, false);
+            graphics.text(font, text, textX, textY, 0xFF404040, false);
             return;
         }
 
@@ -259,7 +259,7 @@ public final class FileBrowserScreen extends Screen
                 graphics.fill(entryMinX, minEntryY, entryMaxX, maxEntryY, 0xFFFFFFFF);
             }
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, entry.icon(), entryIconX, minEntryY + SMALL_PADDING, ICON_SIZE, ICON_SIZE);
-            graphics.drawString(font, entry.name(), entryNameX, minEntryY + 2, 0xFF404040, false);
+            graphics.text(font, entry.name(), entryNameX, minEntryY + 2, 0xFF404040, false);
         }
         graphics.disableScissor();
     }

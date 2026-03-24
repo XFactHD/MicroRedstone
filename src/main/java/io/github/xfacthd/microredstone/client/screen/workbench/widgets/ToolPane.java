@@ -11,7 +11,7 @@ import io.github.xfacthd.microredstone.client.screen.workbench.tab.PartsList;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolPaneTabWidget;
 import io.github.xfacthd.microredstone.client.screen.workbench.tab.ToolsTab;
 import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -61,9 +61,9 @@ public final class ToolPane implements GuiEventListener, Renderable
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
     {
-        getActiveTabWidget().render(graphics, mouseX, mouseY);
+        getActiveTabWidget().extractRenderState(graphics, mouseX, mouseY);
     }
 
     @Override
