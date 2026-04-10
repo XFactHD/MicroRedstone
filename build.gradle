@@ -125,8 +125,7 @@ dependencies {
     //runtimeOnly("curse.maven:atlasviewer-633577:${atlasviewer_coord}")
 
     compileOnly("net.commoble.exmachina:exmachina:${exmachina_version}")
-    //runtimeOnly("net.commoble.exmachina:exmachina:${exmachina_version}")
-    //runtimeOnly("curse.maven:morered-387638:${morered_coord}")
+    runtimeOnly("curse.maven:morered-387638:${morered_coord}")
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
