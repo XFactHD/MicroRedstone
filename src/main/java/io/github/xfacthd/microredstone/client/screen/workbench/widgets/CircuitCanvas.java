@@ -50,12 +50,12 @@ import java.util.Set;
 import java.util.function.ToIntFunction;
 
 public final class CircuitCanvas extends AbstractCircuitCanvas implements CircuitCanvasAccess {
-    private static final FontDescription MONOSPACE_FONT = new FontDescription.Resource(Utils.rl("monospace"));
+    private static final FontDescription MONOSPACE_FONT = new FontDescription.Resource(Utils.id("monospace"));
     private static final Identifier[] PORT_BORDERS = Util.make(new Identifier[8], arr -> {
         for (Port port : Port.values()) {
             String prefix = "port/border_" + port.getSerializedName() + "_";
-            arr[port.ordinal() << 1 | WireType.SINGLE.ordinal()] = Utils.rl(prefix + "single");
-            arr[port.ordinal() << 1 | WireType.BUNDLED.ordinal()] = Utils.rl(prefix + "bundled");
+            arr[port.ordinal() << 1 | WireType.SINGLE.ordinal()] = Utils.id(prefix + "single");
+            arr[port.ordinal() << 1 | WireType.BUNDLED.ordinal()] = Utils.id(prefix + "bundled");
         }
     });
 

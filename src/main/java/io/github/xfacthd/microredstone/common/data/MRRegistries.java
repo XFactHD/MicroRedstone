@@ -12,11 +12,11 @@ import java.util.function.Consumer;
 
 public final class MRRegistries {
     public static final Registry<CircuitNodeType<?>> CIRCUIT_NODE_TYPES = create(
-            ResourceKey.createRegistryKey(Utils.rl("circuit_node_types")),
+            ResourceKey.createRegistryKey(Utils.id("circuit_node_types")),
             builder -> builder.sync(true)
     );
     public static final Registry<ProtoNodeType<?>> PROTO_NODE_TYPES = create(
-            ResourceKey.createRegistryKey(Utils.rl("proto_node_types")),
+            ResourceKey.createRegistryKey(Utils.id("proto_node_types")),
             _ -> { }
     );
 

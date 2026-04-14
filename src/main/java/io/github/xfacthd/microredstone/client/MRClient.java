@@ -38,7 +38,7 @@ public final class MRClient {
     }
 
     private static void onRegisterBlockModels(RegisterBlockStateModels event) {
-        event.registerModel(Utils.rl("microchip"), UnbakedMicrochipModel.CODEC);
+        event.registerModel(Utils.id("microchip"), UnbakedMicrochipModel.CODEC);
     }
 
     private static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {

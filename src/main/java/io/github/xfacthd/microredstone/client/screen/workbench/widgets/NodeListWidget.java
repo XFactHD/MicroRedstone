@@ -19,10 +19,10 @@ import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
 public final class NodeListWidget extends ScrollableWidget {
-    private static final Identifier BACKGROUND = Utils.rl("node_list_background");
-    private static final Identifier BUTTON = Utils.rl("minecraft", "widget/button");
-    private static final Identifier BUTTON_HOVER = Utils.rl("minecraft", "widget/button_highlighted");
-    private static final Identifier SCROLLER_HANDLE = Utils.rl("minecraft", "container/villager/scroller");
+    private static final Identifier BACKGROUND = Utils.id("node_list_background");
+    private static final Identifier BUTTON = Utils.id("minecraft", "widget/button");
+    private static final Identifier BUTTON_HOVER = Utils.id("minecraft", "widget/button_highlighted");
+    private static final Identifier SCROLLER_HANDLE = Utils.id("minecraft", "container/villager/scroller");
 
     private static final int PADDING = 5;
     private static final int BORDER = 5;

@@ -27,7 +27,7 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     public static final int TOOL_PANE_WIDTH = 144;
     private static final int MAX_HEIGHT = CircuitCanvas.HEIGHT;
     private static final int HEADER_HEIGHT = 15;
-    private static final Identifier BACKGROUND = Utils.rl("minecraft", "toast/tutorial");
+    private static final Identifier BACKGROUND = Utils.id("minecraft", "toast/tutorial");
 
     protected final CircuitWorkbenchScreen owner;
     protected final ToolPane toolPane;

@@ -37,7 +37,7 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.parts_list.mode");
     public static final Component LABEL_FILTER = Utils.translate("label", "circuit_workbench.parts_list.filter");
     public static final Component MSG_DROP_TO_DELETE = Utils.translate("msg", "circuit_workbench.parts_list.drop_to_delete");
-    private static final Identifier ICON_DELETE = Utils.rl("delete");
+    private static final Identifier ICON_DELETE = Utils.id("delete");
     private static final ShareType[] SHARE_TYPES = ShareType.values();
     private static final int LABEL_X = 5;
     private static final int MODE_LABEL_Y = 10;

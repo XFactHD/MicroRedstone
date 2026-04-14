@@ -17,8 +17,8 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     public static final int SIZE = 16;
     private static final int ICON_OFFSET = 2;
     private static final int ICON_SIZE = SIZE - ICON_OFFSET * 2;
-    private static final WidgetSprites SPRITES_OFF = sprites(Utils.rl("button/toggle_button_off"));
-    private static final WidgetSprites SPRITES_ON = sprites(Utils.rl("button/toggle_button_on"));
+    private static final WidgetSprites SPRITES_OFF = sprites(Utils.id("button/toggle_button_off"));
+    private static final WidgetSprites SPRITES_ON = sprites(Utils.id("button/toggle_button_on"));
     public static final String TOOLTIP_OFF = Utils.translationKey("tooltip", "circuit_workbench.parts_list.filter.hidden");
     public static final String TOOLTIP_ON = Utils.translationKey("tooltip", "circuit_workbench.parts_list.filter.shown");
 

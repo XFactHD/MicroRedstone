@@ -20,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Objects;
 
 public final class MicrochipCircuitScreen extends AbstractContainerScreen<MicrochipCircuitMenu> {
-    private static final Identifier BACKGROUND = Utils.rl("background");
+    private static final Identifier BACKGROUND = Utils.id("background");
     public static final String TITLE_WITH_CIRCUIT = Utils.translationKey("title", "microchip.circuit");
     public static final String TITLE_WITH_CIRCUIT_DEBUG = Utils.translationKey("title", "microchip.circuit_debug");
     static final int CANVAS_BORDER = 10;

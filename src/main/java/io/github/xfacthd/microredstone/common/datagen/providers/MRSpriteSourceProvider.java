@@ -33,17 +33,17 @@ public final class MRSpriteSourceProvider extends SpriteSourceProvider {
         atlas(AtlasIds.BLOCKS)
                 .addSource(new AreaMaskSource(
                         Identifier.withDefaultNamespace("block/moss_block"),
-                        Utils.rl("block/pcb"),
+                        Utils.id("block/pcb"),
                         2, 2, 12, 12
                 ))
                 .addSource(new AreaMaskSource(
                         Identifier.fromNamespaceAndPath("morered", "block/redwire_post_plate_overlay"),
-                        Utils.rl("block/overlay_single"),
+                        Utils.id("block/overlay_single"),
                         0, 0, 16, 2
                 ), new ModLoadedCondition("morered"))
                 .addSource(new AreaMaskSource(
                         Identifier.fromNamespaceAndPath("morered", "block/bundled_cable_plate_overlay"),
-                        Utils.rl("block/overlay_bundled"),
+                        Utils.id("block/overlay_bundled"),
                         0, 0, 16, 2
                 ), new ModLoadedCondition("morered"));
 
@@ -52,47 +52,47 @@ public final class MRSpriteSourceProvider extends SpriteSourceProvider {
                 guiAtlas.addSource(new PortOverlaySource(location, ports))
         );
         guiAtlas.addSource(new PortOverlaySource(
-                        Utils.rl("port/border_up_single"),
+                        Utils.id("port/border_up_single"),
                         Map.of(Port.UP, WireType.SINGLE),
                         Optional.of("border")
                 ))
                 .addSource(new PortOverlaySource(
-                        Utils.rl("port/border_up_bundled"),
+                        Utils.id("port/border_up_bundled"),
                         Map.of(Port.UP, WireType.BUNDLED),
                         Optional.of("border")
                 ))
                 .addSource(new PortOverlaySource(
-                        Utils.rl("port/border_down_single"),
+                        Utils.id("port/border_down_single"),
                         Map.of(Port.DOWN, WireType.SINGLE),
                         Optional.of("border")
                 ))
                 .addSource(new PortOverlaySource(
-                        Utils.rl("port/border_down_bundled"),
+                        Utils.id("port/border_down_bundled"),
                         Map.of(Port.DOWN, WireType.BUNDLED),
                         Optional.of("border")
                 ))
                 .addSource(new PortOverlaySource(
-                        Utils.rl("port/border_left_single"),
+                        Utils.id("port/border_left_single"),
                         Map.of(Port.LEFT, WireType.SINGLE),
                         Optional.of("border")
                 ))
                 .addSource(new PortOverlaySource(
-                        Utils.rl("port/border_left_bundled"),
+                        Utils.id("port/border_left_bundled"),
                         Map.of(Port.LEFT, WireType.BUNDLED),
                         Optional.of("border")
                 ))
                 .addSource(new PortOverlaySource(
-                        Utils.rl("port/border_right_single"),
+                        Utils.id("port/border_right_single"),
                         Map.of(Port.RIGHT, WireType.SINGLE),
                         Optional.of("border")
                 ))
                 .addSource(new PortOverlaySource(
-                        Utils.rl("port/border_right_bundled"),
+                        Utils.id("port/border_right_bundled"),
                         Map.of(Port.RIGHT, WireType.BUNDLED),
                         Optional.of("border")
                 ));
         guiAtlas.addSource(new SingleFile(
-                Utils.rl("neoforge", "white"),
+                Utils.id("neoforge", "white"),
                 Optional.of(CircuitCanvasContentRenderState.WHITE_SPRITE)
         ));
         guiAtlas.addSource(new StackingSource(

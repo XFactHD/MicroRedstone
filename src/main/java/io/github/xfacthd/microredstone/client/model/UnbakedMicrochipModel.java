@@ -20,10 +20,10 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
     ).apply(inst, UnbakedMicrochipModel::new));
     private static final String[] EDGE_SUFFIXES = new String[] { "n", "e", "s", "w" };
     public static final Identifier[] LOCATIONS_SINGLE = Utils.fillArray(new Identifier[4], edge ->
-            Utils.rl("block/type_single_" + EDGE_SUFFIXES[edge])
+            Utils.id("block/type_single_" + EDGE_SUFFIXES[edge])
     );
     public static final Identifier[] LOCATIONS_BUNDLED = Utils.fillArray(new Identifier[4], edge ->
-            Utils.rl("block/type_bundled_" + EDGE_SUFFIXES[edge])
+            Utils.id("block/type_bundled_" + EDGE_SUFFIXES[edge])
     );
 
     private final Identifier baseModel;

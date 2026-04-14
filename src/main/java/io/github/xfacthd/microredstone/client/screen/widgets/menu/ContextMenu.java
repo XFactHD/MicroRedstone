@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public final class ContextMenu extends SimpleTransientContainerWidget {
-    private static final Identifier BACKGROUND = Utils.rl("context_menu_background");
+    private static final Identifier BACKGROUND = Utils.id("context_menu_background");
     static final int HIGHLIGHT_COLOR = CommonColors.LIGHT_GRAY;
     static final int MIN_WIDTH = 70;
     static final int MAX_WIDTH = 160;

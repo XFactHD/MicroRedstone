@@ -14,7 +14,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public final class MicrochipScreen extends AbstractContainerScreen<MicrochipMenu> {
-    private static final Identifier BACKGROUND = Utils.rl("textures/gui/microchip.png");
+    private static final Identifier BACKGROUND = Utils.id("textures/gui/microchip.png");
 
     private final ItemStack icStack = new ItemStack(MRContent.ITEM_INTEGRATED_CIRCUIT);
 

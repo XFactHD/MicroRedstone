@@ -54,7 +54,7 @@ public final class ReferencePrototypeNode extends PrototypeNode {
     }
 
     private static IconConfig makeIconConfig(PortConfig portConfig) {
-        return IconConfig.of(Utils.rl("part/reference"), portConfig);
+        return IconConfig.of(Utils.id("part/reference"), portConfig);
     }
 
     public static final class Serializable extends PrototypeNode.Serializable {

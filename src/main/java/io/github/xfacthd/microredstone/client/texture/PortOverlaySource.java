@@ -36,7 +36,7 @@ public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverl
             Codec.unboundedMap(Port.CODEC, WireType.CODEC).fieldOf("ports").forGetter(PortOverlaySource::portOverlays),
             Codec.STRING.optionalFieldOf("type_prefix").forGetter(PortOverlaySource::typePrefix)
     ).apply(inst, PortOverlaySource::new));
-    public static final Identifier ID = Utils.rl("port_overlay");
+    public static final Identifier ID = Utils.id("port_overlay");
 
     public PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverlays) {
         this(sprite, portOverlays, Optional.empty());
@@ -56,7 +56,7 @@ public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverl
         Map<WireType, Pair<Resource, LazyLoadedImage>> resources = new HashMap<>();
         for (Object2IntMap.Entry<WireType> entry : types.object2IntEntrySet()) {
             WireType type = entry.getKey();
-            Identifier sprite = Utils.rl("gui/sprites/port/" + prefix + type.getSerializedName());
+            Identifier sprite = Utils.id("gui/sprites/port/" + prefix + type.getSerializedName());
             Identifier location = TEXTURE_ID_CONVERTER.idToFile(sprite);
             Optional<Resource> typeResource = resourceManager.getResource(location);
             if (typeResource.isEmpty()) {

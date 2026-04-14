@@ -27,7 +27,7 @@ public enum ShareType implements StringRepresentable {
 
     private final String name = toString().toLowerCase(Locale.ROOT);
     private final Component title = Utils.translate("label", "circuit_workbench.library_browser.filter." + name);
-    private final Identifier icon = Utils.rl("filter/type_" + name);
+    private final Identifier icon = Utils.id("filter/type_" + name);
 
     public Component getTitle() {
         return title;

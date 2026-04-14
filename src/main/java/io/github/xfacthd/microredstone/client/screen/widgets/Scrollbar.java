@@ -14,8 +14,8 @@ import org.lwjgl.glfw.GLFW;
 import java.util.function.IntSupplier;
 
 public final class Scrollbar implements GuiEventListener, Renderable {
-    private static final Identifier BACKGROUND = Utils.rl("node_list_background");
-    private static final Identifier SCROLLER = Utils.rl("minecraft", "container/villager/scroller");
+    private static final Identifier BACKGROUND = Utils.id("node_list_background");
+    private static final Identifier SCROLLER = Utils.id("minecraft", "container/villager/scroller");
     public static final int BACKGROUND_WIDTH = 8;
     public static final int SCROLLER_WIDTH = 6;
     private static final int SCROLLER_HEIGHT = 27;

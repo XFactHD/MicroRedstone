@@ -44,7 +44,7 @@ public record AreaMaskSource(Identifier src, Identifier sprite, int x, int y, in
         }
         return DataResult.success(res);
     });
-    public static final Identifier ID = Utils.rl("mask");
+    public static final Identifier ID = Utils.id("mask");
 
     @Override
     public void run(ResourceManager manager, Output out) {

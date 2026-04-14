@@ -9,8 +9,8 @@ import net.minecraft.client.input.InputWithModifiers;
 public final class ModeButton<E extends MultiModeTab.Mode> extends SimpleButton implements DropFocusAfterClick {
     public static final int WIDTH = 52;
     private static final int HEIGHT = 16;
-    private static final WidgetSprites SPRITES_UNSELECTED = sprites(Utils.rl("button/mode_button"));
-    private static final WidgetSprites SPRITES_SELECTED = sprites(Utils.rl("button/mode_button_selected"));
+    private static final WidgetSprites SPRITES_UNSELECTED = sprites(Utils.id("button/mode_button"));
+    private static final WidgetSprites SPRITES_SELECTED = sprites(Utils.id("button/mode_button_selected"));
 
     private final MultiModeTab<E> owner;
     private final E mode;

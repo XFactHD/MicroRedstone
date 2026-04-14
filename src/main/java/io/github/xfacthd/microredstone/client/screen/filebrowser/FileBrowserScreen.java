@@ -38,9 +38,9 @@ import java.util.stream.Stream;
 
 // TODO: make title and dir/file icons
 public final class FileBrowserScreen extends Screen {
-    private static final Identifier BACKGROUND = Utils.rl("textures/gui/filebrowser.png");
-    private static final Identifier ICON_DIRECTORY = Utils.rl("filebrowser/icon_directory");
-    private static final Identifier ICON_FILE = Utils.rl("filebrowser/icon_file");
+    private static final Identifier BACKGROUND = Utils.id("textures/gui/filebrowser.png");
+    private static final Identifier ICON_DIRECTORY = Utils.id("filebrowser/icon_directory");
+    private static final Identifier ICON_FILE = Utils.id("filebrowser/icon_file");
     public static final Component MSG_DIR_EMPTY = Utils.translate("msg", "filebrowser.dir_empty");
     public static final Component MSG_DIR_NO_MATCHING_FILES = Utils.translate("msg", "filebrowser.dir_no_matching_file");
     public static final Component LABEL_FILE_NAME = Utils.translate("label", "filebrowser.file_name");
@@ -508,7 +508,7 @@ public final class FileBrowserScreen extends Screen {
     }
 
     private static WidgetSprites actionSprites(String type) {
-        Identifier prefix = Utils.rl("filebrowser/button_" + type);
+        Identifier prefix = Utils.id("filebrowser/button_" + type);
         return new WidgetSprites(prefix, prefix.withSuffix("_disabled"), prefix.withSuffix("_focused"));
     }
 
@@ -537,8 +537,8 @@ public final class FileBrowserScreen extends Screen {
     }
 
     public enum Type {
-        OPEN(Utils.rl("filebrowser/icon_open")),
-        SAVE(Utils.rl("filebrowser/icon_save")),
+        OPEN(Utils.id("filebrowser/icon_open")),
+        SAVE(Utils.id("filebrowser/icon_save")),
         ;
 
         private final String name = toString().toLowerCase(Locale.ROOT);

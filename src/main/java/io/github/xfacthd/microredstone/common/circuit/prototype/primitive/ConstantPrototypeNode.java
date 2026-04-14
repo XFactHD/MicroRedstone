@@ -31,8 +31,8 @@ public final class ConstantPrototypeNode extends PrototypeNode {
     private static final PortConfig PORTS_BUNDLED = PortConfig.builder()
             .addPort(Port.RIGHT, WireType.BUNDLED, PortDir.OUTPUT)
             .build();
-    public static final IconConfig ICON_SINGLE = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_single"), false);
-    public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.rl("part/constant"), Utils.rl("port/right_bundled"), false);
+    public static final IconConfig ICON_SINGLE = new IconConfig(Utils.id("part/constant"), Utils.id("port/right_single"), false);
+    public static final IconConfig ICON_BUNDLED = new IconConfig(Utils.id("part/constant"), Utils.id("port/right_bundled"), false);
     public static final int MAX_VAL_SINGLE = 1;
     public static final int MAX_VAL_BUNDLED = 65535;
 

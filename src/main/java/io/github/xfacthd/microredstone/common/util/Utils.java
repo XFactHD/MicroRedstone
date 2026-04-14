@@ -42,7 +42,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class Utils {
-    private static final Identifier RL_TEMPLATE = Identifier.fromNamespaceAndPath(MicroRedstone.MOD_ID, "");
+    private static final Identifier ID_TEMPLATE = Identifier.fromNamespaceAndPath(MicroRedstone.MOD_ID, "");
     private static final Long2ObjectMap<Direction> DIRECTION_BY_NORMAL = Arrays.stream(Direction.values())
             .collect(Collectors.toMap(
                     side -> new BlockPos(side.getUnitVec3i()).asLong(),
@@ -61,20 +61,20 @@ public final class Utils {
         return DIRECTION_BY_NORMAL.get(BlockPos.asLong(x, y, z));
     }
 
-    public static Identifier rl(String path) {
-        return RL_TEMPLATE.withPath(path);
+    public static Identifier id(String path) {
+        return ID_TEMPLATE.withPath(path);
     }
 
-    public static Identifier rl(String namespace, String path) {
+    public static Identifier id(String namespace, String path) {
         return Identifier.fromNamespaceAndPath(namespace, path);
     }
 
     public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String path) {
-        return new CustomPacketPayload.Type<>(Utils.rl(path));
+        return new CustomPacketPayload.Type<>(Utils.id(path));
     }
 
     public static ConfigurationTask.Type configTaskType(String path) {
-        return new ConfigurationTask.Type(Utils.rl(path));
+        return new ConfigurationTask.Type(Utils.id(path));
     }
 
     public static <T> ResourceKey<T> getKeyOrThrow(Holder<T> holder) {

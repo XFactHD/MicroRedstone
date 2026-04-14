@@ -52,8 +52,8 @@ import java.util.stream.Stream;
 // TODO: auto-save every so often and when leaving the screen (add additional button to clear on screen exit)
 // TODO: re-open last auto-save when re-entering the screen if it wasn't cleared
 public final class CircuitWorkbenchScreen extends AbstractContainerScreen<CircuitWorkbenchMenu> {
-    private static final Identifier BACKGROUND = Utils.rl("background");
-    public static final Identifier WINDOW_FRAME = Utils.rl("window_frame");
+    private static final Identifier BACKGROUND = Utils.id("background");
+    public static final Identifier WINDOW_FRAME = Utils.id("window_frame");
     public static final Component TITLE_CONFIRM_CLOSE = Utils.translate("title", "circuit_workbench.close.confirm");
     public static final Component MESSAGE_CONFIRM_CLOSE_LINE_ONE = Utils.translate("msg", "circuit_workbench.close.confirm_line_one", CircuitWorkbenchBlock.MENU_TITLE);
     public static final Component MESSAGE_CONFIRM_CLOSE_LINE_TWO = Utils.translate("msg", "circuit_workbench.close.confirm_line_two");

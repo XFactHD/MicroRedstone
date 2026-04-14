@@ -22,7 +22,7 @@ public final class ServerCircuitLibrary extends SavedData {
             ServerCircuitLibrary::serialize
     );
     private static final SavedDataType<ServerCircuitLibrary> TYPE = new SavedDataType<>(
-            Utils.rl("circuit_library"),
+            Utils.id("circuit_library"),
             () -> new ServerCircuitLibrary(new Object2ObjectOpenHashMap<>()),
             CODEC.xmap(ServerCircuitLibrary::new, ServerCircuitLibrary::getLibraries),
             null

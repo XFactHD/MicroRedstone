@@ -29,8 +29,8 @@ import java.util.function.Consumer;
 // TODO: rename to something more sensible
 public final class LibraryBrowser extends ToolPaneTabWidget implements MultiModeTab<LibraryBrowser.Mode> {
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.library_browser.mode");
-    private static final Identifier INVENTORY = Utils.rl("workbench_inventory");
-    private static final Identifier SLOT = Utils.rl("minecraft", "container/slot");
+    private static final Identifier INVENTORY = Utils.id("workbench_inventory");
+    private static final Identifier SLOT = Utils.id("minecraft", "container/slot");
     private static final int INVENTORY_WIDTH = 172;
     private static final int INVENTORY_HEIGHT = 94;
     private static final int LABEL_X = 5;

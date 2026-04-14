@@ -24,7 +24,7 @@ public enum WireType implements StringRepresentable {
     public static final StreamCodec<ByteBuf, WireType> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, WireType::ordinal);
 
     private final String name = toString().toLowerCase(Locale.ROOT);
-    private final Icon icon = new Icon(Utils.rl("wire/icon_" + name));
+    private final Icon icon = new Icon(Utils.id("wire/icon_" + name));
     private final DyeColor defaultColor;
 
     WireType(DyeColor defaultColor) {

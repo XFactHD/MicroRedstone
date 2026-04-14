@@ -93,13 +93,13 @@ public final class PrimitivePrototypeNode extends PrototypeNode {
     }
 
     public enum Type implements StringRepresentable {
-        NOT(false, false, Utils.rl("part/not")),
-        AND(true, false, Utils.rl("part/and")),
-        OR(true, false, Utils.rl("part/or")),
-        XOR(true, false, Utils.rl("part/xor")),
-        NAND(true, true, Utils.rl("part/nand")),
-        NOR(true, true, Utils.rl("part/nor")),
-        XNOR(true, true, Utils.rl("part/xnor")),
+        NOT(false, false, Utils.id("part/not")),
+        AND(true, false, Utils.id("part/and")),
+        OR(true, false, Utils.id("part/or")),
+        XOR(true, false, Utils.id("part/xor")),
+        NAND(true, true, Utils.id("part/nand")),
+        NOR(true, true, Utils.id("part/nor")),
+        XNOR(true, true, Utils.id("part/xnor")),
         ;
 
         public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);

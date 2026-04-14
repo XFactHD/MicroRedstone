@@ -71,20 +71,20 @@ public final class PortOverlays {
     private static @Nullable Identifier buildOverlayLocation(int portMask) {
         return switch (portMask) {
             case 0b0000_0000 -> null;
-            case 0b0000_1111 -> Utils.rl("port/full_single");
-            case 0b1111_0000 -> Utils.rl("port/full_bundled");
-            case 0b0000_0001 -> Utils.rl("port/up_single");
-            case 0b0000_0010 -> Utils.rl("port/right_single");
-            case 0b0000_0100 -> Utils.rl("port/down_single");
-            case 0b0000_1000 -> Utils.rl("port/left_single");
-            case 0b0000_1010 -> Utils.rl("port/hor_single");
-            case 0b0000_0101 -> Utils.rl("port/vert_single");
-            case 0b0001_0000 -> Utils.rl("port/up_bundled");
-            case 0b0010_0000 -> Utils.rl("port/right_bundled");
-            case 0b0100_0000 -> Utils.rl("port/down_bundled");
-            case 0b1000_0000 -> Utils.rl("port/left_bundled");
-            case 0b1010_0000 -> Utils.rl("port/hor_bundled");
-            case 0b0101_0000 -> Utils.rl("port/vert_bundled");
+            case 0b0000_1111 -> Utils.id("port/full_single");
+            case 0b1111_0000 -> Utils.id("port/full_bundled");
+            case 0b0000_0001 -> Utils.id("port/up_single");
+            case 0b0000_0010 -> Utils.id("port/right_single");
+            case 0b0000_0100 -> Utils.id("port/down_single");
+            case 0b0000_1000 -> Utils.id("port/left_single");
+            case 0b0000_1010 -> Utils.id("port/hor_single");
+            case 0b0000_0101 -> Utils.id("port/vert_single");
+            case 0b0001_0000 -> Utils.id("port/up_bundled");
+            case 0b0010_0000 -> Utils.id("port/right_bundled");
+            case 0b0100_0000 -> Utils.id("port/down_bundled");
+            case 0b1000_0000 -> Utils.id("port/left_bundled");
+            case 0b1010_0000 -> Utils.id("port/hor_bundled");
+            case 0b0101_0000 -> Utils.id("port/vert_bundled");
             default -> {
                 boolean suffixIndividually = (portMask & 0b1111_0000) != 0 && (portMask & 0b0000_1111) != 0;
                 StringBuilder builder = new StringBuilder();
@@ -107,7 +107,7 @@ public final class PortOverlays {
                     boolean single = (portMask & 0b1111_0000) == 0;
                     builder.append(single ? "_single" : "_bundled");
                 }
-                yield Utils.rl("port/").withSuffix(builder.toString());
+                yield Utils.id("port/").withSuffix(builder.toString());
             }
         };
     }

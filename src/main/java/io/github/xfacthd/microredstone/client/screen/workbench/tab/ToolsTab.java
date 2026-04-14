@@ -81,9 +81,9 @@ public final class ToolsTab extends ToolPaneTabWidget {
             }
         },
         CREATE_BUNDLED_WIRE(WireType.BUNDLED.getIcon(), WireToolActionContextMenuProvider.INSTANCE_BUNDLED, Alignment.TOP),
-        LOAD_LOCAL(new Icon(Utils.rl("button/load_circuit")), null, Alignment.BOTTOM),
-        SAVE_LOCAL(new Icon(Utils.rl("button/save_circuit")), null, Alignment.BOTTOM),
-        CLEAR_CANVAS(new Icon(Utils.rl("minecraft", "spectator/close")), null, Alignment.BOTTOM),
+        LOAD_LOCAL(new Icon(Utils.id("button/load_circuit")), null, Alignment.BOTTOM),
+        SAVE_LOCAL(new Icon(Utils.id("button/save_circuit")), null, Alignment.BOTTOM),
+        CLEAR_CANVAS(new Icon(Utils.id("minecraft", "spectator/close")), null, Alignment.BOTTOM),
         ;
 
         private static final ToolAction[] ACTIONS = values();

@@ -46,8 +46,8 @@ public final class MRBlockModelProvider extends ModelProvider {
         makeMicrochipBlockModel(blockModels);
 
         for (int edge = 0; edge < 4; edge++) {
-            plateOverlay(blockModels, UnbakedMicrochipModel.LOCATIONS_SINGLE[edge], Utils.rl("block/overlay_single"), edge, true, true);
-            plateOverlay(blockModels, UnbakedMicrochipModel.LOCATIONS_BUNDLED[edge], Utils.rl("block/overlay_bundled"), edge, true, true);
+            plateOverlay(blockModels, UnbakedMicrochipModel.LOCATIONS_SINGLE[edge], Utils.id("block/overlay_single"), edge, true, true);
+            plateOverlay(blockModels, UnbakedMicrochipModel.LOCATIONS_BUNDLED[edge], Utils.id("block/overlay_bundled"), edge, true, true);
         }
     }
 

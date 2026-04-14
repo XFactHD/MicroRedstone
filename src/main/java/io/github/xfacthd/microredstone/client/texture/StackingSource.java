@@ -33,7 +33,7 @@ public record StackingSource(Identifier primary, List<Identifier> secondaries, I
             Identifier.CODEC.listOf(1, Integer.MAX_VALUE).fieldOf("secondary_textures").forGetter(StackingSource::secondaries),
             Identifier.CODEC.fieldOf("sprite").forGetter(StackingSource::sprite)
     ).apply(inst, StackingSource::new));
-    public static final Identifier ID = Utils.rl("stacking");
+    public static final Identifier ID = Utils.id("stacking");
 
     @Override
     public void run(ResourceManager resourceManager, Output output) {

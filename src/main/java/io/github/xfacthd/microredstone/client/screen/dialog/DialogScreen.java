@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.function.BinaryOperator;
 
 public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, QueryDialogScreen {
-    private static final Identifier BACKGROUND = Utils.rl("dialog/background");
+    private static final Identifier BACKGROUND = Utils.id("dialog/background");
     protected static final int PADDING = 5;
     private static final int ICON_SIZE = 10;
     private static final int TITLE_X = PADDING + ICON_SIZE + PADDING;
@@ -146,12 +146,12 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     }
 
     public enum Type {
-        INFO(Utils.rl("dialog/icon_info"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
-        WARNING(Utils.rl("dialog/icon_warning"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
-        ERROR(Utils.rl("dialog/icon_error"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
-        CONFIRM(Utils.rl("dialog/icon_confirm"), true, CommonComponents.GUI_YES, (_, cancel) -> cancel),
-        PROPERTIES(Utils.rl("dialog/icon_properties"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
-        QUERY(Utils.rl("dialog/icon_query"), true, CommonComponents.GUI_DONE, (_, cancel) -> cancel),
+        INFO(Utils.id("dialog/icon_info"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        WARNING(Utils.id("dialog/icon_warning"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        ERROR(Utils.id("dialog/icon_error"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        CONFIRM(Utils.id("dialog/icon_confirm"), true, CommonComponents.GUI_YES, (_, cancel) -> cancel),
+        PROPERTIES(Utils.id("dialog/icon_properties"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
+        QUERY(Utils.id("dialog/icon_query"), true, CommonComponents.GUI_DONE, (_, cancel) -> cancel),
         ;
 
         private final Identifier icon;

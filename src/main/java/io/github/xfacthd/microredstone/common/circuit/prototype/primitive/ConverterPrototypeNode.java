@@ -83,8 +83,8 @@ public final class ConverterPrototypeNode extends PrototypeNode {
     }
 
     public enum Type implements StringRepresentable {
-        PACK(WireType.SINGLE, WireType.BUNDLED, Utils.rl("part/packer")),
-        UNPACK(WireType.BUNDLED, WireType.SINGLE, Utils.rl("part/unpacker"));
+        PACK(WireType.SINGLE, WireType.BUNDLED, Utils.id("part/packer")),
+        UNPACK(WireType.BUNDLED, WireType.SINGLE, Utils.id("part/unpacker"));
 
         private static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
 

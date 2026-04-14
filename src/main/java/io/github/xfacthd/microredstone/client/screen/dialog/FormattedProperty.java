@@ -41,7 +41,7 @@ record FormattedProperty(Component label, Value value) {
     }
 
     private static final class DelayedValue implements Value {
-        private static final Component THROBBER = Component.object(new AtlasSprite(AtlasIds.GUI, Utils.rl("dialog/throbber"))).withColor(0xFFFFFFFF);
+        private static final Component THROBBER = Component.object(new AtlasSprite(AtlasIds.GUI, Utils.id("dialog/throbber"))).withColor(0xFFFFFFFF);
 
         private final Supplier<@Nullable Component> source;
         private final Font font;

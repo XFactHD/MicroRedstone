@@ -13,10 +13,10 @@ import net.minecraft.util.CommonColors;
 public final class ToolPaneTabButton extends SimpleButton implements DropFocusAfterClick {
     public static final int WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH / ToolPaneTab.TAB_COUNT;
     public static final int HEIGHT = 18;
-    private static final WidgetSprites SPRITES_UNSELECTED = sprites(Utils.rl("tab/tab_unselected"));
-    private static final WidgetSprites SPRITES_LEFT = sprites(Utils.rl("tab/tab_selected_left"));
-    private static final WidgetSprites SPRITES_CENTER = sprites(Utils.rl("tab/tab_selected_center"));
-    private static final WidgetSprites SPRITES_RIGHT = sprites(Utils.rl("tab/tab_selected_right"));
+    private static final WidgetSprites SPRITES_UNSELECTED = sprites(Utils.id("tab/tab_unselected"));
+    private static final WidgetSprites SPRITES_LEFT = sprites(Utils.id("tab/tab_selected_left"));
+    private static final WidgetSprites SPRITES_CENTER = sprites(Utils.id("tab/tab_selected_center"));
+    private static final WidgetSprites SPRITES_RIGHT = sprites(Utils.id("tab/tab_selected_right"));
 
     private final ToolPane owner;
     private final ToolPaneTab tab;

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractCircuitCanvas implements Renderable {
-    private static final Identifier BLUEPRINT = Utils.rl("blueprint");
+    private static final Identifier BLUEPRINT = Utils.id("blueprint");
     public static final int PART_COUNT_X = 48;
     public static final int PART_COUNT_Y = 24; // TODO: consider increasing height to 36 cells
     public static final int PART_COUNT = PART_COUNT_X * PART_COUNT_Y;

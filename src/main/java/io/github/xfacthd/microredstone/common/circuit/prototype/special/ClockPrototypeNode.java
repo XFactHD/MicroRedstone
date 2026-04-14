@@ -29,7 +29,7 @@ public final class ClockPrototypeNode extends PrototypeNode {
             .addOptionalPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
             .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
             .build();
-    public static final IconConfig ICON = new IconConfig(Utils.rl("part/clock"), Utils.rl("port/hor_single"), false);
+    public static final IconConfig ICON = new IconConfig(Utils.id("part/clock"), Utils.id("port/hor_single"), false);
 
     private int halfPeriodLength = 10;
 
