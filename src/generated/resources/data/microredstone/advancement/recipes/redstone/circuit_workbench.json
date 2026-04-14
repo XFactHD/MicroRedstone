@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "hasIntegratedCircuit": {
+      "conditions": {
+        "items": [
+          {
+            "items": "microredstone:integrated_circuit"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "microredstone:circuit_workbench"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "hasIntegratedCircuit"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "microredstone:circuit_workbench"
+    ]
+  }
+}

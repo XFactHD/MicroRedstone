@@ -4,6 +4,7 @@ import io.github.xfacthd.microredstone.MicroRedstone;
 import io.github.xfacthd.microredstone.common.datagen.providers.MRBlockModelProvider;
 import io.github.xfacthd.microredstone.common.datagen.providers.MRItemModelProvider;
 import io.github.xfacthd.microredstone.common.datagen.providers.MRLanguageProvider;
+import io.github.xfacthd.microredstone.common.datagen.providers.MRRecipeProvider;
 import io.github.xfacthd.microredstone.common.datagen.providers.MRSpriteSourceProvider;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -23,5 +24,7 @@ public final class GeneratorHandler
         event.createProvider(MRItemModelProvider::new);
         event.createProvider(MRSpriteSourceProvider::new);
         event.createProvider(MRLanguageProvider::new);
+
+        event.createProvider(MRRecipeProvider.Runner::new);
     }
 }

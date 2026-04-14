@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "minecraft:comparator",
+    "G": "#c:nuggets/gold",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "GRG",
+    "RCR",
+    "GRG"
+  ],
+  "result": {
+    "id": "microredstone:integrated_circuit"
+  }
+}
