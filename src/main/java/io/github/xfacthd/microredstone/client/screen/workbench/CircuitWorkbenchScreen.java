@@ -39,9 +39,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+// TODO: add color picker for canvas background
+// TODO: make parts list selectable instead of dragging parts out of it
+// TODO: use C to copy whatever is being hovered
+// TODO: add undo/redo
+// TODO: use R to toggle wire pivot while dragging wire
+// TODO: use right-click to cancel wire placement in addition to ESC
+// TODO: add mouse drag selection for deletion and, once feasible (i.e. pulling wires along with dragged parts works), moving groups of parts around
 // TODO: add "modified" flag to prevent data loss when accidentally closing the screen and adjust close confirmation
 //       to use it instead of canvas emptiness, can be re-used to cache assembly result
 // TODO: add local storage for (partial) designs in prototype stage
+// TODO: auto-save every so often and when leaving the screen (add additional button to clear on screen exit)
+// TODO: re-open last auto-save when re-entering the screen if it wasn't cleared
 public final class CircuitWorkbenchScreen extends AbstractContainerScreen<CircuitWorkbenchMenu>
 {
     private static final Identifier BACKGROUND = Utils.rl("background");
