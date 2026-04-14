@@ -40,6 +40,7 @@
   "desc.microredstone.circuit_workbench.part_entry.xor_two_bundled": "",
   "desc.microredstone.circuit_workbench.part_entry.xor_two_single": "",
   "item.microredstone.integrated_circuit": "Integrated Circuit",
+  "itemGroup.microredstone": "MicroRedstone",
   "label.microredstone.circuit_workbench.canvas.menu.node.clock.set_period": "Set Clock Period",
   "label.microredstone.circuit_workbench.canvas.menu.node.connection.name": "Set Name",
   "label.microredstone.circuit_workbench.canvas.menu.node.connection.port_dir": "Port Direction",

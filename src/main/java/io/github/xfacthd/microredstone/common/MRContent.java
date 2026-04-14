@@ -41,9 +41,14 @@ import io.github.xfacthd.microredstone.common.util.registration.DeferredMenuType
 import io.github.xfacthd.microredstone.common.util.registration.DeferredMenuTypeRegister;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -65,6 +70,7 @@ public final class MRContent
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MicroRedstone.MOD_ID);
     private static final DeferredDataComponentTypeRegister DATA_COMPONENTS = DeferredDataComponentTypeRegister.create(MicroRedstone.MOD_ID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MicroRedstone.MOD_ID);
+    private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MicroRedstone.MOD_ID);
     private static final DeferredBlockEntityRegister BLOCK_ENTITIES = DeferredBlockEntityRegister.create(MicroRedstone.MOD_ID);
     private static final DeferredMenuTypeRegister MENU_TYPES = DeferredMenuTypeRegister.create(MicroRedstone.MOD_ID);
     private static final DeferredRegister<CircuitNodeType<?>> CIRCUIT_NODES = DeferredRegister.create(MRRegistries.CIRCUIT_NODE_TYPES, MicroRedstone.MOD_ID);
@@ -86,6 +92,21 @@ public final class MRContent
     public static final Holder<Item> ITEM_INTEGRATED_CIRCUIT = ITEMS.registerItem(
             "integrated_circuit",
             props -> new CircuitItem(props.component(DC_TYPE_CIRCUIT, StoredCircuit.EMPTY))
+    );
+    // endregion
+
+    // region CreativeModeTabs
+    public static final Holder<CreativeModeTab> CREATIVE_TAB_MAIN = CREATIVE_TABS.register(
+            "main", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.microredstone"))
+                    .icon(() -> new ItemStack(BLOCK_MICROCHIP.value()))
+                    .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+                    .displayItems((_, output) -> {
+                        output.accept(BLOCK_MICROCHIP.value());
+                        output.accept(ITEM_INTEGRATED_CIRCUIT.value());
+                        output.accept(BLOCK_CIRCUIT_WORKBENCH.value());
+                    })
+                    .build()
     );
     // endregion
 
@@ -204,6 +225,7 @@ public final class MRContent
         BLOCKS.register(modBus);
         DATA_COMPONENTS.register(modBus);
         ITEMS.register(modBus);
+        CREATIVE_TABS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         MENU_TYPES.register(modBus);
         CIRCUIT_NODES.register(modBus);

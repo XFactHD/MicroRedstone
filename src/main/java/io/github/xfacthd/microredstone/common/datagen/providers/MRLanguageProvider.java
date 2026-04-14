@@ -231,6 +231,8 @@ public final class MRLanguageProvider extends LanguageProvider
 
     private void addSpecialTranslations()
     {
+        add(MRContent.CREATIVE_TAB_MAIN.value().getDisplayName(), "MicroRedstone");
+
         for (DyeColor color : DyeColor.values())
         {
             StringBuilder name = new StringBuilder();
