@@ -64,8 +64,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class MRContent
-{
+public final class MRContent {
     // region Registries
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MicroRedstone.MOD_ID);
     private static final DeferredDataComponentTypeRegister DATA_COMPONENTS = DeferredDataComponentTypeRegister.create(MicroRedstone.MOD_ID);
@@ -185,13 +184,11 @@ public final class MRContent
     );
     // endregion
 
-    private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory)
-    {
+    private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory) {
         return registerBlock(name, blockFactory, BlockItem::new);
     }
 
-    private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory, BlockItemFactory<B> itemFactory)
-    {
+    private static <B extends Block> DeferredBlock<B> registerBlock(String name, BlockFactory<B> blockFactory, BlockItemFactory<B> itemFactory) {
         DeferredBlock<B> block = BLOCKS.registerBlock(name, blockFactory);
         ITEMS.registerItem(name, props -> itemFactory.apply(block.value(), props.useBlockDescriptionPrefix()));
         return block;
@@ -200,26 +197,22 @@ public final class MRContent
     @SafeVarargs
     private static <T extends BlockEntity> DeferredBlockEntity<T> registerBlockEntity(
             String name, BlockEntityType.BlockEntitySupplier<T> factory, Holder<Block>... blocks
-    )
-    {
+    ) {
         Supplier<Set<Block>> blockSet = () -> Arrays.stream(blocks).map(Holder::value).collect(Collectors.toSet());
         return BLOCK_ENTITIES.registerBlockEntity(name, factory, blockSet, false);
     }
 
     private static <T extends CircuitNode> Holder<CircuitNodeType<?>> registerCircuitNodeType(
             String name, MapCodec<T> codec, StreamCodec<ByteBuf, T> streamCodec
-    )
-    {
+    ) {
         return CIRCUIT_NODES.register(name, () -> new CircuitNodeType<>(codec, streamCodec));
     }
 
-    private static <T extends PrototypeNode.Serializable> Holder<ProtoNodeType<?>> registerProtoNodeType(String name, MapCodec<T> codec)
-    {
+    private static <T extends PrototypeNode.Serializable> Holder<ProtoNodeType<?>> registerProtoNodeType(String name, MapCodec<T> codec) {
         return PROTO_NODES.register(name, () -> new ProtoNodeType<>(codec));
     }
 
-    public static void init(IEventBus modBus)
-    {
+    public static void init(IEventBus modBus) {
         modBus.addListener(MRRegistries::onRegisterNewRegistries);
 
         BLOCKS.register(modBus);
@@ -233,15 +226,13 @@ public final class MRContent
     }
 
     @FunctionalInterface
-    private interface BlockFactory<B extends Block> extends Function<BlockBehaviour.Properties, B>
-    {
+    private interface BlockFactory<B extends Block> extends Function<BlockBehaviour.Properties, B> {
         @Override
         B apply(BlockBehaviour.Properties properties);
     }
 
     @FunctionalInterface
-    private interface BlockItemFactory<B extends Block> extends BiFunction<B, Item.Properties, BlockItem>
-    {
+    private interface BlockItemFactory<B extends Block> extends BiFunction<B, Item.Properties, BlockItem> {
         @Override
         BlockItem apply(B block, Item.Properties properties);
     }

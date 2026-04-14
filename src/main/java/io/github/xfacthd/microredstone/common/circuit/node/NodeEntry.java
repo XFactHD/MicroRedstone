@@ -14,18 +14,15 @@ import net.minecraft.network.codec.StreamCodec;
  * @param inputs  The mapping between the internal ioPorts of the node and the ioPorts of the surrounding node for inputs
  * @param outputs The mapping between the internal ioPorts of the node and the ioPorts of the surrounding node for outputs
  */
-public record NodeEntry<T extends CircuitNode>(T node, NodePos pos, int rotation, WirePair[] inputs, WirePair[] outputs)
-{
+public record NodeEntry<T extends CircuitNode>(T node, NodePos pos, int rotation, WirePair[] inputs, WirePair[] outputs) {
     public static final Codec<NodeEntry<CircuitNode>> CODEC = codec(CircuitNode.CODEC);
     public static final StreamCodec<ByteBuf, NodeEntry<CircuitNode>> STREAM_CODEC = streamCodec(CircuitNode.STREAM_CODEC);
 
-    public void evaluate(EvalContext context)
-    {
+    public void evaluate(EvalContext context) {
         node.evaluate(context, inputs, outputs);
     }
 
-    public static <T extends CircuitNode> Codec<NodeEntry<T>> codec(Codec<T> nodeCodec)
-    {
+    public static <T extends CircuitNode> Codec<NodeEntry<T>> codec(Codec<T> nodeCodec) {
         return RecordCodecBuilder.create(inst -> inst.group(
                 nodeCodec.fieldOf("node").forGetter(NodeEntry::node),
                 NodePos.CODEC.fieldOf("pos").forGetter(NodeEntry::pos),
@@ -35,8 +32,7 @@ public record NodeEntry<T extends CircuitNode>(T node, NodePos pos, int rotation
         ).apply(inst, NodeEntry::new));
     }
 
-    public static <T extends CircuitNode> StreamCodec<ByteBuf, NodeEntry<T>> streamCodec(StreamCodec<ByteBuf, T> nodeCodec)
-    {
+    public static <T extends CircuitNode> StreamCodec<ByteBuf, NodeEntry<T>> streamCodec(StreamCodec<ByteBuf, T> nodeCodec) {
         return StreamCodec.composite(
                 nodeCodec,
                 NodeEntry::node,

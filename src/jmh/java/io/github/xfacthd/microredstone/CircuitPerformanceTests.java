@@ -22,30 +22,27 @@ import java.util.concurrent.CompletableFuture;
 
 @State(Scope.Benchmark)
 @SuppressWarnings("MethodMayBeStatic")
-public class CircuitPerformanceTests
-{
-    private static final CompoundCircuitNode BCD_7SEG_DEC_INTERP = Util.make(() ->
-    {
+public class CircuitPerformanceTests {
+    private static final CompoundCircuitNode BCD_7SEG_DEC_INTERP = Util.make(() -> {
         CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
         CompoundCircuitNode assembled = CircuitAssembler.assemble("BCD_7SEG_DEC", protoNode, new CircuitErrorCollector());
         return Objects.requireNonNull(assembled);
     });
     private static final Circuit BCD_7SEG_DEC_INTERP_CIRCUIT = new Circuit(BCD_7SEG_DEC_INTERP);
     private static final TestInterfaceAdapter BCD_7SEG_DEC_INTERP_ADAPTER = new TestInterfaceAdapter();
-    private static final RootCircuitNode BCD_7SEG_DEC_COMPILED = Util.make(() ->
-    {
+    private static final RootCircuitNode BCD_7SEG_DEC_COMPILED = Util.make(() -> {
         CompletableFuture<RootCircuitNode> future = CircuitCompiler.tryCompileNode(BCD_7SEG_DEC_INTERP, true);
-        if (future.join() instanceof CompiledCircuitNode compiled) return compiled;
+        if (future.join() instanceof CompiledCircuitNode compiled) {
+            return compiled;
+        }
         throw new IllegalStateException("Test circuit failed to compile");
     });
     private static final Circuit BCD_7SEG_DEC_COMPILED_CIRCUIT = new Circuit(BCD_7SEG_DEC_COMPILED);
     private static final TestInterfaceAdapter BCD_7SEG_DEC_COMPILED_ADAPTER = new TestInterfaceAdapter();
 
     @Benchmark
-    public void runInterpreted(Blackhole bh)
-    {
-        for (int i = 0; i < 10; i++)
-        {
+    public void runInterpreted(Blackhole bh) {
+        for (int i = 0; i < 10; i++) {
             BCD_7SEG_DEC_INTERP_ADAPTER.setValue(Port.LEFT, i);
             BCD_7SEG_DEC_INTERP_CIRCUIT.evaluate(BCD_7SEG_DEC_INTERP_ADAPTER, null);
             bh.consume(BCD_7SEG_DEC_INTERP_ADAPTER.getValue(Port.RIGHT));
@@ -53,10 +50,8 @@ public class CircuitPerformanceTests
     }
 
     @Benchmark
-    public void runCompiled(Blackhole bh)
-    {
-        for (int i = 0; i < 10; i++)
-        {
+    public void runCompiled(Blackhole bh) {
+        for (int i = 0; i < 10; i++) {
             BCD_7SEG_DEC_COMPILED_ADAPTER.setValue(Port.LEFT, i);
             BCD_7SEG_DEC_COMPILED_CIRCUIT.evaluate(BCD_7SEG_DEC_COMPILED_ADAPTER, null);
             bh.consume(BCD_7SEG_DEC_COMPILED_ADAPTER.getValue(Port.RIGHT));

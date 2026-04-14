@@ -14,13 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(DebugExportConfigExtension.class)
-public final class AssemblerValidationTests
-{
+public final class AssemblerValidationTests {
     // TODO: implement (requires validation to output consistent messages)
 
     @Test
-    void testBundlePackDriverCollision()
-    {
+    void testBundlePackDriverCollision() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireIn = builder.addWire(WireType.SINGLE);
@@ -43,8 +41,7 @@ public final class AssemblerValidationTests
     }
 
     @Test
-    void testBundleMultiPackDriverCollision()
-    {
+    void testBundleMultiPackDriverCollision() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.SINGLE);

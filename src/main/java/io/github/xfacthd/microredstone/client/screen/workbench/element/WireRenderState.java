@@ -13,8 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public record WireRenderState(WireType type, DyeColor color, List<NodePos> nodes, List<WireSection> sections, boolean powered, Sprites sprites, int packedColor)
-{
+public record WireRenderState(WireType type, DyeColor color, List<NodePos> nodes, List<WireSection> sections, boolean powered, Sprites sprites, int packedColor) {
     private static final int WIRE_PERP_OFFSET = 4;
     private static final int WIRE_PAR_OFFSET_PART_MIN = 9;
     private static final int WIRE_PAR_OFFSET_PART_MAX = 1;
@@ -22,20 +21,16 @@ public record WireRenderState(WireType type, DyeColor color, List<NodePos> nodes
     private static final int WIRE_PAR_OFFSET_BRANCH_MAX = 3;
     private static final int WIRE_WIDTH = 2;
 
-    public WireRenderState(WireType type, DyeColor color)
-    {
+    public WireRenderState(WireType type, DyeColor color) {
         this(type, color, new ArrayList<>(), new ArrayList<>(), false, Sprites.DEFAULT, computeColor(type, color, false));
     }
 
-    public void addSections(Set<NodePos> parts, Collection<RoutedWire.Section> sections)
-    {
+    public void addSections(Set<NodePos> parts, Collection<RoutedWire.Section> sections) {
         sections.forEach(section -> addSection(parts, section.posOne(), section.posTwo()));
     }
 
-    public void addSection(Set<NodePos> parts, NodePos posOne, NodePos posTwo)
-    {
-        if (posOne.x() == posTwo.x())
-        {
+    public void addSection(Set<NodePos> parts, NodePos posOne, NodePos posTwo) {
+        if (posOne.x() == posTwo.x()) {
             int minY = Math.min(posOne.y(), posTwo.y());
             int maxY = Math.max(posOne.y(), posTwo.y());
             boolean partMin = parts.contains(posOne.y() == minY ? posOne : posTwo);
@@ -45,9 +40,7 @@ public record WireRenderState(WireType type, DyeColor color, List<NodePos> nodes
             int y1 = slotToPixel(minY) + (partMin ? WIRE_PAR_OFFSET_PART_MIN : WIRE_PAR_OFFSET_BRANCH_MIN);
             int y2 = slotToPixel(maxY) + (partMax ? WIRE_PAR_OFFSET_PART_MAX : WIRE_PAR_OFFSET_BRANCH_MAX);
             this.sections.add(new WireSection(x1, y1, x2, y2));
-        }
-        else if (posOne.y() == posTwo.y())
-        {
+        } else if (posOne.y() == posTwo.y()) {
             int minX = Math.min(posOne.x(), posTwo.x());
             int maxX = Math.max(posOne.x(), posTwo.x());
             boolean partMin = parts.contains(posOne.x() == minX ? posOne : posTwo);
@@ -60,41 +53,40 @@ public record WireRenderState(WireType type, DyeColor color, List<NodePos> nodes
         }
     }
 
-    private static int slotToPixel(int coord)
-    {
+    private static int slotToPixel(int coord) {
         return CircuitCanvas.BORDER_TOP_LEFT + coord * CircuitCanvas.PART_SLOT_SIZE;
     }
 
-    public void addNode(WireNode node)
-    {
-        if (!(node instanceof WireNode.Connection))
-        {
+    public void addNode(WireNode node) {
+        if (!(node instanceof WireNode.Connection)) {
             nodes.add(node.pos());
         }
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return sections.isEmpty() && nodes.isEmpty();
     }
 
-    public WireRenderState withPowered(boolean powered)
-    {
-        if (powered == this.powered || type == WireType.BUNDLED) return this;
+    public WireRenderState withPowered(boolean powered) {
+        if (powered == this.powered || type == WireType.BUNDLED) {
+            return this;
+        }
         return new WireRenderState(type, color, nodes, sections, powered, sprites, computeColor(type, color, powered));
     }
 
-    private static int computeColor(WireType type, DyeColor color, boolean powered)
-    {
-        if (type == WireType.BUNDLED) return 0xFFFFFFFF;
-        if (powered) return color.getTextColor();
+    private static int computeColor(WireType type, DyeColor color, boolean powered) {
+        if (type == WireType.BUNDLED) {
+            return 0xFFFFFFFF;
+        }
+        if (powered) {
+            return color.getTextColor();
+        }
         return color.getTextureDiffuseColor();
     }
 
-    public record WireSection(int minX, int minY, int maxX, int maxY) {}
+    public record WireSection(int minX, int minY, int maxX, int maxY) { }
 
-    public record Sprites(Identifier nodeSprite, Identifier sectionSpriteHor, Identifier sectionSpriteVert)
-    {
+    public record Sprites(Identifier nodeSprite, Identifier sectionSpriteHor, Identifier sectionSpriteVert) {
         private static final Sprites DEFAULT = new Sprites(
                 CircuitCanvasContentRenderState.WHITE_SPRITE,
                 CircuitCanvasContentRenderState.WHITE_SPRITE,

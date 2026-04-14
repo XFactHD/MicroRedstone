@@ -15,34 +15,29 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public final class SyncCircuitLibraryTask implements ConfigurationTask
-{
+public final class SyncCircuitLibraryTask implements ConfigurationTask {
     private static final Type TYPE = Utils.configTaskType("sync_circuit_library");
 
     private final ServerConfigurationPacketListenerImpl listener;
     private final MinecraftServer server;
 
-    public SyncCircuitLibraryTask(ServerConfigurationPacketListener listener)
-    {
+    public SyncCircuitLibraryTask(ServerConfigurationPacketListener listener) {
         this.listener = (ServerConfigurationPacketListenerImpl) listener;
         this.server = Objects.requireNonNull(ServerLifecycleHooks.getCurrentServer());
     }
 
     @Override
-    public void start(Consumer<Packet<?>> sender)
-    {
+    public void start(Consumer<Packet<?>> sender) {
         ServerCircuitLibrary library = ServerCircuitLibrary.get(server);
         List<CircuitLibraryEntry> entries = library.getEntriesForPlayer(listener.getOwner().id());
-        if (!entries.isEmpty())
-        {
+        if (!entries.isEmpty()) {
             sender.accept(new ClientboundCircuitLibraryPayload(entries).toVanillaClientbound());
         }
         listener.finishCurrentTask(TYPE);
     }
 
     @Override
-    public Type type()
-    {
+    public Type type() {
         return TYPE;
     }
 }

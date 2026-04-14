@@ -27,28 +27,27 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.ToIntFunction;
 
-final class MicrochipSignalComponent implements SignalComponent
-{
+final class MicrochipSignalComponent implements SignalComponent {
     static final MicrochipSignalComponent INSTANCE = new MicrochipSignalComponent();
     static final MapCodec<MicrochipSignalComponent> CODEC = MapCodec.unit(INSTANCE);
     private static final Direction[] DIRECTIONS = Direction.values();
 
     @Override
-    public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel)
-    {
-        if (level.getBlockEntity(pos) instanceof MicrochipBlockEntity be)
-        {
+    public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel) {
+        if (level.getBlockEntity(pos) instanceof MicrochipBlockEntity be) {
             Direction dir = state.getValue(BlockStateProperties.FACING);
             List<TransmissionNode> nodes = new ArrayList<>(4);
-            for (Direction side : DIRECTIONS)
-            {
-                if (side.getAxis() == dir.getAxis()) continue;
+            for (Direction side : DIRECTIONS) {
+                if (side.getAxis() == dir.getAxis()) {
+                    continue;
+                }
 
                 RedstoneType type = be.getRedstoneType(side);
-                if (type == RedstoneType.NONE) continue;
+                if (type == RedstoneType.NONE) {
+                    continue;
+                }
 
-                if (channel != Channel.redstone() || type != RedstoneType.BUNDLED)
-                {
+                if (channel != Channel.redstone() || type != RedstoneType.BUNDLED) {
                     nodes.add(new TransmissionNode(
                             NodeShape.ofSideSide(dir, side),
                             reader(be, side, channel),
@@ -68,16 +67,12 @@ final class MicrochipSignalComponent implements SignalComponent
         return List.of();
     }
 
-    private static ToIntFunction<LevelReader> reader(MicrochipBlockEntity be, Direction side, Channel channel)
-    {
-        return switch (channel)
-        {
+    private static ToIntFunction<LevelReader> reader(MicrochipBlockEntity be, Direction side, Channel channel) {
+        return switch (channel) {
             case Channel.Redstone ignored -> _ -> be.getRedstoneOutput(side) * 15;
-            case Channel.Single single ->
-            {
+            case Channel.Single single -> {
                 int bitIdx = single.color().ordinal();
-                yield _ ->
-                {
+                yield _ -> {
                     int bitVal = be.getRedstoneOutput(side);
                     return ((bitVal >> bitIdx) & 0x1) * 15;
                 };
@@ -85,23 +80,19 @@ final class MicrochipSignalComponent implements SignalComponent
         };
     }
 
-    private static BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> listener(MicrochipBlockEntity be, Direction side, Channel channel)
-    {
-        int bundleBit = switch (channel)
-        {
+    private static BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> listener(MicrochipBlockEntity be, Direction side, Channel channel) {
+        int bundleBit = switch (channel) {
             case Channel.Redstone ignored -> -1;
             case Channel.Single single -> single.color().ordinal();
         };
-        return (_, value) ->
-        {
+        return (_, value) -> {
             be.receiveExternalInput(side, value, bundleBit);
             return Map.of();
         };
     }
 
     @Override
-    public MapCodec<MicrochipSignalComponent> codec()
-    {
+    public MapCodec<MicrochipSignalComponent> codec() {
         return CODEC;
     }
 }

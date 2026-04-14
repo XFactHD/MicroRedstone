@@ -49,8 +49,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public final class ImportExportHandler
-{
+public final class ImportExportHandler {
     public static final Component TITLE_CONFIRM_IMPORT = Utils.translate("title", "circuit_workbench.library_browser.import_action.import_overwrite.confirm");
     public static final Component MESSAGE_CONFIRM_IMPORT_LINE_ONE = Utils.translate("msg", "circuit_workbench.library_browser.import_action.import_overwrite.confirm_line_one");
     public static final Component MESSAGE_CONFIRM_IMPORT_LINE_TWO = Utils.translate("msg", "circuit_workbench.library_browser.import_action.import_overwrite.confirm_line_two");
@@ -69,56 +68,46 @@ public final class ImportExportHandler
     // TODO: inhibit editing while waiting for server response
     private boolean waitingForExportResult = false;
 
-    ImportExportHandler(CircuitWorkbenchScreen owner)
-    {
+    ImportExportHandler(CircuitWorkbenchScreen owner) {
         this.owner = owner;
         this.menu = owner.getMenu();
         this.canvas = owner.getCanvas();
     }
 
-    public void importCircuitFromItem(ItemStack stack)
-    {
+    public void importCircuitFromItem(ItemStack stack) {
         StoredCircuit circuit = stack.get(MRContent.DC_TYPE_CIRCUIT);
-        if (circuit != null && circuit.rootNode() != null)
-        {
+        if (circuit != null && circuit.rootNode() != null) {
             importCircuit(circuit.rootNode());
         }
     }
 
-    public void importCircuitFromClipboard()
-    {
+    public void importCircuitFromClipboard() {
         String clipboard = Minecraft.getInstance().keyboardHandler.getClipboard();
-        if (clipboard.isEmpty()) return;
+        if (clipboard.isEmpty()) {
+            return;
+        }
 
         JsonObject json;
-        try
-        {
+        try {
             json = GsonHelper.parse(clipboard);
-        }
-        catch (JsonParseException e)
-        {
+        } catch (JsonParseException e) {
             displayImportError(ImportError.PARSE_FAILED);
             return;
         }
         CompoundCircuitNode circuitNode;
-        try
-        {
+        try {
             DataResult<Pair<CompoundCircuitNode, JsonElement>> result = NODE_CODEC.decode(JsonOps.INSTANCE, json);
-            if (result.isError() || result.result().isEmpty())
-            {
+            if (result.isError() || result.result().isEmpty()) {
                 displayImportError(ImportError.DECODE_FAILED);
                 return;
             }
             circuitNode = result.getOrThrow().getFirst();
-        }
-        catch (Throwable t)
-        {
+        } catch (Throwable t) {
             displayImportError(ImportError.DECODE_FAILED);
             return;
         }
 
-        if (!CircuitValidator.validate(circuitNode))
-        {
+        if (!CircuitValidator.validate(circuitNode)) {
             displayImportError(ImportError.VALIDATE_FAILED);
             return;
         }
@@ -126,10 +115,8 @@ public final class ImportExportHandler
         importCircuit(circuitNode);
     }
 
-    public void importCircuit(CompoundCircuitNode circuitNode)
-    {
-        if (canvas.isEmpty())
-        {
+    public void importCircuit(CompoundCircuitNode circuitNode) {
+        if (canvas.isEmpty()) {
             doImportCircuit(circuitNode);
             return;
         }
@@ -142,8 +129,7 @@ public final class ImportExportHandler
                 .show();
     }
 
-    private void doImportCircuit(CompoundCircuitNode circuitNode)
-    {
+    private void doImportCircuit(CompoundCircuitNode circuitNode) {
         canvas.clear();
 
         PartGrid partGrid = canvas.getPartGrid();
@@ -154,31 +140,24 @@ public final class ImportExportHandler
                 .stream()
                 .map(wireGrid::importWire)
                 .toList();
-        circuitNode.forAllNodes(entry ->
-        {
+        circuitNode.forAllNodes(entry -> {
             PrototypeNode protoNode = entry.node().disassemble();
-            if (protoNode instanceof ReferencePrototypeNode)
-            {
+            if (protoNode instanceof ReferencePrototypeNode) {
                 // CompoundCircuitNodes are weird, their Connectors refer to the internal wire instead of the external one like everything else
                 resolveReferenceNodeWires(protoNode, wires, entry.node().getInputs(), entry.inputs(), probablyBroken);
                 resolveReferenceNodeWires(protoNode, wires, entry.node().getOutputs(), entry.outputs(), probablyBroken);
-            }
-            else
-            {
-                for (Connector con : Utils.concatArrays(entry.node().getInputs(), entry.node().getOutputs()))
-                {
+            } else {
+                for (Connector con : Utils.concatArrays(entry.node().getInputs(), entry.node().getOutputs())) {
                     protoNode.setConnection(con.port(), wires.get(con.wire()), true);
                 }
             }
             partGrid.setPartNode(entry.pos(), protoNode, entry.rotation(), PartSetMode.ADD);
-            if (entry.node() instanceof LampCircuitNode lamp && protoNode instanceof LampPrototypeNode protoLamp)
-            {
+            if (entry.node() instanceof LampCircuitNode lamp && protoNode instanceof LampPrototypeNode protoLamp) {
                 importChainedLamps(partGrid, entry.pos(), lamp, protoLamp, probablyBroken);
             }
         });
         CompoundPrototypeNode rootNode = canvas.getRootNode();
-        for (Connector connector : Utils.concatArrays(circuitNode.getInputs(), circuitNode.getOutputs()))
-        {
+        for (Connector connector : Utils.concatArrays(circuitNode.getInputs(), circuitNode.getOutputs())) {
             Connection connection = new Connection(connector.type());
             connection.setPos(connector.pos(), connector.port().toPartRotation());
             connection.setPortDir(connector.dir());
@@ -189,8 +168,7 @@ public final class ImportExportHandler
 
         owner.getToolPane().getLibraryBrowser().setExportName(circuitNode.getName());
 
-        if (probablyBroken.isTrue())
-        {
+        if (probablyBroken.isTrue()) {
             DialogScreen.builder(DialogScreen.Type.INFO)
                     .withTitle(TITLE_IMPORT_BROKEN)
                     .withMessage(MESSAGE_IMPORT_BROKEN)
@@ -198,14 +176,11 @@ public final class ImportExportHandler
         }
     }
 
-    private static void resolveReferenceNodeWires(PrototypeNode protoNode, List<Wire> wires, Connector[] connectors, WirePair[] wirePairs, MutableBoolean probablyBroken)
-    {
-        outer: for (WirePair wirePair : wirePairs)
-        {
-            for (Connector connector : connectors)
-            {
-                if (connector.wire() == wirePair.internal())
-                {
+    private static void resolveReferenceNodeWires(PrototypeNode protoNode, List<Wire> wires, Connector[] connectors, WirePair[] wirePairs, MutableBoolean probablyBroken) {
+        outer:
+        for (WirePair wirePair : wirePairs) {
+            for (Connector connector : connectors) {
+                if (connector.wire() == wirePair.internal()) {
                     protoNode.setConnection(connector.port(), wires.get(wirePair.external()), true);
                     continue outer;
                 }
@@ -214,43 +189,36 @@ public final class ImportExportHandler
         }
     }
 
-    private static void importChainedLamps(PartGrid partGrid, NodePos rootPos, LampCircuitNode lamp, LampPrototypeNode protoLamp, MutableBoolean probablyBroken)
-    {
+    private static void importChainedLamps(PartGrid partGrid, NodePos rootPos, LampCircuitNode lamp, LampPrototypeNode protoLamp, MutableBoolean probablyBroken) {
         List<LampCircuitNode.ChainEntry> chain = lamp.getChainedNodes();
 
         // Compute a set of candidate chain targets to avoid endlessly looping if a chain entry happens to be invalid
         Set<NodePos> lampPosSet = new HashSet<>();
         lampPosSet.add(rootPos);
-        for (LampCircuitNode.ChainEntry chainEntry : chain)
-        {
+        for (LampCircuitNode.ChainEntry chainEntry : chain) {
             lampPosSet.add(chainEntry.pos());
         }
 
         Deque<LampCircuitNode.ChainEntry> chainEntries = new ArrayDeque<>(chain);
         Map<NodePos, LampPrototypeNode> lampProtos = new HashMap<>(chainEntries.size());
         lampProtos.put(rootPos, protoLamp);
-        while (!chainEntries.isEmpty())
-        {
+        while (!chainEntries.isEmpty()) {
             LampCircuitNode.ChainEntry chainEntry = chainEntries.removeFirst();
             NodePos pos = chainEntry.pos();
             int rotation = chainEntry.rotation();
 
             NodePos targetPos = pos.offset(Port.ofPartRotation(rotation));
             LampPrototypeNode chainTarget = lampProtos.get(targetPos);
-            if (chainTarget == null && lampPosSet.contains(targetPos))
-            {
+            if (chainTarget == null && lampPosSet.contains(targetPos)) {
                 chainEntries.addLast(chainEntry);
                 continue;
             }
 
             LampPrototypeNode lampProto = new LampPrototypeNode();
             lampProto.setColor(lamp.getColor());
-            if (chainTarget != null)
-            {
+            if (chainTarget != null) {
                 lampProto.chain(chainTarget);
-            }
-            else
-            {
+            } else {
                 probablyBroken.setTrue();
             }
             partGrid.setPartNode(pos, lampProto, rotation, PartSetMode.ADD);
@@ -258,20 +226,17 @@ public final class ImportExportHandler
         }
     }
 
-    public static void displayImportError(ImportError error)
-    {
+    public static void displayImportError(ImportError error) {
         DialogScreen.builder(DialogScreen.Type.ERROR)
                 .withTitle(TITLE_IMPORT_ERROR)
                 .withMessage(error.dialogMessage)
                 .show();
     }
 
-    public void assembleAndExport(String name, ExportTarget target)
-    {
+    public void assembleAndExport(String name, ExportTarget target) {
         CircuitErrorCollector errors = new CircuitErrorCollector();
         CompoundCircuitNode assembled = CircuitAssembler.assemble(name, canvas.getRootNode(), errors);
-        if (assembled == null)
-        {
+        if (assembled == null) {
             // TODO: unpack reporter and set up error annotations, replacing temporary error dialog
             DialogScreen.builder(DialogScreen.Type.ERROR)
                     .withTitle(Component.literal("Circuit Assembly Failed"))
@@ -280,14 +245,12 @@ public final class ImportExportHandler
             return;
         }
 
-        boolean exists = switch (target)
-        {
+        boolean exists = switch (target) {
             case CIRCUIT_ITEM -> StoredCircuit.isPresent(menu.getCircuitSlot().getItem());
             case LIBRARY -> ClientCircuitLibrary.hasEntryWithName(name);
             case JSON_IN_CLIPBOARD -> false;
         };
-        if (!exists)
-        {
+        if (!exists) {
             exportCircuit(assembled, target);
             return;
         }
@@ -299,35 +262,26 @@ public final class ImportExportHandler
                 .show();
     }
 
-    private void exportCircuit(CompoundCircuitNode circuitNode, ExportTarget target)
-    {
-        switch (target)
-        {
-            case LIBRARY ->
-            {
+    private void exportCircuit(CompoundCircuitNode circuitNode, ExportTarget target) {
+        switch (target) {
+            case LIBRARY -> {
                 ClientCircuitLibrary.addOrModifyCircuit(circuitNode);
                 waitingForExportResult = true;
             }
-            case CIRCUIT_ITEM ->
-            {
+            case CIRCUIT_ITEM -> {
                 var payload = new ServerboundWorkbenchWriteCircuitPayload(menu.containerId, circuitNode);
                 ClientPacketDistributor.sendToServer(payload);
                 waitingForExportResult = true;
             }
-            case JSON_IN_CLIPBOARD ->
-            {
+            case JSON_IN_CLIPBOARD -> {
                 DataResult<JsonElement> result;
-                try
-                {
+                try {
                     result = NODE_CODEC.encodeStart(JsonOps.INSTANCE, circuitNode);
-                }
-                catch (Throwable t)
-                {
+                } catch (Throwable t) {
                     displayExportResult(ExportResult.JSON_ENCODE_FAILED);
                     return;
                 }
-                if (result.isError() || result.result().isEmpty())
-                {
+                if (result.isError() || result.result().isEmpty()) {
                     displayExportResult(ExportResult.JSON_ENCODE_FAILED);
                     return;
                 }
@@ -339,8 +293,7 @@ public final class ImportExportHandler
         }
     }
 
-    public static void displayExportResult(ExportResult result)
-    {
+    public static void displayExportResult(ExportResult result) {
         boolean success = result.isSuccess();
         DialogScreen.builder(success ? DialogScreen.Type.INFO : DialogScreen.Type.ERROR)
                 .withTitle(success ? TITLE_EXPORT_SUCCESS : TITLE_EXPORT_ERROR)
@@ -349,15 +302,13 @@ public final class ImportExportHandler
         // TODO: mark as unmodified on success
     }
 
-    public boolean isWaitingForExportResult()
-    {
+    public boolean isWaitingForExportResult() {
         boolean waiting = waitingForExportResult;
         waitingForExportResult = false;
         return waiting;
     }
 
-    public enum ImportError
-    {
+    public enum ImportError {
         PARSE_FAILED,
         DECODE_FAILED,
         VALIDATE_FAILED,
@@ -366,14 +317,12 @@ public final class ImportExportHandler
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final Component dialogMessage = Utils.translate("msg", "circuit_workbench.library_browser.import_action.failed." + name);
 
-        public Component getDialogMessage()
-        {
+        public Component getDialogMessage() {
             return dialogMessage;
         }
     }
 
-    public enum ExportResult
-    {
+    public enum ExportResult {
         SUCCESS,
         ITEM_SERVER_ERROR,
         LIBRARY_SERVER_ERROR,
@@ -383,21 +332,19 @@ public final class ImportExportHandler
         private final String name = toString().toLowerCase(Locale.ROOT);
         private final Component dialogMessage = Utils.translate("msg", "circuit_workbench.library_browser.export_action.result." + name);
 
-        boolean isSuccess()
-        {
+        boolean isSuccess() {
             return this == SUCCESS;
         }
 
-        public Component getDialogMessage()
-        {
+        public Component getDialogMessage() {
             return dialogMessage;
         }
 
-        public static ExportResult ofServerResponse(boolean success, ExportTarget target)
-        {
-            if (success) return SUCCESS;
-            return switch (target)
-            {
+        public static ExportResult ofServerResponse(boolean success, ExportTarget target) {
+            if (success) {
+                return SUCCESS;
+            }
+            return switch (target) {
                 case CIRCUIT_ITEM -> ITEM_SERVER_ERROR;
                 case LIBRARY -> LIBRARY_SERVER_ERROR;
                 case JSON_IN_CLIPBOARD -> throw new UnsupportedOperationException();

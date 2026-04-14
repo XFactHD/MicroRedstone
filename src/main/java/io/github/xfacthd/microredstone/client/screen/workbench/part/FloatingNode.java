@@ -9,12 +9,9 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
-public sealed interface FloatingNode
-{
-    static FloatingNode of(PlaceableNode node, @Nullable NodePos lastPos)
-    {
-        return switch (node)
-        {
+public sealed interface FloatingNode {
+    static FloatingNode of(PlaceableNode node, @Nullable NodePos lastPos) {
+        return switch (node) {
             case PrototypeNode proto -> new Part(proto, lastPos, proto.getRotation());
             case Connection con -> new EdgeConnection(con, lastPos, con.getRotation());
             default -> throw new IllegalArgumentException("Invalid node: " + node);
@@ -23,13 +20,11 @@ public sealed interface FloatingNode
 
     PlaceableNode node();
 
-    @Nullable
-    NodePos lastPos();
+    @Nullable NodePos lastPos();
 
     int rotation();
 
-    default FloatingNode rotate(int offset)
-    {
+    default FloatingNode rotate(int offset) {
         return withRotation(Mth.positiveModulo(rotation() + offset, 4));
     }
 
@@ -39,36 +34,28 @@ public sealed interface FloatingNode
 
     void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY);
 
-    record Part(PrototypeNode node, @Nullable NodePos lastPos, int rotation) implements FloatingNode
-    {
+    record Part(PrototypeNode node, @Nullable NodePos lastPos, int rotation) implements FloatingNode {
         @Override
-        public FloatingNode withRotation(int rotation)
-        {
+        public FloatingNode withRotation(int rotation) {
             return new Part(node, lastPos, rotation);
         }
 
         @Override
-        public boolean canPlaceAt(CircuitCanvas canvas, NodePos pos)
-        {
+        public boolean canPlaceAt(CircuitCanvas canvas, NodePos pos) {
             return pos.equals(lastPos) || !canvas.isNodeOccupied(pos);
         }
 
         @Override
-        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY)
-        {
+        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY) {
             boolean posMatches = pos.equals(lastPos);
             PartSetMode mode = null;
             // Dragging a node doesn't actually remove it from the grid -> no action required if pos and rotation match
-            if (rotation != node.getRotation() || !posMatches)
-            {
+            if (rotation != node.getRotation() || !posMatches) {
                 PartGrid partGrid = canvas.getPartGrid();
                 mode = posMatches ? PartSetMode.ROTATE : PartSetMode.MOVE;
-                if (lastPos != null)
-                {
+                if (lastPos != null) {
                     partGrid.setPartNode(lastPos, null, 0, mode);
-                }
-                else
-                {
+                } else {
                     mode = PartSetMode.ADD;
                 }
                 partGrid.setPartNode(pos, node, rotation, mode);
@@ -77,28 +64,25 @@ public sealed interface FloatingNode
         }
     }
 
-    record EdgeConnection(Connection node, @Nullable NodePos lastPos, int rotation) implements FloatingNode
-    {
+    record EdgeConnection(Connection node, @Nullable NodePos lastPos, int rotation) implements FloatingNode {
         @Override
-        public FloatingNode withRotation(int rotation)
-        {
+        public FloatingNode withRotation(int rotation) {
             return new EdgeConnection(node, lastPos, rotation);
         }
 
         @Override
-        public boolean canPlaceAt(CircuitCanvas canvas, NodePos pos)
-        {
-            if (!pos.equals(lastPos) && canvas.isNodeOccupied(pos)) return false;
-
-            @Nullable Connection[] connections = canvas.getRootNode().getConnections();
-            Connection existing = connections[Port.ofPartRotation(rotation).ordinal()];
-            if (existing != null && existing != node)
-            {
+        public boolean canPlaceAt(CircuitCanvas canvas, NodePos pos) {
+            if (!pos.equals(lastPos) && canvas.isNodeOccupied(pos)) {
                 return false;
             }
 
-            return switch (rotation)
-            {
+            @Nullable Connection[] connections = canvas.getRootNode().getConnections();
+            Connection existing = connections[Port.ofPartRotation(rotation).ordinal()];
+            if (existing != null && existing != node) {
+                return false;
+            }
+
+            return switch (rotation) {
                 case 0 -> pos.x() == 0;
                 case 1 -> pos.y() == 0;
                 case 2 -> pos.x() == CircuitCanvas.PART_COUNT_X - 1;
@@ -108,27 +92,25 @@ public sealed interface FloatingNode
         }
 
         @Override
-        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY)
-        {
+        public void placeAt(CircuitCanvas canvas, NodePos pos, boolean revertToLast, int mouseX, int mouseY) {
             // Dragging a connection doesn't actually remove it from the grid -> no action required if pos and rotation match
-            if (pos.equals(lastPos) && node.getRotation() == rotation) return;
+            if (pos.equals(lastPos) && node.getRotation() == rotation) {
+                return;
+            }
 
             @Nullable Connection[] connections = canvas.getRootNode().getConnections();
             int placeRot = revertToLast ? node.getRotation() : rotation;
             Port prevPort = Port.ofPartRotation(node.getRotation());
             Port newPort = Port.ofPartRotation(placeRot);
-            if (lastPos != null)
-            {
-                if (newPort != prevPort)
-                {
+            if (lastPos != null) {
+                if (newPort != prevPort) {
                     connections[prevPort.ordinal()] = null;
                 }
                 canvas.getWireGrid().trimConnectedWires(lastPos, node);
                 node.connect(null);
             }
             node.setPos(pos, placeRot);
-            if (lastPos == null || newPort != prevPort)
-            {
+            if (lastPos == null || newPort != prevPort) {
                 connections[newPort.ordinal()] = node;
             }
         }

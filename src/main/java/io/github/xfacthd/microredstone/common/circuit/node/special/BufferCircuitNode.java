@@ -27,8 +27,7 @@ import java.util.Objects;
 /**
  * Special buffer node to use for safely evaluating circular dependencies
  */
-public final class BufferCircuitNode extends LeafCircuitNode
-{
+public final class BufferCircuitNode extends LeafCircuitNode {
     public static final MapCodec<BufferCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Connector.CODEC.fieldOf("input").forGetter(node -> node.getInputs()[0]),
             Connector.CODEC.fieldOf("output").forGetter(node -> node.getOutputs()[0])
@@ -44,21 +43,18 @@ public final class BufferCircuitNode extends LeafCircuitNode
     private final int inputWire;
     private final int outputWire;
 
-    public BufferCircuitNode(Connector input, Connector output)
-    {
+    public BufferCircuitNode(Connector input, Connector output) {
         super(List.of(input), List.of(output));
         this.inputWire = input.wire();
         this.outputWire = output.wire();
     }
 
     @Override
-    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
-    {
+    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) {
         context.copyState(inputWire, outputWire);
     }
 
-    public void compileReadBack(CodeBuilder mthBody, ClassDesc selfType, FieldGetter fieldGetter, LocalWireMapper localWires)
-    {
+    public void compileReadBack(CodeBuilder mthBody, ClassDesc selfType, FieldGetter fieldGetter, LocalWireMapper localWires) {
         String stateField = fieldGetter.buffer(this);
 
         mthBody.aload(0); // this
@@ -66,8 +62,7 @@ public final class BufferCircuitNode extends LeafCircuitNode
         localWires.generateStore(outputWire);
     }
 
-    public void compileCapture(CodeBuilder mthBody, ClassDesc selfType, FieldGetter fieldGetter, LocalWireMapper localWires)
-    {
+    public void compileCapture(CodeBuilder mthBody, ClassDesc selfType, FieldGetter fieldGetter, LocalWireMapper localWires) {
         String stateField = fieldGetter.buffer(this);
 
         mthBody.aload(0); // this
@@ -75,45 +70,42 @@ public final class BufferCircuitNode extends LeafCircuitNode
         mthBody.putfield(selfType, stateField, ConstantDescs.CD_short);
     }
 
-    public int getInputWire()
-    {
+    public int getInputWire() {
         return inputWire;
     }
 
-    public int getOutputWire()
-    {
+    public int getOutputWire() {
         return outputWire;
     }
 
     @Override
-    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
-    {
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount) {
         return true;
     }
 
     @Override
-    public PrototypeNode disassemble()
-    {
+    public PrototypeNode disassemble() {
         return new BufferPrototypeNode(getInputs()[0].type());
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
-    {
+    public CircuitNodeType<? extends CircuitNode> type() {
         return MRContent.NODE_TYPE_BUFFER.value();
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (!(obj instanceof BufferCircuitNode other)) return false;
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof BufferCircuitNode other)) {
+            return false;
+        }
         return other.inputWire == inputWire && other.outputWire == outputWire;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(inputWire, outputWire);
     }
 }

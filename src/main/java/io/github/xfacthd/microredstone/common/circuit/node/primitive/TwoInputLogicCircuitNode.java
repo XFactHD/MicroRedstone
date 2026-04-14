@@ -23,8 +23,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
-public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
-{
+public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode {
     public static final MapCodec<TwoInputLogicCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             PrimitivePrototypeNode.Type.CODEC.fieldOf("function").forGetter(node -> node.type),
             Codec.BOOL.fieldOf("multi_bit").forGetter(TwoInputLogicCircuitNode::isMultiBit),
@@ -50,8 +49,7 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
     private final boolean invertResult;
     private final int inversionMask;
 
-    public TwoInputLogicCircuitNode(PrimitivePrototypeNode.Type type, boolean multiBit, List<Connector> inputs, Connector output)
-    {
+    public TwoInputLogicCircuitNode(PrimitivePrototypeNode.Type type, boolean multiBit, List<Connector> inputs, Connector output) {
         super(inputs, List.of(output));
         this.type = type;
         this.inputOneWire = inputs.get(0).wire();
@@ -62,77 +60,69 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
-    {
+    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) {
         short inputOne = context.loadInput(inputOneWire);
         short inputTwo = context.loadInput(inputTwoWire);
-        int output = switch (type)
-        {
+        int output = switch (type) {
             case AND, NAND -> inputOne & inputTwo;
             case OR, NOR -> inputOne | inputTwo;
             case XOR, XNOR -> inputOne ^ inputTwo;
             default -> throw new UnsupportedOperationException("Invalid logic op: " + type);
         };
-        if (invertResult)
-        {
+        if (invertResult) {
             output ^= inversionMask;
         }
         context.storeOutput(outputWire, (short) output);
     }
 
     @Override
-    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
-    {
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires) {
         localWires.generateLoad(inputOneWire);
         localWires.generateLoad(inputTwoWire);
-        switch (type)
-        {
+        switch (type) {
             case AND, NAND -> mthBody.iand();
             case OR, NOR -> mthBody.ior();
             case XOR, XNOR -> mthBody.ixor();
             default -> throw new UnsupportedOperationException("Invalid logic op: " + type);
         }
-        if (invertResult)
-        {
+        if (invertResult) {
             mthBody.loadConstant(inversionMask)
                     .ixor();
         }
         localWires.generateStore(outputWire);
     }
 
-    public PrimitivePrototypeNode.Type getType()
-    {
+    public PrimitivePrototypeNode.Type getType() {
         return type;
     }
 
     @Override
-    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
-    {
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount) {
         return true;
     }
 
     @Override
-    public PrototypeNode disassemble()
-    {
+    public PrototypeNode disassemble() {
         return new PrimitivePrototypeNode(type, 2, isMultiBit() ? WireType.BUNDLED : WireType.SINGLE);
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
-    {
+    public CircuitNodeType<? extends CircuitNode> type() {
         return MRContent.NODE_TYPE_LOGIC_TWO_INPUT.value();
     }
 
-    private boolean isMultiBit()
-    {
+    private boolean isMultiBit() {
         return inversionMask != 0x1;
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (!(obj instanceof TwoInputLogicCircuitNode other)) return false;
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof TwoInputLogicCircuitNode other)) {
+            return false;
+        }
         return other.type == type &&
                 other.inputOneWire == inputOneWire &&
                 other.inputTwoWire == inputTwoWire &&
@@ -142,8 +132,7 @@ public final class TwoInputLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(type, inputOneWire, inputTwoWire, outputWire, invertResult, inversionMask);
     }
 }

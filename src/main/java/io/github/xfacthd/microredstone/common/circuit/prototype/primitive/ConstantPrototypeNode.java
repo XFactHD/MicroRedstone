@@ -24,8 +24,7 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import java.util.List;
 import java.util.Map;
 
-public final class ConstantPrototypeNode extends PrototypeNode
-{
+public final class ConstantPrototypeNode extends PrototypeNode {
     private static final PortConfig PORTS_SINGLE = PortConfig.builder()
             .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
             .build();
@@ -40,64 +39,53 @@ public final class ConstantPrototypeNode extends PrototypeNode
     private final WireType wireType;
     private int value = 0;
 
-    public ConstantPrototypeNode(WireType wireType)
-    {
+    public ConstantPrototypeNode(WireType wireType) {
         super(wireType.select(PORTS_SINGLE, PORTS_BUNDLED), wireType.select(ICON_SINGLE, ICON_BUNDLED));
         this.wireType = wireType;
     }
 
-    private ConstantPrototypeNode(WireType wireType, int value)
-    {
+    private ConstantPrototypeNode(WireType wireType, int value) {
         this(wireType);
         this.value = value;
     }
 
-    public WireType getWireType()
-    {
+    public WireType getWireType() {
         return wireType;
     }
 
-    public int getValue()
-    {
+    public int getValue() {
         return value;
     }
 
-    public void setValue(int value)
-    {
+    public void setValue(int value) {
         this.value = value;
     }
 
     @Override
-    protected void validateInternal(CircuitErrorCollector errors)
-    {
+    protected void validateInternal(CircuitErrorCollector errors) {
         int maxValue = wireType.select(MAX_VAL_SINGLE, MAX_VAL_BUNDLED);
-        if (value < 0 || value > maxValue)
-        {
+        if (value < 0 || value > maxValue) {
             errors.submit(new NodeError.InvalidConstantValue(this, value));
         }
     }
 
     @Override
-    public CircuitNode assemble(WireMapper wireMapper)
-    {
+    public CircuitNode assemble(WireMapper wireMapper) {
         int outputWire = wireMapper.resolveWire(getWireOrThrow(Port.RIGHT));
         Connector output = new Connector(getPos(), Port.RIGHT, outputWire, PortDir.OUTPUT, wireType);
         return new ConstantCircuitNode((short) value, output);
     }
 
     @Override
-    public Serializable serialize(List<Wire> wires)
-    {
+    public Serializable serialize(List<Wire> wires) {
         return new Serializable(this, wires, wireType, value);
     }
 
-    public static IconConfig icon(ConstantCircuitNode node)
-    {
+    public static IconConfig icon(ConstantCircuitNode node) {
         return node.getOutputs()[0].type().select(ICON_SINGLE, ICON_BUNDLED);
     }
 
-    public static final class Serializable extends PrototypeNode.Serializable
-    {
+    public static final class Serializable extends PrototypeNode.Serializable {
         public static final MapCodec<Serializable> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 WireType.CODEC.fieldOf("wire_type").forGetter(node -> node.wireType),
                 Codec.INT.fieldOf("value").forGetter(node -> node.value)
@@ -106,29 +94,25 @@ public final class ConstantPrototypeNode extends PrototypeNode
         private final WireType wireType;
         private final int value;
 
-        private Serializable(PrototypeNode node, List<Wire> wires, WireType wireType, int value)
-        {
+        private Serializable(PrototypeNode node, List<Wire> wires, WireType wireType, int value) {
             super(node, wires);
             this.wireType = wireType;
             this.value = value;
         }
 
-        private Serializable(WireType wireType, int value, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
-        {
+        private Serializable(WireType wireType, int value, Map<Port, Integer> connectedWires, NodePos pos, int rotation) {
             super(connectedWires, pos, rotation);
             this.wireType = wireType;
             this.value = value;
         }
 
         @Override
-        protected PrototypeNode buildInternal()
-        {
+        protected PrototypeNode buildInternal() {
             return new ConstantPrototypeNode(wireType, value);
         }
 
         @Override
-        public ProtoNodeType<? extends PrototypeNode.Serializable> type()
-        {
+        public ProtoNodeType<? extends PrototypeNode.Serializable> type() {
             return MRContent.PROTO_TYPE_CONSTANT.value();
         }
     }

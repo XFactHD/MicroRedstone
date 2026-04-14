@@ -14,8 +14,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public final class Connection implements PlaceableNode
-{
+public final class Connection implements PlaceableNode {
     public static final IconConfig ICON_SINGLE_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_single"), false);
     private static final IconConfig ICON_SINGLE_OUT = new IconConfig(Utils.rl("part/connection_out"), Utils.rl("port/right_single"), false);
     public static final IconConfig ICON_BUNDLED_IN = new IconConfig(Utils.rl("part/connection_in"), Utils.rl("port/right_bundled"), false);
@@ -29,127 +28,103 @@ public final class Connection implements PlaceableNode
     private Wire wire;
     private String name = "";
 
-    public Connection(WireType wireType)
-    {
+    public Connection(WireType wireType) {
         this.wireType = wireType;
     }
 
-    public void connect(@Nullable Wire wire)
-    {
+    public void connect(@Nullable Wire wire) {
         this.wire = wire;
     }
 
-    public void setPos(NodePos pos, int rotation)
-    {
+    public void setPos(NodePos pos, int rotation) {
         this.pos = pos;
         this.rotation = rotation;
     }
 
-    public void setPortDir(PortDir portDir)
-    {
+    public void setPortDir(PortDir portDir) {
         this.portDir = portDir;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
     @Override
-    public NodePos getPos()
-    {
+    public NodePos getPos() {
         return pos;
     }
 
     @Override
-    public int getRotation()
-    {
+    public int getRotation() {
         return rotation;
     }
 
     @Override
-    public IconConfig getIcon()
-    {
-        return switch (portDir)
-        {
+    public IconConfig getIcon() {
+        return switch (portDir) {
             case INPUT -> wireType.select(ICON_SINGLE_IN, ICON_BUNDLED_IN);
             case OUTPUT -> wireType.select(ICON_SINGLE_OUT, ICON_BUNDLED_OUT);
         };
     }
 
     @Override
-    public boolean hasPort(Port port, @Nullable WireType wireType)
-    {
+    public boolean hasPort(Port port, @Nullable WireType wireType) {
         return port.rotate(-rotation) == Port.RIGHT && (wireType == null || wireType == this.wireType);
     }
 
     @Override
-    public boolean isConnected(Port port)
-    {
+    public boolean isConnected(Port port) {
         return hasPort(port, wireType) && wire != null;
     }
 
-    public void removeWire(Wire wire)
-    {
-        if (this.wire == wire)
-        {
+    public void removeWire(Wire wire) {
+        if (this.wire == wire) {
             this.wire = null;
         }
     }
 
-    public PortDir getPortDir()
-    {
+    public PortDir getPortDir() {
         return portDir;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public WireType getWireType()
-    {
+    public WireType getWireType() {
         return wireType;
     }
 
-    public Wire getWire()
-    {
+    public Wire getWire() {
         return Objects.requireNonNull(wire);
     }
 
-    public boolean validate(CircuitErrorCollector errors)
-    {
-        if (wire == null)
-        {
+    public boolean validate(CircuitErrorCollector errors) {
+        if (wire == null) {
             errors.submit(new NodeError.DanglingConnection(this));
             return false;
         }
-        if (wire.getWireType() != wireType)
-        {
+        if (wire.getWireType() != wireType) {
             errors.submit(new NodeError.MismatchedConnection(this, Port.RIGHT, wireType, wire.getWireType()));
         }
         return true;
     }
 
-    public Connector toConnector(Port port, WireMapper wireMapper)
-    {
+    public Connector toConnector(Port port, WireMapper wireMapper) {
         int resolveWire = wireMapper.resolveWire(Objects.requireNonNull(wire));
         return new Connector(pos, port, resolveWire, portDir, wireType, name);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Connector[dir=" + portDir + ",type=" + wireType + ",desc=" + name + "]";
     }
 
-    public Serializable serialize(Port port, List<Wire> wires)
-    {
+    public Serializable serialize(Port port, List<Wire> wires) {
         return new Serializable(port, wireType, portDir, pos, rotation, wire != null ? wires.indexOf(wire) : -1, name);
     }
 
-    public record Serializable(Port port, WireType wireType, PortDir dir, NodePos pos, int rotation, int wireIdx, String name)
-    {
+    public record Serializable(Port port, WireType wireType, PortDir dir, NodePos pos, int rotation, int wireIdx, String name) {
         public static final Codec<Serializable> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                 Port.CODEC.fieldOf("port").forGetter(Serializable::port),
                 WireType.CODEC.fieldOf("type").forGetter(Serializable::wireType),
@@ -160,8 +135,7 @@ public final class Connection implements PlaceableNode
                 Codec.STRING.optionalFieldOf("name", "").forGetter(Serializable::name)
         ).apply(inst, Serializable::new));
 
-        public Connection build(List<Wire> wires)
-        {
+        public Connection build(List<Wire> wires) {
             Wire wire = Objects.requireNonNull(wires.get(wireIdx));
             Connection connection = new Connection(wireType);
             connection.pos = pos;

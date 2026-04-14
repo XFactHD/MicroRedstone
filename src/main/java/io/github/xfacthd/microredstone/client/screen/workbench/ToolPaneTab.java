@@ -5,8 +5,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
 
-public enum ToolPaneTab
-{
+public enum ToolPaneTab {
     PARTS,
     TOOLS,
     LIBRARY,
@@ -18,8 +17,7 @@ public enum ToolPaneTab
 
     private final Component title = Utils.translate("label", "circuit_workbench.tab." + toString().toLowerCase(Locale.ROOT));
 
-    public Component getTitle()
-    {
+    public Component getTitle() {
         return title;
     }
 }

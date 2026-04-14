@@ -15,8 +15,7 @@ import net.minecraft.util.ExtraCodecs;
  * @param external The wire index in the surrounding circuit node
  * @param internal The wire index in the nested circuit node
  */
-public record WirePair(int external, int internal)
-{
+public record WirePair(int external, int internal) {
     public static final Codec<WirePair> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("external").forGetter(WirePair::external),
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("internal").forGetter(WirePair::internal)

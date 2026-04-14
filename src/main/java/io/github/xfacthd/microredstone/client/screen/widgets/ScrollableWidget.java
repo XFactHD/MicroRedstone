@@ -4,20 +4,17 @@ import io.github.xfacthd.microredstone.client.screen.widgets.menu.ContextMenuPro
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
-public abstract class ScrollableWidget
-{
+public abstract class ScrollableWidget {
     private static final int SCROLL_SPEED = 10;
     protected static final int SCROLLER_HANDLE_HEIGHT = 27;
 
     private int scrollOffset = 0;
     private boolean dragging = false;
 
-    public final void scroll(double yDiff)
-    {
+    public final void scroll(double yDiff) {
         int innerHeight = getInnerHeight();
         int entriesHeight = getEntriesHeight();
-        if (entriesHeight <= innerHeight)
-        {
+        if (entriesHeight <= innerHeight) {
             scrollOffset = 0;
             return;
         }
@@ -26,12 +23,10 @@ public abstract class ScrollableWidget
         scrollOffset = Mth.clamp(scrollOffset + offset, 0, entriesHeight - innerHeight);
     }
 
-    public final void dragScrollBar(double mouseY)
-    {
+    public final void dragScrollBar(double mouseY) {
         int innerHeight = getInnerHeight();
         int entriesHeight = getEntriesHeight();
-        if (entriesHeight <= innerHeight)
-        {
+        if (entriesHeight <= innerHeight) {
             scrollOffset = 0;
             return;
         }
@@ -41,23 +36,19 @@ public abstract class ScrollableWidget
         scrollOffset = (int) Mth.clamp(offset * maxOffset, 0, maxOffset);
     }
 
-    public final int getScrollOffset()
-    {
+    public final int getScrollOffset() {
         return scrollOffset;
     }
 
-    public final void resetScrollOffset()
-    {
+    public final void resetScrollOffset() {
         this.scrollOffset = 0;
     }
 
-    public final void setDragging(boolean dragging)
-    {
+    public final void setDragging(boolean dragging) {
         this.dragging = dragging;
     }
 
-    public final boolean isDragging()
-    {
+    public final boolean isDragging() {
         return dragging;
     }
 
@@ -77,9 +68,7 @@ public abstract class ScrollableWidget
 
     public abstract boolean isMouseOverScrollBar(double mouseX, double mouseY);
 
-    @Nullable
-    public ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY)
-    {
+    public @Nullable ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY) {
         return null;
     }
 }

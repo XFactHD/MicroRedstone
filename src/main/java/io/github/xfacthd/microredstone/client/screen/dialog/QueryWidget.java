@@ -6,8 +6,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
-public interface QueryWidget
-{
+public interface QueryWidget {
     Component label();
 
     void setupWidget(Font font, int x, int y, int maxWidth, Consumer<AbstractWidget> widgetAdder);

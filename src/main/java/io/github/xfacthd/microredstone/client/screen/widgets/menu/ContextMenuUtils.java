@@ -7,20 +7,18 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class ContextMenuUtils
-{
+public final class ContextMenuUtils {
     private static final DyeColor[] COLORS = DyeColor.values();
 
-    public static void makeDyeColorMenu(ContextMenuBuilder menuBuilder, Consumer<DyeColor> setter, Supplier<DyeColor> getter)
-    {
+    public static void makeDyeColorMenu(ContextMenuBuilder menuBuilder, Consumer<DyeColor> setter, Supplier<DyeColor> getter) {
         makeDyeColorMenu(menuBuilder, setter, getter, Set.of());
     }
 
-    public static void makeDyeColorMenu(ContextMenuBuilder menuBuilder, Consumer<DyeColor> setter, Supplier<DyeColor> getter, Set<DyeColor> excluded)
-    {
-        for (DyeColor color : COLORS)
-        {
-            if (excluded.contains(color)) continue;
+    public static void makeDyeColorMenu(ContextMenuBuilder menuBuilder, Consumer<DyeColor> setter, Supplier<DyeColor> getter, Set<DyeColor> excluded) {
+        for (DyeColor color : COLORS) {
+            if (excluded.contains(color)) {
+                continue;
+            }
 
             menuBuilder.addActionEntry(ColorNames.getName(color), entry -> entry
                     .withAction(() -> setter.accept(color))
@@ -29,5 +27,5 @@ public final class ContextMenuUtils
         }
     }
 
-    private ContextMenuUtils() {}
+    private ContextMenuUtils() { }
 }

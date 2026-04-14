@@ -20,8 +20,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public record StoredCircuit(@Nullable CompoundCircuitNode rootNode) implements TooltipProvider
-{
+public record StoredCircuit(@Nullable CompoundCircuitNode rootNode) implements TooltipProvider {
     public static final Codec<StoredCircuit> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             CompoundCircuitNode.CODEC.codec().optionalFieldOf("root_node").forGetter(StoredCircuit::rootNodeForSerialization)
     ).apply(inst, StoredCircuit::of));
@@ -33,34 +32,26 @@ public record StoredCircuit(@Nullable CompoundCircuitNode rootNode) implements T
     public static final StoredCircuit EMPTY = new StoredCircuit(null);
     public static final String LABEL_CIRCUIT = Utils.translationKey("label", "stored_circuit");
 
-    private static StoredCircuit of(Optional<CompoundCircuitNode> rootNode)
-    {
+    private static StoredCircuit of(Optional<CompoundCircuitNode> rootNode) {
         return new StoredCircuit(rootNode.orElse(null));
     }
 
-    @SuppressWarnings("NullableProblems")
-    private Optional<CompoundCircuitNode> rootNodeForSerialization()
-    {
+    private Optional<CompoundCircuitNode> rootNodeForSerialization() {
         return Optional.ofNullable(rootNode);
     }
 
-    @Nullable
-    public Circuit toCircuit()
-    {
+    public @Nullable Circuit toCircuit() {
         return rootNode != null ? new Circuit(rootNode) : null;
     }
 
     @Override
-    public void addToTooltip(Item.TooltipContext context, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter)
-    {
-        if (rootNode != null)
-        {
+    public void addToTooltip(Item.TooltipContext context, Consumer<Component> tooltipAdder, TooltipFlag flag, DataComponentGetter componentGetter) {
+        if (rootNode != null) {
             tooltipAdder.accept(Component.translatable(LABEL_CIRCUIT, rootNode.getName()));
         }
     }
 
-    public static boolean isPresent(ItemStack stack)
-    {
+    public static boolean isPresent(ItemStack stack) {
         StoredCircuit circuit = stack.get(MRContent.DC_TYPE_CIRCUIT);
         return circuit != null && !circuit.equals(EMPTY);
     }

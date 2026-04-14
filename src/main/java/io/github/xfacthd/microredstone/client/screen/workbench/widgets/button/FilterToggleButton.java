@@ -13,8 +13,7 @@ import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
-public final class FilterToggleButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ShareType>
-{
+public final class FilterToggleButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ShareType> {
     public static final int SIZE = 16;
     private static final int ICON_OFFSET = 2;
     private static final int ICON_SIZE = SIZE - ICON_OFFSET * 2;
@@ -26,8 +25,7 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     private final PartsList owner;
     private final ShareType filter;
 
-    public FilterToggleButton(PartsList owner, ShareType filter)
-    {
+    public FilterToggleButton(PartsList owner, ShareType filter) {
         super(0, 0, SIZE, SIZE, filter.getTitle());
         this.owner = owner;
         this.filter = filter;
@@ -35,39 +33,33 @@ public final class FilterToggleButton extends SimpleButton implements DropFocusA
     }
 
     @Override
-    protected void extractForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    protected void extractForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         int iconX = getX() + ICON_OFFSET;
         int iconY = getY() + ICON_OFFSET;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, filter.getIcon(), iconX, iconY, ICON_SIZE, ICON_SIZE);
     }
 
-    private boolean isEnabled()
-    {
+    private boolean isEnabled() {
         return WorkbenchConfig.INSTANCE.isImportFilterEnabled(filter);
     }
 
     @Override
-    protected WidgetSprites getSprites()
-    {
+    protected WidgetSprites getSprites() {
         return isEnabled() ? SPRITES_ON : SPRITES_OFF;
     }
 
     @Override
-    public void onPress(InputWithModifiers input)
-    {
+    public void onPress(InputWithModifiers input) {
         owner.setFilter(filter, Minecraft.getInstance().hasShiftDown());
     }
 
-    public void updateTooltip()
-    {
+    public void updateTooltip() {
         String key = isEnabled() ? TOOLTIP_ON : TOOLTIP_OFF;
         setTooltip(Tooltip.create(Component.translatable(key, filter.getTitle())));
     }
 
     @Override
-    public ShareType getAction()
-    {
+    public ShareType getAction() {
         return filter;
     }
 }

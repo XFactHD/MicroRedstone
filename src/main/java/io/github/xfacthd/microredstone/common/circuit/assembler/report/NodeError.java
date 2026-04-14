@@ -14,40 +14,32 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Set;
 
-public sealed interface NodeError extends CircuitError
-{
+public sealed interface NodeError extends CircuitError {
     PlaceableNode node();
 
-    sealed interface PortError extends NodeError
-    {
+    sealed interface PortError extends NodeError {
         Port port();
     }
 
-    non-sealed interface TypeSpecificError extends NodeError {}
+    non-sealed interface TypeSpecificError extends NodeError { }
 
-    record DirectCycle(PrototypeNode node) implements NodeError
-    {
+    record DirectCycle(PrototypeNode node) implements NodeError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("Immediate cyclic connection on " + node);
         }
     }
 
-    record IndirectCycle(Set<PrototypeNode> nodes) implements NodeError
-    {
+    record IndirectCycle(Set<PrototypeNode> nodes) implements NodeError {
         @Override
-        public PrototypeNode node()
-        {
+        public PrototypeNode node() {
             return nodes.iterator().next();
         }
 
         @Override
-        public Component description()
-        {
+        public Component description() {
             StringBuilder builder = new StringBuilder();
-            for (PrototypeNode node : nodes)
-            {
+            for (PrototypeNode node : nodes) {
                 builder.append(node).append("->");
             }
             builder.append(nodes.iterator().next());
@@ -55,74 +47,58 @@ public sealed interface NodeError extends CircuitError
         }
     }
 
-    record UnknownWires(PrototypeNode node, Set<Wire> wires) implements NodeError
-    {
+    record UnknownWires(PrototypeNode node, Set<Wire> wires) implements NodeError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("PrototypeNode " + node + " is connected to unknown wires " + wires);
         }
     }
 
-    record UnexpectedConnection(PrototypeNode node, Port port) implements PortError
-    {
+    record UnexpectedConnection(PrototypeNode node, Port port) implements PortError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("PrototypeNode " + node + " has unexpected connection on port " + port);
         }
     }
 
-    record MissingConnection(PrototypeNode node, Port port, PortDir dir) implements PortError
-    {
+    record MissingConnection(PrototypeNode node, Port port, PortDir dir) implements PortError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("PrototypeNode " + node + " is missing " + dir + " connection on port " + port);
         }
     }
 
-    record MismatchedConnection(PlaceableNode node, Port port, WireType portType, WireType wireType) implements PortError
-    {
+    record MismatchedConnection(PlaceableNode node, Port port, WireType portType, WireType wireType) implements PortError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("PrototypeNode " + node + " has wire with incorrect type " + wireType + " connected on port " + port + " , expected type " + portType);
         }
     }
 
-    record DanglingConnection(Connection node) implements NodeError
-    {
+    record DanglingConnection(Connection node) implements NodeError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("Connection " + node + " is unconnected");
         }
     }
 
-    record InvalidClockPeriod(ClockPrototypeNode node, int halfPeriod) implements TypeSpecificError
-    {
+    record InvalidClockPeriod(ClockPrototypeNode node, int halfPeriod) implements TypeSpecificError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("ClockPrototypeNode " + node + " has invalid period: " + (halfPeriod * 2));
         }
     }
 
-    record InvalidConstantValue(ConstantPrototypeNode node, int value) implements TypeSpecificError
-    {
+    record InvalidConstantValue(ConstantPrototypeNode node, int value) implements TypeSpecificError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("ConstantPrototypeNode " + node + " has invalid value: " + value);
         }
     }
 
-    record InvalidConverterBit(ConverterPrototypeNode node, int bitIndex) implements TypeSpecificError
-    {
+    record InvalidConverterBit(ConverterPrototypeNode node, int bitIndex) implements TypeSpecificError {
         @Override
-        public Component description()
-        {
+        public Component description() {
             return Component.literal("ConverterPrototypeNode " + node + " has invalid bit index: " + bitIndex);
         }
     }

@@ -6,8 +6,7 @@ import io.github.xfacthd.microredstone.common.circuit.node.NodePos;
 import io.github.xfacthd.microredstone.common.circuit.prototype.spec.IconConfig;
 import org.jspecify.annotations.Nullable;
 
-public interface PlaceableNode
-{
+public interface PlaceableNode {
     NodePos getPos();
 
     int getRotation();
@@ -18,8 +17,7 @@ public interface PlaceableNode
 
     boolean isConnected(Port port);
 
-    default NodePos nudgePlacementPos(CircuitCanvasAccess canvas, NodePos newPos, int newRotation, int mouseX, int mouseY)
-    {
+    default NodePos nudgePlacementPos(CircuitCanvasAccess canvas, NodePos newPos, int newRotation, int mouseX, int mouseY) {
         return newPos;
     }
 }

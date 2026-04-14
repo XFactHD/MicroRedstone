@@ -18,36 +18,31 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.function.Consumer;
 
-public final class ConstantPartNodeContextMenuProvider extends PartNodeContextMenuProvider<ConstantPrototypeNode>
-{
+public final class ConstantPartNodeContextMenuProvider extends PartNodeContextMenuProvider<ConstantPrototypeNode> {
     public static final Component ENTRY_SET_VALUE = Utils.translate("label", "circuit_workbench.canvas.menu.node.constant.set_value");
     public static final Component TITLE_SET_VALUE = Utils.translate("title", "circuit_workbench.canvas.node.constant.set_value");
     public static final Component LABEL_SET_VALUE = Utils.translate("label", "circuit_workbench.canvas.node.constant.set_value.query");
     public static final Component TOOLTIP_INVALID_VALUE_SINGLE = Utils.translate("tooltip", "circuit_workbench.canvas.node.constant.set_value.invalid_value.single");
     public static final Component TOOLTIP_INVALID_VALUE_BUNDLED = Utils.translate("tooltip", "circuit_workbench.canvas.node.constant.set_value.invalid_value.bundled");
 
-    public ConstantPartNodeContextMenuProvider(CircuitCanvas canvas, ConstantPrototypeNode node)
-    {
+    public ConstantPartNodeContextMenuProvider(CircuitCanvas canvas, ConstantPrototypeNode node) {
         super(canvas, node);
     }
 
     @Override
-    public void fillRootMenu(ContextMenuBuilder menuBuilder)
-    {
+    public void fillRootMenu(ContextMenuBuilder menuBuilder) {
         menuBuilder.addActionEntry(ENTRY_SET_VALUE, this::openValueConfigDialog);
         super.fillRootMenu(menuBuilder);
     }
 
-    private void openValueConfigDialog()
-    {
+    private void openValueConfigDialog() {
         DialogScreen.builder(DialogScreen.Type.QUERY)
                 .withTitle(TITLE_SET_VALUE)
                 .withQueryWidget(new ConstantQueryWidget(node))
                 .show();
     }
 
-    private static final class ConstantQueryWidget implements QueryWidget
-    {
+    private static final class ConstantQueryWidget implements QueryWidget {
         private static final int EDIT_BOX_WIDTH = 120;
         private static final int EDIT_BOX_HEIGHT = 20;
         private static final NumberEditBox.ParserConfig PARSER_CONFIG_SINGLE = new NumberEditBox.ParserConfig(
@@ -58,8 +53,7 @@ public final class ConstantPartNodeContextMenuProvider extends PartNodeContextMe
         );
         private static final NumberEditBox.ParserConfig PARSER_CONFIG_BUNDLED = new NumberEditBox.ParserConfig(
                 value -> value >= 0 && value <= 65_535,
-                Util.make(() ->
-                {
+                Util.make(() -> {
                     Reference2IntMap<NumberEditBox.NumberFormat> formats = new Reference2IntOpenHashMap<>();
                     formats.put(NumberEditBox.NumberFormat.HEX, 4);
                     formats.put(NumberEditBox.NumberFormat.BIN, 16);
@@ -73,20 +67,17 @@ public final class ConstantPartNodeContextMenuProvider extends PartNodeContextMe
         @UnknownNullability
         private NumberEditBox editBox = null;
 
-        public ConstantQueryWidget(ConstantPrototypeNode node)
-        {
+        public ConstantQueryWidget(ConstantPrototypeNode node) {
             this.node = node;
         }
 
         @Override
-        public Component label()
-        {
+        public Component label() {
             return LABEL_SET_VALUE;
         }
 
         @Override
-        public void setupWidget(Font font, int x, int y, int maxWidth, Consumer<AbstractWidget> widgetAdder)
-        {
+        public void setupWidget(Font font, int x, int y, int maxWidth, Consumer<AbstractWidget> widgetAdder) {
             int width = Math.min(EDIT_BOX_WIDTH, maxWidth);
             NumberEditBox.ParserConfig parserConfig = node.getWireType().select(PARSER_CONFIG_SINGLE, PARSER_CONFIG_BUNDLED);
             editBox = new NumberEditBox(font, x, y, width, EDIT_BOX_HEIGHT, parserConfig, editBox, node.getValue());
@@ -94,14 +85,12 @@ public final class ConstantPartNodeContextMenuProvider extends PartNodeContextMe
         }
 
         @Override
-        public boolean isInputValid()
-        {
+        public boolean isInputValid() {
             return editBox.isInputValid();
         }
 
         @Override
-        public void saveQueryResult()
-        {
+        public void saveQueryResult() {
             node.setValue(editBox.getIntValue());
         }
     }

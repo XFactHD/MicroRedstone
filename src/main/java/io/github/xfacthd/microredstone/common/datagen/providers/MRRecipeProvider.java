@@ -11,16 +11,13 @@ import net.neoforged.neoforge.common.Tags;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class MRRecipeProvider extends RecipeProvider
-{
-    private MRRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
-    {
+public final class MRRecipeProvider extends RecipeProvider {
+    private MRRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
         super(registries, output);
     }
 
     @Override
-    protected void buildRecipes()
-    {
+    protected void buildRecipes() {
         shaped(RecipeCategory.REDSTONE, MRContent.BLOCK_MICROCHIP.value(), 4)
                 .pattern("SRS")
                 .pattern("RGR")
@@ -50,22 +47,18 @@ public final class MRRecipeProvider extends RecipeProvider
                 .save(output);
     }
 
-    public static final class Runner extends RecipeProvider.Runner
-    {
-        public Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries)
-        {
+    public static final class Runner extends RecipeProvider.Runner {
+        public Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
             super(packOutput, registries);
         }
 
         @Override
-        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output)
-        {
+        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
             return new MRRecipeProvider(registries, output);
         }
 
         @Override
-        public String getName()
-        {
+        public String getName() {
             return "Recipes - MicroRedstone";
         }
     }

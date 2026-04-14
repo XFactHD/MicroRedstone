@@ -18,8 +18,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
-public final class NodeListWidget extends ScrollableWidget
-{
+public final class NodeListWidget extends ScrollableWidget {
     private static final Identifier BACKGROUND = Utils.rl("node_list_background");
     private static final Identifier BUTTON = Utils.rl("minecraft", "widget/button");
     private static final Identifier BUTTON_HOVER = Utils.rl("minecraft", "widget/button_highlighted");
@@ -49,15 +48,13 @@ public final class NodeListWidget extends ScrollableWidget
     private int innerY;
     private int innerHeight;
 
-    public NodeListWidget(CircuitWorkbenchScreen owner, IntSupplier entryCount, IntFunction<Entry> entryGetter)
-    {
+    public NodeListWidget(CircuitWorkbenchScreen owner, IntSupplier entryCount, IntFunction<Entry> entryGetter) {
         this.owner = owner;
         this.entryCount = entryCount;
         this.entryGetter = entryGetter;
     }
 
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         int minX = listX;
         int maxX = minX + ENTRY_WIDTH;
         int minY = innerY;
@@ -72,11 +69,9 @@ public final class NodeListWidget extends ScrollableWidget
         graphics.enableScissor(minX, minY, maxX, maxY);
 
         int count = entryCount.getAsInt();
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             int y = minY + i * ENTRY_HEIGHT - getScrollOffset();
-            if (y + ENTRY_HEIGHT < minY || y > maxY)
-            {
+            if (y + ENTRY_HEIGHT < minY || y > maxY) {
                 continue;
             }
 
@@ -92,18 +87,14 @@ public final class NodeListWidget extends ScrollableWidget
             int nameY = y + ENTRY_NAME_OFF_Y;
             Component subTitle = entry.subTitle();
             ActiveTextCollector textCollector = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.NONE);
-            if (subTitle != null)
-            {
+            if (subTitle != null) {
                 graphics.drawScrollingString(textCollector, owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY - 6);
                 graphics.drawScrollingString(textCollector, owner.getFont(), subTitle, nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY + 5);
-            }
-            else
-            {
+            } else {
                 graphics.drawScrollingString(textCollector, owner.getFont(), entry.title(), nameX, maxX - ENTRY_NAME_BORDER_RIGHT, nameY);
             }
 
-            if (hovered)
-            {
+            if (hovered) {
                 graphics.requestCursor(CursorTypes.POINTING_HAND);
             }
         }
@@ -111,94 +102,85 @@ public final class NodeListWidget extends ScrollableWidget
         graphics.disableScissor();
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, scrollbarX, minY - 1, SCROLLER_BG_WIDTH, innerHeight + 2);
-        if (canScroll)
-        {
+        if (canScroll) {
             float scrollFactor = (float) getScrollOffset() / (entriesHeight - innerHeight);
             int scrollerY = minY + (int) (scrollFactor * (innerHeight - SCROLLER_HANDLE_HEIGHT));
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_HANDLE, innerScrollbarX, scrollerY, SCROLLER_HANDLE_WIDTH, SCROLLER_HANDLE_HEIGHT);
         }
 
-        if (isDragging())
-        {
+        if (isDragging()) {
             graphics.requestCursor(CursorTypes.RESIZE_NS);
-        }
-        else if (isMouseOverScrollBar(mouseX, mouseY))
-        {
+        } else if (isMouseOverScrollBar(mouseX, mouseY)) {
             graphics.requestCursor(CursorTypes.POINTING_HAND);
         }
     }
 
     @Override
-    public boolean isMouseOver(double mouseX, double mouseY)
-    {
-        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) {
+            return false;
+        }
         return mouseX >= listX && mouseX < (listX + FULL_INNER_WIDTH);
     }
 
     @Override
-    public boolean isMouseOverList(double mouseX, double mouseY)
-    {
-        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
+    public boolean isMouseOverList(double mouseX, double mouseY) {
+        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) {
+            return false;
+        }
         return mouseX >= listX && mouseX < (listX + NodeListWidget.INNER_WIDTH);
     }
 
     @Override
-    public boolean isMouseOverScrollBar(double mouseX, double mouseY)
-    {
-        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) return false;
+    public boolean isMouseOverScrollBar(double mouseX, double mouseY) {
+        if (mouseY < innerY || mouseY >= (innerY + innerHeight)) {
+            return false;
+        }
         return mouseX >= innerScrollbarX && mouseX < (innerScrollbarX + SCROLLER_HANDLE_WIDTH);
     }
 
     @Override
-    public int getInnerX()
-    {
+    public int getInnerX() {
         return listX;
     }
 
     @Override
-    public int getInnerY()
-    {
+    public int getInnerY() {
         return innerY;
     }
 
     @Override
-    public int getInnerWidth()
-    {
+    public int getInnerWidth() {
         return FULL_INNER_WIDTH;
     }
 
     @Override
-    public int getInnerHeight()
-    {
+    public int getInnerHeight() {
         return innerHeight;
     }
 
     @Override
-    protected int getEntriesHeight()
-    {
+    protected int getEntriesHeight() {
         return entryCount.getAsInt() * ENTRY_HEIGHT;
     }
 
     @Override
-    @Nullable
-    public ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY)
-    {
+    public @Nullable ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY) {
         return getClickedEntryIdx(mouseY, idx -> entryGetter.apply(idx).getContextMenuProvider(owner));
     }
 
-    @Nullable
-    public <T> T getClickedEntryIdx(double mouseY, IntFunction<@Nullable T> resultFactory)
-    {
+    public <T> @Nullable T getClickedEntryIdx(double mouseY, IntFunction<@Nullable T> resultFactory) {
         int relY = (int) (mouseY - innerY + getScrollOffset());
-        if (relY < 0) return null;
+        if (relY < 0) {
+            return null;
+        }
 
         int idx = relY / NodeListWidget.ENTRY_HEIGHT;
         int count = entryCount.getAsInt();
         return idx < count ? resultFactory.apply(idx) : null;
     }
 
-    public void computeLayout(int height, int paneX, int paneY)
-    {
+    public void computeLayout(int height, int paneX, int paneY) {
         this.innerHeight = height - (BORDER * 2);
         scrollbarX = paneX + WIDTH - BORDER + 1;
         listX = paneX + BORDER;
@@ -206,20 +188,16 @@ public final class NodeListWidget extends ScrollableWidget
         innerY = paneY + BORDER;
     }
 
-    public interface Entry
-    {
+    public interface Entry {
         IconConfig icon();
 
         Component title();
 
-        @Nullable
-        Component subTitle();
+        @Nullable Component subTitle();
 
         PlaceableNode instantiate();
 
-        @Nullable
-        default ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner)
-        {
+        default @Nullable ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner) {
             return null;
         }
     }

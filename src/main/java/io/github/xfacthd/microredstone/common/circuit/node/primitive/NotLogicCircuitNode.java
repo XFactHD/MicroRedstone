@@ -23,8 +23,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
-public final class NotLogicCircuitNode extends PrimitiveCircuitNode
-{
+public final class NotLogicCircuitNode extends PrimitiveCircuitNode {
     public static final MapCodec<NotLogicCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Codec.BOOL.fieldOf("multi_bit").forGetter(NotLogicCircuitNode::isMultiBit),
             Connector.CODEC.fieldOf("input").forGetter(node -> node.getInputs()[0]),
@@ -44,8 +43,7 @@ public final class NotLogicCircuitNode extends PrimitiveCircuitNode
     private final int outputWire;
     private final int inversionMask;
 
-    public NotLogicCircuitNode(boolean multiBit, Connector input, Connector output)
-    {
+    public NotLogicCircuitNode(boolean multiBit, Connector input, Connector output) {
         super(List.of(input), List.of(output));
         this.inputWire = input.wire();
         this.outputWire = output.wire();
@@ -53,15 +51,13 @@ public final class NotLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
-    {
+    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) {
         short input = context.loadInput(inputWire);
         context.storeOutput(outputWire, (short) (input ^ inversionMask));
     }
 
     @Override
-    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
-    {
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires) {
         localWires.generateLoad(inputWire);
         mthBody.loadConstant(inversionMask)
                 .ixor();
@@ -69,39 +65,37 @@ public final class NotLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
-    {
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount) {
         return true;
     }
 
     @Override
-    public PrototypeNode disassemble()
-    {
+    public PrototypeNode disassemble() {
         return new PrimitivePrototypeNode(PrimitivePrototypeNode.Type.NOT, 1, isMultiBit() ? WireType.BUNDLED : WireType.SINGLE);
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
-    {
+    public CircuitNodeType<? extends CircuitNode> type() {
         return MRContent.NODE_TYPE_LOGIC_NOT.value();
     }
 
-    private boolean isMultiBit()
-    {
+    private boolean isMultiBit() {
         return inversionMask != 0x1;
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (!(obj instanceof NotLogicCircuitNode other)) return false;
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof NotLogicCircuitNode other)) {
+            return false;
+        }
         return other.inputWire == inputWire && other.outputWire == outputWire && other.inversionMask == inversionMask;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(inputWire, outputWire, inversionMask);
     }
 }

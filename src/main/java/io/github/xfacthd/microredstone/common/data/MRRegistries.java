@@ -10,26 +10,23 @@ import net.neoforged.neoforge.registries.RegistryBuilder;
 
 import java.util.function.Consumer;
 
-public final class MRRegistries
-{
+public final class MRRegistries {
     public static final Registry<CircuitNodeType<?>> CIRCUIT_NODE_TYPES = create(
             ResourceKey.createRegistryKey(Utils.rl("circuit_node_types")),
             builder -> builder.sync(true)
     );
     public static final Registry<ProtoNodeType<?>> PROTO_NODE_TYPES = create(
             ResourceKey.createRegistryKey(Utils.rl("proto_node_types")),
-            builder -> {}
+            _ -> { }
     );
 
-    private static <T> Registry<T> create(ResourceKey<Registry<T>> key, Consumer<RegistryBuilder<T>> consumer)
-    {
+    private static <T> Registry<T> create(ResourceKey<Registry<T>> key, Consumer<RegistryBuilder<T>> consumer) {
         RegistryBuilder<T> builder = new RegistryBuilder<>(key);
         consumer.accept(builder);
         return builder.create();
     }
 
-    public static void onRegisterNewRegistries(final NewRegistryEvent event)
-    {
+    public static void onRegisterNewRegistries(final NewRegistryEvent event) {
         event.register(CIRCUIT_NODE_TYPES);
         event.register(PROTO_NODE_TYPES);
     }

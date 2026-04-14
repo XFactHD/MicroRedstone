@@ -13,8 +13,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
-public final class MicrochipMenu extends AbstractContainerMenu
-{
+public final class MicrochipMenu extends AbstractContainerMenu {
     private static final int CIRCUIT_SLOT_X = 80;
     private static final int CIRCUIT_SLOT_Y = 35;
     private static final int INVENTORY_X = 8;
@@ -24,20 +23,17 @@ public final class MicrochipMenu extends AbstractContainerMenu
     private final ContainerLevelAccess levelAccess;
     private final Slot circuitSlot;
 
-    public static MicrochipMenu createServer(int containerId, Inventory inventory, MicrochipBlockEntity blockEntity)
-    {
+    public static MicrochipMenu createServer(int containerId, Inventory inventory, MicrochipBlockEntity blockEntity) {
         Level level = Objects.requireNonNull(blockEntity.getLevel());
         ContainerLevelAccess levelAccess = ContainerLevelAccess.create(level, blockEntity.getBlockPos());
         return new MicrochipMenu(containerId, inventory, levelAccess, CircuitSlotFactory.server(blockEntity));
     }
 
-    public static MicrochipMenu createClient(int containerId, Inventory inventory)
-    {
+    public static MicrochipMenu createClient(int containerId, Inventory inventory) {
         return new MicrochipMenu(containerId, inventory, ContainerLevelAccess.NULL, CircuitSlotFactory.CLIENT);
     }
 
-    private MicrochipMenu(int containerId, Inventory inventory, ContainerLevelAccess levelAccess, CircuitSlotFactory circuitSlotFactory)
-    {
+    private MicrochipMenu(int containerId, Inventory inventory, ContainerLevelAccess levelAccess, CircuitSlotFactory circuitSlotFactory) {
         super(MRContent.MENU_TYPE_MICROCHIP.value(), containerId);
         this.levelAccess = levelAccess;
         this.circuitSlot = addSlot(circuitSlotFactory.create(CIRCUIT_SLOT_X, CIRCUIT_SLOT_Y));
@@ -45,32 +41,23 @@ public final class MicrochipMenu extends AbstractContainerMenu
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index)
-    {
+    public ItemStack quickMoveStack(Player player, int index) {
         ItemStack remainder = ItemStack.EMPTY;
         Slot slot = slots.get(index);
-        if (slot.hasItem())
-        {
+        if (slot.hasItem()) {
             ItemStack stack = slot.getItem();
             remainder = stack.copy();
-            if (index < CIRCUIT_SLOT_COUNT)
-            {
-                if (!moveItemStackTo(stack, CIRCUIT_SLOT_COUNT, slots.size(), true))
-                {
+            if (index < CIRCUIT_SLOT_COUNT) {
+                if (!moveItemStackTo(stack, CIRCUIT_SLOT_COUNT, slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            }
-            else if (!moveItemStackTo(stack, 0, CIRCUIT_SLOT_COUNT, false))
-            {
+            } else if (!moveItemStackTo(stack, 0, CIRCUIT_SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
 
-            if (stack.isEmpty())
-            {
+            if (stack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
-            }
-            else
-            {
+            } else {
                 slot.setChanged();
             }
         }
@@ -78,24 +65,20 @@ public final class MicrochipMenu extends AbstractContainerMenu
         return remainder;
     }
 
-    public Slot getCircuitSlot()
-    {
+    public Slot getCircuitSlot() {
         return circuitSlot;
     }
 
     @Override
-    public boolean stillValid(Player player)
-    {
+    public boolean stillValid(Player player) {
         return stillValid(levelAccess, player, MRContent.BLOCK_MICROCHIP.value());
     }
 
     @FunctionalInterface
-    private interface CircuitSlotFactory
-    {
+    private interface CircuitSlotFactory {
         CircuitSlotFactory CLIENT = (x, y) -> new Slot(new SingleItemContainer(), 0, x, y);
 
-        static CircuitSlotFactory server(MicrochipBlockEntity blockEntity)
-        {
+        static CircuitSlotFactory server(MicrochipBlockEntity blockEntity) {
             return (x, y) -> new CircuitSlot(blockEntity, x, y);
         }
 

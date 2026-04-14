@@ -17,8 +17,7 @@ import net.minecraft.util.FormattedCharSequence;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFocusAfterClick
-{
+final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFocusAfterClick {
     private static final int HEIGHT = 14;
     private static final long HOVER_OPEN_DELAY = 500;
     private static final int HOR_PADDING = 3;
@@ -41,47 +40,39 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
     private boolean wasHovered = false;
     private long hoverStart = -1;
 
-    static MenuEntryButton create(ContextMenu owner, Component text, Optional<Component> keybindHint, Runnable task, Optional<BooleanSupplier> stateSupplier)
-    {
+    static MenuEntryButton create(ContextMenu owner, Component text, Optional<Component> keybindHint, Runnable task, Optional<BooleanSupplier> stateSupplier) {
         return create(owner, text, keybindHint, new TaskAction(task, stateSupplier));
     }
 
-    static MenuEntryButton create(ContextMenu owner, Component text, SubMenuKey subMenuKey)
-    {
+    static MenuEntryButton create(ContextMenu owner, Component text, SubMenuKey subMenuKey) {
         return create(owner, text, Optional.empty(), new SubMenuAction(subMenuKey));
     }
 
-    private static MenuEntryButton create(ContextMenu owner, Component text, Optional<Component> keyHint, Action action)
-    {
+    private static MenuEntryButton create(ContextMenu owner, Component text, Optional<Component> keyHint, Action action) {
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(text);
         int availableWidth = ContextMenu.MAX_WIDTH - HOR_PADDING * 2;
         int paddedExtraWidth = 0;
         int markerWidth = 0;
-        if (action.hasMarker())
-        {
+        if (action.hasMarker()) {
             markerWidth = font.width(action.getMarker());
             paddedExtraWidth = markerWidth;
         }
         int keyHintWidth = 0;
-        if (keyHint.isPresent())
-        {
+        if (keyHint.isPresent()) {
             keyHintWidth = font.width(keyHint.get());
             paddedExtraWidth += keyHintWidth;
-            if (action.hasMarker())
-            {
+            if (action.hasMarker()) {
                 paddedExtraWidth += HOR_PADDING;
             }
         }
-        if (paddedExtraWidth > 0)
-        {
+        if (paddedExtraWidth > 0) {
             paddedExtraWidth += MARKER_PADDING;
         }
         availableWidth -= paddedExtraWidth;
         FormattedText buttonTitle = text;
         boolean ellipsized = false;
-        if (textWidth > availableWidth)
-        {
+        if (textWidth > availableWidth) {
             buttonTitle = font.ellipsize(text, availableWidth);
             ellipsized = true;
         }
@@ -100,8 +91,7 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
             int markerWidth,
             int keyHintWidth,
             Font font
-    )
-    {
+    ) {
         super(0, 0, 0, HEIGHT, text);
         this.owner = owner;
         this.text = Language.getInstance().getVisualOrder(buttonTitle);
@@ -115,119 +105,97 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
     }
 
     @Override
-    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
-        if (isHoveredOrFocused())
-        {
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        if (isHoveredOrFocused()) {
             graphics.fill(getX(), getY(), getRight(), getBottom(), HIGHLIGHT_COLOR);
         }
         extractTitle(graphics, font, ARGB.color(alpha, active ? 0xFFFFFFFF : 0xFFA0A0A0));
         handleSubMenuState(mouseX, mouseY);
 
-        if (isHovered() && ellipsized)
-        {
+        if (isHovered() && ellipsized) {
             graphics.setTooltipForNextFrame(getMessage(), mouseX, mouseY);
         }
-        if (isHovered())
-        {
+        if (isHovered()) {
             graphics.requestCursor(isActive() ? CursorTypes.POINTING_HAND : CursorTypes.NOT_ALLOWED);
         }
     }
 
-    private void extractTitle(GuiGraphicsExtractor graphics, Font font, int color)
-    {
+    private void extractTitle(GuiGraphicsExtractor graphics, Font font, int color) {
         int textY = getY() + 3;
         graphics.text(font, text, getX() + HOR_PADDING, textY, color);
 
         int extraTextX = getRight();
-        if (action.hasMarker())
-        {
+        if (action.hasMarker()) {
             extraTextX -= HOR_PADDING + markerWidth;
-            if (action.isMarkerVisible())
-            {
+            if (action.isMarkerVisible()) {
                 graphics.text(font, action.getMarker(), extraTextX, textY, color);
             }
         }
-        if (keyHint.isPresent())
-        {
+        if (keyHint.isPresent()) {
             extraTextX -= HOR_PADDING + keyHintWidth;
             graphics.text(font, keyHint.get(), extraTextX, textY, color);
         }
     }
 
-    private void handleSubMenuState(int mouseX, int mouseY)
-    {
-        if (!(action instanceof SubMenuAction(SubMenuKey key))) return;
+    private void handleSubMenuState(int mouseX, int mouseY) {
+        if (!(action instanceof SubMenuAction(SubMenuKey key))) {
+            return;
+        }
 
         ContextMenu openMenu = owner.getOpenSubMenu(key);
-        if (isHovered && !wasHovered && openMenu == null)
-        {
+        if (isHovered && !wasHovered && openMenu == null) {
             wasHovered = true;
             hoverStart = System.currentTimeMillis();
-        }
-        else if (!isHovered || openMenu != null)
-        {
+        } else if (!isHovered || openMenu != null) {
             wasHovered = false;
             hoverStart = -1;
         }
-        if (hoverStart != -1 && System.currentTimeMillis() - hoverStart > HOVER_OPEN_DELAY)
-        {
+        if (hoverStart != -1 && System.currentTimeMillis() - hoverStart > HOVER_OPEN_DELAY) {
             openSubMenu(key);
-        }
-        else if (!isCursorCloseEnough(mouseX, mouseY) && openMenu != null && !openMenu.shouldKeepMenuOpen(mouseX, mouseY, false))
-        {
+        } else if (!isCursorCloseEnough(mouseX, mouseY) && openMenu != null && !openMenu.shouldKeepMenuOpen(mouseX, mouseY, false)) {
             // TODO: avoid closing the sub-menu when moving the cursor diagonally from the button into the sub-menu
             openMenu.close();
         }
     }
 
-    private boolean isCursorCloseEnough(int mouseX, int mouseY)
-    {
+    private boolean isCursorCloseEnough(int mouseX, int mouseY) {
         return isHovered || (owner.isMouseOver(mouseX, mouseY) && isMouseOver(getX(), mouseY));
     }
 
     @Override
-    public void onPress(InputWithModifiers input)
-    {
+    public void onPress(InputWithModifiers input) {
         action.execute(this);
     }
 
-    private void openSubMenu(SubMenuKey subMenuKey)
-    {
+    private void openSubMenu(SubMenuKey subMenuKey) {
         owner.openSubMenu(subMenuKey, getX() - 1, getRight() + 1, getY() - 1);
     }
 
-    boolean opensSubMenuOn(ContextMenu menu)
-    {
+    boolean opensSubMenuOn(ContextMenu menu) {
         return owner == menu && action instanceof SubMenuAction;
     }
 
-    boolean opensSubMenu(SubMenuKey subMenuKey)
-    {
+    boolean opensSubMenu(SubMenuKey subMenuKey) {
         return action instanceof SubMenuAction(SubMenuKey key) && key == subMenuKey;
     }
 
     @Override
-    public void setLayout(int x, int y, int width)
-    {
+    public void setLayout(int x, int y, int width) {
         setPosition(x, y);
         setWidth(width);
     }
 
     @Override
-    public int getRequiredWidth()
-    {
+    public int getRequiredWidth() {
         return requiredWidth;
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput output)
-    {
+    protected void updateWidgetNarration(NarrationElementOutput output) {
         defaultButtonNarrationText(output);
     }
 
-    private sealed interface Action permits TaskAction, SubMenuAction
-    {
+    private sealed interface Action permits TaskAction, SubMenuAction {
         void execute(MenuEntryButton button);
 
         boolean isMarkerVisible();
@@ -237,57 +205,47 @@ final class MenuEntryButton extends AbstractButton implements MenuEntry, DropFoc
         Component getMarker();
     }
 
-    private record TaskAction(Runnable task, Optional<BooleanSupplier> stateSupplier) implements Action
-    {
+    private record TaskAction(Runnable task, Optional<BooleanSupplier> stateSupplier) implements Action {
         @Override
-        public void execute(MenuEntryButton button)
-        {
+        public void execute(MenuEntryButton button) {
             task.run();
             button.owner.getRoot().close();
         }
 
         @Override
-        public boolean isMarkerVisible()
-        {
+        public boolean isMarkerVisible() {
             return stateSupplier.isPresent() && stateSupplier.get().getAsBoolean();
         }
 
         @Override
-        public boolean hasMarker()
-        {
+        public boolean hasMarker() {
             return stateSupplier.isPresent();
         }
 
         @Override
-        public Component getMarker()
-        {
+        public Component getMarker() {
             return SELECTION_MARKER;
         }
     }
 
-    private record SubMenuAction(SubMenuKey key) implements Action
-    {
+    private record SubMenuAction(SubMenuKey key) implements Action {
         @Override
-        public void execute(MenuEntryButton button)
-        {
+        public void execute(MenuEntryButton button) {
             button.openSubMenu(key);
         }
 
         @Override
-        public boolean isMarkerVisible()
-        {
+        public boolean isMarkerVisible() {
             return true;
         }
 
         @Override
-        public boolean hasMarker()
-        {
+        public boolean hasMarker() {
             return true;
         }
 
         @Override
-        public Component getMarker()
-        {
+        public Component getMarker() {
             return SUB_MENU_ARROW;
         }
     }

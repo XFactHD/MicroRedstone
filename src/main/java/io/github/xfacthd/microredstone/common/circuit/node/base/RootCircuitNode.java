@@ -10,21 +10,17 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-public non-sealed abstract class RootCircuitNode extends CircuitNode
-{
-    protected RootCircuitNode(List<Connector> inputs, List<Connector> outputs)
-    {
+public non-sealed abstract class RootCircuitNode extends CircuitNode {
+    protected RootCircuitNode(List<Connector> inputs, List<Connector> outputs) {
         super(inputs, outputs);
     }
 
-    protected RootCircuitNode(Connector[] inputs, Connector[] outputs)
-    {
+    protected RootCircuitNode(Connector[] inputs, Connector[] outputs) {
         super(inputs, outputs);
     }
 
     @Override
-    public final void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
-    {
+    public final void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) {
         evaluate(context, inputs, outputs, null);
     }
 

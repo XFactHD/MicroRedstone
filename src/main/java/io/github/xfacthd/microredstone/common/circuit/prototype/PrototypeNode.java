@@ -25,8 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class PrototypeNode implements PlaceableNode
-{
+public abstract class PrototypeNode implements PlaceableNode {
     private static final Port[] PORTS = Port.values();
 
     protected final PortConfig portConfig;
@@ -36,99 +35,76 @@ public abstract class PrototypeNode implements PlaceableNode
     private NodePos pos = new NodePos(0, 0);
     private int rotation = 0;
 
-    protected PrototypeNode(PortConfig portConfig, @Nullable IconConfig icon)
-    {
+    protected PrototypeNode(PortConfig portConfig, @Nullable IconConfig icon) {
         this.portConfig = portConfig;
         this.icon = icon;
     }
 
-    public final void setPos(NodePos pos)
-    {
+    public final void setPos(NodePos pos) {
         this.pos = pos;
     }
 
-    public final void setRotation(int rotation)
-    {
+    public final void setRotation(int rotation) {
         this.rotation = rotation;
     }
 
-    public final void setConnection(Port port, Wire wire, boolean connect)
-    {
+    public final void setConnection(Port port, Wire wire, boolean connect) {
         Port portNorm = port.rotate(-rotation);
-        if (portConfig.hasPort(portNorm, wire.getWireType()))
-        {
-            if (connect)
-            {
+        if (portConfig.hasPort(portNorm, wire.getWireType())) {
+            if (connect) {
                 connectedWires.put(portNorm, wire);
-            }
-            else
-            {
+            } else {
                 connectedWires.remove(portNorm);
             }
         }
     }
 
     @Override
-    public final boolean hasPort(Port port, @Nullable WireType wireType)
-    {
+    public final boolean hasPort(Port port, @Nullable WireType wireType) {
         return portConfig.hasPort(port.rotate(-rotation), wireType);
     }
 
     @Override
-    public final boolean isConnected(Port port)
-    {
+    public final boolean isConnected(Port port) {
         return isConnectedNormalized(port.rotate(-rotation));
     }
 
-    protected final boolean isConnectedNormalized(Port port)
-    {
+    protected final boolean isConnectedNormalized(Port port) {
         return connectedWires.containsKey(port);
     }
 
-    public final Wire getWireOrThrow(Port port)
-    {
+    public final Wire getWireOrThrow(Port port) {
         return Objects.requireNonNull(connectedWires.get(port));
     }
 
-    @Nullable
-    public final Wire getWireOptional(Port port)
-    {
+    public final @Nullable Wire getWireOptional(Port port) {
         return connectedWires.get(port);
     }
 
-    public final void replaceWire(Wire oldWire, Wire newWire)
-    {
+    public final void replaceWire(Wire oldWire, Wire newWire) {
         connectedWires.replaceAll((port, wire) -> wire == oldWire ? newWire : wire);
     }
 
-    public final void removeConnectedWire(Wire wire)
-    {
+    public final void removeConnectedWire(Wire wire) {
         connectedWires.values().removeIf(mapWire -> mapWire == wire);
     }
 
-    public final void clearWires()
-    {
+    public final void clearWires() {
         connectedWires.clear();
     }
 
-    public final void validate(CircuitErrorCollector errors)
-    {
-        for (Port port : PORTS)
-        {
+    public final void validate(CircuitErrorCollector errors) {
+        for (Port port : PORTS) {
             boolean hasPort = portConfig.hasPort(port);
             boolean connected = isConnectedNormalized(port);
-            if (!hasPort)
-            {
-                if (connected)
-                {
+            if (!hasPort) {
+                if (connected) {
                     errors.submit(new NodeError.UnexpectedConnection(this, port));
                 }
                 continue;
             }
-            if (!connected)
-            {
-                if (portConfig.isRequired(this, port))
-                {
+            if (!connected) {
+                if (portConfig.isRequired(this, port)) {
                     PortDir portDir = Objects.requireNonNull(portConfig.getPortDir(port));
                     errors.submit(new NodeError.MissingConnection(this, port, portDir));
                 }
@@ -136,60 +112,52 @@ public abstract class PrototypeNode implements PlaceableNode
             }
             Wire wire = getWireOrThrow(port);
             WireType portType = Objects.requireNonNull(portConfig.getPortType(port));
-            if (wire.getWireType() != portType)
-            {
+            if (wire.getWireType() != portType) {
                 errors.submit(new NodeError.MismatchedConnection(this, port, portType, wire.getWireType()));
             }
         }
         validateInternal(errors);
     }
 
-    protected void validateInternal(CircuitErrorCollector errors) {}
+    protected void validateInternal(CircuitErrorCollector errors) { }
 
-    @Nullable
-    public abstract CircuitNode assemble(WireMapper wireMapper);
+    public abstract @Nullable CircuitNode assemble(WireMapper wireMapper);
 
     @Override
-    public final NodePos getPos()
-    {
+    public final NodePos getPos() {
         return pos;
     }
 
     @Override
-    public final int getRotation()
-    {
+    public final int getRotation() {
         return rotation;
     }
 
     @Override
-    public final IconConfig getIcon()
-    {
+    public final IconConfig getIcon() {
         return Objects.requireNonNull(icon);
     }
 
-    public final Set<Wire> getConnectedWires()
-    {
+    public final Set<Wire> getConnectedWires() {
         return Set.copyOf(connectedWires.values());
     }
 
-    public final Set<Wire> getConnectedWires(PortDir dir)
-    {
+    public final Set<Wire> getConnectedWires(PortDir dir) {
         return portConfig.getPortsWithDir(dir)
                 .map(connectedWires::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
-    public void performPostPlaceAction(CircuitCanvasAccess canvas, int mouseX, int mouseY, @Nullable PartSetMode mode, boolean revertToLast) {}
+    public void performPostPlaceAction(CircuitCanvasAccess canvas, int mouseX, int mouseY, @Nullable PartSetMode mode, boolean revertToLast) { }
 
-    public void performPreRemoveAction(CircuitCanvasAccess canvas) {}
+    public void performPreRemoveAction(CircuitCanvasAccess canvas) { }
 
     public abstract Serializable serialize(List<Wire> wires);
 
-    public void finishDeserialization(List<PrototypeNode> nodes) {}
+    public void finishDeserialization(List<PrototypeNode> nodes) { }
 
-    public abstract static class Serializable
-    {
+    public abstract static class Serializable {
         public static final Codec<Serializable> CODEC = MRRegistries.PROTO_NODE_TYPES.byNameCodec()
                 .dispatch(PrototypeNode.Serializable::type, ProtoNodeType::codec);
 
@@ -197,14 +165,11 @@ public abstract class PrototypeNode implements PlaceableNode
         final NodePos pos;
         final int rotation;
 
-        protected Serializable(PrototypeNode node, List<Wire> wires)
-        {
+        protected Serializable(PrototypeNode node, List<Wire> wires) {
             this.connectedWires = new EnumMap<>(Port.class);
-            node.connectedWires.forEach((port, wire) ->
-            {
+            node.connectedWires.forEach((port, wire) -> {
                 int wireIdx = wires.indexOf(wire);
-                if (wireIdx >= 0)
-                {
+                if (wireIdx >= 0) {
                     connectedWires.put(port, wireIdx);
                 }
             });
@@ -212,21 +177,17 @@ public abstract class PrototypeNode implements PlaceableNode
             this.rotation = node.getRotation();
         }
 
-        protected Serializable(Map<Port, Integer> connectedWires, NodePos pos, int rotation)
-        {
+        protected Serializable(Map<Port, Integer> connectedWires, NodePos pos, int rotation) {
             this.connectedWires = connectedWires;
             this.pos = pos;
             this.rotation = rotation;
         }
 
-        public final PrototypeNode build(List<Wire> wires)
-        {
+        public final PrototypeNode build(List<Wire> wires) {
             PrototypeNode node = buildInternal();
-            connectedWires.forEach((port, wireIdx) ->
-            {
+            connectedWires.forEach((port, wireIdx) -> {
                 Wire wire = wires.get(wireIdx);
-                if (wire != null)
-                {
+                if (wire != null) {
                     node.setConnection(port, wire, true);
                 }
             });
@@ -241,8 +202,7 @@ public abstract class PrototypeNode implements PlaceableNode
 
         protected static <T extends Serializable> Products.P3<RecordCodecBuilder.Mu<T>, Map<Port, Integer>, NodePos, Integer> commonFields(
                 RecordCodecBuilder.Instance<T> inst
-        )
-        {
+        ) {
             return inst.group(
                     Codec.unboundedMap(Port.CODEC, Codec.INT).fieldOf("connected_wires").forGetter(node -> node.connectedWires),
                     NodePos.CODEC.fieldOf("pos").forGetter(node -> node.pos),

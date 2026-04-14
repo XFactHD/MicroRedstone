@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-public final class ContextMenu extends SimpleTransientContainerWidget
-{
+public final class ContextMenu extends SimpleTransientContainerWidget {
     private static final Identifier BACKGROUND = Utils.rl("context_menu_background");
     static final int HIGHLIGHT_COLOR = CommonColors.LIGHT_GRAY;
     static final int MIN_WIDTH = 70;
@@ -42,14 +41,12 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     private int lastMouseX = -1;
     private int lastMouseY = -1;
 
-    public ContextMenu(Screen owner)
-    {
+    public ContextMenu(Screen owner) {
         this.owner = owner;
         this.superMenu = null;
     }
 
-    private ContextMenu(ContextMenu superMenu)
-    {
+    private ContextMenu(ContextMenu superMenu) {
         this.owner = superMenu.owner;
         this.superMenu = superMenu;
         this.activeProvider = superMenu.activeProvider;
@@ -57,14 +54,13 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
-        if (!open) return;
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        if (!open) {
+            return;
+        }
 
-        if (superMenu == null && (mouseX != lastMouseX || mouseY != lastMouseY))
-        {
-            if (isMouseOver(mouseX, mouseY))
-            {
+        if (superMenu == null && (mouseX != lastMouseX || mouseY != lastMouseY)) {
+            if (isMouseOver(mouseX, mouseY)) {
                 resetFocusOnMouseMove(mouseX, mouseY);
             }
             lastMouseX = mouseX;
@@ -73,35 +69,27 @@ public final class ContextMenu extends SimpleTransientContainerWidget
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, x, y, width, height);
 
-        for (Renderable renderable : renderables)
-        {
+        for (Renderable renderable : renderables) {
             renderable.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
-        if (openSubMenu != null)
-        {
+        if (openSubMenu != null) {
             openSubMenu.menu.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
     }
 
-    private void resetFocusOnMouseMove(int mouseX, int mouseY)
-    {
-        if (getFocused() instanceof ContextMenu menu)
-        {
+    private void resetFocusOnMouseMove(int mouseX, int mouseY) {
+        if (getFocused() instanceof ContextMenu menu) {
             menu.resetFocusOnMouseMove(mouseX, mouseY);
-        }
-        else if (getFocused() instanceof MenuEntryButton button && !button.isMouseOver(mouseX, mouseY))
-        {
+        } else if (getFocused() instanceof MenuEntryButton button && !button.isMouseOver(mouseX, mouseY)) {
             setFocused(null);
         }
     }
 
-    public boolean open(int mouseX, int mouseY, ContextMenuProvider provider)
-    {
+    public boolean open(int mouseX, int mouseY, ContextMenuProvider provider) {
         ContextMenuBuilderImpl menuBuilder = new ContextMenuBuilderImpl(this, mouseX, OptionalInt.empty(), mouseY);
         provider.fillRootMenu(menuBuilder);
         menuBuilder.build();
-        if (!entries.isEmpty())
-        {
+        if (!entries.isEmpty()) {
             activeProvider = provider;
             open = true;
             lastMouseX = mouseX;
@@ -113,10 +101,8 @@ public final class ContextMenu extends SimpleTransientContainerWidget
         return false;
     }
 
-    void openSubMenu(SubMenuKey subMenuKey, int leftX, int rightX, int y)
-    {
-        if (openSubMenu != null)
-        {
+    void openSubMenu(SubMenuKey subMenuKey, int leftX, int rightX, int y) {
+        if (openSubMenu != null) {
             openSubMenu.menu.close();
         }
 
@@ -124,22 +110,18 @@ public final class ContextMenu extends SimpleTransientContainerWidget
         ContextMenuBuilderImpl menuBuilder = new ContextMenuBuilderImpl(menu, rightX, OptionalInt.of(leftX), y);
         activeProvider.fillSubMenu(menuBuilder, subMenuKey);
         menuBuilder.build();
-        if (!menu.entries.isEmpty())
-        {
+        if (!menu.entries.isEmpty()) {
             openSubMenu = new OpenSubMenu(subMenuKey, menu);
             setFocused(menu);
         }
     }
 
-    public void close()
-    {
-        if (openSubMenu != null)
-        {
+    public void close() {
+        if (openSubMenu != null) {
             openSubMenu.menu.close();
         }
         reset();
-        if (superMenu != null)
-        {
+        if (superMenu != null) {
             OpenSubMenu subMenu = superMenu.openSubMenu;
             Preconditions.checkState(subMenu != null && subMenu.menu == this);
             superMenu.openSubMenu = null;
@@ -147,8 +129,7 @@ public final class ContextMenu extends SimpleTransientContainerWidget
         }
     }
 
-    private void reset()
-    {
+    private void reset() {
         open = false;
         activeProvider = DummyProvider.INSTANCE;
         entries.clear();
@@ -157,27 +138,28 @@ public final class ContextMenu extends SimpleTransientContainerWidget
         lastMouseY = -1;
     }
 
-    ContextMenu getRoot()
-    {
+    ContextMenu getRoot() {
         return superMenu != null ? superMenu.getRoot() : this;
     }
 
-    @Nullable
-    ContextMenu getOpenSubMenu(SubMenuKey key)
-    {
+    @Nullable ContextMenu getOpenSubMenu(SubMenuKey key) {
         return openSubMenu != null && openSubMenu.subMenuKey == key ? openSubMenu.menu : null;
     }
 
-    public boolean shouldKeepMenuOpen(int mouseX, int mouseY, boolean fromMouseClick)
-    {
-        if (superMenu == null && !fromMouseClick) return true;
-        if (superMenu != null && getFocused() != null && !fromMouseClick) return true;
-        if (isMouseOver(mouseX, mouseY)) return true;
+    public boolean shouldKeepMenuOpen(int mouseX, int mouseY, boolean fromMouseClick) {
+        if (superMenu == null && !fromMouseClick) {
+            return true;
+        }
+        if (superMenu != null && getFocused() != null && !fromMouseClick) {
+            return true;
+        }
+        if (isMouseOver(mouseX, mouseY)) {
+            return true;
+        }
         return openSubMenu != null && openSubMenu.menu.shouldKeepMenuOpen(mouseX, mouseY, fromMouseClick);
     }
 
-    void setLayout(int x, int y, int width, int height)
-    {
+    void setLayout(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -185,18 +167,14 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     }
 
     @Override
-    public List<? extends GuiEventListener> children()
-    {
+    public List<? extends GuiEventListener> children() {
         return entries;
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
-    {
-        if (super.mouseClicked(event, doubleClick))
-        {
-            if (getFocused() instanceof DropFocusAfterClick)
-            {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (super.mouseClicked(event, doubleClick)) {
+            if (getFocused() instanceof DropFocusAfterClick) {
                 setFocused(null);
             }
             return true;
@@ -205,10 +183,8 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
-        if (getFocused() instanceof ContextMenu menu)
-        {
+    public boolean keyPressed(KeyEvent event) {
+        if (getFocused() instanceof ContextMenu menu) {
             return menu.keyPressed(event);
         }
 
@@ -216,10 +192,8 @@ public final class ContextMenu extends SimpleTransientContainerWidget
         return arrow != null ? handleArrowKey(arrow) : super.keyPressed(event);
     }
 
-    private boolean handleArrowKey(ArrowKey.Direction arrow)
-    {
-        return switch (arrow)
-        {
+    private boolean handleArrowKey(ArrowKey.Direction arrow) {
+        return switch (arrow) {
             case UP -> focusNextButton(-1);
             case DOWN -> focusNextButton(1);
             case LEFT -> tryCloseSubMenu();
@@ -227,30 +201,23 @@ public final class ContextMenu extends SimpleTransientContainerWidget
         };
     }
 
-    private boolean focusNextButton(int offset)
-    {
-        if (getFocused() instanceof MenuEntryButton button && button.owner == this)
-        {
+    private boolean focusNextButton(int offset) {
+        if (getFocused() instanceof MenuEntryButton button && button.owner == this) {
             int idx = entries.indexOf(button);
             int nextIdx = Mth.positiveModulo(idx + offset, entries.size());
             setFocused(entries.get(nextIdx));
             return true;
-        }
-        else if (getFocused() == null)
-        {
+        } else if (getFocused() == null) {
             setFocused(offset > 0 ? entries.getFirst() : entries.getLast());
             return true;
         }
         return false;
     }
 
-    private boolean tryOpenSubMenu()
-    {
-        if (getFocused() instanceof MenuEntryButton button && button.opensSubMenuOn(this) && openSubMenu == null)
-        {
+    private boolean tryOpenSubMenu() {
+        if (getFocused() instanceof MenuEntryButton button && button.opensSubMenuOn(this) && openSubMenu == null) {
             button.onPress(new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_1, 0));
-            if (openSubMenu != null)
-            {
+            if (openSubMenu != null) {
                 MenuEntryButton first = openSubMenu.menu.entries.getFirst();
                 openSubMenu.menu.setFocused(first);
             }
@@ -259,10 +226,8 @@ public final class ContextMenu extends SimpleTransientContainerWidget
         return false;
     }
 
-    private boolean tryCloseSubMenu()
-    {
-        if (superMenu != null && superMenu.openSubMenu != null)
-        {
+    private boolean tryCloseSubMenu() {
+        if (superMenu != null && superMenu.openSubMenu != null) {
             SubMenuKey subMenuKey = superMenu.openSubMenu.subMenuKey;
             MenuEntryButton button = superMenu.entries
                     .stream()
@@ -276,25 +241,20 @@ public final class ContextMenu extends SimpleTransientContainerWidget
     }
 
     @Override
-    public boolean isMouseOver(double mouseX, double mouseY)
-    {
-        if (!open)
-        {
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        if (!open) {
             return false;
         }
-        if (mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height)
-        {
+        if (mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height) {
             return true;
         }
         return openSubMenu != null && openSubMenu.menu.isMouseOver(mouseX, mouseY);
     }
 
     @Override
-    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY)
-    {
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
         Optional<GuiEventListener> child = super.getChildAt(mouseX, mouseY);
-        if (child.isEmpty() && openSubMenu != null)
-        {
+        if (child.isEmpty() && openSubMenu != null) {
             child = openSubMenu.menu.getChildAt(mouseX, mouseY);
         }
         return child;

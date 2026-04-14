@@ -8,59 +8,47 @@ import java.util.EnumSet;
 import java.util.Set;
 
 // TODO: consider persisting the workbench config
-public final class WorkbenchConfig
-{
+public final class WorkbenchConfig {
     public static final WorkbenchConfig INSTANCE = new WorkbenchConfig();
 
     private final Set<ShareType> importFilters = EnumSet.allOf(ShareType.class);
     private DyeColor wireColor = WireType.SINGLE.getDefaultColor();
     private boolean routeLongWireSectionFirst = true;
 
-    public boolean isImportFilterEnabled(ShareType filter)
-    {
+    public boolean isImportFilterEnabled(ShareType filter) {
         return importFilters.contains(filter);
     }
 
-    public DyeColor getWireColor()
-    {
+    public DyeColor getWireColor() {
         return wireColor;
     }
 
-    public boolean isRouteLongWireSectionFirst()
-    {
+    public boolean isRouteLongWireSectionFirst() {
         return routeLongWireSectionFirst;
     }
 
-    public boolean setFilter(ShareType filter, boolean exclusive)
-    {
-        if (exclusive)
-        {
-            if (!importFilters.contains(filter) || importFilters.size() > 1)
-            {
+    public boolean setFilter(ShareType filter, boolean exclusive) {
+        if (exclusive) {
+            if (!importFilters.contains(filter) || importFilters.size() > 1) {
                 importFilters.clear();
                 importFilters.add(filter);
                 return true;
             }
             return false;
         }
-        if (importFilters.contains(filter))
-        {
+        if (importFilters.contains(filter)) {
             importFilters.remove(filter);
-        }
-        else
-        {
+        } else {
             importFilters.add(filter);
         }
         return true;
     }
 
-    public void setWireColor(DyeColor wireColor)
-    {
+    public void setWireColor(DyeColor wireColor) {
         this.wireColor = wireColor;
     }
 
-    public void toggleRouteLongWireSectionFirst()
-    {
+    public void toggleRouteLongWireSectionFirst() {
         routeLongWireSectionFirst = !routeLongWireSectionFirst;
     }
 }

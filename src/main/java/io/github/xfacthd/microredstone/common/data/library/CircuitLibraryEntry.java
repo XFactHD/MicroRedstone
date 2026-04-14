@@ -21,8 +21,7 @@ public record CircuitLibraryEntry(
         Instant timeCreated,
         Instant timeModified,
         ShareInfo shareInfo
-)
-{
+) {
     static final Codec<CircuitLibraryEntry> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             UUIDUtil.CODEC.fieldOf("id").forGetter(CircuitLibraryEntry::id),
             CompoundCircuitNode.CODEC.codec().fieldOf("circuit").forGetter(CircuitLibraryEntry::circuitNode),
@@ -47,44 +46,35 @@ public record CircuitLibraryEntry(
             CircuitLibraryEntry::new
     );
 
-    public static CircuitLibraryEntry createCircuit(CompoundCircuitNode circuitNode, UUID author)
-    {
+    public static CircuitLibraryEntry createCircuit(CompoundCircuitNode circuitNode, UUID author) {
         Instant time = Instant.now();
         return new CircuitLibraryEntry(Util.NIL_UUID, circuitNode, author, time, time, ShareInfo.Private.INSTANCE);
     }
 
-    public String name()
-    {
+    public String name() {
         return circuitNode.getName();
     }
 
-    public CircuitLibraryEntry modifyCircuit(CompoundCircuitNode circuitNode)
-    {
+    public CircuitLibraryEntry modifyCircuit(CompoundCircuitNode circuitNode) {
         return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, Instant.now(), shareInfo);
     }
 
-    public CircuitLibraryEntry modifyShareInfo(ShareInfo shareInfo)
-    {
-        if (!this.shareInfo.equals(shareInfo))
-        {
+    public CircuitLibraryEntry modifyShareInfo(ShareInfo shareInfo) {
+        if (!this.shareInfo.equals(shareInfo)) {
             return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, Instant.now(), shareInfo);
         }
         return this;
     }
 
-    CircuitLibraryEntry withId(UUID id)
-    {
-        if (!this.id.equals(id))
-        {
+    CircuitLibraryEntry withId(UUID id) {
+        if (!this.id.equals(id)) {
             return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, timeModified, shareInfo);
         }
         return this;
     }
 
-    CircuitLibraryEntry withoutShareTargets()
-    {
-        if (shareInfo instanceof ShareInfo.Shared(Set<UUID> sharedTo) && !sharedTo.isEmpty())
-        {
+    CircuitLibraryEntry withoutShareTargets() {
+        if (shareInfo instanceof ShareInfo.Shared(Set<UUID> sharedTo) && !sharedTo.isEmpty()) {
             return new CircuitLibraryEntry(id, circuitNode, author, timeCreated, timeModified, shareInfo.withoutShareTargets());
         }
         return this;

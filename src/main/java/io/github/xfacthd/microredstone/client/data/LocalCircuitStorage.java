@@ -22,8 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.function.Consumer;
 
-public final class LocalCircuitStorage
-{
+public final class LocalCircuitStorage {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final Component FILE_TYPE_DESCRIPTION = Utils.translate("desc", "circuit_workbench.local_storage.file_type");
     private static final LoadResult LOAD_CANCELED = new LoadResult.Canceled();
@@ -37,10 +36,8 @@ public final class LocalCircuitStorage
             StandardOpenOption.TRUNCATE_EXISTING
     };
 
-    public static void load(Consumer<LoadResult> callback)
-    {
-        if (!ensureDirectoryExists(e -> callback.accept(new LoadResult.Error(e))))
-        {
+    public static void load(Consumer<LoadResult> callback) {
+        if (!ensureDirectoryExists(e -> callback.accept(new LoadResult.Error(e)))) {
             return;
         }
 
@@ -52,31 +49,24 @@ public final class LocalCircuitStorage
                 .show();
     }
 
-    private static void doLoad(Consumer<LoadResult> callback, @Nullable Path path)
-    {
-        if (path == null)
-        {
+    private static void doLoad(Consumer<LoadResult> callback, @Nullable Path path) {
+        if (path == null) {
             callback.accept(LOAD_CANCELED);
             return;
         }
 
-        try (BufferedReader reader = Files.newBufferedReader(path))
-        {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             JsonElement json = GsonHelper.parse(reader);
             DataResult<CompoundPrototypeNode> result = CompoundPrototypeNode.deserialize(JsonOps.INSTANCE, json);
             callback.accept(new LoadResult.Success(result.getOrThrow()));
-        }
-        catch (Throwable t)
-        {
+        } catch (Throwable t) {
             callback.accept(new LoadResult.Error(t));
             LOGGER.error("Failed to load circuit design", t);
         }
     }
 
-    public static void store(CompoundPrototypeNode circuit, Consumer<StoreResult> callback)
-    {
-        if (!ensureDirectoryExists(e -> callback.accept(new StoreResult.Error(e))))
-        {
+    public static void store(CompoundPrototypeNode circuit, Consumer<StoreResult> callback) {
+        if (!ensureDirectoryExists(e -> callback.accept(new StoreResult.Error(e)))) {
             return;
         }
 
@@ -88,16 +78,13 @@ public final class LocalCircuitStorage
                 .show();
     }
 
-    private static void doStore(CompoundPrototypeNode circuit, Consumer<StoreResult> callback, @Nullable Path path)
-    {
-        if (path == null)
-        {
+    private static void doStore(CompoundPrototypeNode circuit, Consumer<StoreResult> callback, @Nullable Path path) {
+        if (path == null) {
             callback.accept(STORE_CANCELED);
             return;
         }
 
-        try
-        {
+        try {
             Files.createDirectories(path.getParent());
 
             JsonElement json = circuit.serialize(JsonOps.INSTANCE).getOrThrow();
@@ -105,30 +92,23 @@ public final class LocalCircuitStorage
             Files.writeString(path, jsonText, SAVE_OPTIONS);
 
             callback.accept(STORE_SUCCESS);
-        }
-        catch (Throwable t)
-        {
+        } catch (Throwable t) {
             callback.accept(new StoreResult.Error(t));
             LOGGER.error("Failed to save circuit design", t);
         }
     }
 
-    private static boolean ensureDirectoryExists(Consumer<IOException> errorHandler)
-    {
-        try
-        {
+    private static boolean ensureDirectoryExists(Consumer<IOException> errorHandler) {
+        try {
             Files.createDirectories(ROOT_PATH.get());
             return true;
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             errorHandler.accept(e);
             return false;
         }
     }
 
-    public sealed interface LoadResult
-    {
+    public sealed interface LoadResult {
         record Success(CompoundPrototypeNode circuit) implements LoadResult { }
 
         record Canceled() implements LoadResult { }
@@ -136,8 +116,7 @@ public final class LocalCircuitStorage
         record Error(Throwable error) implements LoadResult { }
     }
 
-    public sealed interface StoreResult
-    {
+    public sealed interface StoreResult {
         record Success() implements StoreResult { }
 
         record Canceled() implements StoreResult { }
@@ -145,5 +124,5 @@ public final class LocalCircuitStorage
         record Error(Throwable error) implements StoreResult { }
     }
 
-    private LocalCircuitStorage() {}
+    private LocalCircuitStorage() { }
 }

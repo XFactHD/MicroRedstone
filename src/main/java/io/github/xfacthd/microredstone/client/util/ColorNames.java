@@ -10,21 +10,19 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class ColorNames
-{
+public final class ColorNames {
     private static final Map<DyeColor, Component> COLOR_NAMES = Arrays.stream(DyeColor.values())
             .map(color -> Pair.of(color, Utils.translate("label", "dye_color." + color.getName())))
             .collect(Collectors.toMap(
                     Pair::getFirst,
                     Pair::getSecond,
-                    (a, b) -> { throw new UnsupportedOperationException(); },
+                    (_, _) -> { throw new UnsupportedOperationException(); },
                     () -> new EnumMap<>(DyeColor.class)
             ));
 
-    public static Component getName(DyeColor color)
-    {
+    public static Component getName(DyeColor color) {
         return COLOR_NAMES.get(color);
     }
 
-    private ColorNames() {}
+    private ColorNames() { }
 }

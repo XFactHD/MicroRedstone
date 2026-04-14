@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public abstract sealed class ToolPaneTabWidget implements GuiEventListener permits PartsList, ToolsTab, LibraryBrowser
-{
+public abstract sealed class ToolPaneTabWidget implements GuiEventListener permits PartsList, ToolsTab, LibraryBrowser {
     public static final int TOOL_PANE_WIDTH = 144;
     private static final int MAX_HEIGHT = CircuitCanvas.HEIGHT;
     private static final int HEADER_HEIGHT = 15;
@@ -37,30 +36,26 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     protected int paneY;
     protected int height;
 
-    protected ToolPaneTabWidget(CircuitWorkbenchScreen owner, ToolPane toolPane)
-    {
+    protected ToolPaneTabWidget(CircuitWorkbenchScreen owner, ToolPane toolPane) {
         this.owner = owner;
         this.toolPane = toolPane;
         this.tabButton = new ToolPaneTabButton(toolPane, getType(), 0, 0);
     }
 
-    public final void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    public final void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, paneX, paneY, TOOL_PANE_WIDTH, height);
         extractContent(graphics, mouseX, mouseY);
     }
 
     protected abstract void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY);
 
-    public final void initHeader(Consumer<AbstractWidget> widgetAdder)
-    {
+    public final void initHeader(Consumer<AbstractWidget> widgetAdder) {
         widgetAdder.accept(tabButton);
     }
 
     public abstract void initContent(Consumer<AbstractWidget> widgetAdder);
 
-    public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight)
-    {
+    public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight) {
         int xOff = getType().ordinal() * ToolPaneTabButton.WIDTH;
         tabButton.setPosition(toolPaneX + xOff, toolPaneY);
 
@@ -73,9 +68,7 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
 
     public abstract void updateWidgetVisibility(boolean active);
 
-    @Nullable
-    public ScrollableWidget getScrollableWidget()
-    {
+    public @Nullable ScrollableWidget getScrollableWidget() {
         return null;
     }
 
@@ -83,19 +76,16 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
 
     protected static <T extends ToolPaneTabWidget, E extends Enum<E>, B extends AbstractButton & ActionButton<E>> List<B> makeActionButtons(
             T tab, E[] actions, BiFunction<T, E, B> buttonFactory
-    )
-    {
+    ) {
         return Arrays.stream(actions)
                 .map(action -> buttonFactory.apply(tab, action))
                 .toList();
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
-    {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
         ScrollableWidget scrollable = getScrollableWidget();
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(event.x(), event.y())))
-        {
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && (scrollable.isDragging() || scrollable.isMouseOverScrollBar(event.x(), event.y()))) {
             scrollable.dragScrollBar(event.y());
             scrollable.setDragging(true);
             return true;
@@ -104,11 +94,9 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event)
-    {
+    public boolean mouseReleased(MouseButtonEvent event) {
         ScrollableWidget scrollable = getScrollableWidget();
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && scrollable.isDragging())
-        {
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && scrollable != null && scrollable.isDragging()) {
             scrollable.setDragging(false);
             return true;
         }
@@ -116,11 +104,9 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         ScrollableWidget scrollable = getScrollableWidget();
-        if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY))
-        {
+        if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY)) {
             scrollable.scroll(-scrollY);
             return true;
         }
@@ -128,8 +114,7 @@ public abstract sealed class ToolPaneTabWidget implements GuiEventListener permi
     }
 
     @Override
-    public final boolean isFocused()
-    {
+    public final boolean isFocused() {
         return false;
     }
 

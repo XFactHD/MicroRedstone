@@ -8,20 +8,16 @@ import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-public sealed interface DragStart
-{
-    static DragStart canvas(NodePos pos)
-    {
+public sealed interface DragStart {
+    static DragStart canvas(NodePos pos) {
         return new Canvas(pos);
     }
 
-    static DragStart partsList(int partIdx)
-    {
+    static DragStart partsList(int partIdx) {
         return new PartsListEntry(partIdx);
     }
 
-    static DragStart library(int entryIdx)
-    {
+    static DragStart library(int entryIdx) {
         return new LibraryBrowserEntry(entryIdx);
     }
 
@@ -31,88 +27,70 @@ public sealed interface DragStart
 
     OptionalInt library();
 
-    @Nullable
-    PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen);
+    @Nullable PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen);
 
-    record Canvas(NodePos pos) implements DragStart
-    {
+    record Canvas(NodePos pos) implements DragStart {
         @Override
-        public Optional<NodePos> canvas()
-        {
+        public Optional<NodePos> canvas() {
             return Optional.of(pos);
         }
 
         @Override
-        public OptionalInt partsList()
-        {
+        public OptionalInt partsList() {
             return OptionalInt.empty();
         }
 
         @Override
-        public OptionalInt library()
-        {
+        public OptionalInt library() {
             return OptionalInt.empty();
         }
 
         @Override
-        @Nullable
-        public PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen)
-        {
+        public @Nullable PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen) {
             return workbenchScreen.getCanvas().getPartGrid().getPartNode(pos);
         }
     }
 
-    record PartsListEntry(int partIdx) implements DragStart
-    {
+    record PartsListEntry(int partIdx) implements DragStart {
         @Override
-        public Optional<NodePos> canvas()
-        {
+        public Optional<NodePos> canvas() {
             return Optional.empty();
         }
 
         @Override
-        public OptionalInt partsList()
-        {
+        public OptionalInt partsList() {
             return OptionalInt.of(partIdx);
         }
 
         @Override
-        public OptionalInt library()
-        {
+        public OptionalInt library() {
             return OptionalInt.empty();
         }
 
         @Override
-        public PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen)
-        {
+        public PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen) {
             return LogicGateList.instantiate(partIdx);
         }
     }
 
-    record LibraryBrowserEntry(int entryIdx) implements DragStart
-    {
+    record LibraryBrowserEntry(int entryIdx) implements DragStart {
         @Override
-        public Optional<NodePos> canvas()
-        {
+        public Optional<NodePos> canvas() {
             return Optional.empty();
         }
 
         @Override
-        public OptionalInt partsList()
-        {
+        public OptionalInt partsList() {
             return OptionalInt.empty();
         }
 
         @Override
-        public OptionalInt library()
-        {
+        public OptionalInt library() {
             return OptionalInt.of(entryIdx);
         }
 
         @Override
-        @Nullable
-        public PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen)
-        {
+        public @Nullable PlaceableNode resolve(CircuitWorkbenchScreen workbenchScreen) {
             return workbenchScreen.getToolPane().getPartsList().instantiateLibraryNode(entryIdx);
         }
     }

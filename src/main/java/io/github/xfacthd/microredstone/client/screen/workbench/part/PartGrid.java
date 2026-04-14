@@ -12,106 +12,85 @@ import org.jspecify.annotations.Nullable;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-public final class PartGrid
-{
+public final class PartGrid {
     private final CircuitCanvas canvas;
     private final @Nullable PrototypeNode[] partGrid = new PrototypeNode[CircuitCanvas.PART_COUNT];
 
-    public PartGrid(CircuitCanvas canvas)
-    {
+    public PartGrid(CircuitCanvas canvas) {
         this.canvas = canvas;
     }
 
-    @Nullable
-    public PlaceableNode getPartNode(NodePos pos)
-    {
+    public @Nullable PlaceableNode getPartNode(NodePos pos) {
         PrototypeNode node = partGrid[index(pos)];
-        if (node != null) return node;
+        if (node != null) {
+            return node;
+        }
 
-        for (Connection con : canvas.getRootNode().getConnections())
-        {
-            if (con != null && con.getPos().equals(pos))
-            {
+        for (Connection con : canvas.getRootNode().getConnections()) {
+            if (con != null && con.getPos().equals(pos)) {
                 return con;
             }
         }
         return null;
     }
 
-    public void importPartNode(PrototypeNode node)
-    {
+    public void importPartNode(PrototypeNode node) {
         setPartNode(node.getPos(), node, node.getRotation(), PartSetMode.ADD);
     }
 
-    public void setPartNode(NodePos pos, @Nullable PrototypeNode node, int rotation, PartSetMode mode)
-    {
+    public void setPartNode(NodePos pos, @Nullable PrototypeNode node, int rotation, PartSetMode mode) {
         int idx = index(pos);
         CompoundPrototypeNode circuit = canvas.getRootNode();
-        if (node == null)
-        {
+        if (node == null) {
             PrototypeNode oldNode = partGrid[idx];
-            if (oldNode != null)
-            {
-                if (mode.addOrRemove())
-                {
+            if (oldNode != null) {
+                if (mode.addOrRemove()) {
                     circuit.removeChild(oldNode);
                 }
                 canvas.getWireGrid().trimConnectedWires(pos, oldNode);
                 oldNode.clearWires();
             }
         }
-        if (mode.writeGrid())
-        {
+        if (mode.writeGrid()) {
             partGrid[idx] = node;
         }
-        if (node != null)
-        {
+        if (node != null) {
             node.setPos(pos);
             node.setRotation(rotation);
-            if (mode.addOrRemove())
-            {
+            if (mode.addOrRemove()) {
                 circuit.addChild(node);
             }
         }
     }
 
-    public void removePartNode(NodePos pos)
-    {
-        switch (getPartNode(pos))
-        {
-            case PrototypeNode node ->
-            {
+    public void removePartNode(NodePos pos) {
+        switch (getPartNode(pos)) {
+            case PrototypeNode node -> {
                 node.performPreRemoveAction(canvas);
                 setPartNode(pos, null, 0, PartSetMode.REMOVE);
             }
-            case Connection con ->
-            {
+            case Connection con -> {
                 Port port = Port.ofPartRotation(con.getRotation());
                 canvas.getRootNode().getConnections()[port.ordinal()] = null;
                 canvas.getWireGrid().trimConnectedWires(pos, con);
             }
-            case null, default -> {}
+            case null, default -> { }
         }
     }
 
-    public void forEach(Consumer<PrototypeNode> consumer)
-    {
-        for (PrototypeNode node : partGrid)
-        {
-            if (node != null)
-            {
+    public void forEach(Consumer<PrototypeNode> consumer) {
+        for (PrototypeNode node : partGrid) {
+            if (node != null) {
                 consumer.accept(node);
             }
         }
     }
 
-    public void clear()
-    {
+    public void clear() {
         Arrays.fill(partGrid, null);
     }
 
-    private static int index(NodePos pos)
-    {
+    private static int index(NodePos pos) {
         return pos.y() * CircuitCanvas.PART_COUNT_X + pos.x();
     }
 }

@@ -10,19 +10,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * clear the export directory. Ensures this happens exactly once, regardless
  * of how many test classes run.
  */
-public final class DebugExportConfigExtension implements Extension
-{
+public final class DebugExportConfigExtension implements Extension {
     private static final AtomicBoolean CONFIGURING = new AtomicBoolean();
     private static final AtomicBoolean CONFIGURED = new AtomicBoolean();
 
-    public DebugExportConfigExtension()
-    {
-        if (CONFIGURED.get()) return;
+    public DebugExportConfigExtension() {
+        if (CONFIGURED.get()) {
+            return;
+        }
 
-        if (!CONFIGURING.compareAndSet(false, true))
-        {
-            while (!CONFIGURED.get())
-            {
+        if (!CONFIGURING.compareAndSet(false, true)) {
+            while (!CONFIGURED.get()) {
                 Thread.onSpinWait();
             }
             return;

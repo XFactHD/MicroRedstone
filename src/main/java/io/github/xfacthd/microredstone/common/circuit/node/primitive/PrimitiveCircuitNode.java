@@ -7,10 +7,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.base.LeafCircuitNode;
 import java.lang.classfile.CodeBuilder;
 import java.util.List;
 
-public abstract class PrimitiveCircuitNode extends LeafCircuitNode
-{
-    protected PrimitiveCircuitNode(List<Connector> inputs, List<Connector> outputs)
-    {
+public abstract class PrimitiveCircuitNode extends LeafCircuitNode {
+    protected PrimitiveCircuitNode(List<Connector> inputs, List<Connector> outputs) {
         super(inputs, outputs);
     }
 

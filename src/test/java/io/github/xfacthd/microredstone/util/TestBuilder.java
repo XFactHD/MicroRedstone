@@ -8,33 +8,28 @@ import io.github.xfacthd.microredstone.common.circuit.connection.WireType;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.CompoundPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 
-public final class TestBuilder
-{
+public final class TestBuilder {
     private final CompoundPrototypeNode cmpNode = new CompoundPrototypeNode();
 
-    public Wire addWire(WireType wireType)
-    {
+    public Wire addWire(WireType wireType) {
         Wire wire = new Wire(wireType, wireType.getDefaultColor());
         cmpNode.addWire(wire);
         return wire;
     }
 
-    public Connection addConnection(Port port, WireType wireType, PortDir portDir)
-    {
+    public Connection addConnection(Port port, WireType wireType, PortDir portDir) {
         Connection connection = new Connection(wireType);
         connection.setPortDir(portDir);
         cmpNode.setConnection(port, connection);
         return connection;
     }
 
-    public <T extends PrototypeNode> T addNode(T node)
-    {
+    public <T extends PrototypeNode> T addNode(T node) {
         cmpNode.addChild(node);
         return node;
     }
 
-    public CompoundPrototypeNode build()
-    {
+    public CompoundPrototypeNode build() {
         return cmpNode;
     }
 }

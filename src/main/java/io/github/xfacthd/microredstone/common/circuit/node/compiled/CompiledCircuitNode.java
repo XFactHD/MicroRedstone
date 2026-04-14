@@ -6,14 +6,12 @@ import io.github.xfacthd.microredstone.common.circuit.node.base.RootCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.node.special.CompoundCircuitNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.PrototypeNode;
 
-public abstract class CompiledCircuitNode extends RootCircuitNode
-{
+public abstract class CompiledCircuitNode extends RootCircuitNode {
     private final CompoundCircuitNode originalNode;
     private final Runnable releaser;
     private final int wireCount;
 
-    CompiledCircuitNode(CompoundCircuitNode originalNode, Runnable releaser)
-    {
+    CompiledCircuitNode(CompoundCircuitNode originalNode, Runnable releaser) {
         super(originalNode.getInputs(), originalNode.getOutputs());
         this.originalNode = originalNode;
         this.releaser = releaser;
@@ -21,46 +19,39 @@ public abstract class CompiledCircuitNode extends RootCircuitNode
     }
 
     @Override
-    public final int getWireCount()
-    {
+    public final int getWireCount() {
         return wireCount;
     }
 
     @Override
-    public final CompoundCircuitNode serializable()
-    {
+    public final CompoundCircuitNode serializable() {
         return originalNode;
     }
 
     @Override
-    public final void release()
-    {
+    public final void release() {
         releaser.run();
     }
 
     @Override
-    public final PrototypeNode disassemble()
-    {
+    public final PrototypeNode disassemble() {
         // CompiledCircuitNodes can never reach the client
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final CircuitNodeType<? extends CircuitNode> type()
-    {
+    public final CircuitNodeType<? extends CircuitNode> type() {
         // CompiledCircuitNodes can't be serialized directly, they must be unwrapped first
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public final boolean equals(Object obj)
-    {
+    public final boolean equals(Object obj) {
         return this == obj;
     }
 
     @Override
-    public final int hashCode()
-    {
+    public final int hashCode() {
         return System.identityHashCode(this);
     }
 }

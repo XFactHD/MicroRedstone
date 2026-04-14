@@ -7,8 +7,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record ClientboundMicrochipUpdateWireStatesPayload(int containerId, WireStates wireStates) implements CustomPacketPayload
-{
+public record ClientboundMicrochipUpdateWireStatesPayload(int containerId, WireStates wireStates) implements CustomPacketPayload {
     public static final Type<ClientboundMicrochipUpdateWireStatesPayload> TYPE = Utils.payloadType("clientbound_microchip_update_wire_states");
     public static final StreamCodec<FriendlyByteBuf, ClientboundMicrochipUpdateWireStatesPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,
@@ -19,8 +18,7 @@ public record ClientboundMicrochipUpdateWireStatesPayload(int containerId, WireS
     );
 
     @Override
-    public Type<ClientboundMicrochipUpdateWireStatesPayload> type()
-    {
+    public Type<ClientboundMicrochipUpdateWireStatesPayload> type() {
         return TYPE;
     }
 }

@@ -21,10 +21,8 @@ import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = MicroRedstone.MOD_ID, dist = Dist.CLIENT)
-public final class MRClient
-{
-    public MRClient(IEventBus modBus)
-    {
+public final class MRClient {
+    public MRClient(IEventBus modBus) {
         modBus.addListener(MRClient::onRegisterSpriteSourceTypes);
         modBus.addListener(MRClient::onRegisterBlockModels);
         modBus.addListener(MRClient::onRegisterMenuScreens);
@@ -33,20 +31,17 @@ public final class MRClient
         NeoForge.EVENT_BUS.addListener(ClientCircuitLibrary::onPlayerDisconnect);
     }
 
-    private static void onRegisterSpriteSourceTypes(RegisterSpriteSourcesEvent event)
-    {
+    private static void onRegisterSpriteSourceTypes(RegisterSpriteSourcesEvent event) {
         event.register(AreaMaskSource.ID, AreaMaskSource.CODEC);
         event.register(PortOverlaySource.ID, PortOverlaySource.CODEC);
         event.register(StackingSource.ID, StackingSource.CODEC);
     }
 
-    private static void onRegisterBlockModels(RegisterBlockStateModels event)
-    {
+    private static void onRegisterBlockModels(RegisterBlockStateModels event) {
         event.registerModel(Utils.rl("microchip"), UnbakedMicrochipModel.CODEC);
     }
 
-    private static void onRegisterMenuScreens(RegisterMenuScreensEvent event)
-    {
+    private static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(MRContent.MENU_TYPE_MICROCHIP.value(), MicrochipScreen::new);
         event.register(MRContent.MENU_TYPE_MICROCHIP_CIRCUIT.value(), MicrochipCircuitScreen::new);
         event.register(MRContent.MENU_TYPE_CIRCUIT_WORKBENCH.value(), CircuitWorkbenchScreen::new);

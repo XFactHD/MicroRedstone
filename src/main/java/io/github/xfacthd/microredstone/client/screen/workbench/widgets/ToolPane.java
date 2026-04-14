@@ -24,27 +24,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public final class ToolPane implements GuiEventListener, Renderable
-{
+public final class ToolPane implements GuiEventListener, Renderable {
     private final PartsList partsList;
     private final ToolsTab toolsTab;
     private final LibraryBrowser libraryBrowser;
     private final ToolPaneTabWidget[] tabWidgets;
     private ToolPaneTab activeTab = ToolPaneTab.PARTS;
 
-    public ToolPane(CircuitWorkbenchScreen owner)
-    {
+    public ToolPane(CircuitWorkbenchScreen owner) {
         this.partsList = new PartsList(owner, this);
         this.toolsTab = new ToolsTab(owner, this);
         this.libraryBrowser = new LibraryBrowser(owner, this);
         this.tabWidgets = new ToolPaneTabWidget[] { partsList, toolsTab, libraryBrowser };
     }
 
-    public void init(Consumer<AbstractWidget> widgetAdder)
-    {
+    public void init(Consumer<AbstractWidget> widgetAdder) {
         List<AbstractWidget> content = new ArrayList<>();
-        for (ToolPaneTabWidget widget : tabWidgets)
-        {
+        for (ToolPaneTabWidget widget : tabWidgets) {
             widget.initHeader(widgetAdder);
             widget.initContent(content::add);
             widget.updateWidgetVisibility(widget.getType() == ToolPaneTab.PARTS);
@@ -52,130 +48,108 @@ public final class ToolPane implements GuiEventListener, Renderable
         content.forEach(widgetAdder);
     }
 
-    public void computeLayout(int leftPos, int topPos, int imageWidth, int imageHeight, int toolPaneX, int toolPaneY, int height)
-    {
-        for (ToolPaneTabWidget widget : tabWidgets)
-        {
+    public void computeLayout(int leftPos, int topPos, int imageWidth, int imageHeight, int toolPaneX, int toolPaneY, int height) {
+        for (ToolPaneTabWidget widget : tabWidgets) {
             widget.computeLayout(leftPos, topPos, imageWidth, imageHeight, toolPaneX, toolPaneY, height);
         }
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         getActiveTabWidget().extractRenderState(graphics, mouseX, mouseY);
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
-    {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         return getActiveTabWidget().mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event)
-    {
+    public boolean mouseReleased(MouseButtonEvent event) {
         return getActiveTabWidget().mouseReleased(event);
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
-    {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
         return getActiveTabWidget().mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         return getActiveTabWidget().mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
+    public boolean keyPressed(KeyEvent event) {
         return getActiveTabWidget().keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(KeyEvent event)
-    {
+    public boolean keyReleased(KeyEvent event) {
         return getActiveTabWidget().keyReleased(event);
     }
 
     @Override
-    public boolean charTyped(CharacterEvent event)
-    {
+    public boolean charTyped(CharacterEvent event) {
         return getActiveTabWidget().charTyped(event);
     }
 
-    public boolean canDeletePart(FloatingNode floatingNode, @Nullable NodePos target, double mouseX, double mouseY)
-    {
-        if (target != null || floatingNode.lastPos() == null) return false;
-        if (activeTab != ToolPaneTab.PARTS) return false;
+    public boolean canDeletePart(FloatingNode floatingNode, @Nullable NodePos target, double mouseX, double mouseY) {
+        if (target != null || floatingNode.lastPos() == null) {
+            return false;
+        }
+        if (activeTab != ToolPaneTab.PARTS) {
+            return false;
+        }
         return partsList.getScrollableWidget().isMouseOver(mouseX, mouseY);
     }
 
-    public void setActiveTab(ToolPaneTab tab)
-    {
-        if (tab != activeTab)
-        {
+    public void setActiveTab(ToolPaneTab tab) {
+        if (tab != activeTab) {
             activeTab = tab;
-            for (ToolPaneTabWidget widget : tabWidgets)
-            {
+            for (ToolPaneTabWidget widget : tabWidgets) {
                 widget.updateWidgetVisibility(tab == widget.getType());
             }
         }
     }
 
-    public ToolPaneTab getActiveTab()
-    {
+    public ToolPaneTab getActiveTab() {
         return activeTab;
     }
 
-    public ToolPaneTabWidget getActiveTabWidget()
-    {
-        return switch (activeTab)
-        {
+    public ToolPaneTabWidget getActiveTabWidget() {
+        return switch (activeTab) {
             case PARTS -> partsList;
             case TOOLS -> toolsTab;
             case LIBRARY -> libraryBrowser;
         };
     }
 
-    public PartsList getPartsList()
-    {
+    public PartsList getPartsList() {
         return partsList;
     }
 
-    public ToolsTab getToolsTab()
-    {
+    public ToolsTab getToolsTab() {
         return toolsTab;
     }
 
-    public LibraryBrowser getLibraryBrowser()
-    {
+    public LibraryBrowser getLibraryBrowser() {
         return libraryBrowser;
     }
 
-    @Nullable
-    public ContextMenuProvider getContextMenuProviderAt(double mouseX, double mouseY)
-    {
+    public @Nullable ContextMenuProvider getContextMenuProviderAt(double mouseX, double mouseY) {
         ScrollableWidget scrollable = getActiveTabWidget().getScrollableWidget();
-        if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY))
-        {
+        if (scrollable != null && scrollable.isMouseOver(mouseX, mouseY)) {
             return scrollable.getContextMenuProvider(mouseX, mouseY);
         }
         return null;
     }
 
-    public boolean isHoveringPartSource(double mouseX, double mouseY)
-    {
+    public boolean isHoveringPartSource(double mouseX, double mouseY) {
         return activeTab == ToolPaneTab.PARTS && partsList.getScrollableWidget().isMouseOverList(mouseX, mouseY);
     }
 
-    @Nullable
-    public DragStart getClickedPart(double mouseX, double mouseY)
-    {
+    public @Nullable DragStart getClickedPart(double mouseX, double mouseY) {
         return partsList.getClickedPartIdx(mouseY);
     }
 
@@ -183,8 +157,7 @@ public final class ToolPane implements GuiEventListener, Renderable
     public void setFocused(boolean focused) { }
 
     @Override
-    public boolean isFocused()
-    {
+    public boolean isFocused() {
         return false;
     }
 }

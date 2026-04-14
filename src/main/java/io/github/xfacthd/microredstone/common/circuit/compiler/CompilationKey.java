@@ -15,21 +15,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-record CompilationKey(List<NodeKey<CompilationKey>> nestedCompoundNodes, List<NodeKey<? extends CircuitNode>> primitiveNodes, List<WireType> wires)
-{
-    static CompilationKey of(CompoundCircuitNode compound)
-    {
+record CompilationKey(List<NodeKey<CompilationKey>> nestedCompoundNodes, List<NodeKey<? extends CircuitNode>> primitiveNodes, List<WireType> wires) {
+    static CompilationKey of(CompoundCircuitNode compound) {
         List<NodeKey<CompilationKey>> nestedCompoundNodes = new ObjectArrayList<>();
         List<NodeKey<? extends CircuitNode>> primitiveNodes = new ObjectArrayList<>();
-        compound.forAllNodes(entry ->
-        {
-            if (entry.node() instanceof CompoundCircuitNode nestedCompound)
-            {
+        compound.forAllNodes(entry -> {
+            if (entry.node() instanceof CompoundCircuitNode nestedCompound) {
                 CompilationKey nestedKey = CompilationKey.of(nestedCompound);
                 nestedCompoundNodes.add(NodeKey.of(nestedKey, entry));
-            }
-            else
-            {
+            } else {
                 primitiveNodes.add(NodeKey.of(entry.node(), entry));
             }
         });
@@ -42,15 +36,12 @@ record CompilationKey(List<NodeKey<CompilationKey>> nestedCompoundNodes, List<No
         return new CompilationKey(nestedCompoundNodes, primitiveNodes, wires);
     }
 
-    record NodeKey<T>(T node, LongList inputs, LongList outputs)
-    {
-        private static <T> NodeKey<T> of(T node, NodeEntry<?> srcEntry)
-        {
+    record NodeKey<T>(T node, LongList inputs, LongList outputs) {
+        private static <T> NodeKey<T> of(T node, NodeEntry<?> srcEntry) {
             return new NodeKey<>(node, mapIO(srcEntry.inputs()), mapIO(srcEntry.outputs()));
         }
 
-        private static LongList mapIO(WirePair[] pairs)
-        {
+        private static LongList mapIO(WirePair[] pairs) {
             return Arrays.stream(pairs)
                     .mapToLong(pair -> (long) pair.external() << 32 | pair.internal())
                     .collect(LongArrayList::new, LongArrayList::add, LongArrayList::addAll);

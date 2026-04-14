@@ -13,32 +13,26 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-public final class PortOverlays
-{
+public final class PortOverlays {
     private static final Port[] PORTS = Port.values();
     private static final List<Port> OVERLAY_PORT_ORDER = List.of(Port.UP, Port.DOWN, Port.LEFT, Port.RIGHT);
-    private static final Identifier[] OVERLAY_LOCATIONS = buildOverlayLocations();
+    private static final @Nullable Identifier[] OVERLAY_LOCATIONS = buildOverlayLocations();
 
-    public static Identifier get(int portMask)
-    {
+    public static Identifier get(int portMask) {
         return Objects.requireNonNull(OVERLAY_LOCATIONS[portMask]);
     }
 
-    public static void forEach(BiConsumer<Identifier, Map<Port, WireType>> consumer)
-    {
-        for (int i = 1; i < OVERLAY_LOCATIONS.length; i++)
-        {
-            if (OVERLAY_LOCATIONS[i] == null) continue;
+    public static void forEach(BiConsumer<Identifier, Map<Port, WireType>> consumer) {
+        for (int i = 1; i < OVERLAY_LOCATIONS.length; i++) {
+            if (OVERLAY_LOCATIONS[i] == null) {
+                continue;
+            }
 
             Map<Port, WireType> ports = new EnumMap<>(Port.class);
-            for (Port port : PORTS)
-            {
-                if ((i & port.appendMask(0, WireType.SINGLE)) != 0)
-                {
+            for (Port port : PORTS) {
+                if ((i & port.appendMask(0, WireType.SINGLE)) != 0) {
                     ports.put(port, WireType.SINGLE);
-                }
-                else if ((i & port.appendMask(0, WireType.BUNDLED)) != 0)
-                {
+                } else if ((i & port.appendMask(0, WireType.BUNDLED)) != 0) {
                     ports.put(port, WireType.BUNDLED);
                 }
             }
@@ -46,23 +40,26 @@ public final class PortOverlays
         }
     }
 
-    private static Identifier[] buildOverlayLocations()
-    {
-        WireType[] types = Arrays.copyOf(WireType.values(), 5);
-        Identifier[] map = new Identifier[256];
-        for (WireType typeUp : types)
-        {
-            for (WireType typeRight : types)
-            {
-                for (WireType typeDown : types)
-                {
-                    for (WireType typeLeft : types)
-                    {
+    private static @Nullable Identifier[] buildOverlayLocations() {
+        @Nullable WireType[] types = Arrays.copyOf(WireType.values(), 5);
+        @Nullable Identifier[] map = new Identifier[256];
+        for (WireType typeUp : types) {
+            for (WireType typeRight : types) {
+                for (WireType typeDown : types) {
+                    for (WireType typeLeft : types) {
                         int portMask = 0;
-                        if (typeUp != null) portMask = Port.UP.appendMask(portMask, typeUp);
-                        if (typeRight != null) portMask = Port.RIGHT.appendMask(portMask, typeRight);
-                        if (typeDown != null) portMask = Port.LEFT.appendMask(portMask, typeDown);
-                        if (typeLeft != null) portMask = Port.DOWN.appendMask(portMask, typeLeft);
+                        if (typeUp != null) {
+                            portMask = Port.UP.appendMask(portMask, typeUp);
+                        }
+                        if (typeRight != null) {
+                            portMask = Port.RIGHT.appendMask(portMask, typeRight);
+                        }
+                        if (typeDown != null) {
+                            portMask = Port.LEFT.appendMask(portMask, typeDown);
+                        }
+                        if (typeLeft != null) {
+                            portMask = Port.DOWN.appendMask(portMask, typeLeft);
+                        }
                         map[portMask] = buildOverlayLocation(portMask);
                     }
                 }
@@ -71,11 +68,8 @@ public final class PortOverlays
         return map;
     }
 
-    @Nullable
-    private static Identifier buildOverlayLocation(int portMask)
-    {
-        return switch (portMask)
-        {
+    private static @Nullable Identifier buildOverlayLocation(int portMask) {
+        return switch (portMask) {
             case 0b0000_0000 -> null;
             case 0b0000_1111 -> Utils.rl("port/full_single");
             case 0b1111_0000 -> Utils.rl("port/full_bundled");
@@ -91,28 +85,25 @@ public final class PortOverlays
             case 0b1000_0000 -> Utils.rl("port/left_bundled");
             case 0b1010_0000 -> Utils.rl("port/hor_bundled");
             case 0b0101_0000 -> Utils.rl("port/vert_bundled");
-            default ->
-            {
+            default -> {
                 boolean suffixIndividually = (portMask & 0b1111_0000) != 0 && (portMask & 0b0000_1111) != 0;
                 StringBuilder builder = new StringBuilder();
-                for (Port port : OVERLAY_PORT_ORDER)
-                {
+                for (Port port : OVERLAY_PORT_ORDER) {
                     boolean single = (portMask & port.appendMask(0, WireType.SINGLE)) != 0;
                     boolean bundled = (portMask & port.appendMask(0, WireType.BUNDLED)) != 0;
-                    if (!single && !bundled) continue;
+                    if (!single && !bundled) {
+                        continue;
+                    }
 
-                    if (!builder.isEmpty())
-                    {
+                    if (!builder.isEmpty()) {
                         builder.append("_");
                     }
                     builder.append(port.getSerializedName());
-                    if (suffixIndividually)
-                    {
+                    if (suffixIndividually) {
                         builder.append(single ? "_single" : "_bundled");
                     }
                 }
-                if (!suffixIndividually)
-                {
+                if (!suffixIndividually) {
                     boolean single = (portMask & 0b1111_0000) == 0;
                     builder.append(single ? "_single" : "_bundled");
                 }
@@ -121,5 +112,5 @@ public final class PortOverlays
         };
     }
 
-    private PortOverlays() {}
+    private PortOverlays() { }
 }

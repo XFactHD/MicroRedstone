@@ -5,25 +5,21 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
-public final class BasicButton extends SimpleButton implements DropFocusAfterClick
-{
+public final class BasicButton extends SimpleButton implements DropFocusAfterClick {
     private final Runnable onPress;
 
-    public BasicButton(int x, int y, int width, int height, Component message, Runnable onPress)
-    {
+    public BasicButton(int x, int y, int width, int height, Component message, Runnable onPress) {
         super(x, y, width, height, message);
         this.onPress = onPress;
     }
 
     @Override
-    protected WidgetSprites getSprites()
-    {
+    protected WidgetSprites getSprites() {
         return SPRITES;
     }
 
     @Override
-    public void onPress(InputWithModifiers input)
-    {
+    public void onPress(InputWithModifiers input) {
         onPress.run();
     }
 }

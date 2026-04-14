@@ -6,10 +6,8 @@ import io.github.xfacthd.microredstone.common.circuit.node.NodeEntry;
 import java.util.BitSet;
 import java.util.List;
 
-public non-sealed abstract class LeafCircuitNode extends CircuitNode
-{
-    protected LeafCircuitNode(List<Connector> inputs, List<Connector> outputs)
-    {
+public non-sealed abstract class LeafCircuitNode extends CircuitNode {
+    protected LeafCircuitNode(List<Connector> inputs, List<Connector> outputs) {
         super(inputs, outputs);
     }
 

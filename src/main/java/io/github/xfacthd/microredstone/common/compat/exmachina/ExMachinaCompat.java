@@ -13,36 +13,27 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-public final class ExMachinaCompat
-{
+public final class ExMachinaCompat {
     private static boolean loaded = false;
 
-    public static void init(IEventBus modBus)
-    {
-        if (ModList.get().isLoaded("exmachina"))
-        {
-            try
-            {
+    public static void init(IEventBus modBus) {
+        if (ModList.get().isLoaded("exmachina")) {
+            try {
                 GuardedAccess.init(modBus);
                 loaded = true;
-            }
-            catch (Throwable t)
-            {
+            } catch (Throwable t) {
                 CompatHandler.LOGGER.error("Failed to initialize ExMachina compat", t);
             }
         }
     }
 
-    public static void updateNeighbor(Level level, BlockPos pos)
-    {
-        if (loaded)
-        {
+    public static void updateNeighbor(Level level, BlockPos pos) {
+        if (loaded) {
             GuardedAccess.updateNeighbor(level, pos);
         }
     }
 
-    private static final class GuardedAccess
-    {
+    private static final class GuardedAccess {
         private static final DeferredRegister<MapCodec<? extends SignalComponent>> COMPONENTS = DeferredRegister.create(
                 ExMachinaRegistries.SIGNAL_COMPONENT_TYPE,
                 MicroRedstone.MOD_ID
@@ -51,17 +42,15 @@ public final class ExMachinaCompat
                 "microchip", () -> MicrochipSignalComponent.CODEC
         );
 
-        static void init(IEventBus modBus)
-        {
+        static void init(IEventBus modBus) {
             COMPONENTS.register(modBus);
         }
 
-        static void updateNeighbor(Level level, BlockPos pos)
-        {
+        static void updateNeighbor(Level level, BlockPos pos) {
             ExMachinaGameEvents.scheduleSignalGraphUpdate(level, pos);
         }
 
-        private GuardedAccess() {}
+        private GuardedAccess() { }
     }
 
     private ExMachinaCompat() { }

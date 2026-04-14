@@ -21,24 +21,20 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
-public final class MicrochipBlock extends PlateBlock
-{
-    public MicrochipBlock(Properties properties)
-    {
+public final class MicrochipBlock extends PlateBlock {
+    public MicrochipBlock(Properties properties) {
         super(properties.strength(1.5F, 6F));
         registerDefaultState(defaultBlockState().setValue(PropertyHolder.HAS_CIRCUIT, false));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(PropertyHolder.ROTATION, PropertyHolder.HAS_CIRCUIT);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
-    {
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         BlockState state = super.getStateForPlacement(ctx);
         Direction facing = state.getValue(BlockStateProperties.FACING);
         Direction orientation = Utils.getDirFromCross(ctx.getClickLocation(), ctx.getClickedFace());
@@ -47,12 +43,9 @@ public final class MicrochipBlock extends PlateBlock
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
-    {
-        if (level.getBlockEntity(pos) instanceof MicrochipBlockEntity be)
-        {
-            if (!level.isClientSide())
-            {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (level.getBlockEntity(pos) instanceof MicrochipBlockEntity be) {
+            if (!level.isClientSide()) {
                 player.openMenu(be);
             }
             return InteractionResult.SUCCESS;
@@ -61,17 +54,13 @@ public final class MicrochipBlock extends PlateBlock
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-    {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new MicrochipBlockEntity(pos, state);
     }
 
-    @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> actualType)
-    {
-        if (!level.isClientSide())
-        {
+    public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> actualType) {
+        if (!level.isClientSide()) {
             return Utils.createBlockEntityTicker(actualType, MRContent.BLOCK_ENTITY_MICROCHIP, MicrochipBlockEntity::tick);
         }
         return null;

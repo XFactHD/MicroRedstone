@@ -8,8 +8,7 @@ import io.github.xfacthd.microredstone.client.screen.widgets.menu.SubMenuKey;
 import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.network.chat.Component;
 
-public final class WireToolActionContextMenuProvider implements ContextMenuProvider
-{
+public final class WireToolActionContextMenuProvider implements ContextMenuProvider {
     public static final Component ENTRY_WIRE_COLOR = Utils.translate("label", "circuit_workbench.tools_tab.menu.wire.wire_color");
     public static final Component ENTRY_WIRE_ROUTE_PREF = Utils.translate("label", "circuit_workbench.tools_tab.menu.wire.wire_route_pref");
     private static final SubMenuKey COLOR_SUB_MENU = new SubMenuKey("wire_colors");
@@ -18,16 +17,13 @@ public final class WireToolActionContextMenuProvider implements ContextMenuProvi
 
     private final boolean withWireColors;
 
-    private WireToolActionContextMenuProvider(boolean withWireColors)
-    {
+    private WireToolActionContextMenuProvider(boolean withWireColors) {
         this.withWireColors = withWireColors;
     }
 
     @Override
-    public void fillRootMenu(ContextMenuBuilder menuBuilder)
-    {
-        if (withWireColors)
-        {
+    public void fillRootMenu(ContextMenuBuilder menuBuilder) {
+        if (withWireColors) {
             menuBuilder.addSubMenuEntry(ENTRY_WIRE_COLOR, COLOR_SUB_MENU)
                     .addSeparator();
         }
@@ -40,10 +36,8 @@ public final class WireToolActionContextMenuProvider implements ContextMenuProvi
     }
 
     @Override
-    public void fillSubMenu(ContextMenuBuilder menuBuilder, SubMenuKey subMenuKey)
-    {
-        if (subMenuKey == COLOR_SUB_MENU)
-        {
+    public void fillSubMenu(ContextMenuBuilder menuBuilder, SubMenuKey subMenuKey) {
+        if (subMenuKey == COLOR_SUB_MENU) {
             WorkbenchConfig config = WorkbenchConfig.INSTANCE;
             ContextMenuUtils.makeDyeColorMenu(menuBuilder, config::setWireColor, config::getWireColor);
         }

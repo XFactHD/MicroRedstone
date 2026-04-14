@@ -9,10 +9,8 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.special.Compound
 import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.ConverterPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.primitive.PrimitivePrototypeNode;
 
-public final class ComplexTestCircuits
-{
-    public static CompoundPrototypeNode bcdTo7SegDecoder()
-    {
+public final class ComplexTestCircuits {
+    public static CompoundPrototypeNode bcdTo7SegDecoder() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireIn = builder.addWire(WireType.BUNDLED);

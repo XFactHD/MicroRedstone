@@ -49,13 +49,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.ToIntFunction;
 
-public final class CircuitCanvas extends AbstractCircuitCanvas implements CircuitCanvasAccess
-{
+public final class CircuitCanvas extends AbstractCircuitCanvas implements CircuitCanvasAccess {
     private static final FontDescription MONOSPACE_FONT = new FontDescription.Resource(Utils.rl("monospace"));
-    private static final Identifier[] PORT_BORDERS = Util.make(new Identifier[8], arr ->
-    {
-        for (Port port : Port.values())
-        {
+    private static final Identifier[] PORT_BORDERS = Util.make(new Identifier[8], arr -> {
+        for (Port port : Port.values()) {
             String prefix = "port/border_" + port.getSerializedName() + "_";
             arr[port.ordinal() << 1 | WireType.SINGLE.ordinal()] = Utils.rl(prefix + "single");
             arr[port.ordinal() << 1 | WireType.BUNDLED.ordinal()] = Utils.rl(prefix + "bundled");
@@ -76,8 +73,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
     @Nullable
     private WireInProgress wireInProgress;
 
-    public CircuitCanvas(CircuitWorkbenchScreen owner)
-    {
+    public CircuitCanvas(CircuitWorkbenchScreen owner) {
         this.owner = owner;
     }
 
@@ -90,51 +86,40 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
             List<LampRenderState> lamps,
             int mouseX,
             int mouseY
-    )
-    {
+    ) {
         Set<NodePos> partPositions = new HashSet<>();
-        partGrid.forEach(node ->
-        {
-            if (!owner.isNodeFloating(node))
-            {
-                if (node instanceof LampPrototypeNode lamp)
-                {
+        partGrid.forEach(node -> {
+            if (!owner.isNodeFloating(node)) {
+                if (node instanceof LampPrototypeNode lamp) {
                     LampPrototypeNode chainedLamp = lamp.getNodeChainedTo();
                     boolean chained = chainedLamp != null && !owner.isNodeFloating(chainedLamp);
                     lamps.add(new LampRenderState(lamp, chained));
-                }
-                else
-                {
+                } else {
                     parts.add(new PartRenderState(node));
                 }
                 partPositions.add(node.getPos());
             }
         });
-        for (Connection connection : circuit.getConnections())
-        {
-            if (connection != null && !owner.isNodeFloating(connection))
-            {
+        for (Connection connection : circuit.getConnections()) {
+            if (connection != null && !owner.isNodeFloating(connection)) {
                 parts.add(new PartRenderState(connection));
                 partPositions.add(connection.getPos());
             }
         }
 
-        for (RoutedWire wire : wireGrid)
-        {
+        for (RoutedWire wire : wireGrid) {
             WireType type = wire.wire().getWireType();
             DyeColor color = wire.wire().getColor();
 
             WireRenderState renderState = new WireRenderState(type, color);
-            for (WireNode node : wire.wire().getNodes())
-            {
+            for (WireNode node : wire.wire().getNodes()) {
                 renderState.addNode(node);
             }
             renderState.addSections(partPositions, wire.sections());
             wires.add(renderState);
         }
 
-        if (wireInProgress != null)
-        {
+        if (wireInProgress != null) {
             wireInProgress.repath(this, mouseX, mouseY);
 
             WireType type = wireInProgress.getType();
@@ -142,52 +127,43 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
 
             WireRenderState renderState = new WireRenderState(type, color);
             List<WireNode> wireNodes = wireInProgress.getWireNodes();
-            if (!wireNodes.isEmpty())
-            {
-                for (WireNode node : wireNodes)
-                {
+            if (!wireNodes.isEmpty()) {
+                for (WireNode node : wireNodes) {
                     renderState.addNode(node);
                 }
             }
             renderState.addSections(partPositions, wireInProgress.getSections());
             List<WireNode> floatingNodes = wireInProgress.getFloatingNodes();
-            if (!floatingNodes.isEmpty())
-            {
+            if (!floatingNodes.isEmpty()) {
                 // If a floating node is present, then at least one pinned node exists
                 NodePos lastPos = wireNodes.getLast().pos();
-                for (WireNode node : floatingNodes)
-                {
+                for (WireNode node : floatingNodes) {
                     renderState.addSection(partPositions, lastPos, node.pos());
                     renderState.addNode(node);
                     lastPos = node.pos();
                 }
             }
 
-            if (!renderState.isEmpty())
-            {
+            if (!renderState.isEmpty()) {
                 wires.add(renderState);
             }
         }
     }
 
     @Override
-    protected void extractCanvasOverlays(GuiGraphicsExtractor graphics, int canvasX, int canvasY, int mouseX, int mouseY)
-    {
+    protected void extractCanvasOverlays(GuiGraphicsExtractor graphics, int canvasX, int canvasY, int mouseX, int mouseY) {
         FloatingNode floatingNode = owner.getFloatingNode();
         NodePos hovered = getNodePlacementPos(mouseX, mouseY, floatingNode);
-        if (floatingNode != null)
-        {
+        if (floatingNode != null) {
             NodePos pos = floatingNode.lastPos();
-            if (pos != null)
-            {
+            if (pos != null) {
                 int iconX = canvasX + BORDER_TOP_LEFT + pos.x() * PART_SLOT_SIZE;
                 int iconY = canvasY + BORDER_TOP_LEFT + pos.y() * PART_SLOT_SIZE;
                 drawNodeFrame(graphics, iconX, iconY, 0xFFFFFF00);
             }
 
             boolean canPlace = hovered != null && floatingNode.canPlaceAt(this, hovered);
-            if (hovered != null && (!canPlace || !hovered.equals(pos) || !hovered.equals(getNodePos(mouseX, mouseY))))
-            {
+            if (hovered != null && (!canPlace || !hovered.equals(pos) || !hovered.equals(getNodePos(mouseX, mouseY)))) {
                 int targetX = canvasX + BORDER_TOP_LEFT + hovered.x() * PART_SLOT_SIZE;
                 int targetY = canvasY + BORDER_TOP_LEFT + hovered.y() * PART_SLOT_SIZE;
                 int color = canPlace ? 0xFF00FF00 : 0xFFFF0000;
@@ -196,14 +172,12 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         }
 
         PlaceableNode node;
-        if (isPullingWire() && hovered != null && (node = partGrid.getPartNode(hovered)) != null)
-        {
+        if (isPullingWire() && hovered != null && (node = partGrid.getPartNode(hovered)) != null) {
             // If the coarse pos is non-null, then this is as well
             ExactNodePos exactPos = Objects.requireNonNull(getExactNodePos(mouseX, mouseY));
             Port port = wireInProgress.getTargettedPort(exactPos);
             WireType type = wireInProgress.getType();
-            if (port != null && canConnectToPart(node, hovered, port, type))
-            {
+            if (port != null && canConnectToPart(node, hovered, port, type)) {
                 Identifier icon = PORT_BORDERS[port.ordinal() << 1 | type.ordinal()];
                 int iconX = canvasX + BORDER_TOP_LEFT + hovered.x() * PART_SLOT_SIZE;
                 int iconY = canvasY + BORDER_TOP_LEFT + hovered.y() * PART_SLOT_SIZE;
@@ -213,8 +187,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
     }
 
     @Override
-    protected void extractAdditionalContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    protected void extractAdditionalContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         NodePos hovered = getNodePos(mouseX, mouseY);
         Component cellText = Component.translatable(
                 CELL_COORD_TRANSLATION,
@@ -225,13 +198,11 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         graphics.text(owner.getFont(), cellText, x, y, 0xFF404040, false);
     }
 
-    private static String formatCellCoord(@Nullable NodePos pos, ToIntFunction<NodePos> coordGetter)
-    {
+    private static String formatCellCoord(@Nullable NodePos pos, ToIntFunction<NodePos> coordGetter) {
         return pos != null ? String.format(Locale.ROOT, "%2d", coordGetter.applyAsInt(pos)) : " -";
     }
 
-    private static void drawNodeFrame(GuiGraphicsExtractor graphics, int x, int y, int color)
-    {
+    private static void drawNodeFrame(GuiGraphicsExtractor graphics, int x, int y, int color) {
         // Can't use GuiGraphicsExtractor#outline() as it renders too late
         int width = PART_SLOT_SIZE + 1;
         int height = PART_SLOT_SIZE + 1;
@@ -241,121 +212,96 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         graphics.fill(x + width - 1, y + 1,          x + width, y + height - 1, color);
     }
 
-    public static void drawPartNode(GuiGraphicsExtractor graphics, IconConfig icon, int x, int y, int rotation, int partSize)
-    {
+    public static void drawPartNode(GuiGraphicsExtractor graphics, IconConfig icon, int x, int y, int rotation, int partSize) {
         drawPartNode(graphics.pose(), icon, x, y, rotation, partSize, PartBlitter.of(graphics));
     }
 
-    public static void drawPartNode(Matrix3x2fStack pose, IconConfig icon, int x, int y, int rotation, int partSize, PartBlitter blitter)
-    {
-        if (!icon.rotateTexture())
-        {
+    public static void drawPartNode(Matrix3x2fStack pose, IconConfig icon, int x, int y, int rotation, int partSize, PartBlitter blitter) {
+        if (!icon.rotateTexture()) {
             blitter.blit(pose, icon.icon(), x, y, partSize);
         }
-        if (rotation != 0)
-        {
+        if (rotation != 0) {
             pose.pushMatrix();
             pose.translate(x, y);
             pose.rotateAbout((float) Math.toRadians(90 * rotation), partSize / 2F, partSize / 2F);
             x = 0;
             y = 0;
         }
-        if (icon.rotateTexture())
-        {
+        if (icon.rotateTexture()) {
             blitter.blit(pose, icon.icon(), x, y, partSize);
         }
-        if (icon.portOverlay() != null)
-        {
+        if (icon.portOverlay() != null) {
             blitter.blit(pose, icon.portOverlay(), x, y, partSize);
         }
-        if (rotation != 0)
-        {
+        if (rotation != 0) {
             pose.popMatrix();
         }
     }
 
-    @Nullable
-    public NodePos getNodePlacementPos(int mouseX, int mouseY, @Nullable FloatingNode floatingNode)
-    {
+    public @Nullable NodePos getNodePlacementPos(int mouseX, int mouseY, @Nullable FloatingNode floatingNode) {
         NodePos pos = getNodePos(mouseX, mouseY);
-        if (pos != null && floatingNode != null)
-        {
+        if (pos != null && floatingNode != null) {
             return floatingNode.node().nudgePlacementPos(this, pos, floatingNode.rotation(), mouseX, mouseY);
         }
         return pos;
     }
 
     @Override
-    public boolean isMouseOver(double mouseX, double mouseY)
-    {
+    public boolean isMouseOver(double mouseX, double mouseY) {
         return super.isMouseOver(mouseX, mouseY) && !owner.getToolPane().getLibraryBrowser().isCoveredByInventory(mouseX, mouseY);
     }
 
-    public CompoundPrototypeNode getRootNode()
-    {
+    public CompoundPrototypeNode getRootNode() {
         return circuit;
     }
 
-    public PartGrid getPartGrid()
-    {
+    public PartGrid getPartGrid() {
         return partGrid;
     }
 
-    public WireGrid getWireGrid()
-    {
+    public WireGrid getWireGrid() {
         return wireGrid;
     }
 
-    public boolean isNodeOccupied(NodePos pos)
-    {
+    public boolean isNodeOccupied(NodePos pos) {
         return partGrid.getPartNode(pos) != null || wireGrid.getWireNode(pos) != null;
     }
 
-    public boolean canConnectToPart(PlaceableNode node, NodePos pos, Port port, WireType type)
-    {
+    public boolean canConnectToPart(PlaceableNode node, NodePos pos, Port port, WireType type) {
         return node.hasPort(port, type) && !node.isConnected(port) && !isPortObstructed(pos, port);
     }
 
-    public boolean isPortObstructed(NodePos pos, Port port)
-    {
+    public boolean isPortObstructed(NodePos pos, Port port) {
         return partGrid.getPartNode(pos.offset(port)) != null;
     }
 
-    public boolean isPullingWire()
-    {
+    public boolean isPullingWire() {
         return wireInProgress != null;
     }
 
-    public void startWirePull(WireType wireType)
-    {
+    public void startWirePull(WireType wireType) {
         wireInProgress = new WireInProgress(wireType);
     }
 
-    public void cancelWirePull()
-    {
+    public void cancelWirePull() {
         wireInProgress = null;
     }
 
-    public void pullWire(double mouseX, double mouseY, boolean doubleClick)
-    {
+    public void pullWire(double mouseX, double mouseY, boolean doubleClick) {
         Objects.requireNonNull(wireInProgress);
         // TODO: inform user on failure
         wireInProgress.placeNextNode(this, mouseX, mouseY, doubleClick);
     }
 
-    @Nullable
-    public WireInProgress getWireInProgress()
-    {
+    public @Nullable WireInProgress getWireInProgress() {
         return wireInProgress;
     }
 
-    public ErrorAnnotations getErrorAnnotations()
-    {
+    public ErrorAnnotations getErrorAnnotations() {
         return errorAnnotations;
     }
 
-    public void importPrototype(CompoundPrototypeNode circuit)
-    {
+    public void importPrototype(CompoundPrototypeNode circuit) {
         clear();
 
         circuit.getWires().forEach(wireGrid::importWireDirect);
@@ -363,15 +309,14 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
         this.circuit.copyConnectionsFrom(circuit);
     }
 
-    @Nullable
-    public ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY)
-    {
+    public @Nullable ContextMenuProvider getContextMenuProvider(double mouseX, double mouseY) {
         NodePos pos = getNodePos((int) mouseX, (int) mouseY);
-        if (pos == null) return null;
+        if (pos == null) {
+            return null;
+        }
 
         PlaceableNode node = partGrid.getPartNode(pos);
-        return switch (node)
-        {
+        return switch (node) {
             case Connection con -> new ConnectionNodeContextMenuProvider(this, con);
             case ConstantPrototypeNode constant -> new ConstantPartNodeContextMenuProvider(this, constant);
             case ClockPrototypeNode clock -> new ClockPartNodeContextMenuProvider(this, clock);
@@ -383,43 +328,36 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
     }
 
     @Override
-    public void computeWindowSize(int width, int height)
-    {
+    public void computeWindowSize(int width, int height) {
         int windowPadding = CircuitWorkbenchScreen.PADDING * 2;
         this.width = Math.min(WIDTH, width - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_WIDTH);
         this.height = Math.min(HEIGHT, height - windowPadding - CircuitWorkbenchScreen.NON_CIRCUIT_HEIGHT);
     }
 
     @Override
-    public void computeWindowPos(int leftPos, int topPos)
-    {
+    public void computeWindowPos(int leftPos, int topPos) {
         x = leftPos + CircuitWorkbenchScreen.BORDER_LEFT;
         y = topPos + CircuitWorkbenchScreen.OFFSET_TOP;
     }
 
-    public void clear()
-    {
+    public void clear() {
         circuit.clear();
         partGrid.clear();
         wireGrid.clear();
         errorAnnotations.clear();
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return circuit.isEmpty();
     }
 
     @Override
-    @Nullable
-    public PlaceableNode getPartNode(NodePos pos)
-    {
+    public @Nullable PlaceableNode getPartNode(NodePos pos) {
         return partGrid.getPartNode(pos);
     }
 
     @Override
-    public boolean isValidPos(NodePos pos)
-    {
+    public boolean isValidPos(NodePos pos) {
         return pos.isValid(PART_COUNT_X, PART_COUNT_Y);
     }
 }

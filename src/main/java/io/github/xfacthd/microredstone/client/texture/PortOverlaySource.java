@@ -29,8 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverlays, Optional<String> typePrefix) implements SpriteSource
-{
+public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverlays, Optional<String> typePrefix) implements SpriteSource {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final MapCodec<PortOverlaySource> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Identifier.CODEC.fieldOf("sprite").forGetter(PortOverlaySource::sprite),
@@ -39,32 +38,28 @@ public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverl
     ).apply(inst, PortOverlaySource::new));
     public static final Identifier ID = Utils.rl("port_overlay");
 
-    public PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverlays)
-    {
+    public PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverlays) {
         this(sprite, portOverlays, Optional.empty());
     }
 
     @Override
-    public void run(ResourceManager resourceManager, Output output)
-    {
-        if (portOverlays.isEmpty()) return;
-
+    public void run(ResourceManager resourceManager, Output output) {
+        if (portOverlays.isEmpty()) {
+            return;
+        }
         Map<Port, Pair<Resource, LazyLoadedImage>> portImages = new HashMap<>();
         Object2IntMap<WireType> types = new Object2IntOpenHashMap<>();
-        for (WireType type : portOverlays.values())
-        {
+        for (WireType type : portOverlays.values()) {
             types.compute(type, (_, count) -> count == null ? 1 : (count + 1));
         }
         String prefix = typePrefix.map(s -> s + "_").orElse("");
         Map<WireType, Pair<Resource, LazyLoadedImage>> resources = new HashMap<>();
-        for (Object2IntMap.Entry<WireType> entry : types.object2IntEntrySet())
-        {
+        for (Object2IntMap.Entry<WireType> entry : types.object2IntEntrySet()) {
             WireType type = entry.getKey();
             Identifier sprite = Utils.rl("gui/sprites/port/" + prefix + type.getSerializedName());
             Identifier location = TEXTURE_ID_CONVERTER.idToFile(sprite);
             Optional<Resource> typeResource = resourceManager.getResource(location);
-            if (typeResource.isEmpty())
-            {
+            if (typeResource.isEmpty()) {
                 LOGGER.warn("Port overlay '{}' does not exist", location);
                 return;
             }
@@ -76,26 +71,20 @@ public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverl
     }
 
     @Override
-    public MapCodec<PortOverlaySource> codec()
-    {
+    public MapCodec<PortOverlaySource> codec() {
         return CODEC;
     }
 
-    public record PortOverlaySupplier(Identifier sprite, Map<Port, Pair<Resource, LazyLoadedImage>> portImages) implements DiscardableLoader
-    {
+    public record PortOverlaySupplier(Identifier sprite, Map<Port, Pair<Resource, LazyLoadedImage>> portImages) implements DiscardableLoader {
         @Override
-        public SpriteContents get(SpriteResourceLoader loader)
-        {
-            try
-            {
+        public SpriteContents get(SpriteResourceLoader loader) {
+            try {
                 FrameSize size = checkImageSizes();
                 NativeImage imageOut = new NativeImage(size.width(), size.height(), true);
 
-                portImages.forEach((port, pair) ->
-                {
+                portImages.forEach((port, pair) -> {
                     NativeImage image = Uncheck.apply(LazyLoadedImage::get, pair.getSecond());
-                    switch (port)
-                    {
+                    switch (port) {
                         case UP -> copyRect(image, imageOut, true, false);
                         case RIGHT -> copyRect(image, imageOut, false, true);
                         case DOWN -> copyRect(image, imageOut, true, true);
@@ -103,40 +92,31 @@ public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverl
                     }
                 });
                 return new SpriteContents(sprite, size, imageOut);
-            }
-            catch (Throwable t)
-            {
+            } catch (Throwable t) {
                 LOGGER.warn("Failed to create port overlay {}", sprite, t);
-            }
-            finally
-            {
+            } finally {
                 portImages.values().forEach(pair -> pair.getSecond().release());
             }
             return MissingTextureAtlasSprite.create();
         }
 
-        private static void copyRect(NativeImage src, NativeImage dest, boolean rotate, boolean mirror)
-        {
+        private static void copyRect(NativeImage src, NativeImage dest, boolean rotate, boolean mirror) {
             int width = src.getWidth();
             int height = src.getHeight();
 
-            for (int srcY = 0; srcY < height; srcY++)
-            {
+            for (int srcY = 0; srcY < height; srcY++) {
                 int destY = mirror ? height - 1 - srcY : srcY;
-                for (int srcX = 0; srcX < width; srcX++)
-                {
+                for (int srcX = 0; srcX < width; srcX++) {
                     int destX = mirror ? width - 1 - srcX : srcX;
                     int color = src.getPixelABGR(srcX, srcY);
-                    if (ARGB.alpha(color) > 0)
-                    {
+                    if (ARGB.alpha(color) > 0) {
                         dest.setPixelABGR(rotate ? destY : destX, rotate ? destX : destY, color);
                     }
                 }
             }
         }
 
-        private FrameSize checkImageSizes()
-        {
+        private FrameSize checkImageSizes() {
             List<FrameSize> sizes = portImages.values()
                     .stream()
                     .map(Pair::getSecond)
@@ -144,21 +124,18 @@ public record PortOverlaySource(Identifier sprite, Map<Port, WireType> portOverl
                     .map(img -> new FrameSize(img.getWidth(), img.getHeight()))
                     .distinct()
                     .toList();
-            if (sizes.size() != 1)
-            {
+            if (sizes.size() != 1) {
                 throw new IllegalArgumentException("Encountered different image sizes: " + sizes);
             }
             return sizes.getFirst();
         }
 
         @Override
-        public void discard()
-        {
+        public void discard() {
             portImages.values().forEach(pair -> pair.getSecond().release());
         }
 
-        public Resource getPrimaryResource()
-        {
+        public Resource getPrimaryResource() {
             return portImages.values().iterator().next().getFirst();
         }
     }

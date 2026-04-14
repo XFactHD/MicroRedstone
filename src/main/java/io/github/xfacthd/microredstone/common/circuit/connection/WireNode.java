@@ -19,8 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntFunction;
 
-public sealed interface WireNode
-{
+public sealed interface WireNode {
     Codec<WireNode> CODEC = NodeType.CODEC.dispatch(WireNode::type, NodeType::getCodec);
     StreamCodec<ByteBuf, WireNode> STREAM_CODEC = NodeType.STREAM_CODEC.dispatch(WireNode::type, NodeType::getStreamCodec);
 
@@ -34,40 +33,34 @@ public sealed interface WireNode
 
     NodeType type();
 
-    record Dangling(NodePos pos) implements WireNode
-    {
+    record Dangling(NodePos pos) implements WireNode {
         private static final MapCodec<Dangling> CODEC = NodePos.CODEC.fieldOf("pos").xmap(WireNode.Dangling::new, WireNode.Dangling::pos);
         private static final StreamCodec<ByteBuf, Dangling> STREAM_CODEC = NodePos.STREAM_CODEC.map(WireNode.Dangling::new, WireNode.Dangling::pos);
 
         @Override
-        public Set<NodePos> neighbors()
-        {
+        public Set<NodePos> neighbors() {
             return Set.of();
         }
 
         @Override
-        public WireNode withNeighbor(Port dir, NodePos neighbor)
-        {
+        public WireNode withNeighbor(Port dir, NodePos neighbor) {
             return new Branch(pos, Set.of(dir), Set.of(neighbor));
         }
 
         @Override
-        public WireNode copy()
-        {
+        public WireNode copy() {
             return this;
         }
 
         @Override
-        public NodeType type()
-        {
+        public NodeType type() {
             return NodeType.DANGLING;
         }
     }
 
-    record Connection(NodePos pos, Port port, @Nullable NodePos neighbor) implements WireNode
-    {
-        private static final MapCodec<Connection> CODEC = RecordCodecBuilder.<WireNode.Connection>mapCodec(inst -> inst.group(
-            NodePos.CODEC.fieldOf("pos").forGetter(WireNode::pos),
+    record Connection(NodePos pos, Port port, @Nullable NodePos neighbor) implements WireNode {
+        private static final MapCodec<Connection> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                NodePos.CODEC.fieldOf("pos").forGetter(WireNode::pos),
                 Port.CODEC.fieldOf("port").forGetter(WireNode.Connection::port),
                 NodePos.CODEC.optionalFieldOf("neighbor").forGetter(WireNode.Connection::getNeighbor)
         ).apply(inst, WireNode.Connection::new));
@@ -81,44 +74,37 @@ public sealed interface WireNode
                 WireNode.Connection::new
         );
 
-        private Connection(NodePos pos, Port port, Optional<NodePos> neighbor)
-        {
+        private Connection(NodePos pos, Port port, Optional<NodePos> neighbor) {
             this(pos, port, neighbor.orElse(null));
         }
 
         @Override
-        public Set<NodePos> neighbors()
-        {
+        public Set<NodePos> neighbors() {
             return neighbor != null ? Set.of(neighbor) : Set.of();
         }
 
         @Override
-        public WireNode withNeighbor(Port dir, NodePos neighbor)
-        {
+        public WireNode withNeighbor(Port dir, NodePos neighbor) {
             return new Connection(pos, port, neighbor);
         }
 
         @Override
-        public WireNode copy()
-        {
+        public WireNode copy() {
             return this;
         }
 
         @Override
-        public NodeType type()
-        {
+        public NodeType type() {
             return NodeType.CONNECTION;
         }
 
-        private Optional<NodePos> getNeighbor()
-        {
+        private Optional<NodePos> getNeighbor() {
             return Optional.ofNullable(neighbor);
         }
     }
 
-    record Branch(NodePos pos, Set<Port> ports, Set<NodePos> neighbors) implements WireNode
-    {
-        private static final MapCodec<Branch> CODEC = RecordCodecBuilder.<WireNode.Branch>mapCodec(inst -> inst.group(
+    record Branch(NodePos pos, Set<Port> ports, Set<NodePos> neighbors) implements WireNode {
+        private static final MapCodec<Branch> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 NodePos.CODEC.fieldOf("pos").forGetter(WireNode::pos),
                 Port.CODEC.listOf().fieldOf("ports").xmap(Set::copyOf, List::copyOf).forGetter(WireNode.Branch::ports),
                 NodePos.CODEC.listOf().fieldOf("neighbors").xmap(Set::copyOf, List::copyOf).forGetter(WireNode.Branch::neighbors)
@@ -133,49 +119,40 @@ public sealed interface WireNode
                 WireNode.Branch::new
         );
 
-        public Branch
-        {
+        public Branch {
             ports = EnumSet.copyOf(ports);
             neighbors = new HashSet<>(neighbors);
         }
 
         @Override
-        public WireNode withNeighbor(Port dir, NodePos neighbor)
-        {
-            if (!neighbor.equals(pos))
-            {
+        public WireNode withNeighbor(Port dir, NodePos neighbor) {
+            if (!neighbor.equals(pos)) {
                 ports.add(dir);
                 neighbors.add(neighbor);
             }
             return this;
         }
 
-        public void addNeighbors(Set<NodePos> neighbors)
-        {
-            for (NodePos neighbor : neighbors)
-            {
-                if (!neighbor.equals(pos))
-                {
+        public void addNeighbors(Set<NodePos> neighbors) {
+            for (NodePos neighbor : neighbors) {
+                if (!neighbor.equals(pos)) {
                     this.neighbors.add(neighbor);
                 }
             }
         }
 
         @Override
-        public WireNode copy()
-        {
+        public WireNode copy() {
             return new Branch(pos, ports, neighbors);
         }
 
         @Override
-        public NodeType type()
-        {
+        public NodeType type() {
             return NodeType.BRANCH;
         }
     }
 
-    enum NodeType implements StringRepresentable
-    {
+    enum NodeType implements StringRepresentable {
         DANGLING(Dangling.CODEC, Dangling.STREAM_CODEC),
         CONNECTION(Connection.CODEC, Connection.STREAM_CODEC),
         BRANCH(Branch.CODEC, Branch.STREAM_CODEC),
@@ -189,25 +166,21 @@ public sealed interface WireNode
         private final MapCodec<? extends WireNode> codec;
         private final StreamCodec<ByteBuf, ? extends WireNode> streamCodec;
 
-        NodeType(MapCodec<? extends WireNode> codec, StreamCodec<ByteBuf, ? extends WireNode> streamCodec)
-        {
+        NodeType(MapCodec<? extends WireNode> codec, StreamCodec<ByteBuf, ? extends WireNode> streamCodec) {
             this.codec = codec;
             this.streamCodec = streamCodec;
         }
 
-        private MapCodec<? extends WireNode> getCodec()
-        {
+        private MapCodec<? extends WireNode> getCodec() {
             return codec;
         }
 
-        private StreamCodec<ByteBuf, ? extends WireNode> getStreamCodec()
-        {
+        private StreamCodec<ByteBuf, ? extends WireNode> getStreamCodec() {
             return streamCodec;
         }
 
         @Override
-        public String getSerializedName()
-        {
+        public String getSerializedName() {
             return name;
         }
     }

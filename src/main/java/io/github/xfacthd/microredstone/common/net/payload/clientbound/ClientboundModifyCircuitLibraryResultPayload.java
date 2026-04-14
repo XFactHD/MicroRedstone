@@ -6,8 +6,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record ClientboundModifyCircuitLibraryResultPayload(boolean success) implements CustomPacketPayload
-{
+public record ClientboundModifyCircuitLibraryResultPayload(boolean success) implements CustomPacketPayload {
     public static final Type<ClientboundModifyCircuitLibraryResultPayload> TYPE = Utils.payloadType("clientbound_modify_circuit_library_result");
     public static final StreamCodec<ByteBuf, ClientboundModifyCircuitLibraryResultPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
@@ -16,8 +15,7 @@ public record ClientboundModifyCircuitLibraryResultPayload(boolean success) impl
     );
 
     @Override
-    public Type<ClientboundModifyCircuitLibraryResultPayload> type()
-    {
+    public Type<ClientboundModifyCircuitLibraryResultPayload> type() {
         return TYPE;
     }
 }

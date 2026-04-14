@@ -14,8 +14,7 @@ import net.minecraft.util.StringRepresentable;
 import java.util.Locale;
 import java.util.function.IntFunction;
 
-public enum ShareType implements StringRepresentable
-{
+public enum ShareType implements StringRepresentable {
     PRIVATE,
     SHARED,
     PUBLIC,
@@ -30,26 +29,21 @@ public enum ShareType implements StringRepresentable
     private final Component title = Utils.translate("label", "circuit_workbench.library_browser.filter." + name);
     private final Identifier icon = Utils.rl("filter/type_" + name);
 
-    public Component getTitle()
-    {
+    public Component getTitle() {
         return title;
     }
 
-    public Identifier getIcon()
-    {
+    public Identifier getIcon() {
         return icon;
     }
 
     @Override
-    public String getSerializedName()
-    {
+    public String getSerializedName() {
         return name;
     }
 
-    MapCodec<? extends ShareInfo> getInfoCodec()
-    {
-        return switch (this)
-        {
+    MapCodec<? extends ShareInfo> getInfoCodec() {
+        return switch (this) {
             case PRIVATE -> ShareInfo.Private.CODEC;
             case SHARED -> ShareInfo.Shared.CODEC;
             case PUBLIC -> ShareInfo.Public.CODEC;
@@ -57,10 +51,8 @@ public enum ShareType implements StringRepresentable
         };
     }
 
-    StreamCodec<ByteBuf, ? extends ShareInfo> getInfoStreamCodec()
-    {
-        return switch (this)
-        {
+    StreamCodec<ByteBuf, ? extends ShareInfo> getInfoStreamCodec() {
+        return switch (this) {
             case PRIVATE -> ShareInfo.Private.STREAM_CODEC;
             case SHARED -> ShareInfo.Shared.STREAM_CODEC;
             case PUBLIC -> ShareInfo.Public.STREAM_CODEC;

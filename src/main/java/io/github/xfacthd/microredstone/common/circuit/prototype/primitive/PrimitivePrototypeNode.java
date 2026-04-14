@@ -35,14 +35,12 @@ import java.util.Map;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-public final class PrimitivePrototypeNode extends PrototypeNode
-{
+public final class PrimitivePrototypeNode extends PrototypeNode {
     private final Type type;
     private final int inputCount;
     private final WireType wireType;
 
-    public PrimitivePrototypeNode(Type type, int inputCount, WireType wireType)
-    {
+    public PrimitivePrototypeNode(Type type, int inputCount, WireType wireType) {
         super(type.portConfig(inputCount, wireType), type.icon(inputCount, wireType));
         type.validateInputCount(inputCount);
         this.type = type;
@@ -50,33 +48,26 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         this.wireType = wireType;
     }
 
-    public Type getType()
-    {
+    public Type getType() {
         return type;
     }
 
-    public boolean isMultiBit()
-    {
+    public boolean isMultiBit() {
         return wireType == WireType.BUNDLED;
     }
 
     @Override
-    public CircuitNode assemble(WireMapper wireMapper)
-    {
+    public CircuitNode assemble(WireMapper wireMapper) {
         List<Connector> inputConnectors = new ArrayList<>();
-        portConfig.getPortsWithDir(PortDir.INPUT).forEach(port ->
-        {
+        portConfig.getPortsWithDir(PortDir.INPUT).forEach(port -> {
             int wire = wireMapper.resolveWire(getWireOrThrow(port));
             inputConnectors.add(new Connector(getPos(), port, wire, PortDir.INPUT, wireType));
         });
         int outWire = wireMapper.resolveWire(getWireOrThrow(Port.RIGHT));
         Connector outputConnector = new Connector(getPos(), Port.RIGHT, outWire, PortDir.OUTPUT, wireType);
-        return switch (inputCount)
-        {
-            case 1 ->
-            {
-                if (type != Type.NOT)
-                {
+        return switch (inputCount) {
+            case 1 -> {
+                if (type != Type.NOT) {
                     throw new IllegalStateException("Invalid single-input logic op: " + type);
                 }
                 yield new NotLogicCircuitNode(isMultiBit(), inputConnectors.getFirst(), outputConnector);
@@ -88,15 +79,12 @@ public final class PrimitivePrototypeNode extends PrototypeNode
     }
 
     @Override
-    public Serializable serialize(List<Wire> wires)
-    {
+    public Serializable serialize(List<Wire> wires) {
         return new Serializable(this, wires, type, inputCount, wireType);
     }
 
-    public static IconConfig icon(PrimitiveCircuitNode node)
-    {
-        return switch (node)
-        {
+    public static IconConfig icon(PrimitiveCircuitNode node) {
+        return switch (node) {
             case NotLogicCircuitNode not -> Type.NOT.icon(1, not.getInputs()[0].type());
             case TwoInputLogicCircuitNode logicTwo -> logicTwo.getType().icon(2, logicTwo.getInputs()[0].type());
             case ThreeInputLogicCircuitNode logicThree -> logicThree.getType().icon(3, logicThree.getInputs()[0].type());
@@ -104,8 +92,7 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         };
     }
 
-    public enum Type implements StringRepresentable
-    {
+    public enum Type implements StringRepresentable {
         NOT(false, false, Utils.rl("part/not")),
         AND(true, false, Utils.rl("part/and")),
         OR(true, false, Utils.rl("part/or")),
@@ -127,12 +114,10 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         private final IntFunction<IconConfig> iconSingle;
         private final IntFunction<IconConfig> iconBundled;
 
-        Type(boolean multiInput, boolean invertsResult, Identifier icon)
-        {
+        Type(boolean multiInput, boolean invertsResult, Identifier icon) {
             this.multiInput = multiInput;
             this.invertsResult = invertsResult;
-            if (multiInput)
-            {
+            if (multiInput) {
                 PortConfig portsSingleTwo = PortConfig.builder()
                         .addPort(Port.UP, WireType.SINGLE, PortDir.INPUT)
                         .addPort(Port.DOWN, WireType.SINGLE, PortDir.INPUT)
@@ -163,9 +148,7 @@ public final class PrimitivePrototypeNode extends PrototypeNode
                 IconConfig iconBundledThree = IconConfig.of(icon, portsBundledThree);
                 this.iconSingle = inputs -> inputs == 2 ? iconSingleTwo : iconSingleThree;
                 this.iconBundled = inputs -> inputs == 2 ? iconBundledTwo : iconBundledThree;
-            }
-            else
-            {
+            } else {
                 PortConfig portsSingle = PortConfig.builder()
                         .addPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
                         .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
@@ -183,50 +166,41 @@ public final class PrimitivePrototypeNode extends PrototypeNode
             }
         }
 
-        public boolean invertsResult()
-        {
+        public boolean invertsResult() {
             return invertsResult;
         }
 
-        public PortConfig portConfig(int inputCount, WireType wireType)
-        {
+        public PortConfig portConfig(int inputCount, WireType wireType) {
             validateInputCount(inputCount);
             return wireType.select(portsSingle, portsBundled).apply(inputCount);
         }
 
-        public IconConfig icon(int inputCount, WireType wireType)
-        {
+        public IconConfig icon(int inputCount, WireType wireType) {
             validateInputCount(inputCount);
             return wireType.select(iconSingle, iconBundled).apply(inputCount);
         }
 
-        public Supplier<PrototypeNode> factory(int inputCount, WireType wireType)
-        {
+        public Supplier<PrototypeNode> factory(int inputCount, WireType wireType) {
             validateInputCount(inputCount);
             return () -> new PrimitivePrototypeNode(this, inputCount, wireType);
         }
 
-        private void validateInputCount(int inputCount)
-        {
-            if ((inputCount > 1) != multiInput)
-            {
+        private void validateInputCount(int inputCount) {
+            if ((inputCount > 1) != multiInput) {
                 throw new IllegalArgumentException(String.format(Locale.ROOT, "Invalid input count %d for type %s", inputCount, this));
             }
-            if (inputCount < 1 || inputCount > 3)
-            {
+            if (inputCount < 1 || inputCount > 3) {
                 throw new IllegalArgumentException(String.format(Locale.ROOT, "Invalid input count %d, expected 1 <= count <= 3", inputCount));
             }
         }
 
         @Override
-        public String getSerializedName()
-        {
+        public String getSerializedName() {
             return name;
         }
     }
 
-    public static final class Serializable extends PrototypeNode.Serializable
-    {
+    public static final class Serializable extends PrototypeNode.Serializable {
         public static final MapCodec<Serializable> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Type.CODEC.fieldOf("logic_type").forGetter(node -> node.type),
                 Codec.INT.fieldOf("input_count").forGetter(node -> node.inputCount),
@@ -237,16 +211,14 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         private final int inputCount;
         private final WireType wireType;
 
-        private Serializable(PrototypeNode node, List<Wire> wires, Type type, int inputCount, WireType wireType)
-        {
+        private Serializable(PrototypeNode node, List<Wire> wires, Type type, int inputCount, WireType wireType) {
             super(node, wires);
             this.type = type;
             this.inputCount = inputCount;
             this.wireType = wireType;
         }
 
-        private Serializable(Type type, int inputCount, WireType wireType, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
-        {
+        private Serializable(Type type, int inputCount, WireType wireType, Map<Port, Integer> connectedWires, NodePos pos, int rotation) {
             super(connectedWires, pos, rotation);
             this.type = type;
             this.inputCount = inputCount;
@@ -254,14 +226,12 @@ public final class PrimitivePrototypeNode extends PrototypeNode
         }
 
         @Override
-        protected PrototypeNode buildInternal()
-        {
+        protected PrototypeNode buildInternal() {
             return new PrimitivePrototypeNode(type, inputCount, wireType);
         }
 
         @Override
-        public ProtoNodeType<? extends PrototypeNode.Serializable> type()
-        {
+        public ProtoNodeType<? extends PrototypeNode.Serializable> type() {
             return MRContent.PROTO_TYPE_PRIMITIVE.value();
         }
     }

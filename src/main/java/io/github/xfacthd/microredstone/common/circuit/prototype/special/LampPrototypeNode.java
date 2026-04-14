@@ -33,8 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class LampPrototypeNode extends PrototypeNode
-{
+public final class LampPrototypeNode extends PrototypeNode {
     private static final PortConfig PORT_CONFIG = PortConfig.<LampPrototypeNode>builder()
             .addPredicatedPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT, node -> node.chainedTo == null)
             .build();
@@ -50,99 +49,80 @@ public final class LampPrototypeNode extends PrototypeNode
     @Nullable
     private LampChain chainToResolve = null;
 
-    public LampPrototypeNode()
-    {
+    public LampPrototypeNode() {
         super(PORT_CONFIG, ICON);
     }
 
-    private LampPrototypeNode(LampChain chain, DyeColor color)
-    {
+    private LampPrototypeNode(LampChain chain, DyeColor color) {
         this();
         this.chainToResolve = chain;
         this.color = color;
     }
 
-    public DyeColor getColor()
-    {
+    public DyeColor getColor() {
         return color;
     }
 
-    public void setColor(DyeColor color)
-    {
+    public void setColor(DyeColor color) {
         this.color = color;
-        for (LampPrototypeNode node : chainedToThis)
-        {
+        for (LampPrototypeNode node : chainedToThis) {
             node.setColor(color);
         }
     }
 
-    @Nullable
-    public LampPrototypeNode getNodeChainedTo()
-    {
+    public @Nullable LampPrototypeNode getNodeChainedTo() {
         return chainedTo;
     }
 
-    public LampPrototypeNode getChainRoot()
-    {
+    public LampPrototypeNode getChainRoot() {
         LampPrototypeNode root = this;
-        while (root.chainedTo != null)
-        {
+        while (root.chainedTo != null) {
             root = root.chainedTo;
         }
         return root;
     }
 
-    public void chain(LampPrototypeNode target)
-    {
+    public void chain(LampPrototypeNode target) {
         chainedTo = target;
         target.chainedToThis.add(this);
     }
 
-    public void unchain()
-    {
-        if (chainedTo != null)
-        {
+    public void unchain() {
+        if (chainedTo != null) {
             chainedTo.chainedToThis.remove(this);
             chainedTo = null;
         }
     }
 
-    public void unchainOnMove(PartSetMode mode)
-    {
-        switch (mode)
-        {
-            case ROTATE ->
-            {
+    public void unchainOnMove(PartSetMode mode) {
+        switch (mode) {
+            case ROTATE -> {
                 unchain();
 
                 Port newPort = Port.LEFT.rotate(getRotation());
-                for (LampPrototypeNode node : Set.copyOf(chainedToThis))
-                {
-                    if (getPos().offset(newPort).equals(node.getPos()))
-                    {
+                for (LampPrototypeNode node : Set.copyOf(chainedToThis)) {
+                    if (getPos().offset(newPort).equals(node.getPos())) {
                         node.unchain();
                     }
                 }
             }
-            case MOVE ->
-            {
+            case MOVE -> {
                 unchain();
                 chainedToThis.forEach(LampPrototypeNode::unchain);
             }
         }
     }
 
-    public void unchainOnDelete()
-    {
+    public void unchainOnDelete() {
         unchain();
         chainedToThis.forEach(LampPrototypeNode::unchain);
     }
 
     @Override
-    @Nullable
-    public CircuitNode assemble(WireMapper wireMapper)
-    {
-        if (chainedTo != null) return null;
+    public @Nullable CircuitNode assemble(WireMapper wireMapper) {
+        if (chainedTo != null) {
+            return null;
+        }
 
         List<LampCircuitNode.ChainEntry> chainedNodes = new ArrayList<>();
         collectChainedNodes(chainedNodes);
@@ -151,58 +131,56 @@ public final class LampPrototypeNode extends PrototypeNode
         return new LampCircuitNode(color, chainedNodes, inCon);
     }
 
-    private void collectChainedNodes(List<LampCircuitNode.ChainEntry> chainedNodes)
-    {
-        for (LampPrototypeNode node : chainedToThis)
-        {
+    private void collectChainedNodes(List<LampCircuitNode.ChainEntry> chainedNodes) {
+        for (LampPrototypeNode node : chainedToThis) {
             chainedNodes.add(new LampCircuitNode.ChainEntry(node.getPos(), node.getRotation()));
             node.collectChainedNodes(chainedNodes);
         }
     }
 
     @Override
-    public NodePos nudgePlacementPos(CircuitCanvasAccess canvas, NodePos newPos, int newRotation, int mouseX, int mouseY)
-    {
-        if (!(canvas.getPartNode(newPos) instanceof LampPrototypeNode lamp)) return newPos;
-        if (lamp == this) return newPos;
+    public NodePos nudgePlacementPos(CircuitCanvasAccess canvas, NodePos newPos, int newRotation, int mouseX, int mouseY) {
+        if (!(canvas.getPartNode(newPos) instanceof LampPrototypeNode lamp) || lamp == this) {
+            return newPos;
+        }
 
         ExactNodePos exactPos = canvas.getExactNodePos(mouseX, mouseY);
-        if (exactPos == null) return newPos;
+        if (exactPos == null) {
+            return newPos;
+        }
 
         Port hoveredPort = Port.ofCross(exactPos.fracX(), exactPos.fracY());
-        if (Port.LEFT.rotate(lamp.getRotation()) == hoveredPort) return newPos;
-        if (Port.LEFT.rotate(newRotation) != hoveredPort.getOpposite()) return newPos;
+        if (Port.LEFT.rotate(lamp.getRotation()) == hoveredPort) {
+            return newPos;
+        }
+        if (Port.LEFT.rotate(newRotation) != hoveredPort.getOpposite()) {
+            return newPos;
+        }
 
         NodePos lampPos = newPos.offset(hoveredPort);
         return canvas.isValidPos(lampPos) ? lampPos : newPos;
     }
 
     @Override
-    public void performPostPlaceAction(CircuitCanvasAccess canvas, int mouseX, int mouseY, @Nullable PartSetMode mode, boolean revertToLast)
-    {
-        if (mode != null && mode != PartSetMode.ADD)
-        {
+    public void performPostPlaceAction(CircuitCanvasAccess canvas, int mouseX, int mouseY, @Nullable PartSetMode mode, boolean revertToLast) {
+        if (mode != null && mode != PartSetMode.ADD) {
             unchainOnMove(mode);
         }
-        if (!revertToLast)
-        {
+        if (!revertToLast) {
             NodePos pos = canvas.getNodePos(mouseX, mouseY);
-            if (pos != null && !pos.equals(getPos()) && canvas.getPartNode(pos) instanceof LampPrototypeNode lamp)
-            {
+            if (pos != null && !pos.equals(getPos()) && canvas.getPartNode(pos) instanceof LampPrototypeNode lamp) {
                 chain(lamp);
             }
         }
     }
 
     @Override
-    public void performPreRemoveAction(CircuitCanvasAccess canvas)
-    {
+    public void performPreRemoveAction(CircuitCanvasAccess canvas) {
         unchainOnDelete();
     }
 
     @Override
-    public Serializable serialize(List<Wire> wires)
-    {
+    public Serializable serialize(List<Wire> wires) {
         Set<NodePos> chainedToThis = this.chainedToThis.stream()
                 .map(LampPrototypeNode::getPos)
                 .collect(Collectors.toSet());
@@ -211,10 +189,8 @@ public final class LampPrototypeNode extends PrototypeNode
     }
 
     @Override
-    public void finishDeserialization(List<PrototypeNode> nodes)
-    {
-        if (chainToResolve != null && !chainToResolve.isEmpty())
-        {
+    public void finishDeserialization(List<PrototypeNode> nodes) {
+        if (chainToResolve != null && !chainToResolve.isEmpty()) {
             chainToResolve.chainedToThis.stream()
                     .map(pos -> findNode(nodes, pos))
                     .filter(LampPrototypeNode.class::isInstance)
@@ -229,17 +205,14 @@ public final class LampPrototypeNode extends PrototypeNode
         chainToResolve = null;
     }
 
-    @Nullable
-    private static PrototypeNode findNode(List<PrototypeNode> nodes, NodePos pos)
-    {
+    private static @Nullable PrototypeNode findNode(List<PrototypeNode> nodes, NodePos pos) {
         return nodes.stream()
                 .filter(node -> node.getPos().equals(pos))
                 .findFirst()
                 .orElse(null);
     }
 
-    public static final class Serializable extends PrototypeNode.Serializable
-    {
+    public static final class Serializable extends PrototypeNode.Serializable {
         public static final MapCodec<Serializable> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 LampChain.CODEC.fieldOf("chain").forGetter(node -> node.chain),
                 DyeColor.CODEC.fieldOf("color").forGetter(node -> node.color)
@@ -248,42 +221,36 @@ public final class LampPrototypeNode extends PrototypeNode
         private final LampChain chain;
         private final DyeColor color;
 
-        private Serializable(PrototypeNode node, List<Wire> wires, LampChain chain, DyeColor color)
-        {
+        private Serializable(PrototypeNode node, List<Wire> wires, LampChain chain, DyeColor color) {
             super(node, wires);
             this.chain = chain;
             this.color = color;
         }
 
-        private Serializable(LampChain chain, DyeColor color, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
-        {
+        private Serializable(LampChain chain, DyeColor color, Map<Port, Integer> connectedWires, NodePos pos, int rotation) {
             super(connectedWires, pos, rotation);
             this.chain = chain;
             this.color = color;
         }
 
         @Override
-        protected PrototypeNode buildInternal()
-        {
+        protected PrototypeNode buildInternal() {
             return new LampPrototypeNode(chain, color);
         }
 
         @Override
-        public ProtoNodeType<? extends PrototypeNode.Serializable> type()
-        {
+        public ProtoNodeType<? extends PrototypeNode.Serializable> type() {
             return MRContent.PROTO_TYPE_LAMP.value();
         }
     }
 
-    private record LampChain(Set<NodePos> chainedToThis, Optional<NodePos> chainedTo)
-    {
+    private record LampChain(Set<NodePos> chainedToThis, Optional<NodePos> chainedTo) {
         public static final Codec<LampChain> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                 SerdesUtils.setCodec(NodePos.CODEC).fieldOf("chained_to_this").forGetter(LampChain::chainedToThis),
                 NodePos.CODEC.optionalFieldOf("chained_to").forGetter(LampChain::chainedTo)
         ).apply(inst, LampChain::new));
 
-        private boolean isEmpty()
-        {
+        private boolean isEmpty() {
             return chainedToThis.isEmpty() && chainedTo.isEmpty();
         }
     }

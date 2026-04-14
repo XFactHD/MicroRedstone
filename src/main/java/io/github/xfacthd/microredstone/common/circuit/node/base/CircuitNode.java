@@ -13,8 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 
 import java.util.List;
 
-public abstract sealed class CircuitNode permits RootCircuitNode, LeafCircuitNode
-{
+public abstract sealed class CircuitNode permits RootCircuitNode, LeafCircuitNode {
     public static final Codec<CircuitNode> CODEC = MRRegistries.CIRCUIT_NODE_TYPES.byNameCodec()
             .dispatch(CircuitNode::type, CircuitNodeType::codec);
     public static final StreamCodec<ByteBuf, CircuitNode> STREAM_CODEC = ByteBufCodecs.idMapper(MRRegistries.CIRCUIT_NODE_TYPES)
@@ -23,14 +22,12 @@ public abstract sealed class CircuitNode permits RootCircuitNode, LeafCircuitNod
     protected final Connector[] inputs;
     protected final Connector[] outputs;
 
-    protected CircuitNode(List<Connector> inputs, List<Connector> outputs)
-    {
+    protected CircuitNode(List<Connector> inputs, List<Connector> outputs) {
         this.inputs = inputs.toArray(Connector[]::new);
         this.outputs = outputs.toArray(Connector[]::new);
     }
 
-    protected CircuitNode(Connector[] inputs, Connector[] outputs)
-    {
+    protected CircuitNode(Connector[] inputs, Connector[] outputs) {
         this.inputs = inputs;
         this.outputs = outputs;
     }
@@ -42,16 +39,14 @@ public abstract sealed class CircuitNode permits RootCircuitNode, LeafCircuitNod
     /**
      * {@return the internal indices of ioPorts used as inputs}
      */
-    public final Connector[] getInputs()
-    {
+    public final Connector[] getInputs() {
         return inputs;
     }
 
     /**
      * {@return the internal indices of ioPorts used as outputs}
      */
-    public final Connector[] getOutputs()
-    {
+    public final Connector[] getOutputs() {
         return outputs;
     }
 

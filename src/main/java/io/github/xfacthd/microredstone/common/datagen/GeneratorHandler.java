@@ -11,15 +11,12 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 @Mod(MicroRedstone.MOD_ID)
-public final class GeneratorHandler
-{
-    public GeneratorHandler(IEventBus modBus)
-    {
+public final class GeneratorHandler {
+    public GeneratorHandler(IEventBus modBus) {
         modBus.addListener(GeneratorHandler::onGatherData);
     }
 
-    private static void onGatherData(GatherDataEvent.Client event)
-    {
+    private static void onGatherData(GatherDataEvent.Client event) {
         event.createProvider(MRBlockModelProvider::new);
         event.createProvider(MRItemModelProvider::new);
         event.createProvider(MRSpriteSourceProvider::new);

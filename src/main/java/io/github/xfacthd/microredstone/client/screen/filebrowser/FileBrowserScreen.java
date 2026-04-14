@@ -37,8 +37,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 // TODO: make title and dir/file icons
-public final class FileBrowserScreen extends Screen
-{
+public final class FileBrowserScreen extends Screen {
     private static final Identifier BACKGROUND = Utils.rl("textures/gui/filebrowser.png");
     private static final Identifier ICON_DIRECTORY = Utils.rl("filebrowser/icon_directory");
     private static final Identifier ICON_FILE = Utils.rl("filebrowser/icon_file");
@@ -131,13 +130,11 @@ public final class FileBrowserScreen extends Screen
     private FormattedPath formattedPath = new FormattedPath("", 0);
     private int selectedEntry = -1;
 
-    public static FileBrowserScreenBuilder builder(Type type)
-    {
+    public static FileBrowserScreenBuilder builder(Type type) {
         return new FileBrowserScreenBuilder(type);
     }
 
-    FileBrowserScreen(Type type, Component typeDesc, Path rootPath, @Nullable Path initialPath, FileNameSuffix fileNameSuffix, Consumer<@Nullable Path> pathConsumer)
-    {
+    FileBrowserScreen(Type type, Component typeDesc, Path rootPath, @Nullable Path initialPath, FileNameSuffix fileNameSuffix, Consumer<@Nullable Path> pathConsumer) {
         super(Component.translatable(type.title, typeDesc));
         this.type = type;
         this.typeDesc = typeDesc;
@@ -148,8 +145,7 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         scrollbar = addRenderableOnly(new Scrollbar(0, 0, LIST_HEIGHT, ENTRIES_HEIGHT, true, true, () -> currEntries.size() * ENTRY_HEIGHT, this::isMouseOverList, scrollbar));
 
         actionButtonBack = addRenderableWidget(new ImageButton(ACTION_BUTTON_SIZE, ACTION_BUTTON_SIZE, SPRITES_BACK, this::back, Component.empty()));
@@ -172,8 +168,7 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    protected void repositionElements()
-    {
+    protected void repositionElements() {
         leftPos = (width / 2) - (WIDTH / 2);
         topPos = (height / 2) - (HEIGHT / 2);
 
@@ -188,8 +183,7 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         extractMenuBackground(graphics);
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
 
@@ -211,8 +205,7 @@ public final class FileBrowserScreen extends Screen
         extractEntries(graphics, mouseX, mouseY);
     }
 
-    private void extractPath(GuiGraphicsExtractor graphics)
-    {
+    private void extractPath(GuiGraphicsExtractor graphics) {
         int pathMinX = leftPos + PATH_MIN_X;
         int pathMaxX = leftPos + PATH_MAX_X;
         int pathMinY = topPos + PATH_MIN_Y;
@@ -223,10 +216,8 @@ public final class FileBrowserScreen extends Screen
         graphics.disableScissor();
     }
 
-    private void extractEntries(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
-        if (dirEmpty || noMatchingFiles)
-        {
+    private void extractEntries(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        if (dirEmpty || noMatchingFiles) {
             Component text = dirEmpty ? MSG_DIR_EMPTY : MSG_DIR_NO_MATCHING_FILES;
             int textWidth = font.width(text);
             int textX = leftPos + LIST_X + (LIST_WIDTH / 2) - (textWidth / 2);
@@ -241,21 +232,22 @@ public final class FileBrowserScreen extends Screen
         int entryIconX = entryMinX + SMALL_PADDING;
         int entryNameX = entryIconX + ICON_SIZE + SMALL_PADDING;
         int entryMaxX = entryMinX + ENTRIES_WIDTH;
-        if (scrollbar.isVisible())
-        {
+        if (scrollbar.isVisible()) {
             entryMaxX -= scrollbar.getWidth();
         }
         graphics.enableScissor(entryMinX, listMinY, entryMaxX, listMaxY);
-        for (int i = 0; i < currEntries.size(); i++)
-        {
+        for (int i = 0; i < currEntries.size(); i++) {
             int minEntryY = listMinY + SMALL_PADDING + i * (ENTRY_HEIGHT) - Mth.floor(scrollbar.getOffset());
             int maxEntryY = minEntryY + ENTRY_HEIGHT;
-            if (minEntryY >= listMaxY) break;
-            if (maxEntryY <= listMinY) continue;
+            if (minEntryY >= listMaxY) {
+                break;
+            }
+            if (maxEntryY <= listMinY) {
+                continue;
+            }
 
             DirEntry entry = currEntries.get(i);
-            if (i == selectedEntry || (mouseX >= entryMinX && mouseX < entryMaxX && mouseY >= minEntryY && mouseY < maxEntryY))
-            {
+            if (i == selectedEntry || (mouseX >= entryMinX && mouseX < entryMaxX && mouseY >= minEntryY && mouseY < maxEntryY)) {
                 graphics.fill(entryMinX, minEntryY, entryMaxX, maxEntryY, 0xFFFFFFFF);
             }
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, entry.icon(), entryIconX, minEntryY + SMALL_PADDING, ICON_SIZE, ICON_SIZE);
@@ -265,10 +257,8 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
-    {
-        if (getFocused() != null && !getFocused().isMouseOver(event.x(), event.y()))
-        {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (getFocused() != null && !getFocused().isMouseOver(event.x(), event.y())) {
             setFocused(null);
         }
 
@@ -276,37 +266,26 @@ public final class FileBrowserScreen extends Screen
         int maxX = minX + ENTRIES_WIDTH;
         int minY = topPos + ENTRY_MIN_Y;
         int maxY = minY + ENTRIES_HEIGHT;
-        if (scrollbar.isVisible())
-        {
+        if (scrollbar.isVisible()) {
             maxX -= scrollbar.getWidth();
         }
-        if (event.x() >= minX && event.x() < maxX && event.y() >= minY && event.y() < maxY)
-        {
-            int idx = (int)(event.y() - minY + scrollbar.getOffset()) / ENTRY_HEIGHT;
-            if (idx >= 0 && idx < currEntries.size())
-            {
-                if (doubleClick && selectedEntry == idx)
-                {
-                    switch (currEntries.get(idx))
-                    {
+        if (event.x() >= minX && event.x() < maxX && event.y() >= minY && event.y() < maxY) {
+            int idx = (int) (event.y() - minY + scrollbar.getOffset()) / ENTRY_HEIGHT;
+            if (idx >= 0 && idx < currEntries.size()) {
+                if (doubleClick && selectedEntry == idx) {
+                    switch (currEntries.get(idx)) {
                         case DirEntry.Directory dir -> setCurrentPath(dir.path, true);
                         case DirEntry.File ignored -> execute(execButton);
                     }
-                }
-                else
-                {
+                } else {
                     selectedEntry = idx;
-                    switch (currEntries.get(idx))
-                    {
-                        case DirEntry.Directory ignored ->
-                        {
-                            if (type == Type.SAVE)
-                            {
+                    switch (currEntries.get(idx)) {
+                        case DirEntry.Directory ignored -> {
+                            if (type == Type.SAVE) {
                                 execButton.setMessage(Type.OPEN.buttonTitle);
                             }
                         }
-                        case DirEntry.File file ->
-                        {
+                        case DirEntry.File file -> {
                             fileNameEdit.setValue(file.name);
                             execButton.setMessage(type.buttonTitle);
                         }
@@ -316,48 +295,39 @@ public final class FileBrowserScreen extends Screen
             return true;
         }
         boolean handled = super.mouseClicked(event, doubleClick);
-        if (handled && getFocused() != null && dropFocusAfterClick.contains(getFocused()))
-        {
+        if (handled && getFocused() != null && dropFocusAfterClick.contains(getFocused())) {
             setFocused(null);
         }
         return handled;
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
-    {
-        if (scrollbar.mouseDragged(event, dragX, dragY))
-        {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (scrollbar.mouseDragged(event, dragX, dragY)) {
             return true;
         }
         return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event)
-    {
-        if (scrollbar.mouseReleased(event))
-        {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (scrollbar.mouseReleased(event)) {
             return true;
         }
         return super.mouseReleased(event);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
-        if (scrollbar.mouseScrolled(mouseX, mouseY, scrollX, scrollY))
-        {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollbar.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
-        if (event.isEscape())
-        {
+    public boolean keyPressed(KeyEvent event) {
+        if (event.isEscape()) {
             cancel(cancelButton);
             return true;
         }
@@ -365,19 +335,16 @@ public final class FileBrowserScreen extends Screen
     }
 
     @Override
-    public boolean shouldCloseOnEsc()
-    {
+    public boolean shouldCloseOnEsc() {
         return false;
     }
 
     @Override
-    public boolean isPauseScreen()
-    {
+    public boolean isPauseScreen() {
         return false;
     }
 
-    private boolean isMouseOverList(double mouseX, double mouseY)
-    {
+    private boolean isMouseOverList(double mouseX, double mouseY) {
         int minX = leftPos + LIST_X;
         int maxX = minX + LIST_WIDTH;
         int minY = topPos + LIST_Y;
@@ -385,19 +352,16 @@ public final class FileBrowserScreen extends Screen
         return mouseX >= minX && mouseX < maxX && mouseY >= minY && mouseY < maxY;
     }
 
-    private void setCurrentPath(Path currPath, boolean addToHistory)
-    {
+    private void setCurrentPath(Path currPath, boolean addToHistory) {
         this.currPath = currPath;
-        if (addToHistory)
-        {
+        if (addToHistory) {
             pathHistory.add(currPath);
             historyIdx = pathHistory.size() - 1;
         }
         updateDirectoryEntries();
     }
 
-    private void updateDirectoryEntries()
-    {
+    private void updateDirectoryEntries() {
         formattedPath = formatCurrentPath();
         listCurrentPath();
         execButton.setMessage(type.buttonTitle);
@@ -408,67 +372,56 @@ public final class FileBrowserScreen extends Screen
         actionButtonUp.active = canTraverseUp();
     }
 
-    private boolean canTraverseBack()
-    {
+    private boolean canTraverseBack() {
         return historyIdx > 0;
     }
 
-    private boolean canTraverseForward()
-    {
+    private boolean canTraverseForward() {
         return historyIdx < pathHistory.size() - 1;
     }
 
-    private boolean canTraverseUp()
-    {
+    private boolean canTraverseUp() {
         return currPath.startsWith(rootPath) && currPath.getNameCount() > rootPath.getNameCount();
     }
 
-    private void back(Button btn)
-    {
-        if (canTraverseBack())
-        {
+    private void back(Button btn) {
+        if (canTraverseBack()) {
             historyIdx--;
             setCurrentPath(pathHistory.get(historyIdx), false);
         }
     }
 
-    private void forward(Button btn)
-    {
-        if (canTraverseForward())
-        {
+    private void forward(Button btn) {
+        if (canTraverseForward()) {
             historyIdx++;
             setCurrentPath(pathHistory.get(historyIdx), false);
         }
     }
 
-    private void up(Button btn)
-    {
-        if (canTraverseUp())
-        {
+    private void up(Button btn) {
+        if (canTraverseUp()) {
             setCurrentPath(currPath.getParent(), true);
         }
     }
 
-    private void reload(Button btn)
-    {
+    private void reload(Button btn) {
         updateDirectoryEntries();
     }
 
-    private void execute(Button btn)
-    {
-        if (selectedEntry > -1 && selectedEntry < currEntries.size() && currEntries.get(selectedEntry) instanceof DirEntry.Directory dir)
-        {
+    private void execute(Button btn) {
+        if (selectedEntry > -1 && selectedEntry < currEntries.size() && currEntries.get(selectedEntry) instanceof DirEntry.Directory dir) {
             setCurrentPath(dir.path, false);
             return;
         }
 
         String fileName = fileNameEdit.getValue();
-        if (fileName.isEmpty()) return;
+        if (fileName.isEmpty()) {
+            return;
+        }
 
         fileName = fileNameSuffix.applySuffix(fileName);
         Path filePath = currPath.resolve(fileName);
-        if (type == Type.OPEN && !Files.exists(filePath))
-        {
+        if (type == Type.OPEN && !Files.exists(filePath)) {
             DialogScreen.builder(DialogScreen.Type.ERROR)
                     .withTitle(title)
                     .withMessage(Component.literal(fileName))
@@ -476,9 +429,7 @@ public final class FileBrowserScreen extends Screen
                     .withMessage(MSG_FILE_NOT_FOUND_LINE_TWO)
                     .show();
             return;
-        }
-        else if (type == Type.SAVE && Files.exists(filePath))
-        {
+        } else if (type == Type.SAVE && Files.exists(filePath)) {
             DialogScreen.builder(DialogScreen.Type.CONFIRM)
                     .withTitle(Component.translatable(TITLE_SAVE_CONFIRM_OVERWRITE, typeDesc))
                     .withMessage(Component.translatable(MSG_SAVE_CONFIRM_OVERWRITE_LINE_ONE, fileName))
@@ -490,74 +441,63 @@ public final class FileBrowserScreen extends Screen
         doExecute(filePath);
     }
 
-    private void doExecute(Path filePath)
-    {
+    private void doExecute(Path filePath) {
         onClose();
         pathConsumer.accept(filePath);
     }
 
-    private void cancel(Button btn)
-    {
+    private void cancel(Button btn) {
         onClose();
         pathConsumer.accept(null);
     }
 
-    private void listCurrentPath()
-    {
+    private void listCurrentPath() {
         currEntries.clear();
         dirEmpty = true;
         noMatchingFiles = false;
 
-        try (Stream<Path> paths = Files.list(currPath))
-        {
-            paths.forEach(path ->
-            {
+        try (Stream<Path> paths = Files.list(currPath)) {
+            paths.forEach(path -> {
                 dirEmpty = false;
 
-                if (Files.isDirectory(path))
-                {
+                if (Files.isDirectory(path)) {
                     currEntries.add(new DirEntry.Directory(path, path.getFileName().toString()));
-                }
-                else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                {
+                } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
                     String fileName = path.getFileName().toString();
-                    if (fileNameSuffix.filter(fileName))
-                    {
+                    if (fileNameSuffix.filter(fileName)) {
                         currEntries.add(new DirEntry.File(path, fileName));
                     }
                 }
             });
-        }
-        catch (IOException | UncheckedIOException ignored) { }
+        } catch (IOException | UncheckedIOException ignored) { }
 
         noMatchingFiles = !dirEmpty && currEntries.isEmpty();
 
-        currEntries.sort((e1, e2) ->
-        {
+        currEntries.sort((e1, e2) -> {
             boolean dir1 = e1 instanceof DirEntry.Directory;
             boolean dir2 = e2 instanceof DirEntry.Directory;
-            if (dir1 && !dir2) return -1;
-            if (!dir1 && dir2) return 1;
+            if (dir1 && !dir2) {
+                return -1;
+            }
+            if (!dir1 && dir2) {
+                return 1;
+            }
             return e1.name().compareTo(e2.name());
         });
     }
 
-    private FormattedPath formatCurrentPath()
-    {
+    private FormattedPath formatCurrentPath() {
         Path path = rootPath.relativize(currPath);
         StringBuilder pathText = new StringBuilder();
         int runningWidth = 0;
         boolean first = true;
-        for (int i = path.getNameCount() - 1; i >= 0; i--)
-        {
+        for (int i = path.getNameCount() - 1; i >= 0; i--) {
             String partText = "> " + path.getName(i);
-            if (!first)
-            {
+            if (!first) {
                 partText += " ";
             }
             int partWidth = font.width(partText);
-            if (runningWidth + partWidth > PATH_MAX_WIDTH)
-            {
+            if (runningWidth + partWidth > PATH_MAX_WIDTH) {
                 break;
             }
             pathText.insert(0, partText);
@@ -567,43 +507,36 @@ public final class FileBrowserScreen extends Screen
         return new FormattedPath(pathText.toString().trim(), runningWidth);
     }
 
-    private static WidgetSprites actionSprites(String type)
-    {
+    private static WidgetSprites actionSprites(String type) {
         Identifier prefix = Utils.rl("filebrowser/button_" + type);
         return new WidgetSprites(prefix, prefix.withSuffix("_disabled"), prefix.withSuffix("_focused"));
     }
 
-    private record FormattedPath(String text, int width) {}
+    private record FormattedPath(String text, int width) { }
 
-    private sealed interface DirEntry
-    {
+    private sealed interface DirEntry {
         Path path();
 
         String name();
 
         Identifier icon();
 
-        record Directory(Path path, String name) implements DirEntry
-        {
+        record Directory(Path path, String name) implements DirEntry {
             @Override
-            public Identifier icon()
-            {
+            public Identifier icon() {
                 return ICON_DIRECTORY;
             }
         }
 
-        record File(Path path, String name) implements DirEntry
-        {
+        record File(Path path, String name) implements DirEntry {
             @Override
-            public Identifier icon()
-            {
+            public Identifier icon() {
                 return ICON_FILE;
             }
         }
     }
 
-    public enum Type
-    {
+    public enum Type {
         OPEN(Utils.rl("filebrowser/icon_open")),
         SAVE(Utils.rl("filebrowser/icon_save")),
         ;
@@ -613,18 +546,15 @@ public final class FileBrowserScreen extends Screen
         private final Component buttonTitle = Utils.translate("button", "file_browser." + name);
         private final Identifier icon;
 
-        Type(Identifier icon)
-        {
+        Type(Identifier icon) {
             this.icon = icon;
         }
 
-        public String getTitle()
-        {
+        public String getTitle() {
             return title;
         }
 
-        public Component getButtonTitle()
-        {
+        public Component getButtonTitle() {
             return buttonTitle;
         }
     }

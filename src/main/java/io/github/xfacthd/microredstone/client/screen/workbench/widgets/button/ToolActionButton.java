@@ -15,8 +15,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import org.jspecify.annotations.Nullable;
 
-public final class ToolActionButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ToolsTab.ToolAction>, ContextMenuProviderProxy
-{
+public final class ToolActionButton extends SimpleButton implements DropFocusAfterClick, ActionButton<ToolsTab.ToolAction>, ContextMenuProviderProxy {
     private static final int WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH - 10;
     public static final int HEIGHT = 20;
     private static final int ICON_SIZE = 16;
@@ -26,26 +25,22 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     private final ToolsTab owner;
     private final ToolsTab.ToolAction action;
 
-    public ToolActionButton(ToolsTab owner, ToolsTab.ToolAction action)
-    {
+    public ToolActionButton(ToolsTab owner, ToolsTab.ToolAction action) {
         super(0, 0, WIDTH, HEIGHT, action.getTitle());
         this.owner = owner;
         this.action = action;
     }
 
     @Override
-    protected void extractDefaultLabel(ActiveTextCollector textCollector)
-    {
+    protected void extractDefaultLabel(ActiveTextCollector textCollector) {
         int minX = getX() + TEXT_OFFSET;
         int maxX = getX() + getWidth() - 2;
         textCollector.acceptScrollingWithDefaultCenter(getMessage(), minX, maxX, getY(), getY() + getHeight());
     }
 
     @Override
-    protected void extractForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
-        if (action.isInUse(owner))
-        {
+    protected void extractForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        if (action.isInUse(owner)) {
             graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0xAA169C9C);
         }
 
@@ -58,36 +53,29 @@ public final class ToolActionButton extends SimpleButton implements DropFocusAft
     }
 
     @Override
-    protected WidgetSprites getSprites()
-    {
+    protected WidgetSprites getSprites() {
         return SPRITES;
     }
 
     @Override
-    public void onClick(MouseButtonEvent event, boolean doubleClick)
-    {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT)
-        {
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             onPress(event);
         }
     }
 
     @Override
-    public void onPress(InputWithModifiers input)
-    {
+    public void onPress(InputWithModifiers input) {
         action.execute(owner);
     }
 
     @Override
-    @Nullable
-    public ContextMenuProvider getContextMenuProvider()
-    {
+    public @Nullable ContextMenuProvider getContextMenuProvider() {
         return action.getContextMenuProvider();
     }
 
     @Override
-    public ToolsTab.ToolAction getAction()
-    {
+    public ToolsTab.ToolAction getAction() {
         return action;
     }
 }

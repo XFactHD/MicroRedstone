@@ -23,11 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(DebugExportConfigExtension.class)
-public final class ComplexCircuitTest
-{
+public final class ComplexCircuitTest {
     @Test
-    void testComplexCircuit()
-    {
+    void testComplexCircuit() {
         CompoundPrototypeNode protoNode = ComplexTestCircuits.bcdTo7SegDecoder();
         CompoundCircuitNode node = TestUtils.assemble(protoNode, "BCD_2_7SEG");
 
@@ -50,14 +48,12 @@ public final class ComplexCircuitTest
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             adapter.setValue(Port.LEFT, i);
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(expectedOutputs[i], adapter.getValue(Port.RIGHT), "Interpreted BCD_TO_7SEG input " + i);
         }
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             adapter.setValue(Port.LEFT, i);
             circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(expectedOutputs[i], adapter.getValue(Port.RIGHT), "Compiled BCD_TO_7SEG input " + i);
@@ -72,8 +68,7 @@ public final class ComplexCircuitTest
     }
 
     @Test
-    void testNestedCircuit_OneInOneOut()
-    {
+    void testNestedCircuit_OneInOneOut() {
         TestBuilder innerBuilder = new TestBuilder();
 
         Wire innerWireIn = innerBuilder.addWire(WireType.SINGLE);
@@ -119,14 +114,12 @@ public final class ComplexCircuitTest
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             int left = adapter.setValue(Port.LEFT, i & 1);
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Interpreted NESTED input " + i);
         }
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             int left = adapter.setValue(Port.LEFT, i & 1);
             circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled NESTED input " + i);
@@ -141,8 +134,7 @@ public final class ComplexCircuitTest
     }
 
     @Test
-    void testNestedCircuit_OneInTwoOut()
-    {
+    void testNestedCircuit_OneInTwoOut() {
         TestBuilder innerBuilder = new TestBuilder();
 
         Wire innerWireIn = innerBuilder.addWire(WireType.SINGLE);
@@ -201,15 +193,13 @@ public final class ComplexCircuitTest
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             int left = adapter.setValue(Port.LEFT, i & 1);
             int right = (left << 1) | left;
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(right, adapter.getValue(Port.RIGHT), "Interpreted NESTED input " + i);
         }
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             int left = adapter.setValue(Port.LEFT, i & 1);
             int right = (left << 1) | left;
             circuitCompiled.evaluate(adapter, null);
@@ -225,8 +215,7 @@ public final class ComplexCircuitTest
     }
 
     @Test
-    void testNestedCircuit_OneInThreeOut()
-    {
+    void testNestedCircuit_OneInThreeOut() {
         TestBuilder innerBuilder = new TestBuilder();
 
         Wire innerWireIn = innerBuilder.addWire(WireType.SINGLE);
@@ -293,15 +282,13 @@ public final class ComplexCircuitTest
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             int left = adapter.setValue(Port.LEFT, i & 1);
             int right = (left << 2) | (left << 1) | left;
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(right, adapter.getValue(Port.RIGHT), "Interpreted NESTED input " + i);
         }
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             int left = adapter.setValue(Port.LEFT, i & 1);
             int right = (left << 2) | (left << 1) | left;
             circuitCompiled.evaluate(adapter, null);

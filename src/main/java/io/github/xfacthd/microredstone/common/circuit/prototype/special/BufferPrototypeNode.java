@@ -20,8 +20,7 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import java.util.List;
 import java.util.Map;
 
-public final class BufferPrototypeNode extends PrototypeNode
-{
+public final class BufferPrototypeNode extends PrototypeNode {
     private static final PortConfig PORTS_SINGLE = PortConfig.builder()
             .addPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
             .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
@@ -35,15 +34,13 @@ public final class BufferPrototypeNode extends PrototypeNode
 
     private final WireType wireType;
 
-    public BufferPrototypeNode(WireType wireType)
-    {
+    public BufferPrototypeNode(WireType wireType) {
         super(wireType.select(PORTS_SINGLE, PORTS_BUNDLED), wireType.select(ICON_SINGLE, ICON_BUNDLED));
         this.wireType = wireType;
     }
 
     @Override
-    public BufferCircuitNode assemble(WireMapper wireMapper)
-    {
+    public BufferCircuitNode assemble(WireMapper wireMapper) {
         int inputWire = wireMapper.resolveWire(getWireOrThrow(Port.LEFT));
         int outputWire = wireMapper.resolveWire(getWireOrThrow(Port.RIGHT));
         return new BufferCircuitNode(
@@ -53,45 +50,38 @@ public final class BufferPrototypeNode extends PrototypeNode
     }
 
     @Override
-    public Serializable serialize(List<Wire> wires)
-    {
+    public Serializable serialize(List<Wire> wires) {
         return new Serializable(this, wires, wireType);
     }
 
-    public static IconConfig icon(BufferCircuitNode node)
-    {
+    public static IconConfig icon(BufferCircuitNode node) {
         return node.getInputs()[0].type().select(ICON_SINGLE, ICON_BUNDLED);
     }
 
-    public static final class Serializable extends PrototypeNode.Serializable
-    {
+    public static final class Serializable extends PrototypeNode.Serializable {
         public static final MapCodec<Serializable> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 WireType.CODEC.fieldOf("wire_type").forGetter(node -> node.wireType)
         ).and(commonFields(inst)).apply(inst, Serializable::new));
 
         private final WireType wireType;
 
-        private Serializable(PrototypeNode node, List<Wire> wires, WireType wireType)
-        {
+        private Serializable(PrototypeNode node, List<Wire> wires, WireType wireType) {
             super(node, wires);
             this.wireType = wireType;
         }
 
-        private Serializable(WireType wireType, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
-        {
+        private Serializable(WireType wireType, Map<Port, Integer> connectedWires, NodePos pos, int rotation) {
             super(connectedWires, pos, rotation);
             this.wireType = wireType;
         }
 
         @Override
-        protected PrototypeNode buildInternal()
-        {
+        protected PrototypeNode buildInternal() {
             return new BufferPrototypeNode(wireType);
         }
 
         @Override
-        public ProtoNodeType<? extends PrototypeNode.Serializable> type()
-        {
+        public ProtoNodeType<? extends PrototypeNode.Serializable> type() {
             return MRContent.PROTO_TYPE_BUFFER.value();
         }
     }

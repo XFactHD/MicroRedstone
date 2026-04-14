@@ -9,8 +9,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 
-public record Connector(NodePos pos, Port port, int wire, PortDir dir, WireType type, String name)
-{
+public record Connector(NodePos pos, Port port, int wire, PortDir dir, WireType type, String name) {
     public static final Codec<Connector> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             NodePos.CODEC.fieldOf("pos").forGetter(Connector::pos),
             Port.CODEC.fieldOf("port").forGetter(Connector::port),
@@ -35,8 +34,7 @@ public record Connector(NodePos pos, Port port, int wire, PortDir dir, WireType 
             Connector::new
     );
 
-    public Connector(NodePos pos, Port port, int wire, PortDir dir, WireType type)
-    {
+    public Connector(NodePos pos, Port port, int wire, PortDir dir, WireType type) {
         this(pos, port, wire, dir, type, "");
     }
 }

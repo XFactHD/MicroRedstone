@@ -27,8 +27,7 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 // TODO: rename to something more sensible
-public final class LibraryBrowser extends ToolPaneTabWidget implements MultiModeTab<LibraryBrowser.Mode>
-{
+public final class LibraryBrowser extends ToolPaneTabWidget implements MultiModeTab<LibraryBrowser.Mode> {
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.library_browser.mode");
     private static final Identifier INVENTORY = Utils.rl("workbench_inventory");
     private static final Identifier SLOT = Utils.rl("minecraft", "container/slot");
@@ -49,10 +48,13 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     private static final int ACTION_BTN_X = 5;
     private static final int ACTION_BTN_Y = 50;
     private static final int ACTION_BTN_PADDING = 2;
-    private static final ValidatingEditBox.Validator NAME_VALIDATOR = value ->
-    {
-        if (value.isEmpty()) return TriState.DEFAULT;
-        if (CircuitValidator.validateName(value, false)) return TriState.TRUE;
+    private static final ValidatingEditBox.Validator NAME_VALIDATOR = value -> {
+        if (value.isEmpty()) {
+            return TriState.DEFAULT;
+        }
+        if (CircuitValidator.validateName(value, false)) {
+            return TriState.TRUE;
+        }
         return TriState.FALSE;
     };
 
@@ -70,8 +72,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     private boolean wasImport = true;
     private boolean wasExport = true;
 
-    public LibraryBrowser(CircuitWorkbenchScreen owner, ToolPane toolPane)
-    {
+    public LibraryBrowser(CircuitWorkbenchScreen owner, ToolPane toolPane) {
         super(owner, toolPane);
         this.modeBtnImport = new ModeButton<>(this, Mode.IMPORT, 0, 0);
         this.modeBtnExport = new ModeButton<>(this, Mode.EXPORT, 0, 0);
@@ -81,57 +82,46 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     }
 
     @Override
-    protected void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    protected void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.text(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, INVENTORY, invX, invY, INVENTORY_WIDTH, INVENTORY_HEIGHT);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, slotX, slotY, SLOT_SIZE, SLOT_SIZE);
-        if (!owner.getMenu().getCircuitSlot().hasItem())
-        {
+        if (!owner.getMenu().getCircuitSlot().hasItem()) {
             ScreenUtils.submitTransparentFakeItem(graphics, dummyCircuit, slotX + 1, slotY + 1);
         }
     }
 
     @Override
-    public Mode getMode()
-    {
+    public Mode getMode() {
         return mode;
     }
 
     @Override
-    public void setMode(Mode mode)
-    {
-        if (this.mode != mode)
-        {
+    public void setMode(Mode mode) {
+        if (this.mode != mode) {
             this.mode = mode;
             updateWidgetVisibility(true);
         }
     }
 
-    public void setExportName(String name)
-    {
+    public void setExportName(String name) {
         exportNameEditBox.setValue(name);
     }
 
-    public boolean isCoveredByInventory(double mouseX, double mouseY)
-    {
+    public boolean isCoveredByInventory(double mouseX, double mouseY) {
         return toolPane.getActiveTab() == getType() && mouseX >= invX && mouseY >= invY;
     }
 
-    public boolean isNameEditFocused()
-    {
+    public boolean isNameEditFocused() {
         return mode == Mode.EXPORT && exportNameEditBox.isFocused();
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
-        if (mode == Mode.EXPORT && exportNameEditBox.isFocused())
-        {
-            if (ScreenUtils.isInventoryKey(event))
-            {
+    public boolean keyPressed(KeyEvent event) {
+        if (mode == Mode.EXPORT && exportNameEditBox.isFocused()) {
+            if (ScreenUtils.isInventoryKey(event)) {
                 return true;
             }
             return exportNameEditBox.keyPressed(event);
@@ -140,8 +130,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     }
 
     @Override
-    public void initContent(Consumer<AbstractWidget> widgetAdder)
-    {
+    public void initContent(Consumer<AbstractWidget> widgetAdder) {
         widgetAdder.accept(modeBtnImport);
         widgetAdder.accept(modeBtnExport);
         importActionButtons.forEach(widgetAdder);
@@ -150,8 +139,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     }
 
     @Override
-    public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight)
-    {
+    public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight) {
         super.computeLayout(screenX, screenY, screenWidth, screenHeight, toolPaneX, toolPaneY, windowHeight);
 
         invX = paneX - INVENTORY_WIDTH - CircuitWorkbenchScreen.PADDING;
@@ -162,22 +150,18 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         modeBtnImport.setPosition(paneX + MODE_BTN_IMPORT_X, paneY + MODE_BTN_Y);
         modeBtnExport.setPosition(paneX + MODE_BTN_EXPORT_X, paneY + MODE_BTN_Y);
         exportNameEditBox.setPosition(paneX + NAME_EDIT_X, paneY + NAME_EDIT_Y);
-        importActionButtons.forEach((button) ->
-        {
+        importActionButtons.forEach((button) -> {
             int btnY = paneY + ACTION_BTN_Y + (LibraryActionButton.HEIGHT + ACTION_BTN_PADDING) * button.getAction().ordinal();
             button.setPosition(paneX + ACTION_BTN_X, btnY);
         });
-        exportActionButtons.forEach((button) ->
-        {
+        exportActionButtons.forEach((button) -> {
             int btnY = paneY + ACTION_BTN_Y + (LibraryActionButton.HEIGHT + ACTION_BTN_PADDING) * button.getAction().ordinal();
             button.setPosition(paneX + ACTION_BTN_X, btnY);
         });
 
-        owner.getSlots().forEach(slot ->
-        {
+        owner.getSlots().forEach(slot -> {
             // Circuit slot
-            if (slot.index == 0)
-            {
+            if (slot.index == 0) {
                 slot.x = slotX - screenX + 1;
                 slot.y = slotY - screenY + 1;
                 return;
@@ -191,49 +175,41 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
     }
 
     @Override
-    public void updateWidgetVisibility(boolean active)
-    {
+    public void updateWidgetVisibility(boolean active) {
         modeBtnImport.visible = active;
         modeBtnExport.visible = active;
         owner.getSlots().forEach(slot -> slot.setActive(active));
 
         boolean isImport = active && mode == Mode.IMPORT;
-        if (wasImport != isImport)
-        {
+        if (wasImport != isImport) {
             importActionButtons.forEach(btn -> btn.visible = isImport);
             wasImport = isImport;
         }
         boolean isExport = active && mode == Mode.EXPORT;
-        if (wasExport != isExport)
-        {
+        if (wasExport != isExport) {
             exportNameEditBox.visible = isExport;
             exportActionButtons.forEach(btn -> btn.visible = isExport);
             wasExport = isExport;
         }
-        if (!exportNameEditBox.visible)
-        {
+        if (!exportNameEditBox.visible) {
             exportNameEditBox.clearInvalidState();
         }
     }
 
-    public int getInvLabelX()
-    {
+    public int getInvLabelX() {
         return invX + 11;
     }
 
-    public int getInvLabelY()
-    {
+    public int getInvLabelY() {
         return invY + 8;
     }
 
     @Override
-    public ToolPaneTab getType()
-    {
+    public ToolPaneTab getType() {
         return ToolPaneTab.LIBRARY;
     }
 
-    public enum Mode implements MultiModeTab.Mode
-    {
+    public enum Mode implements MultiModeTab.Mode {
         IMPORT,
         EXPORT;
 
@@ -241,14 +217,12 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         private final Component title = Utils.translate("label", "circuit_workbench.library_browser.mode." + name);
 
         @Override
-        public Component getTitle()
-        {
+        public Component getTitle() {
             return title;
         }
     }
 
-    public enum ImportAction implements LibraryActionButton.Action<LibraryBrowser>
-    {
+    public enum ImportAction implements LibraryActionButton.Action<LibraryBrowser> {
         IMPORT_FROM_ITEM,
         IMPORT_FROM_JSON,
         ;
@@ -259,21 +233,17 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         private final Component title = Utils.translate("label", "circuit_workbench.library_browser.import_action." + name);
 
         @Override
-        public boolean isActive(LibraryBrowser browser)
-        {
-            return !browser.owner.hasActiveEditAction() && switch (this)
-            {
+        public boolean isActive(LibraryBrowser browser) {
+            return !browser.owner.hasActiveEditAction() && switch (this) {
                 case IMPORT_FROM_ITEM -> browser.owner.getMenu().getCircuitSlot().hasItem();
                 case IMPORT_FROM_JSON -> true;
             };
         }
 
         @Override
-        public void execute(LibraryBrowser browser)
-        {
+        public void execute(LibraryBrowser browser) {
             final ImportExportHandler importExportHandler = browser.owner.getImportExportHandler();
-            switch (this)
-            {
+            switch (this) {
                 case IMPORT_FROM_ITEM -> importExportHandler.importCircuitFromItem(
                         browser.owner.getMenu().getCircuitSlot().getItem()
                 );
@@ -282,14 +252,12 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         }
 
         @Override
-        public Component getTitle()
-        {
+        public Component getTitle() {
             return title;
         }
     }
 
-    public enum ExportAction implements LibraryActionButton.Action<LibraryBrowser>
-    {
+    public enum ExportAction implements LibraryActionButton.Action<LibraryBrowser> {
         EXPORT_TO_ITEM,
         EXPORT_TO_LIBRARY,
         EXPORT_TO_JSON,
@@ -302,10 +270,8 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         private final Component title = Utils.translate("label", "circuit_workbench.library_browser.export_action." + name);
 
         @Override
-        public boolean isActive(LibraryBrowser browser)
-        {
-            return !browser.owner.hasActiveEditAction() && switch (this)
-            {
+        public boolean isActive(LibraryBrowser browser) {
+            return !browser.owner.hasActiveEditAction() && switch (this) {
                 case EXPORT_TO_ITEM -> !browser.exportNameEditBox.getValue().isEmpty() && browser.owner.getMenu().getCircuitSlot().hasItem();
                 case EXPORT_TO_LIBRARY -> !browser.exportNameEditBox.getValue().isEmpty();
                 case EXPORT_TO_JSON -> true;
@@ -314,12 +280,10 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         }
 
         @Override
-        public void execute(LibraryBrowser browser)
-        {
+        public void execute(LibraryBrowser browser) {
             ImportExportHandler importExportHandler = browser.owner.getImportExportHandler();
             String circuitName = browser.exportNameEditBox.getTrimmedValue();
-            switch (this)
-            {
+            switch (this) {
                 case EXPORT_TO_ITEM -> importExportHandler.assembleAndExport(circuitName, ExportTarget.CIRCUIT_ITEM);
                 case EXPORT_TO_LIBRARY -> importExportHandler.assembleAndExport(circuitName, ExportTarget.LIBRARY);
                 case EXPORT_TO_JSON -> importExportHandler.assembleAndExport(circuitName, ExportTarget.JSON_IN_CLIPBOARD);
@@ -328,8 +292,7 @@ public final class LibraryBrowser extends ToolPaneTabWidget implements MultiMode
         }
 
         @Override
-        public Component getTitle()
-        {
+        public Component getTitle() {
             return title;
         }
     }

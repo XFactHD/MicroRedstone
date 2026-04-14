@@ -24,8 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
-{
+final class MicrochipCircuitCanvas extends AbstractCircuitCanvas {
     private final List<PartRenderState> parts = new ArrayList<>();
     private final List<WireRenderState> wires = new ArrayList<>();
     private final List<LampRenderState> lamps = new ArrayList<>();
@@ -39,23 +38,22 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
             List<LampRenderState> lamps,
             int mouseX,
             int mouseY
-    )
-    {
+    ) {
         parts.addAll(this.parts);
         wires.addAll(this.wires);
         lamps.addAll(this.lamps);
     }
 
-    void update(@Nullable CompoundCircuitNode rootNode)
-    {
+    void update(@Nullable CompoundCircuitNode rootNode) {
         parts.clear();
         wires.clear();
 
-        if (rootNode == null) return;
+        if (rootNode == null) {
+            return;
+        }
 
         Set<NodePos> partPositions = new HashSet<>();
-        for (Connector connector : Utils.concatArrays(rootNode.getInputs(), rootNode.getOutputs()))
-        {
+        for (Connector connector : Utils.concatArrays(rootNode.getInputs(), rootNode.getOutputs())) {
             Connection connection = new Connection(connector.type());
             connection.setPos(connector.pos(), connector.port().toPartRotation());
             connection.setPortDir(connector.dir());
@@ -63,16 +61,13 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
             parts.add(new PartRenderState(connection));
             partPositions.add(connector.pos());
         }
-        rootNode.forAllNodes(entry ->
-        {
-            if (entry.node() instanceof LampCircuitNode lamp)
-            {
+        rootNode.forAllNodes(entry -> {
+            if (entry.node() instanceof LampCircuitNode lamp) {
                 int inputWire = lamp.getInputWire();
                 DyeColor color = lamp.getColor();
                 lamps.add(new LampRenderState(entry.pos(), entry.rotation(), inputWire, color, false));
                 partPositions.add(entry.pos());
-                for (LampCircuitNode.ChainEntry node : lamp.getChainedNodes())
-                {
+                for (LampCircuitNode.ChainEntry node : lamp.getChainedNodes()) {
                     lamps.add(new LampRenderState(node.pos(), node.rotation(), inputWire, color, true));
                 }
                 return;
@@ -82,49 +77,38 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
             parts.add(new PartRenderState(entry.pos(), icon, entry.rotation()));
             partPositions.add(entry.pos());
         });
-        rootNode.getWires().forEach(wire ->
-        {
+        rootNode.getWires().forEach(wire -> {
             WireRenderState renderState = new WireRenderState(wire.getWireType(), wire.getColor());
             Set<RoutedWire.Section> sections = new HashSet<>();
-            for (WireNode node : wire.getNodes())
-            {
+            for (WireNode node : wire.getNodes()) {
                 renderState.addNode(node);
-                switch (node)
-                {
-                    case WireNode.Branch(NodePos pos, Set<Port> ignored, Set<NodePos> neighbors) ->
-                    {
-                        for (NodePos neighbor : neighbors)
-                        {
+                switch (node) {
+                    case WireNode.Branch(NodePos pos, Set<Port> ignored, Set<NodePos> neighbors) -> {
+                        for (NodePos neighbor : neighbors) {
                             sections.add(new RoutedWire.Section(pos, neighbor));
                         }
                     }
-                    case WireNode.Connection(NodePos pos, Port ignored, @Nullable NodePos neighbor) ->
-                    {
-                        if (neighbor != null)
-                        {
+                    case WireNode.Connection(NodePos pos, Port ignored, @Nullable NodePos neighbor) -> {
+                        if (neighbor != null) {
                             sections.add(new RoutedWire.Section(pos, neighbor));
                         }
                     }
-                    case WireNode.Dangling ignored -> {}
+                    case WireNode.Dangling ignored -> { }
                 }
             }
             renderState.addSections(partPositions, sections);
-            if (!renderState.isEmpty())
-            {
+            if (!renderState.isEmpty()) {
                 wires.add(renderState);
             }
         });
     }
 
-    public void updateWireStates(WireStates wireStates)
-    {
-        for (int i = 0; i < wires.size(); i++)
-        {
+    public void updateWireStates(WireStates wireStates) {
+        for (int i = 0; i < wires.size(); i++) {
             WireRenderState renderState = wires.get(i);
             wires.set(i, renderState.withPowered(wireStates.get(i)));
         }
-        for (int i = 0; i < lamps.size(); i++)
-        {
+        for (int i = 0; i < lamps.size(); i++) {
             LampRenderState renderState = lamps.get(i);
             boolean powered = wireStates.get(renderState.inputWire());
             lamps.set(i, renderState.withPowered(powered));
@@ -132,15 +116,13 @@ final class MicrochipCircuitCanvas extends AbstractCircuitCanvas
     }
 
     @Override
-    public void computeWindowSize(int width, int height)
-    {
+    public void computeWindowSize(int width, int height) {
         this.width = Math.min(WIDTH, width - MicrochipCircuitScreen.CANVAS_BORDER * 2);
         this.height = Math.min(HEIGHT, height - MicrochipCircuitScreen.CANVAS_BORDER * 3);
     }
 
     @Override
-    public void computeWindowPos(int leftPos, int topPos)
-    {
+    public void computeWindowPos(int leftPos, int topPos) {
         x = leftPos + MicrochipCircuitScreen.CANVAS_BORDER;
         y = topPos + MicrochipCircuitScreen.CANVAS_BORDER * 2;
     }

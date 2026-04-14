@@ -19,8 +19,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.Objects;
 
-public final class MicrochipCircuitScreen extends AbstractContainerScreen<MicrochipCircuitMenu>
-{
+public final class MicrochipCircuitScreen extends AbstractContainerScreen<MicrochipCircuitMenu> {
     private static final Identifier BACKGROUND = Utils.rl("background");
     public static final String TITLE_WITH_CIRCUIT = Utils.translationKey("title", "microchip.circuit");
     public static final String TITLE_WITH_CIRCUIT_DEBUG = Utils.translationKey("title", "microchip.circuit_debug");
@@ -32,16 +31,14 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     @Nullable
     private ArrowKey activeArrowKey = null;
 
-    public MicrochipCircuitScreen(MicrochipCircuitMenu menu, Inventory playerInventory, Component title)
-    {
+    public MicrochipCircuitScreen(MicrochipCircuitMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.fullTitle = title;
         handleCircuitUpdate(menu.getInitialRootNode(), menu.getInitialNodeClassName());
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         canvas.computeWindowSize(width, height);
         imageWidth = canvas.getWindowWidth() + CANVAS_BORDER * 2;
         imageHeight = canvas.getWindowHeight() + CANVAS_BORDER * 3;
@@ -54,29 +51,24 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
 
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
 
-        if (isDragging())
-        {
+        if (isDragging()) {
             graphics.requestCursor(CursorTypes.RESIZE_ALL);
         }
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.text(font, fullTitle, titleLabelX, titleLabelY, 0xFF404040, false);
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
-    {
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && canvas.canDrag(event.x(), event.y()))
-        {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && canvas.canDrag(event.x(), event.y())) {
             canvas.drag((float) -dragX, (float) -dragY);
             setDragging(true);
             return true;
@@ -85,10 +77,8 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event)
-    {
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && isDragging())
-        {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && isDragging()) {
             setDragging(false);
             return true;
         }
@@ -96,11 +86,9 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
+    public boolean keyPressed(KeyEvent event) {
         ArrowKey.Direction arrowDir = ArrowKey.Direction.of(event.key());
-        if (arrowDir != null)
-        {
+        if (arrowDir != null) {
             activeArrowKey = new ArrowKey(arrowDir, System.currentTimeMillis());
             canvas.drag(arrowDir);
             return true;
@@ -109,10 +97,8 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    public boolean keyReleased(KeyEvent event)
-    {
-        if (activeArrowKey != null && ArrowKey.Direction.of(event.key()) == activeArrowKey.dir())
-        {
+    public boolean keyReleased(KeyEvent event) {
+        if (activeArrowKey != null && ArrowKey.Direction.of(event.key()) == activeArrowKey.dir()) {
             activeArrowKey = null;
             return true;
         }
@@ -120,34 +106,26 @@ public final class MicrochipCircuitScreen extends AbstractContainerScreen<Microc
     }
 
     @Override
-    protected void containerTick()
-    {
-        if (activeArrowKey != null)
-        {
+    protected void containerTick() {
+        if (activeArrowKey != null) {
             long diff = System.currentTimeMillis() - activeArrowKey.startTime();
-            if (diff > ARROW_REPEAT_DELAY_INITIAL)
-            {
+            if (diff > ARROW_REPEAT_DELAY_INITIAL) {
                 canvas.drag(activeArrowKey.dir());
             }
         }
     }
 
-    public void handleCircuitUpdate(@Nullable CompoundCircuitNode rootNode, @Nullable String nodeClassName)
-    {
+    public void handleCircuitUpdate(@Nullable CompoundCircuitNode rootNode, @Nullable String nodeClassName) {
         canvas.update(rootNode);
-        if (rootNode != null)
-        {
+        if (rootNode != null) {
             String key = Utils.PRODUCTION ? TITLE_WITH_CIRCUIT : TITLE_WITH_CIRCUIT_DEBUG;
             fullTitle = Component.translatable(key, title, rootNode.getName(), Objects.toString(nodeClassName));
-        }
-        else
-        {
+        } else {
             fullTitle = title;
         }
     }
 
-    public void handleWireStateUpdate(WireStates wireStates)
-    {
+    public void handleWireStateUpdate(WireStates wireStates) {
         canvas.updateWireStates(wireStates);
     }
 }

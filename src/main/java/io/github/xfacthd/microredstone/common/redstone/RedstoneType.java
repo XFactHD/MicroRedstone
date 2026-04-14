@@ -7,8 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 
-public enum RedstoneType implements StringRepresentable
-{
+public enum RedstoneType implements StringRepresentable {
     NONE,
     SINGLE,
     BUNDLED;
@@ -18,15 +17,12 @@ public enum RedstoneType implements StringRepresentable
     private final String name = toString().toLowerCase(Locale.ROOT);
 
     @Override
-    public String getSerializedName()
-    {
+    public String getSerializedName() {
         return name;
     }
 
-    public static RedstoneType of(@Nullable WireType wireType)
-    {
-        return switch (wireType)
-        {
+    public static RedstoneType of(@Nullable WireType wireType) {
+        return switch (wireType) {
             case null -> NONE;
             case SINGLE -> SINGLE;
             case BUNDLED -> BUNDLED;

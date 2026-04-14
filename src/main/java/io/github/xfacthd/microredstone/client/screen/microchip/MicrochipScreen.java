@@ -13,30 +13,25 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-public final class MicrochipScreen extends AbstractContainerScreen<MicrochipMenu>
-{
+public final class MicrochipScreen extends AbstractContainerScreen<MicrochipMenu> {
     private static final Identifier BACKGROUND = Utils.rl("textures/gui/microchip.png");
 
     private final ItemStack icStack = new ItemStack(MRContent.ITEM_INTEGRATED_CIRCUIT);
 
-    public MicrochipScreen(MicrochipMenu menu, Inventory inventory, Component title)
-    {
+    public MicrochipScreen(MicrochipMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
     }
 
     @Override
-    protected void extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY)
-    {
+    protected void extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY) {
         super.extractSlot(graphics, slot, mouseX, mouseY);
-        if (slot == menu.getCircuitSlot() && !slot.hasItem())
-        {
+        if (slot == menu.getCircuitSlot() && !slot.hasItem()) {
             ScreenUtils.submitTransparentFakeItem(graphics, icStack, slot.x, slot.y);
         }
     }

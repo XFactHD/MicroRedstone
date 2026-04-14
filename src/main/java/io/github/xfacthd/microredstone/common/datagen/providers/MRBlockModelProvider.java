@@ -31,57 +31,48 @@ import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemp
 
 import java.util.stream.Stream;
 
-public final class MRBlockModelProvider extends ModelProvider
-{
+public final class MRBlockModelProvider extends ModelProvider {
     private static final TextureSlot OVERLAY = TextureSlot.create("overlay");
     private static final Quadrant[] QUADRANTS = Quadrant.values();
 
-    public MRBlockModelProvider(PackOutput output)
-    {
+    public MRBlockModelProvider(PackOutput output) {
         super(output, MicroRedstone.MOD_ID);
     }
 
     @Override
-    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels)
-    {
+    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         blockModels.createCraftingTableLike(MRContent.BLOCK_CIRCUIT_WORKBENCH.value(), Blocks.SMOOTH_STONE, TextureMapping::craftingTable);
 
         makeMicrochipBlockModel(blockModels);
 
-        for (int edge = 0; edge < 4; edge++)
-        {
+        for (int edge = 0; edge < 4; edge++) {
             plateOverlay(blockModels, UnbakedMicrochipModel.LOCATIONS_SINGLE[edge], Utils.rl("block/overlay_single"), edge, true, true);
             plateOverlay(blockModels, UnbakedMicrochipModel.LOCATIONS_BUNDLED[edge], Utils.rl("block/overlay_bundled"), edge, true, true);
         }
     }
 
-    private static void makeMicrochipBlockModel(BlockModelGenerators blockModels)
-    {
+    private static void makeMicrochipBlockModel(BlockModelGenerators blockModels) {
         Identifier name = Utils.getKeyOrThrow(MRContent.BLOCK_MICROCHIP).identifier();
         Identifier baseLoc = name.withPrefix("block/");
         Identifier baseLocCircuit = baseLoc.withSuffix("_circuit");
 
         MultiVariantGenerator generator = MultiVariantGenerator.dispatch(MRContent.BLOCK_MICROCHIP.value())
-                .with(PropertyDispatch.initial(BlockStateProperties.FACING, PropertyHolder.ROTATION, PropertyHolder.HAS_CIRCUIT).generate((dir, rot, hasCircuit) ->
-                {
+                .with(PropertyDispatch.initial(BlockStateProperties.FACING, PropertyHolder.ROTATION, PropertyHolder.HAS_CIRCUIT).generate((dir, rot, hasCircuit) -> {
                     Identifier model = hasCircuit ? baseLocCircuit : baseLoc;
 
-                    Quadrant rotX = switch (dir)
-                    {
+                    Quadrant rotX = switch (dir) {
                         case DOWN, WEST, EAST -> Quadrant.R0;
                         case UP -> Quadrant.R180;
                         case NORTH -> Quadrant.R270;
                         case SOUTH -> Quadrant.R90;
                     };
-                    Quadrant rotY = switch (dir)
-                    {
+                    Quadrant rotY = switch (dir) {
                         case DOWN -> QUADRANTS[rot.ordinal()];
                         case UP, EAST -> QUADRANTS[(rot.ordinal() + 1) % 4];
                         case NORTH, SOUTH -> Quadrant.R0;
                         case WEST -> QUADRANTS[(rot.ordinal() + 3) % 4];
                     };
-                    Quadrant rotZ = switch (dir)
-                    {
+                    Quadrant rotZ = switch (dir) {
                         case UP, DOWN -> Quadrant.R0;
                         case NORTH -> QUADRANTS[rot.ordinal()];
                         case SOUTH -> QUADRANTS[(6 - rot.ordinal()) % 4];
@@ -99,13 +90,11 @@ public final class MRBlockModelProvider extends ModelProvider
         blockModels.registerSimpleItemModel(MRContent.BLOCK_MICROCHIP.value(), baseLocCircuit);
     }
 
-    private static void plateOverlay(BlockModelGenerators blockModels, Identifier name, Identifier texture, int edge, boolean withSide, boolean mirrorTopX)
-    {
+    private static void plateOverlay(BlockModelGenerators blockModels, Identifier name, Identifier texture, int edge, boolean withSide, boolean mirrorTopX) {
         ExtendedModelTemplate template = ExtendedModelTemplateBuilder.builder()
                 .requiredTextureSlot(OVERLAY)
                 .requiredTextureSlot(TextureSlot.PARTICLE)
-                .element(element ->
-                {
+                .element(element -> {
                     element.from(0, 0, 0)
                             .to(16, 2, 16)
                             .face(Direction.UP, face ->
@@ -114,8 +103,7 @@ public final class MRBlockModelProvider extends ModelProvider
                                             .texture(OVERLAY)
                             );
 
-                    if (withSide)
-                    {
+                    if (withSide) {
                         Direction edgeDir = Direction.from2DDataValue(edge);
                         element.face(edgeDir, face ->
                                 face.cullface(edgeDir)
@@ -134,14 +122,12 @@ public final class MRBlockModelProvider extends ModelProvider
     }
 
     @Override
-    protected Stream<? extends Holder<Item>> getKnownItems()
-    {
+    protected Stream<? extends Holder<Item>> getKnownItems() {
         return super.getKnownItems().filter(item -> item.value() instanceof BlockItem);
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "Block Models - MicroRedstone";
     }
 }

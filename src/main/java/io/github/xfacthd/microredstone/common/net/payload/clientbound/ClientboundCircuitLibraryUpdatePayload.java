@@ -11,8 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.List;
 import java.util.UUID;
 
-public record ClientboundCircuitLibraryUpdatePayload(List<CircuitLibraryEntry> addedOrModified, List<UUID> removed) implements CustomPacketPayload
-{
+public record ClientboundCircuitLibraryUpdatePayload(List<CircuitLibraryEntry> addedOrModified, List<UUID> removed) implements CustomPacketPayload {
     public static final Type<ClientboundCircuitLibraryUpdatePayload> TYPE = Utils.payloadType("clientbound_circuit_library_update");
     public static final StreamCodec<ByteBuf, ClientboundCircuitLibraryUpdatePayload> STREAM_CODEC = StreamCodec.composite(
             CircuitLibraryEntry.STREAM_CODEC.apply(ByteBufCodecs.list()),
@@ -23,8 +22,7 @@ public record ClientboundCircuitLibraryUpdatePayload(List<CircuitLibraryEntry> a
     );
 
     @Override
-    public Type<ClientboundCircuitLibraryUpdatePayload> type()
-    {
+    public Type<ClientboundCircuitLibraryUpdatePayload> type() {
         return TYPE;
     }
 }

@@ -6,31 +6,26 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-final class PropertiesDialogScreen extends DialogScreen
-{
+final class PropertiesDialogScreen extends DialogScreen {
     private final List<Property> properties;
     private final List<FormattedProperty> propertyLines = new ArrayList<>();
     private int maxLabelWidth = 0;
     private int propValueX;
 
-    PropertiesDialogScreen(Component title, List<Component> messageLines, List<Property> properties, Runnable okCallback)
-    {
-        super(Type.PROPERTIES, title, messageLines, okCallback, () -> {});
+    PropertiesDialogScreen(Component title, List<Component> messageLines, List<Property> properties, Runnable okCallback) {
+        super(Type.PROPERTIES, title, messageLines, okCallback, () -> { });
         this.properties = properties;
     }
 
     @Override
-    protected boolean computeContent()
-    {
+    protected boolean computeContent() {
         boolean addPadding = super.computeContent();
 
         propertyLines.clear();
         maxLabelWidth = 0;
 
-        for (Property property : properties)
-        {
-            if (addPadding)
-            {
+        for (Property property : properties) {
+            if (addPadding) {
                 imageHeight += PADDING;
             }
 
@@ -40,8 +35,7 @@ final class PropertiesDialogScreen extends DialogScreen
             addPadding = false;
         }
         int maxValueWidth = MAX_TEXT_WIDTH - PADDING - maxLabelWidth;
-        for (Property property : properties)
-        {
+        for (Property property : properties) {
             FormattedProperty formatted = property.format(font, maxValueWidth);
             propertyLines.add(formatted);
             formatted.value().text(); // Try resolving potential DelayedValues
@@ -53,25 +47,21 @@ final class PropertiesDialogScreen extends DialogScreen
     }
 
     @Override
-    protected void finalizeContent()
-    {
+    protected void finalizeContent() {
         super.finalizeContent();
 
         propValueX = leftPos + PADDING * 2 + maxLabelWidth;
     }
 
     @Override
-    protected int extractContent(GuiGraphicsExtractor graphics, int contentX, int mouseX, int mouseY, float partialTick)
-    {
+    protected int extractContent(GuiGraphicsExtractor graphics, int contentX, int mouseX, int mouseY, float partialTick) {
         int contentY = super.extractContent(graphics, contentX, mouseX, mouseY, partialTick);
-        for (FormattedProperty line : propertyLines)
-        {
+        for (FormattedProperty line : propertyLines) {
             graphics.text(font, line.label(), contentX, contentY, 0xFF404040, false);
             FormattedProperty.Value value = line.value();
             graphics.text(font, value.text(), propValueX, contentY, 0xFF404040, false);
             Component tooltip = value.tooltip();
-            if (tooltip != null && mouseY >= contentY && mouseY < contentY + font.lineHeight && mouseX >= propValueX && mouseX < propValueX + value.valueWidth())
-            {
+            if (tooltip != null && mouseY >= contentY && mouseY < contentY + font.lineHeight && mouseX >= propValueX && mouseX < propValueX + value.valueWidth()) {
                 graphics.setTooltipForNextFrame(tooltip, mouseX, mouseY);
             }
             contentY += font.lineHeight;

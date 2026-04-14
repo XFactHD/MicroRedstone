@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
-{
+public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode {
     public static final MapCodec<ThreeInputLogicCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             PrimitivePrototypeNode.Type.CODEC.fieldOf("function").forGetter(node -> node.type),
             Codec.BOOL.fieldOf("multi_bit").forGetter(ThreeInputLogicCircuitNode::isMultiBit),
@@ -52,8 +51,7 @@ public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
     private final boolean invertResult;
     private final int inversionMask;
 
-    public ThreeInputLogicCircuitNode(PrimitivePrototypeNode.Type type, boolean multiBit, List<Connector> inputs, Connector output)
-    {
+    public ThreeInputLogicCircuitNode(PrimitivePrototypeNode.Type type, boolean multiBit, List<Connector> inputs, Connector output) {
         super(inputs, List.of(output));
         this.type = type;
         this.inputOneWire = inputs.get(0).wire();
@@ -65,32 +63,27 @@ public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
-    {
+    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) {
         short inputOne = context.loadInput(inputOneWire);
         short inputTwo = context.loadInput(inputTwoWire);
         short inputThree = context.loadInput(inputThreeWire);
-        int output = switch (type)
-        {
+        int output = switch (type) {
             case AND, NAND -> inputOne & inputTwo & inputThree;
             case OR, NOR -> inputOne | inputTwo | inputThree;
             case XOR, XNOR -> inputOne ^ inputTwo ^ inputThree;
             default -> throw new UnsupportedOperationException("Invalid logic op: " + type);
         };
-        if (invertResult)
-        {
+        if (invertResult) {
             output ^= inversionMask;
         }
         context.storeOutput(outputWire, (short) output);
     }
 
     @Override
-    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
-    {
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires) {
         localWires.generateLoad(inputOneWire);
         localWires.generateLoad(inputTwoWire);
-        UnaryOperator<CodeBuilder> opcode = switch (type)
-        {
+        UnaryOperator<CodeBuilder> opcode = switch (type) {
             case AND, NAND -> CodeBuilder::iand;
             case OR, NOR -> CodeBuilder::ior;
             case XOR, XNOR -> CodeBuilder::ixor;
@@ -99,47 +92,44 @@ public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
         opcode.apply(mthBody);
         localWires.generateLoad(inputThreeWire);
         opcode.apply(mthBody);
-        if (invertResult)
-        {
+        if (invertResult) {
             mthBody.loadConstant(inversionMask)
                     .ixor();
         }
         localWires.generateStore(outputWire);
     }
 
-    public PrimitivePrototypeNode.Type getType()
-    {
+    public PrimitivePrototypeNode.Type getType() {
         return type;
     }
 
     @Override
-    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
-    {
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount) {
         return true;
     }
 
     @Override
-    public PrototypeNode disassemble()
-    {
+    public PrototypeNode disassemble() {
         return new PrimitivePrototypeNode(type, 3, isMultiBit() ? WireType.BUNDLED : WireType.SINGLE);
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
-    {
+    public CircuitNodeType<? extends CircuitNode> type() {
         return MRContent.NODE_TYPE_LOGIC_THREE_INPUT.value();
     }
 
-    private boolean isMultiBit()
-    {
+    private boolean isMultiBit() {
         return inversionMask != 0x1;
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (!(obj instanceof ThreeInputLogicCircuitNode other)) return false;
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof ThreeInputLogicCircuitNode other)) {
+            return false;
+        }
         return other.type == type &&
                 other.inputOneWire == inputOneWire &&
                 other.inputTwoWire == inputTwoWire &&
@@ -150,8 +140,7 @@ public final class ThreeInputLogicCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(type, inputOneWire, inputTwoWire, inputThreeWire, outputWire, invertResult, inversionMask);
     }
 }

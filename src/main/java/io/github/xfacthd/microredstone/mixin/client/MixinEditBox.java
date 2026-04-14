@@ -8,8 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EditBox.class)
-public class MixinEditBox implements EditBoxExtensions
-{
+public class MixinEditBox implements EditBoxExtensions {
     @WrapOperation(
             method = "extractWidgetRenderState",
             at = @At(
@@ -17,8 +16,7 @@ public class MixinEditBox implements EditBoxExtensions
                     target = "Lnet/minecraft/client/gui/components/EditBox;getMaxLength()I"
             )
     )
-    private int microredstone$setCursorShape(EditBox self, Operation<Integer> op)
-    {
+    private int microredstone$setCursorShape(EditBox self, Operation<Integer> op) {
         return microredstone$forceIBeamCursor() ? -1 : op.call(self);
     }
 }

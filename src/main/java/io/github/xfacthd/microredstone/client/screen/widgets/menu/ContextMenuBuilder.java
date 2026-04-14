@@ -6,8 +6,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 @SuppressWarnings("UnusedReturnValue")
-public interface ContextMenuBuilder
-{
+public interface ContextMenuBuilder {
     ContextMenuBuilder addActionEntry(Component text, Runnable action);
 
     ContextMenuBuilder addActionEntry(Component text, Consumer<ActionEntryBuilder> consumer);
@@ -18,8 +17,7 @@ public interface ContextMenuBuilder
 
     boolean isEmpty();
 
-    interface ActionEntryBuilder
-    {
+    interface ActionEntryBuilder {
         ActionEntryBuilder withAction(Runnable action);
 
         ActionEntryBuilder withKeyHint(KeyHint keyHint);

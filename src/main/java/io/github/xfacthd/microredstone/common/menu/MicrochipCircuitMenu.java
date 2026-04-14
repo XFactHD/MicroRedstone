@@ -27,8 +27,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class MicrochipCircuitMenu extends AbstractContainerMenu implements WireStateListener
-{
+public final class MicrochipCircuitMenu extends AbstractContainerMenu implements WireStateListener {
     public static final StreamCodec<ByteBuf, Optional<CompoundCircuitNode>> ROOT_NODE_CODEC = ByteBufCodecs.optional(CompoundCircuitNode.STREAM_CODEC);
 
     @Nullable
@@ -47,15 +46,13 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
     @Nullable
     private WireStates lastStates = null;
 
-    public static MicrochipCircuitMenu createServer(int containerId, MicrochipBlockEntity blockEntity, ServerPlayer player)
-    {
+    public static MicrochipCircuitMenu createServer(int containerId, MicrochipBlockEntity blockEntity, ServerPlayer player) {
         Level level = Objects.requireNonNull(blockEntity.getLevel());
         ContainerLevelAccess levelAccess = ContainerLevelAccess.create(level, blockEntity.getBlockPos());
         return new MicrochipCircuitMenu(containerId, blockEntity, player, levelAccess, null, null);
     }
 
-    public static MicrochipCircuitMenu createClient(int containerId, Inventory ignored, RegistryFriendlyByteBuf buffer)
-    {
+    public static MicrochipCircuitMenu createClient(int containerId, Inventory ignored, RegistryFriendlyByteBuf buffer) {
         ClientboundMicrochipChangeCircuitPayload payload = ClientboundMicrochipChangeCircuitPayload.STREAM_CODEC.decode(buffer);
         CompoundCircuitNode rootNode = payload.rootNode().orElse(null);
         String nodeClassName = payload.nodeClassName().orElse(null);
@@ -69,8 +66,7 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
             ContainerLevelAccess levelAccess,
             @Nullable CompoundCircuitNode initialRootNode,
             @Nullable String initialNodeClassName
-    )
-    {
+    ) {
         super(MRContent.MENU_TYPE_MICROCHIP_CIRCUIT.value(), containerId);
         this.blockEntity = blockEntity;
         this.player = player;
@@ -78,46 +74,38 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
         this.initialRootNode = initialRootNode;
         this.initialNodeClassName = initialNodeClassName;
         this.lastCircuit = blockEntity != null ? blockEntity.getCircuit() : null;
-        if (blockEntity != null)
-        {
+        if (blockEntity != null) {
             blockEntity.addWireStateListener(this);
         }
     }
 
-    public void encodeInitialCircuit(ByteBuf buffer)
-    {
+    public void encodeInitialCircuit(ByteBuf buffer) {
         ClientboundMicrochipChangeCircuitPayload.STREAM_CODEC.encode(buffer, buildCircuitUpdate(lastCircuit));
     }
 
     @Override
-    public void broadcastChanges()
-    {
+    public void broadcastChanges() {
         super.broadcastChanges();
 
-        if (blockEntity != null && player != null)
-        {
+        if (blockEntity != null && player != null) {
             Circuit circuit = blockEntity.getCircuit();
-            if (circuit != lastCircuit)
-            {
+            if (circuit != lastCircuit) {
                 PacketDistributor.sendToPlayer(player, buildCircuitUpdate(circuit));
                 lastCircuit = circuit;
                 currStates = null;
                 lastStates = null;
             }
-            if (currStates != null && !currStates.equals(lastStates))
-            {
+            if (currStates != null && !currStates.equals(lastStates)) {
                 PacketDistributor.sendToPlayer(player, new ClientboundMicrochipUpdateWireStatesPayload(containerId, currStates));
                 lastStates = currStates;
             }
         }
     }
 
-    private ClientboundMicrochipChangeCircuitPayload buildCircuitUpdate(@Nullable Circuit circuit)
-    {
+    private ClientboundMicrochipChangeCircuitPayload buildCircuitUpdate(@Nullable Circuit circuit) {
         CompoundCircuitNode rootNode = circuit != null ? circuit.getSerializableRootNode() : null;
         String nodeClassName = null;
-        if (!Utils.PRODUCTION && circuit != null && circuit.getRootNode() instanceof CompiledCircuitNode compiled)
-        {
+        if (!Utils.PRODUCTION && circuit != null && circuit.getRootNode() instanceof CompiledCircuitNode compiled) {
             nodeClassName = compiled.getClass().getSimpleName();
             // Strip unnecessary suffix appended to hidden classes
             nodeClassName = nodeClassName.substring(0, nodeClassName.indexOf('/'));
@@ -126,41 +114,32 @@ public final class MicrochipCircuitMenu extends AbstractContainerMenu implements
     }
 
     @Override
-    public void handleWireStates(WireStates wireStates)
-    {
+    public void handleWireStates(WireStates wireStates) {
         currStates = wireStates;
     }
 
-    @Nullable
-    public CompoundCircuitNode getInitialRootNode()
-    {
+    public @Nullable CompoundCircuitNode getInitialRootNode() {
         return initialRootNode;
     }
 
-    @Nullable
-    public String getInitialNodeClassName()
-    {
+    public @Nullable String getInitialNodeClassName() {
         return initialNodeClassName;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index)
-    {
+    public ItemStack quickMoveStack(Player player, int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(Player player)
-    {
+    public boolean stillValid(Player player) {
         return stillValid(levelAccess, player, MRContent.BLOCK_MICROCHIP.value());
     }
 
     @Override
-    public void removed(Player player)
-    {
+    public void removed(Player player) {
         super.removed(player);
-        if (blockEntity != null)
-        {
+        if (blockEntity != null) {
             blockEntity.removeWireStateListener(this);
         }
     }

@@ -22,8 +22,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
-public final class BundlePackerCircuitNode extends PrimitiveCircuitNode
-{
+public final class BundlePackerCircuitNode extends PrimitiveCircuitNode {
     public static final MapCodec<BundlePackerCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Codec.intRange(0, 15).fieldOf("bit_index").forGetter(node -> node.bitIndex),
             Connector.CODEC.fieldOf("input").forGetter(node -> node.getInputs()[0]),
@@ -44,8 +43,7 @@ public final class BundlePackerCircuitNode extends PrimitiveCircuitNode
     private final int inputWire;
     private final int outputWire;
 
-    public BundlePackerCircuitNode(int bitIndex, Connector input, Connector output)
-    {
+    public BundlePackerCircuitNode(int bitIndex, Connector input, Connector output) {
         super(List.of(input), List.of(output));
         this.bitIndex = bitIndex;
         this.invBitMask = ~(1 << bitIndex);
@@ -54,8 +52,7 @@ public final class BundlePackerCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
-    {
+    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) {
         short input = context.loadInput(inputWire);
         short existing = context.loadInput(outputWire);
         short output = (short) (input << bitIndex);
@@ -63,17 +60,14 @@ public final class BundlePackerCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
-    {
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires) {
         localWires.generateLoad(inputWire);
-        if (bitIndex > 0)
-        {
+        if (bitIndex > 0) {
             mthBody.loadConstant(bitIndex)
                     .ishl();
         }
         // Multiple bundle packers can write to the same bundled wire, so the packer can't just overwrite the output
-        if (localWires.hasLocalOrParam(outputWire))
-        {
+        if (localWires.hasLocalOrParam(outputWire)) {
             localWires.generateLoad(outputWire);
             mthBody.loadConstant(invBitMask)
                     .iand()
@@ -83,36 +77,35 @@ public final class BundlePackerCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
-    {
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount) {
         return bitIndex >= 0 && bitIndex < 16;
     }
 
     @Override
-    public PrototypeNode disassemble()
-    {
+    public PrototypeNode disassemble() {
         ConverterPrototypeNode node = new ConverterPrototypeNode(ConverterPrototypeNode.Type.PACK);
         node.setBitIndex(bitIndex);
         return node;
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
-    {
+    public CircuitNodeType<? extends CircuitNode> type() {
         return MRContent.NODE_TYPE_BUNDLE_PACKER.value();
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (!(obj instanceof BundlePackerCircuitNode other)) return false;
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof BundlePackerCircuitNode other)) {
+            return false;
+        }
         return other.bitIndex == bitIndex && other.invBitMask == invBitMask && other.inputWire == inputWire && other.outputWire == outputWire;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(bitIndex, invBitMask, inputWire, outputWire);
     }
 }

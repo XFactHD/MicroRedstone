@@ -22,8 +22,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
-public final class ConstantCircuitNode extends PrimitiveCircuitNode
-{
+public final class ConstantCircuitNode extends PrimitiveCircuitNode {
     public static final MapCodec<ConstantCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Codec.SHORT.fieldOf("value").forGetter(node -> node.value),
             Connector.CODEC.fieldOf("output").forGetter(node -> node.getOutputs()[0])
@@ -39,29 +38,25 @@ public final class ConstantCircuitNode extends PrimitiveCircuitNode
     private final short value;
     private final int outputWire;
 
-    public ConstantCircuitNode(short value, Connector output)
-    {
+    public ConstantCircuitNode(short value, Connector output) {
         super(List.of(), List.of(output));
-        this.value = output.type().select((short)(value & 0x1), value);
+        this.value = output.type().select((short) (value & 0x1), value);
         this.outputWire = output.wire();
     }
 
     @Override
-    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs)
-    {
+    public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) {
         context.storeOutput(outputWire, value);
     }
 
     @Override
-    public void compile(CodeBuilder mthBody, LocalWireMapper localWires)
-    {
+    public void compile(CodeBuilder mthBody, LocalWireMapper localWires) {
         mthBody.loadConstant(value);
         localWires.generateStore(outputWire);
     }
 
     @Override
-    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
-    {
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount) {
         int maxValue = getOutputs()[0].type().select(
                 ConstantPrototypeNode.MAX_VAL_SINGLE,
                 ConstantPrototypeNode.MAX_VAL_BUNDLED
@@ -70,30 +65,30 @@ public final class ConstantCircuitNode extends PrimitiveCircuitNode
     }
 
     @Override
-    public PrototypeNode disassemble()
-    {
+    public PrototypeNode disassemble() {
         ConstantPrototypeNode node = new ConstantPrototypeNode(getOutputs()[0].type());
         node.setValue(((int) value) & 0xFFFF);
         return node;
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
-    {
+    public CircuitNodeType<? extends CircuitNode> type() {
         return MRContent.NODE_TYPE_CONSTANT.value();
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (!(obj instanceof ConstantCircuitNode other)) return false;
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof ConstantCircuitNode other)) {
+            return false;
+        }
         return other.value == value && other.outputWire == outputWire;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(value, outputWire);
     }
 }

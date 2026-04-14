@@ -17,8 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.BinaryOperator;
 
-public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, QueryDialogScreen
-{
+public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, QueryDialogScreen {
     private static final Identifier BACKGROUND = Utils.rl("dialog/background");
     protected static final int PADDING = 5;
     private static final int ICON_SIZE = 10;
@@ -46,13 +45,11 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     @UnknownNullability
     ButtonPair buttonPair = null;
 
-    public static DialogScreenBuilder builder(Type type)
-    {
+    public static DialogScreenBuilder builder(Type type) {
         return new DialogScreenBuilder(type);
     }
 
-    DialogScreen(Type type, Component title, List<Component> messageLines, Runnable okCallback, Runnable cancelCallback)
-    {
+    DialogScreen(Type type, Component title, List<Component> messageLines, Runnable okCallback, Runnable cancelCallback) {
         super(title);
         this.type = type;
         this.messageLines = messageLines;
@@ -61,8 +58,7 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         textBlocks.clear();
 
         imageWidth = MIN_WIDTH;
@@ -71,8 +67,7 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
 
         computeContent();
 
-        if (imageWidth % 2 != 0)
-        {
+        if (imageWidth % 2 != 0) {
             imageWidth++;
         }
         imageHeight += FOOTER_HEIGHT;
@@ -84,19 +79,15 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
         buttonPair = type.initialize(this, leftPos + imageWidth / 2, okCallback, cancelCallback);
     }
 
-    protected boolean computeContent()
-    {
+    protected boolean computeContent() {
         boolean addPadding = false;
-        for (Component line : messageLines)
-        {
-            if (addPadding)
-            {
+        for (Component line : messageLines) {
+            if (addPadding) {
                 imageHeight += PADDING;
             }
 
             List<FormattedCharSequence> segments = font.split(line, MAX_TEXT_WIDTH);
-            for (FormattedCharSequence segment : segments)
-            {
+            for (FormattedCharSequence segment : segments) {
                 int segmentWidth = font.width(segment) + PADDING * 2;
                 imageWidth = Math.max(imageWidth, segmentWidth);
             }
@@ -111,8 +102,7 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     protected void finalizeContent() { }
 
     @Override
-    public final void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public final void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         extractMenuBackground(graphics);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
 
@@ -123,13 +113,10 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
         extractContent(graphics, contentX, mouseX, mouseY, partialTick);
     }
 
-    protected int extractContent(GuiGraphicsExtractor graphics, int contentX, int mouseX, int mouseY, float partialTick)
-    {
+    protected int extractContent(GuiGraphicsExtractor graphics, int contentX, int mouseX, int mouseY, float partialTick) {
         int contentY = topPos + CONTENT_Y;
-        for (List<FormattedCharSequence> block : textBlocks)
-        {
-            for (FormattedCharSequence line : block)
-            {
+        for (List<FormattedCharSequence> block : textBlocks) {
+            for (FormattedCharSequence line : block) {
                 graphics.text(font, line, contentX, contentY, 0xFF404040, false);
                 contentY += font.lineHeight;
             }
@@ -139,10 +126,8 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
-        if (event.isEscape())
-        {
+    public boolean keyPressed(KeyEvent event) {
+        if (event.isEscape()) {
             onClose();
             type.escCallbackSelector.apply(okCallback, cancelCallback).run();
             return true;
@@ -151,19 +136,16 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
     }
 
     @Override
-    public boolean shouldCloseOnEsc()
-    {
+    public boolean shouldCloseOnEsc() {
         return false;
     }
 
     @Override
-    public boolean isPauseScreen()
-    {
+    public boolean isPauseScreen() {
         return false;
     }
 
-    public enum Type
-    {
+    public enum Type {
         INFO(Utils.rl("dialog/icon_info"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
         WARNING(Utils.rl("dialog/icon_warning"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
         ERROR(Utils.rl("dialog/icon_error"), false, CommonComponents.GUI_OK, (ok, _) -> ok),
@@ -178,19 +160,16 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
         private final Component okText;
         private final BinaryOperator<Runnable> escCallbackSelector;
 
-        Type(Identifier icon, boolean hasCancel, Component okText, BinaryOperator<Runnable> escCallbackSelector)
-        {
+        Type(Identifier icon, boolean hasCancel, Component okText, BinaryOperator<Runnable> escCallbackSelector) {
             this.icon = icon;
             this.hasCancel = hasCancel;
             this.okText = okText;
             this.escCallbackSelector = escCallbackSelector;
         }
 
-        ButtonPair initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback)
-        {
+        ButtonPair initialize(DialogScreen screen, int xCenter, Runnable okCallback, Runnable cancelCallback) {
             ButtonPair buttonPair;
-            if (hasCancel)
-            {
+            if (hasCancel) {
                 int halfWidth = (xCenter - screen.leftPos) / 2;
                 int xLeft = screen.leftPos + halfWidth - BUTTON_WIDTH / 2;
                 int xRight = xCenter + halfWidth - BUTTON_WIDTH / 2;
@@ -198,21 +177,17 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
                         addButton(screen, xLeft, okText, okCallback),
                         addButton(screen, xRight, CommonComponents.GUI_CANCEL, cancelCallback)
                 );
-            }
-            else
-            {
+            } else {
                 int x = xCenter - BUTTON_WIDTH / 2;
                 buttonPair = new ButtonPair(addButton(screen, x, okText, okCallback), null);
             }
             return buttonPair;
         }
 
-        private static Button addButton(DialogScreen screen, int x, Component text, Runnable callback)
-        {
+        private static Button addButton(DialogScreen screen, int x, Component text, Runnable callback) {
             int y = screen.topPos + screen.imageHeight - PADDING - BUTTON_HEIGHT;
             return screen.addRenderableWidget(
-                    Button.builder(text, _ ->
-                            {
+                    Button.builder(text, _ -> {
                                 screen.onClose();
                                 callback.run();
                             })
@@ -221,8 +196,7 @@ public sealed class DialogScreen extends Screen permits PropertiesDialogScreen, 
             );
         }
 
-        public Component getDefaultTitle()
-        {
+        public Component getDefaultTitle() {
             return defaultTitle;
         }
     }

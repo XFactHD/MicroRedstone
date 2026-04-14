@@ -3,13 +3,11 @@ package io.github.xfacthd.microredstone.common.util;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Rotation;
 
-final class MappingArrays
-{
+final class MappingArrays {
     static final Rotation[] DIR_PAIR_TO_ROT = MappingArrays.makeDirPairToRotMap();
     static final Direction[] DIR_ROT_TO_SIDE = MappingArrays.makeDirRotToSideMap();
 
-    private static Rotation[] makeDirPairToRotMap()
-    {
+    private static Rotation[] makeDirPairToRotMap() {
         Rotation[] arr = new Rotation[6 * 8];
 
         arr[dirPairToRotIndex(Direction.DOWN, Direction.NORTH)] = Rotation.NONE;
@@ -45,19 +43,18 @@ final class MappingArrays
         return arr;
     }
 
-    static int dirPairToRotIndex(Direction facing, Direction orientation)
-    {
+    static int dirPairToRotIndex(Direction facing, Direction orientation) {
         return (facing.ordinal() << 3) | orientation.ordinal();
     }
 
-    private static Direction[] makeDirRotToSideMap()
-    {
+    private static Direction[] makeDirRotToSideMap() {
         Direction[] arr = new Direction[6 * 4];
 
-        for (int i = 0; i < DIR_PAIR_TO_ROT.length; i++)
-        {
+        for (int i = 0; i < DIR_PAIR_TO_ROT.length; i++) {
             Rotation rotation = DIR_PAIR_TO_ROT[i];
-            if (rotation == null) continue;
+            if (rotation == null) {
+                continue;
+            }
 
             Direction facing = Direction.from3DDataValue((i >>> 3) & 0b111);
             Direction orientation = Direction.from3DDataValue(i & 0b111);
@@ -67,8 +64,7 @@ final class MappingArrays
         return arr;
     }
 
-    static int dirRotToSideIndex(Direction facing, Rotation rotation)
-    {
+    static int dirRotToSideIndex(Direction facing, Rotation rotation) {
         return (facing.ordinal() << 2) | rotation.ordinal();
     }
 

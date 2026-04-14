@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public final class LampCircuitNode extends LeafCircuitNode
-{
+public final class LampCircuitNode extends LeafCircuitNode {
     public static final MapCodec<LampCircuitNode> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             DyeColor.CODEC.fieldOf("color").forGetter(node -> node.color),
             ChainEntry.CODEC.listOf().fieldOf("chained").forGetter(node -> node.chainedNodes),
@@ -47,8 +46,7 @@ public final class LampCircuitNode extends LeafCircuitNode
     private final DyeColor color;
     private final List<ChainEntry> chainedNodes;
 
-    public LampCircuitNode(DyeColor color, List<ChainEntry> chainedNodes, Connector input)
-    {
+    public LampCircuitNode(DyeColor color, List<ChainEntry> chainedNodes, Connector input) {
         super(List.of(input), List.of());
         this.inputWire = input.wire();
         this.chainedNodes = chainedNodes;
@@ -58,32 +56,26 @@ public final class LampCircuitNode extends LeafCircuitNode
     @Override
     public void evaluate(EvalContext context, WirePair[] inputs, WirePair[] outputs) { }
 
-    public int getInputWire()
-    {
+    public int getInputWire() {
         return inputWire;
     }
 
-    public DyeColor getColor()
-    {
+    public DyeColor getColor() {
         return color;
     }
 
-    public List<ChainEntry> getChainedNodes()
-    {
+    public List<ChainEntry> getChainedNodes() {
         return chainedNodes;
     }
 
     @Override
-    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount)
-    {
+    public boolean validate(NodeEntry<?> entry, BitSet wires, int wireCount) {
         Set<NodePos> lamps = new HashSet<>();
         lamps.add(entry.pos());
         chainedNodes.forEach(node -> lamps.add(node.pos));
-        for (ChainEntry node : chainedNodes)
-        {
+        for (ChainEntry node : chainedNodes) {
             NodePos target = node.pos.offset(Port.LEFT.rotate(node.rotation));
-            if (!lamps.contains(target))
-            {
+            if (!lamps.contains(target)) {
                 return false;
             }
         }
@@ -91,35 +83,34 @@ public final class LampCircuitNode extends LeafCircuitNode
     }
 
     @Override
-    public PrototypeNode disassemble()
-    {
+    public PrototypeNode disassemble() {
         LampPrototypeNode node = new LampPrototypeNode();
         node.setColor(color);
         return node;
     }
 
     @Override
-    public CircuitNodeType<? extends CircuitNode> type()
-    {
+    public CircuitNodeType<? extends CircuitNode> type() {
         return MRContent.NODE_TYPE_LAMP.value();
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (!(obj instanceof LampCircuitNode other)) return false;
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof LampCircuitNode other)) {
+            return false;
+        }
         return other.color == color;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(inputWire, color);
     }
 
-    public record ChainEntry(NodePos pos, int rotation)
-    {
+    public record ChainEntry(NodePos pos, int rotation) {
         static final Codec<ChainEntry> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                 NodePos.CODEC.fieldOf("pos").forGetter(ChainEntry::pos),
                 Codec.intRange(0, 3).fieldOf("rotation").forGetter(ChainEntry::rotation)

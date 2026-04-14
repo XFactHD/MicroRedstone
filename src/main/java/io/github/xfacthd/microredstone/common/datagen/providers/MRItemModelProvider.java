@@ -13,34 +13,28 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.stream.Stream;
 
-public final class MRItemModelProvider extends ModelProvider
-{
-    public MRItemModelProvider(PackOutput output)
-    {
+public final class MRItemModelProvider extends ModelProvider {
+    public MRItemModelProvider(PackOutput output) {
         super(output, MicroRedstone.MOD_ID);
     }
 
     @Override
-    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels)
-    {
+    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         itemModels.declareCustomModelItem(MRContent.ITEM_INTEGRATED_CIRCUIT.value());
     }
 
     @Override
-    protected Stream<? extends Holder<Block>> getKnownBlocks()
-    {
+    protected Stream<? extends Holder<Block>> getKnownBlocks() {
         return Stream.empty();
     }
 
     @Override
-    protected Stream<? extends Holder<Item>> getKnownItems()
-    {
+    protected Stream<? extends Holder<Item>> getKnownItems() {
         return super.getKnownItems().filter(item -> !(item.value() instanceof BlockItem));
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "Item Models - MicroRedstone";
     }
 }

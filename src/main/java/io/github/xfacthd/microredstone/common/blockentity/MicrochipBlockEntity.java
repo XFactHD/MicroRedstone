@@ -55,8 +55,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
-public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter, ExternalInterfaceAdapter, MenuProvider
-{
+public final class MicrochipBlockEntity extends BaseBlockEntity implements RedstoneLevelAdapter, ExternalInterfaceAdapter, MenuProvider {
     public static final Component MENU_TITLE = Utils.translate("title", "microchip");
     public static final ModelProperty<RedstoneType[]> PORT_TYPE_PROPERTY = new ModelProperty<>();
     private static final Port[] PORTS = Port.values();
@@ -72,52 +71,43 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     private Circuit circuit = null;
     private String circuitName = "";
 
-    public MicrochipBlockEntity(BlockPos pos, BlockState state)
-    {
+    public MicrochipBlockEntity(BlockPos pos, BlockState state) {
         super(MRContent.BLOCK_ENTITY_MICROCHIP.value(), pos, state);
         setBlockState(state);
     }
 
-    public void tick()
-    {
-        if (circuit != null)
-        {
-            if (!wireStateListeners.isEmpty())
-            {
+    public void tick() {
+        if (circuit != null) {
+            if (!wireStateListeners.isEmpty()) {
                 WireStates wireStates = new WireStates(circuit.getRootNode().getWireCount());
                 circuit.evaluate(this, wireStates);
                 wireStateListeners.forEach(listener -> listener.handleWireStates(wireStates));
-            }
-            else
-            {
+            } else {
                 circuit.evaluate(this, null);
             }
         }
     }
 
-    public void setCircuit(@Nullable Circuit circuit)
-    {
-        if (level().isClientSide()) return;
+    public void setCircuit(@Nullable Circuit circuit) {
+        if (level().isClientSide()) {
+            return;
+        }
 
         boolean hadCircuit = this.circuit != null;
-        if (hadCircuit)
-        {
+        if (hadCircuit) {
             Arrays.fill(portTypes, RedstoneType.NONE);
             Arrays.fill(portDirs, PortDir.INPUT);
             Arrays.fill(portStates, (short) 0);
         }
         this.circuit = circuit;
         boolean hasCircuit = circuit != null;
-        if (hasCircuit)
-        {
-            for (Connector input : circuit.getInputs())
-            {
+        if (hasCircuit) {
+            for (Connector input : circuit.getInputs()) {
                 int idx = input.port().ordinal();
                 portTypes[idx] = RedstoneType.of(input.type());
                 portDirs[idx] = PortDir.INPUT;
             }
-            for (Connector output : circuit.getOutputs())
-            {
+            for (Connector output : circuit.getOutputs()) {
                 int idx = output.port().ordinal();
                 portTypes[idx] = RedstoneType.of(output.type());
                 portDirs[idx] = PortDir.OUTPUT;
@@ -125,71 +115,55 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
             scheduleCircuitCompilation(circuit);
         }
 
-        if (hadCircuit != hasCircuit)
-        {
+        if (hadCircuit != hasCircuit) {
             BlockState state = getBlockState().setValue(PropertyHolder.HAS_CIRCUIT, hasCircuit);
             level().setBlockAndUpdate(worldPosition, state);
-        }
-        else
-        {
+        } else {
             sendClientUpdate();
         }
 
         setChangedWithoutSignalUpdate();
-        for (Port port : PORTS)
-        {
+        for (Port port : PORTS) {
             triggerSignalUpdate(port.ordinal());
         }
     }
 
-    private void scheduleCircuitCompilation(Circuit prevCircuit)
-    {
-        if (prevCircuit.getRootNode() instanceof CompoundCircuitNode circuitNode)
-        {
+    private void scheduleCircuitCompilation(Circuit prevCircuit) {
+        if (prevCircuit.getRootNode() instanceof CompoundCircuitNode circuitNode) {
             MinecraftServer server = Objects.requireNonNull(level().getServer());
             CircuitCompiler.tryCompileNode(circuitNode)
-                    .thenAcceptAsync(node ->
-                    {
-                        if (circuit != prevCircuit)
-                        {
+                    .thenAcceptAsync(node -> {
+                        if (circuit != prevCircuit) {
                             node.release();
                             return;
                         }
-                        if (node instanceof CompiledCircuitNode compiled)
-                        {
+                        if (node instanceof CompiledCircuitNode compiled) {
                             circuit = circuit.replaceRootNode(compiled);
                         }
                     }, server);
         }
     }
 
-    @Nullable
-    public Circuit getCircuit()
-    {
+    public @Nullable Circuit getCircuit() {
         return circuit;
     }
 
-    public void addWireStateListener(WireStateListener listener)
-    {
+    public void addWireStateListener(WireStateListener listener) {
         wireStateListeners.add(listener);
     }
 
-    public void removeWireStateListener(WireStateListener listener)
-    {
+    public void removeWireStateListener(WireStateListener listener) {
         wireStateListeners.remove(listener);
     }
 
     @Override
-    public short read(int input)
-    {
+    public short read(int input) {
         return portStates[input];
     }
 
     @Override
-    public void write(int output, short value)
-    {
-        if (value != portStates[output])
-        {
+    public void write(int output, short value) {
+        if (value != portStates[output]) {
             portStates[output] = value;
             setChangedWithoutSignalUpdate();
             triggerSignalUpdate(output);
@@ -197,19 +171,18 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
-    public RedstoneType getRedstoneType(Direction side)
-    {
+    public RedstoneType getRedstoneType(Direction side) {
         return portTypes[getSideRotation(facing, side).ordinal()];
     }
 
     @Override
-    public int getRedstoneOutput(Direction side)
-    {
+    public int getRedstoneOutput(Direction side) {
         Rotation sideRot = getSideRotation(facing, side);
-        if (portDirs[sideRot.ordinal()] == PortDir.INPUT) return 0;
+        if (portDirs[sideRot.ordinal()] == PortDir.INPUT) {
+            return 0;
+        }
 
-        return switch (portTypes[sideRot.ordinal()])
-        {
+        return switch (portTypes[sideRot.ordinal()]) {
             case NONE -> 0;
             case SINGLE -> portStates[sideRot.ordinal()] * 15;
             case BUNDLED -> portStates[sideRot.ordinal()];
@@ -217,17 +190,16 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
-    public void handleNeighborUpdate(BlockPos adjPos, Direction side)
-    {
+    public void handleNeighborUpdate(BlockPos adjPos, Direction side) {
         Rotation sideRot = getSideRotation(facing, side);
-        if (portDirs[sideRot.ordinal()] == PortDir.OUTPUT) return;
+        if (portDirs[sideRot.ordinal()] == PortDir.OUTPUT) {
+            return;
+        }
 
         RedstoneType portType = portTypes[sideRot.ordinal()];
-        if (portType != RedstoneType.NONE)
-        {
+        if (portType != RedstoneType.NONE) {
             short result = WireSupport.getInput(level(), worldPosition, adjPos, side, portType);
-            if (result != -1)
-            {
+            if (result != -1) {
                 portStates[sideRot.ordinal()] = result;
             }
         }
@@ -236,36 +208,32 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     /**
      * Receive updated input value on the given side. Handles bundle signals per-bit
      */
-    public void receiveExternalInput(Direction side, int value, int bundleBit)
-    {
+    public void receiveExternalInput(Direction side, int value, int bundleBit) {
         Rotation sideRot = getSideRotation(facing, side);
-        if (portDirs[sideRot.ordinal()] == PortDir.OUTPUT) return;
+        if (portDirs[sideRot.ordinal()] == PortDir.OUTPUT) {
+            return;
+        }
 
         RedstoneType portType = portTypes[sideRot.ordinal()];
-        portStates[sideRot.ordinal()] = switch (portType)
-        {
+        portStates[sideRot.ordinal()] = switch (portType) {
             case NONE -> (short) 0;
             case SINGLE -> (short) (value > 0 ? 1 : 0);
-            case BUNDLED ->
-            {
+            case BUNDLED -> {
                 int portValue = portStates[sideRot.ordinal()] & ~(1 << bundleBit);
-                if (value > 0) portValue |= 1 << bundleBit;
+                if (value > 0) { portValue |= 1 << bundleBit; }
                 yield (short) portValue;
             }
         };
     }
 
-    private Rotation getSideRotation(Direction facing, Direction side)
-    {
+    private Rotation getSideRotation(Direction facing, Direction side) {
         Rotation sideRot = Utils.getRotationFromFacingOrientation(facing, side);
         return sideRot.getRotated(Utils.invertRotation(rotation));
     }
 
-    private void triggerSignalUpdate(int port)
-    {
+    private void triggerSignalUpdate(int port) {
         RedstoneType type = portTypes[port];
-        if (type != RedstoneType.NONE)
-        {
+        if (type != RedstoneType.NONE) {
             Rotation sideRot = rotation.getRotated(ROTATIONS[port]);
             Direction side = Utils.getSideFromFacingRotation(facing, sideRot);
             BlockPos adjPos = worldPosition.relative(side);
@@ -274,120 +242,99 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player)
-    {
-        if (circuit != null && !player.isShiftKeyDown())
-        {
+    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+        if (circuit != null && !player.isShiftKeyDown()) {
             return MicrochipCircuitMenu.createServer(containerId, this, (ServerPlayer) player);
         }
         return MicrochipMenu.createServer(containerId, inventory, this);
     }
 
     @Override
-    public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer)
-    {
-        if (menu instanceof MicrochipCircuitMenu circuitMenu)
-        {
+    public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
+        if (menu instanceof MicrochipCircuitMenu circuitMenu) {
             circuitMenu.encodeInitialCircuit(buffer);
         }
     }
 
     @Override
-    public Component getDisplayName()
-    {
+    public Component getDisplayName() {
         return MENU_TITLE;
     }
 
     @Override
-    public ModelData getModelData()
-    {
+    public ModelData getModelData() {
         return ModelData.of(PORT_TYPE_PROPERTY, portTypes.clone());
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket()
-    {
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public void onDataPacket(Connection net, ValueInput valueInput)
-    {
+    public void onDataPacket(Connection net, ValueInput valueInput) {
         handleUpdateTag(valueInput);
         level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
-    {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
         SerdesUtils.writeTypedArray(output, "port_types", RedstoneType.CODEC, portTypes);
         return output.buildResult();
     }
 
     @Override
-    public void handleUpdateTag(ValueInput input)
-    {
+    public void handleUpdateTag(ValueInput input) {
         SerdesUtils.readTypedArray(input, "port_types", RedstoneType.CODEC, portTypes);
         requestModelDataUpdate();
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void setBlockState(BlockState state)
-    {
+    public void setBlockState(BlockState state) {
         super.setBlockState(state);
         facing = state.getValue(BlockStateProperties.FACING);
         rotation = state.getValue(PropertyHolder.ROTATION);
     }
 
     @Override
-    public void onLoad()
-    {
+    public void onLoad() {
         super.onLoad();
-        if (!level().isClientSide())
-        {
+        if (!level().isClientSide()) {
             boolean hasCircuit = circuit != null;
-            if (hasCircuit)
-            {
+            if (hasCircuit) {
                 scheduleCircuitCompilation(circuit);
             }
-            if (getBlockState().getValue(PropertyHolder.HAS_CIRCUIT) != hasCircuit)
-            {
+            if (getBlockState().getValue(PropertyHolder.HAS_CIRCUIT) != hasCircuit) {
                 level().setBlockAndUpdate(worldPosition, getBlockState().setValue(PropertyHolder.HAS_CIRCUIT, hasCircuit));
             }
         }
     }
 
     @Override
-    public void setRemoved()
-    {
+    public void setRemoved() {
         super.setRemoved();
-        if (circuit != null)
-        {
+        if (circuit != null) {
             circuit.release();
         }
     }
 
     @Override
-    protected void collectImplicitComponents(DataComponentMap.Builder components)
-    {
-        if (circuit != null)
-        {
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        if (circuit != null) {
             components.set(MRContent.DC_TYPE_CIRCUIT, new StoredCircuit(circuit.getSerializableRootNode()));
         }
     }
 
     @Override
-    protected void applyImplicitComponents(DataComponentGetter componentGetter)
-    {
+    protected void applyImplicitComponents(DataComponentGetter componentGetter) {
         setCircuit(componentGetter.getOrDefault(MRContent.DC_TYPE_CIRCUIT, StoredCircuit.EMPTY).toCircuit());
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void removeComponentsFromTag(ValueOutput output)
-    {
+    public void removeComponentsFromTag(ValueOutput output) {
         output.discard("port_types");
         output.discard("port_states");
         output.discard("circuit");
@@ -395,8 +342,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
-    protected void loadAdditional(ValueInput input)
-    {
+    protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         SerdesUtils.readTypedArray(input, "port_types", RedstoneType.CODEC, portTypes);
         SerdesUtils.readTypedArray(input, "port_dirs", PortDir.CODEC, portDirs);
@@ -406,8 +352,7 @@ public final class MicrochipBlockEntity extends BaseBlockEntity implements Redst
     }
 
     @Override
-    protected void saveAdditional(ValueOutput output)
-    {
+    protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         SerdesUtils.writeTypedArray(output, "port_types", RedstoneType.CODEC, portTypes);
         SerdesUtils.writeTypedArray(output, "port_dirs", PortDir.CODEC, portDirs);

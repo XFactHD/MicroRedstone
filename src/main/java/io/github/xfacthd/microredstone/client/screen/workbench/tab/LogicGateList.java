@@ -19,8 +19,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public final class LogicGateList
-{
+public final class LogicGateList {
     static final Entry[] ENTRIES = new Entry[] {
             entry("connection_single").spec(Connection.ICON_SINGLE_IN, WireType.SINGLE).build(),
             entry("connection_bundled").spec(Connection.ICON_BUNDLED_IN, WireType.BUNDLED).build(),
@@ -61,22 +60,17 @@ public final class LogicGateList
     };
     static final int ENTRY_COUNT = ENTRIES.length;
 
-    private static EntryBuilder entry(String name)
-    {
+    private static EntryBuilder entry(String name) {
         return new EntryBuilder(name);
     }
 
-    public static PlaceableNode instantiate(int index)
-    {
+    public static PlaceableNode instantiate(int index) {
         return LogicGateList.ENTRIES[index].instantiate();
     }
 
-    public static Entry getEntryByName(String componentName)
-    {
-        for (Entry entry : ENTRIES)
-        {
-            if (entry.name().equals(componentName))
-            {
+    public static Entry getEntryByName(String componentName) {
+        for (Entry entry : ENTRIES) {
+            if (entry.name().equals(componentName)) {
                 return entry;
             }
         }
@@ -90,17 +84,14 @@ public final class LogicGateList
             Component description,
             IconConfig icon,
             Supplier<? extends PlaceableNode> factory
-    ) implements NodeListWidget.Entry
-    {
+    ) implements NodeListWidget.Entry {
         @Override
-        public PlaceableNode instantiate()
-        {
+        public PlaceableNode instantiate() {
             return factory.get();
         }
     }
 
-    private static final class EntryBuilder
-    {
+    private static final class EntryBuilder {
         private final String name;
         private boolean hasSubtitle = true;
         @Nullable
@@ -108,38 +99,32 @@ public final class LogicGateList
         @Nullable
         private Supplier<? extends PlaceableNode> factory = null;
 
-        EntryBuilder(String name)
-        {
+        EntryBuilder(String name) {
             this.name = name;
         }
 
-        EntryBuilder spec(IconConfig icon, Supplier<PrototypeNode> factory)
-        {
+        EntryBuilder spec(IconConfig icon, Supplier<PrototypeNode> factory) {
             this.icon = icon;
             this.factory = factory;
             return this;
         }
 
-        EntryBuilder spec(int inputCount, WireType wireType, Provider<IconConfig> icon, Provider<Supplier<PrototypeNode>> factory)
-        {
+        EntryBuilder spec(int inputCount, WireType wireType, Provider<IconConfig> icon, Provider<Supplier<PrototypeNode>> factory) {
             return spec(icon.get(inputCount, wireType), factory.get(inputCount, wireType));
         }
 
-        EntryBuilder spec(IconConfig icon, WireType wireType)
-        {
+        EntryBuilder spec(IconConfig icon, WireType wireType) {
             this.icon = icon;
             this.factory = () -> new Connection(wireType);
             return this;
         }
 
-        EntryBuilder withoutSubtitle()
-        {
+        EntryBuilder withoutSubtitle() {
             hasSubtitle = false;
             return this;
         }
 
-        Entry build()
-        {
+        Entry build() {
             Objects.requireNonNull(icon);
             Objects.requireNonNull(factory);
 
@@ -150,11 +135,10 @@ public final class LogicGateList
             return new Entry(name, title, subTitle, description, icon, factory);
         }
 
-        interface Provider<T>
-        {
+        interface Provider<T> {
             T get(int inputCount, WireType wireType);
         }
     }
 
-    private LogicGateList() {}
+    private LogicGateList() { }
 }

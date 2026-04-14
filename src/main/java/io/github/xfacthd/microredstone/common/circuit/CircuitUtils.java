@@ -18,12 +18,9 @@ import io.github.xfacthd.microredstone.common.circuit.prototype.special.ClockPro
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.LampPrototypeNode;
 import io.github.xfacthd.microredstone.common.circuit.prototype.special.ReferencePrototypeNode;
 
-public final class CircuitUtils
-{
-    public static IconConfig makeIconConfig(CircuitNode node)
-    {
-        return switch (node)
-        {
+public final class CircuitUtils {
+    public static IconConfig makeIconConfig(CircuitNode node) {
+        return switch (node) {
             case BundlePackerCircuitNode ignored -> ConverterPrototypeNode.Type.PACK.getIcon();
             case BundleUnpackerCircuitNode ignored -> ConverterPrototypeNode.Type.UNPACK.getIcon();
             case ConstantCircuitNode constant -> ConstantPrototypeNode.icon(constant);
@@ -36,5 +33,5 @@ public final class CircuitUtils
         };
     }
 
-    private CircuitUtils() {}
+    private CircuitUtils() { }
 }

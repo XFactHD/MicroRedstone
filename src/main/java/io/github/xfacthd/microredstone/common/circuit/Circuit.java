@@ -12,8 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 
-public final class Circuit
-{
+public final class Circuit {
     public static final Codec<Circuit> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             CompoundCircuitNode.CODEC.codec().fieldOf("root_node").forGetter(Circuit::getSerializableRootNode),
             CircuitState.CODEC.fieldOf("state").forGetter(Circuit::serializeState)
@@ -24,14 +23,12 @@ public final class Circuit
     private final WirePair[] outputs;
     private final EvalContext.Root evalContext;
 
-    private Circuit(RootCircuitNode rootNode, CircuitState state)
-    {
+    private Circuit(RootCircuitNode rootNode, CircuitState state) {
         this(rootNode);
         rootNode.applyState(state);
     }
 
-    public Circuit(RootCircuitNode rootNode)
-    {
+    public Circuit(RootCircuitNode rootNode) {
         this.rootNode = rootNode;
         this.inputs = Arrays.stream(rootNode.getInputs())
                 .map(con -> new WirePair(con.port().ordinal(), con.wire()))
@@ -42,45 +39,37 @@ public final class Circuit
         this.evalContext = new EvalContext.Root(inputs, outputs);
     }
 
-    public void evaluate(ExternalInterfaceAdapter adapter, @Nullable WireStates wireStates)
-    {
+    public void evaluate(ExternalInterfaceAdapter adapter, @Nullable WireStates wireStates) {
         evalContext.prepare(adapter);
         rootNode.evaluate(evalContext, inputs, outputs, wireStates);
         evalContext.flush(adapter);
     }
 
-    public Circuit replaceRootNode(CompiledCircuitNode compiled)
-    {
+    public Circuit replaceRootNode(CompiledCircuitNode compiled) {
         return new Circuit(compiled, serializeState());
     }
 
-    private CircuitState serializeState()
-    {
+    private CircuitState serializeState() {
         return rootNode.serializeState();
     }
 
-    public RootCircuitNode getRootNode()
-    {
+    public RootCircuitNode getRootNode() {
         return rootNode;
     }
 
-    public CompoundCircuitNode getSerializableRootNode()
-    {
+    public CompoundCircuitNode getSerializableRootNode() {
         return rootNode.serializable();
     }
 
-    public Connector[] getInputs()
-    {
+    public Connector[] getInputs() {
         return rootNode.getInputs();
     }
 
-    public Connector[] getOutputs()
-    {
+    public Connector[] getOutputs() {
         return rootNode.getOutputs();
     }
 
-    public void release()
-    {
+    public void release() {
         rootNode.release();
     }
 }

@@ -17,8 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public final class WireInProgress
-{
+public final class WireInProgress {
     private final WireType type;
     private final DyeColor color;
     private final Icon icon;
@@ -28,77 +27,69 @@ public final class WireInProgress
     private NodePos lastCursorPos = null;
     private List<WireNode> floatingNodes = List.of();
 
-    public WireInProgress(WireType wireType)
-    {
+    public WireInProgress(WireType wireType) {
         this.type = wireType;
         this.color = wireType.getColor(WorkbenchConfig.INSTANCE.getWireColor());
         this.icon = wireType.getIcon().withColor(color);
     }
 
-    public WireType getType()
-    {
+    public WireType getType() {
         return type;
     }
 
-    public DyeColor getColor()
-    {
+    public DyeColor getColor() {
         return color;
     }
 
-    public Icon getIcon()
-    {
+    public Icon getIcon() {
         return icon;
     }
 
-    public List<WireNode> getWireNodes()
-    {
+    public List<WireNode> getWireNodes() {
         return wireNodes;
     }
 
-    public List<RoutedWire.Section> getSections()
-    {
+    public List<RoutedWire.Section> getSections() {
         return sections;
     }
 
-    public List<WireNode> getFloatingNodes()
-    {
+    public List<WireNode> getFloatingNodes() {
         return floatingNodes;
     }
 
-    public void repath(CircuitCanvas canvas, int mouseX, int mouseY)
-    {
-        if (wireNodes.isEmpty()) { return; }
+    public void repath(CircuitCanvas canvas, int mouseX, int mouseY) {
+        if (wireNodes.isEmpty()) {
+            return;
+        }
 
         NodePos cursorPos = canvas.getNodePos(mouseX, mouseY);
-        if (cursorPos != null && !cursorPos.equals(lastCursorPos))
-        {
+        if (cursorPos != null && !cursorPos.equals(lastCursorPos)) {
             floatingNodes = new ArrayList<>(WireRouter.route(canvas, this, cursorPos));
             lastCursorPos = cursorPos;
         }
     }
 
-    public PlaceResult placeNextNode(CircuitCanvas canvas, double mouseX, double mouseY, boolean doubleClick)
-    {
-        if (wireNodes.isEmpty())
-        {
+    public PlaceResult placeNextNode(CircuitCanvas canvas, double mouseX, double mouseY, boolean doubleClick) {
+        if (wireNodes.isEmpty()) {
             ExactNodePos exactPos = canvas.getExactNodePos(mouseX, mouseY);
-            if (exactPos == null)
-            {
+            if (exactPos == null) {
                 return PlaceResult.OUTSIDE_CANVAS;
             }
 
             NodePos pos = exactPos.pos();
             PlaceableNode partNode = canvas.getPartGrid().getPartNode(pos);
-            if (partNode != null)
-            {
+            if (partNode != null) {
                 return tryConnectPart(canvas, pos, partNode, true, null, () -> Port.ofCross(exactPos.fracX(), exactPos.fracY()));
             }
             WireGrid.WireGridNode wire = canvas.getWireGrid().getWireNode(pos);
-            if (wire != null && wire.wires().size() == 1)
-            {
+            if (wire != null && wire.wires().size() == 1) {
                 RoutedWire routed = wire.wires().getFirst();
-                if (routed.wire().getWireType() != type) return PlaceResult.GENERIC_FAIL;
-                if (routed.wire().getColor() != color) return PlaceResult.GENERIC_FAIL;
+                if (routed.wire().getWireType() != type) {
+                    return PlaceResult.GENERIC_FAIL;
+                }
+                if (routed.wire().getColor() != color) {
+                    return PlaceResult.GENERIC_FAIL;
+                }
 
                 RoutedWire.Section section = routed.findIntersectedSection(pos);
                 Set<NodePos> neighbors = section != null ? Set.of(section.posOne(), section.posTwo()) : Set.of();
@@ -111,30 +102,24 @@ public final class WireInProgress
 
         repath(canvas, (int) mouseX, (int) mouseY);
         NodePos pos = canvas.getNodePos((int) mouseX, (int) mouseY);
-        if (!floatingNodes.isEmpty())
-        {
-            if (floatingNodes.getLast().pos().equals(pos))
-            {
+        if (!floatingNodes.isEmpty()) {
+            if (floatingNodes.getLast().pos().equals(pos)) {
                 // floatingNodes can only contain zero, one or two entries
                 WireNode lastNode = floatingNodes.size() > 1 ? floatingNodes.getFirst() : wireNodes.getLast();
                 Port dir = lastNode.pos().getDirTowards(pos);
 
                 PlaceableNode partNode = canvas.getPartGrid().getPartNode(pos);
-                if (partNode != null)
-                {
+                if (partNode != null) {
                     floatingNodes.removeLast();
                     PlaceResult result = tryConnectPart(canvas, pos, partNode, false, lastNode.pos(), dir::getOpposite);
-                    if (result == PlaceResult.SUCCESS)
-                    {
+                    if (result == PlaceResult.SUCCESS) {
                         addMissingSectionsAndComplete(canvas);
                     }
                     return result;
                 }
                 WireGrid.WireGridNode wireNode = canvas.getWireGrid().getWireNode(pos);
-                if (wireNode != null)
-                {
-                    if (wireNode.canConnect(type, color, dir))
-                    {
+                if (wireNode != null) {
+                    if (wireNode.canConnect(type, color, dir)) {
                         wireNodes.add(floatingNodes.removeLast());
                         addMissingSectionsAndComplete(canvas);
                         return PlaceResult.SUCCESS;
@@ -149,9 +134,7 @@ public final class WireInProgress
                 lastCursorPos = null;
                 return PlaceResult.SUCCESS;
             }
-        }
-        else if (doubleClick && wireNodes.getLast().pos().equals(pos))
-        {
+        } else if (doubleClick && wireNodes.getLast().pos().equals(pos)) {
             completeWire(canvas);
             return PlaceResult.SUCCESS;
         }
@@ -165,73 +148,65 @@ public final class WireInProgress
             boolean updateNode,
             @Nullable NodePos neighbor,
             Supplier<Port> portSupplier
-    )
-    {
+    ) {
         Port port = portSupplier.get();
-        if (!part.hasPort(port, type)) return PlaceResult.NO_PORT;
-        if (!canvas.canConnectToPart(part, pos, port, type)) return PlaceResult.BLOCKED_PORT;
+        if (!part.hasPort(port, type)) {
+            return PlaceResult.NO_PORT;
+        }
+        if (!canvas.canConnectToPart(part, pos, port, type)) {
+            return PlaceResult.BLOCKED_PORT;
+        }
 
         WireNode.Connection node = new WireNode.Connection(pos, port, neighbor);
-        if (updateNode && !wireNodes.isEmpty())
-        {
+        if (updateNode && !wireNodes.isEmpty()) {
             updateNodeAt(wireNodes.size() - 1, node);
         }
         wireNodes.add(node);
         return PlaceResult.SUCCESS;
     }
 
-    private void addMissingSectionsAndComplete(CircuitCanvas canvas)
-    {
+    private void addMissingSectionsAndComplete(CircuitCanvas canvas) {
         int firstNewNode = wireNodes.size() - 1;
-        if (firstNewNode > 0)
-        {
+        if (firstNewNode > 0) {
             WireNode connected = floatingNodes.isEmpty() ? wireNodes.getLast() : floatingNodes.getFirst();
             updateNodeAt(firstNewNode - 1, connected);
         }
         wireNodes.addAll(wireNodes.size() - 1, floatingNodes);
-        for (int i = Math.max(firstNewNode, 1); i < wireNodes.size(); i++)
-        {
+        for (int i = Math.max(firstNewNode, 1); i < wireNodes.size(); i++) {
             sections.add(new RoutedWire.Section(wireNodes.get(i - 1).pos(), wireNodes.get(i).pos()));
         }
         completeWire(canvas);
     }
 
-    private void updateNodeAt(int index, WireNode connected)
-    {
+    private void updateNodeAt(int index, WireNode connected) {
         WireNode node = wireNodes.get(index);
         Port dir = node.pos().getDirTowards(connected.pos());
         wireNodes.set(index, node.withNeighbor(dir, connected.pos()));
     }
 
-    private void completeWire(CircuitCanvas canvas)
-    {
+    private void completeWire(CircuitCanvas canvas) {
         sections.removeIf(RoutedWire.Section::isZeroLength);
         canvas.getWireGrid().addWire(type, color, wireNodes, sections);
         canvas.cancelWirePull();
     }
 
-    public boolean intersects(NodePos pos)
-    {
-        for (RoutedWire.Section section : sections)
-        {
-            if (section.intersects(pos))
-            {
+    public boolean intersects(NodePos pos) {
+        for (RoutedWire.Section section : sections) {
+            if (section.intersects(pos)) {
                 return true;
             }
         }
         return false;
     }
 
-    @Nullable
-    public Port getTargettedPort(ExactNodePos exactPos)
-    {
-        if (wireNodes.isEmpty())
-        {
+    public @Nullable Port getTargettedPort(ExactNodePos exactPos) {
+        if (wireNodes.isEmpty()) {
             return Port.ofCross(exactPos.fracX(), exactPos.fracY());
         }
-        if (!floatingNodes.isEmpty())
-        {
-            if (!floatingNodes.getLast().pos().equals(exactPos.pos())) return null;
+        if (!floatingNodes.isEmpty()) {
+            if (!floatingNodes.getLast().pos().equals(exactPos.pos())) {
+                return null;
+            }
 
             WireNode lastNode = floatingNodes.size() > 1 ? floatingNodes.getFirst() : wireNodes.getLast();
             return lastNode.pos().getDirTowards(exactPos.pos()).getOpposite();
@@ -239,13 +214,11 @@ public final class WireInProgress
         return null;
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return wireNodes.isEmpty() && floatingNodes.isEmpty();
     }
 
-    public enum PlaceResult
-    {
+    public enum PlaceResult {
         SUCCESS,
         OUTSIDE_CANVAS,
         NO_PORT,

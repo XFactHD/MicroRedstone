@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public record StackingSource(Identifier primary, List<Identifier> secondaries, Identifier sprite) implements SpriteSource
-{
+public record StackingSource(Identifier primary, List<Identifier> secondaries, Identifier sprite) implements SpriteSource {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final MapCodec<StackingSource> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Identifier.CODEC.fieldOf("primary_texture").forGetter(StackingSource::primary),
@@ -37,30 +36,25 @@ public record StackingSource(Identifier primary, List<Identifier> secondaries, I
     public static final Identifier ID = Utils.rl("stacking");
 
     @Override
-    public void run(ResourceManager resourceManager, Output output)
-    {
+    public void run(ResourceManager resourceManager, Output output) {
         run(resourceManager, output, Set.of());
     }
 
     @Override
-    public void run(ResourceManager resourceManager, Output output, Set<MetadataSectionType<?>> additionalMetadata)
-    {
+    public void run(ResourceManager resourceManager, Output output, Set<MetadataSectionType<?>> additionalMetadata) {
         Identifier primaryFile = TEXTURE_ID_CONVERTER.idToFile(primary);
         Optional<Resource> optPrimary = resourceManager.getResource(primaryFile);
-        if (optPrimary.isEmpty())
-        {
+        if (optPrimary.isEmpty()) {
             LOGGER.warn("Missing primary source texture: {}", primaryFile);
             return;
         }
         InputImage primaryImage = new InputImage(primaryFile, optPrimary.get(), 1);
 
         List<InputImage> secondaryImages = new ArrayList<>(secondaries.size());
-        for (Identifier secondary : secondaries)
-        {
+        for (Identifier secondary : secondaries) {
             Identifier secondaryFile = TEXTURE_ID_CONVERTER.idToFile(secondary);
             Optional<Resource> optSecondary = resourceManager.getResource(secondaryFile);
-            if (optSecondary.isEmpty())
-            {
+            if (optSecondary.isEmpty()) {
                 LOGGER.warn("Missing primary source texture: {}", secondaryFile);
                 return;
             }
@@ -72,8 +66,7 @@ public record StackingSource(Identifier primary, List<Identifier> secondaries, I
     }
 
     @Override
-    public MapCodec<? extends SpriteSource> codec()
-    {
+    public MapCodec<? extends SpriteSource> codec() {
         return CODEC;
     }
 
@@ -82,18 +75,12 @@ public record StackingSource(Identifier primary, List<Identifier> secondaries, I
             List<InputImage> secondaryImages,
             Identifier sprite,
             Set<MetadataSectionType<?>> additionalMetadata
-    ) implements DiscardableLoader
-    {
+    ) implements DiscardableLoader {
         @Override
-        @Nullable
-        public SpriteContents get(SpriteResourceLoader loader)
-        {
-            try
-            {
-                for (InputImage image : secondaryImages)
-                {
-                    if (image.resource().metadata().getSection(AnimationMetadataSection.TYPE).isPresent())
-                    {
+        public @Nullable SpriteContents get(SpriteResourceLoader loader) {
+            try {
+                for (InputImage image : secondaryImages) {
+                    if (image.resource().metadata().getSection(AnimationMetadataSection.TYPE).isPresent()) {
                         throw new IllegalArgumentException("Secondary image '" + image.file() + "' has an animation, this is unsupported");
                     }
                 }
@@ -114,8 +101,7 @@ public record StackingSource(Identifier primary, List<Identifier> secondaries, I
                         .map(img -> new FrameSize(img.getWidth(), img.getHeight()))
                         .distinct()
                         .toList();
-                if (sizes.size() != 1 || !sizes.getFirst().equals(frameSize))
-                {
+                if (sizes.size() != 1 || !sizes.getFirst().equals(frameSize)) {
                     List<FrameSize> allSizes = new ArrayList<>(sizes);
                     allSizes.add(frameSize);
                     throw new IllegalArgumentException("Encountered different image sizes: " + allSizes);
@@ -127,47 +113,35 @@ public record StackingSource(Identifier primary, List<Identifier> secondaries, I
                 List<MetadataSectionType.WithValue<?>> metaSections = primaryMeta.getTypedSections(additionalMetadata);
                 Optional<TextureMetadataSection> texMeta = primaryMeta.getSection(TextureMetadataSection.TYPE);
                 return new SpriteContents(sprite, frameSize, imageOut, Optional.ofNullable(sourceAnim), metaSections, texMeta);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 LOGGER.error("Failed to create stacked texture '{}' from source texture '{}'", sprite, primaryImage.file());
-            }
-            finally
-            {
+            } finally {
                 discard();
             }
             return null;
         }
 
-        private static void buildOutputImage(List<FrameInfo> frames, NativeImage primary, List<NativeImage> secondaries, NativeImage imageOut, FrameSize frameSize)
-        {
+        private static void buildOutputImage(List<FrameInfo> frames, NativeImage primary, List<NativeImage> secondaries, NativeImage imageOut, FrameSize frameSize) {
             imageOut.copyFrom(primary);
-            for (NativeImage secondary : secondaries)
-            {
-                for (FrameInfo frame : frames)
-                {
+            for (NativeImage secondary : secondaries) {
+                for (FrameInfo frame : frames) {
                     int fx = frame.x();
                     int fy = frame.y();
 
-                    for (int y = 0; y < frameSize.height(); y++)
-                    {
-                        for (int x = 0; x < frameSize.width(); x++)
-                        {
+                    for (int y = 0; y < frameSize.height(); y++) {
+                        for (int x = 0; x < frameSize.width(); x++) {
                             int absX = fx + x;
                             int absY = fy + y;
 
                             int secColor = secondary.getPixelABGR(x, y);
                             int secAlpha = ARGB.alpha(secColor);
-                            if (secAlpha == 0)
-                            {
+                            if (secAlpha == 0) {
                                 continue;
                             }
 
-                            if (secAlpha < 255)
-                            {
+                            if (secAlpha < 255) {
                                 int primColor = imageOut.getPixelABGR(absX, absY);
-                                if (ARGB.alpha(primColor) > 0)
-                                {
+                                if (ARGB.alpha(primColor) > 0) {
                                     secColor = ARGB.multiply(primColor, secColor);
                                 }
                             }
@@ -178,14 +152,12 @@ public record StackingSource(Identifier primary, List<Identifier> secondaries, I
             }
         }
 
-        public Resource getPrimaryResource()
-        {
+        public Resource getPrimaryResource() {
             return primaryImage.resource();
         }
 
         @Override
-        public void discard()
-        {
+        public void discard() {
             primaryImage.release();
             secondaryImages.forEach(InputImage::release);
         }

@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ClockPrototypeNode extends PrototypeNode
-{
+public final class ClockPrototypeNode extends PrototypeNode {
     private static final PortConfig PORT_CONFIG = PortConfig.builder()
             .addOptionalPort(Port.LEFT, WireType.SINGLE, PortDir.INPUT)
             .addPort(Port.RIGHT, WireType.SINGLE, PortDir.OUTPUT)
@@ -34,43 +33,35 @@ public final class ClockPrototypeNode extends PrototypeNode
 
     private int halfPeriodLength = 10;
 
-    public ClockPrototypeNode()
-    {
+    public ClockPrototypeNode() {
         super(PORT_CONFIG, ICON);
     }
 
-    private ClockPrototypeNode(int halfPeriodLength)
-    {
+    private ClockPrototypeNode(int halfPeriodLength) {
         this();
         this.halfPeriodLength = halfPeriodLength;
     }
 
-    public int getHalfPeriodLength()
-    {
+    public int getHalfPeriodLength() {
         return halfPeriodLength;
     }
 
-    public void setHalfPeriodLength(int halfCycleLength)
-    {
+    public void setHalfPeriodLength(int halfCycleLength) {
         this.halfPeriodLength = halfCycleLength;
     }
 
     @Override
-    protected void validateInternal(CircuitErrorCollector errors)
-    {
-        if (halfPeriodLength < 1)
-        {
+    protected void validateInternal(CircuitErrorCollector errors) {
+        if (halfPeriodLength < 1) {
             errors.submit(new NodeError.InvalidClockPeriod(this, halfPeriodLength));
         }
     }
 
     @Override
-    public ClockCircuitNode assemble(WireMapper wireMapper)
-    {
+    public ClockCircuitNode assemble(WireMapper wireMapper) {
         Connector inhibitCon = null;
         Wire inhibitWireOpt = getWireOptional(Port.LEFT);
-        if (inhibitWireOpt != null)
-        {
+        if (inhibitWireOpt != null) {
             int inhibitWire = wireMapper.resolveWire(inhibitWireOpt);
             inhibitCon = new Connector(getPos(), Port.LEFT, inhibitWire, PortDir.INPUT, WireType.SINGLE);
         }
@@ -80,40 +71,34 @@ public final class ClockPrototypeNode extends PrototypeNode
     }
 
     @Override
-    public Serializable serialize(List<Wire> wires)
-    {
+    public Serializable serialize(List<Wire> wires) {
         return new Serializable(this, wires, halfPeriodLength);
     }
 
-    public static final class Serializable extends PrototypeNode.Serializable
-    {
+    public static final class Serializable extends PrototypeNode.Serializable {
         public static final MapCodec<Serializable> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Codec.INT.fieldOf("half_period_length").forGetter(node -> node.halfPeriodLength)
         ).and(commonFields(inst)).apply(inst, Serializable::new));
 
         private final int halfPeriodLength;
 
-        private Serializable(PrototypeNode node, List<Wire> wires, int halfPeriodLength)
-        {
+        private Serializable(PrototypeNode node, List<Wire> wires, int halfPeriodLength) {
             super(node, wires);
             this.halfPeriodLength = halfPeriodLength;
         }
 
-        private Serializable(int halfPeriodLength, Map<Port, Integer> connectedWires, NodePos pos, int rotation)
-        {
+        private Serializable(int halfPeriodLength, Map<Port, Integer> connectedWires, NodePos pos, int rotation) {
             super(connectedWires, pos, rotation);
             this.halfPeriodLength = halfPeriodLength;
         }
 
         @Override
-        protected PrototypeNode buildInternal()
-        {
+        protected PrototypeNode buildInternal() {
             return new ClockPrototypeNode(halfPeriodLength);
         }
 
         @Override
-        public ProtoNodeType<? extends PrototypeNode.Serializable> type()
-        {
+        public ProtoNodeType<? extends PrototypeNode.Serializable> type() {
             return MRContent.PROTO_TYPE_CLOCK.value();
         }
     }

@@ -11,8 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
-public record ClientboundMicrochipChangeCircuitPayload(int containerId, Optional<CompoundCircuitNode> rootNode, Optional<String> nodeClassName) implements CustomPacketPayload
-{
+public record ClientboundMicrochipChangeCircuitPayload(int containerId, Optional<CompoundCircuitNode> rootNode, Optional<String> nodeClassName) implements CustomPacketPayload {
     public static final Type<ClientboundMicrochipChangeCircuitPayload> TYPE = Utils.payloadType("clientbound_microchip_change_circuit");
     public static final StreamCodec<ByteBuf, ClientboundMicrochipChangeCircuitPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,
@@ -24,14 +23,12 @@ public record ClientboundMicrochipChangeCircuitPayload(int containerId, Optional
             ClientboundMicrochipChangeCircuitPayload::new
     );
 
-    public ClientboundMicrochipChangeCircuitPayload(int containerId, @Nullable CompoundCircuitNode rootNode, @Nullable String nodeClassName)
-    {
+    public ClientboundMicrochipChangeCircuitPayload(int containerId, @Nullable CompoundCircuitNode rootNode, @Nullable String nodeClassName) {
         this(containerId, Optional.ofNullable(rootNode), Optional.ofNullable(nodeClassName));
     }
 
     @Override
-    public Type<ClientboundMicrochipChangeCircuitPayload> type()
-    {
+    public Type<ClientboundMicrochipChangeCircuitPayload> type() {
         return TYPE;
     }
 }

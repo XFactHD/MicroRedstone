@@ -51,8 +51,7 @@ import java.util.stream.Stream;
 // TODO: add local storage for (partial) designs in prototype stage
 // TODO: auto-save every so often and when leaving the screen (add additional button to clear on screen exit)
 // TODO: re-open last auto-save when re-entering the screen if it wasn't cleared
-public final class CircuitWorkbenchScreen extends AbstractContainerScreen<CircuitWorkbenchMenu>
-{
+public final class CircuitWorkbenchScreen extends AbstractContainerScreen<CircuitWorkbenchMenu> {
     private static final Identifier BACKGROUND = Utils.rl("background");
     public static final Identifier WINDOW_FRAME = Utils.rl("window_frame");
     public static final Component TITLE_CONFIRM_CLOSE = Utils.translate("title", "circuit_workbench.close.confirm");
@@ -81,14 +80,12 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     private int lastMouseY = -1;
     private boolean isDraggingCanvas = false;
 
-    public CircuitWorkbenchScreen(CircuitWorkbenchMenu menu, Inventory inventory, Component title)
-    {
+    public CircuitWorkbenchScreen(CircuitWorkbenchMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         addRenderableOnly(canvas);
         addRenderableOnly(toolPane);
         toolPane.init(this::addRenderableWidget);
@@ -97,10 +94,8 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    protected void repositionElements()
-    {
-        if (contextMenu.isOpen())
-        {
+    protected void repositionElements() {
+        if (contextMenu.isOpen()) {
             contextMenu.close();
         }
 
@@ -125,112 +120,86 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         boolean overMenu = contextMenu.isOpen() && contextMenu.isMouseOver(mouseX, mouseY);
         lastMouseX = overMenu ? -1 : mouseX;
         lastMouseY = overMenu ? -1 : mouseY;
         super.extractRenderState(graphics, lastMouseX, lastMouseY, partialTick);
         contextMenu.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
-        if (isDraggingCanvas)
-        {
+        if (isDraggingCanvas) {
             graphics.requestCursor(CursorTypes.RESIZE_ALL);
         }
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, leftPos, topPos, imageWidth, imageHeight);
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractContents(graphics, mouseX, mouseY, partialTick);
 
-        if (floatingNode != null)
-        {
+        if (floatingNode != null) {
             CircuitCanvas.drawPartNode(graphics, floatingNode.node().getIcon(), mouseX - 4, mouseY - 4, floatingNode.rotation(), CircuitCanvas.PART_SIZE);
         }
-        if (canvas.isPullingWire() && Objects.requireNonNull(canvas.getWireInProgress()).isEmpty())
-        {
+        if (canvas.isPullingWire() && Objects.requireNonNull(canvas.getWireInProgress()).isEmpty()) {
             Icon icon = canvas.getWireInProgress().getIcon();
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon.texture(), mouseX - 4, mouseY - 8, 8, 8, icon.color());
         }
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.text(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
-        if (toolPane.getActiveTab() == ToolPaneTab.LIBRARY)
-        {
+        if (toolPane.getActiveTab() == ToolPaneTab.LIBRARY) {
             graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
         }
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick)
-    {
-        if (contextMenu.isOpen())
-        {
-            if (!contextMenu.shouldKeepMenuOpen((int) event.x(), (int) event.y(), true))
-            {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (contextMenu.isOpen()) {
+            if (!contextMenu.shouldKeepMenuOpen((int) event.x(), (int) event.y(), true)) {
                 contextMenu.close();
-            }
-            else if (contextMenu.isMouseOver(event.x(), event.y()))
-            {
+            } else if (contextMenu.isMouseOver(event.x(), event.y())) {
                 return contextMenu.mouseClicked(event, doubleClick);
             }
-        }
-        else if (!hasActiveEditAction() && event.button() == GLFW.GLFW_MOUSE_BUTTON_2)
-        {
+        } else if (!hasActiveEditAction() && event.button() == GLFW.GLFW_MOUSE_BUTTON_2) {
             ContextMenuProvider provider = getContextMenuProviderAt(event.x(), event.y());
-            if (provider != null)
-            {
-                if (contextMenu.open((int) event.x(), (int) event.y(), provider))
-                {
+            if (provider != null) {
+                if (contextMenu.open((int) event.x(), (int) event.y(), provider)) {
                     setFocused(contextMenu);
                 }
                 return true;
             }
         }
-        if (!isDragging() && event.button() == GLFW.GLFW_MOUSE_BUTTON_1)
-        {
+        if (!isDragging() && event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             GuiEventListener focused = getFocused();
-            if (focused != null && !focused.isMouseOver(event.x(), event.y()))
-            {
+            if (focused != null && !focused.isMouseOver(event.x(), event.y())) {
                 setFocused(null);
             }
 
-            if (canvas.isPullingWire())
-            {
+            if (canvas.isPullingWire()) {
                 canvas.pullWire((int) event.x(), (int) event.y(), doubleClick);
                 return true;
             }
 
             NodePos nodePos = canvas.getNodePos((int) event.x(), (int) event.y());
-            if (nodePos != null)
-            {
+            if (nodePos != null) {
                 dragStart = DragStart.canvas(nodePos);
-            }
-            else if (toolPane.isHoveringPartSource(event.x(), event.y()))
-            {
+            } else if (toolPane.isHoveringPartSource(event.x(), event.y())) {
                 dragStart = toolPane.getClickedPart(event.x(), event.y());
             }
-            if (dragStart != null)
-            {
+            if (dragStart != null) {
                 setDragging(true);
                 return true;
             }
         }
-        if (super.mouseClicked(event, doubleClick))
-        {
-            if (getFocused() instanceof DropFocusAfterClick && getFocused().isMouseOver(event.x(), event.y()))
-            {
+        if (super.mouseClicked(event, doubleClick)) {
+            if (getFocused() instanceof DropFocusAfterClick && getFocused().isMouseOver(event.x(), event.y())) {
                 setFocused(null);
             }
             return true;
@@ -239,70 +208,54 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
-    {
-        if (floatingNode != null)
-        {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (floatingNode != null) {
             return true;
         }
-        if (dragStart != null)
-        {
+        if (dragStart != null) {
             PlaceableNode node = dragStart.resolve(this);
-            if (node != null)
-            {
+            if (node != null) {
                 NodePos lastPos = dragStart.canvas().orElse(null);
                 floatingNode = FloatingNode.of(node, lastPos);
             }
             dragStart = null;
             return true;
         }
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && canvas.canDrag(event.x(), event.y()))
-        {
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_3 && canvas.canDrag(event.x(), event.y())) {
             canvas.drag((float) -dragX, (float) -dragY);
             isDraggingCanvas = true;
             return true;
         }
-        if (toolPane.mouseDragged(event, dragX, dragY))
-        {
+        if (toolPane.mouseDragged(event, dragX, dragY)) {
             return true;
         }
         return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event)
-    {
-        if (toolPane.mouseReleased(event))
-        {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (toolPane.mouseReleased(event)) {
             return true;
         }
 
-        if (isDraggingCanvas && event.button() == GLFW.GLFW_MOUSE_BUTTON_3)
-        {
+        if (isDraggingCanvas && event.button() == GLFW.GLFW_MOUSE_BUTTON_3) {
             isDraggingCanvas = false;
             return true;
         }
-        if (isDragging())
-        {
-            if (floatingNode != null)
-            {
+        if (isDragging()) {
+            if (floatingNode != null) {
                 NodePos target = canvas.getNodePlacementPos((int) event.x(), (int) event.y(), floatingNode);
                 boolean revertToLast = false;
-                if (target != null && !floatingNode.canPlaceAt(canvas, target))
-                {
+                if (target != null && !floatingNode.canPlaceAt(canvas, target)) {
                     target = null;
                 }
-                if (target == null && !toolPane.canDeletePart(floatingNode, target, event.x(), event.y()))
-                {
+                if (target == null && !toolPane.canDeletePart(floatingNode, target, event.x(), event.y())) {
                     target = floatingNode.lastPos();
                     revertToLast = true;
                 }
-                if (target != null)
-                {
+                if (target != null) {
                     floatingNode.placeAt(canvas, target, revertToLast, (int) event.x(), (int) event.y());
-                }
-                else if (floatingNode.lastPos() != null)
-                {
+                } else if (floatingNode.lastPos() != null) {
                     canvas.getPartGrid().removePartNode(Objects.requireNonNull(floatingNode.lastPos()));
                 }
                 floatingNode = null;
@@ -315,14 +268,11 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
-        if (toolPane.mouseScrolled(mouseX, mouseY, scrollX, scrollY))
-        {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (toolPane.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
             return true;
         }
-        if (floatingNode != null)
-        {
+        if (floatingNode != null) {
             floatingNode = floatingNode.rotate(Mth.sign(-scrollY));
             return true;
         }
@@ -330,66 +280,52 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event)
-    {
-        if (contextMenu.isOpen())
-        {
-            if (event.isEscape())
-            {
+    public boolean keyPressed(KeyEvent event) {
+        if (contextMenu.isOpen()) {
+            if (event.isEscape()) {
                 contextMenu.close();
                 return true;
             }
             return contextMenu.keyPressed(event);
         }
-        if (toolPane.keyPressed(event) || (toolPane.getLibraryBrowser().isNameEditFocused() && !event.isEscape()))
-        {
+        if (toolPane.keyPressed(event) || (toolPane.getLibraryBrowser().isNameEditFocused() && !event.isEscape())) {
             return true;
         }
         ArrowKey.Direction arrowDir = ArrowKey.Direction.of(event.key());
-        if (arrowDir != null)
-        {
+        if (arrowDir != null) {
             activeArrowKey = new ArrowKey(arrowDir, System.currentTimeMillis());
             canvas.drag(arrowDir);
             return true;
         }
-        if (canvas.isPullingWire() && event.isEscape())
-        {
+        if (canvas.isPullingWire() && event.isEscape()) {
             canvas.cancelWirePull();
             return true;
         }
-        if (!hasActiveEditAction())
-        {
-            if (event.key() == GLFW.GLFW_KEY_W)
-            {
+        if (!hasActiveEditAction()) {
+            if (event.key() == GLFW.GLFW_KEY_W) {
                 canvas.startWirePull(WireType.SINGLE);
                 return true;
             }
-            if (event.key() == GLFW.GLFW_KEY_B)
-            {
+            if (event.key() == GLFW.GLFW_KEY_B) {
                 canvas.startWirePull(WireType.BUNDLED);
                 return true;
             }
         }
-        if (floatingNode != null && event.key() == GLFW.GLFW_KEY_R)
-        {
+        if (floatingNode != null && event.key() == GLFW.GLFW_KEY_R) {
             floatingNode = floatingNode.rotate(Minecraft.getInstance().hasShiftDown() ? -1 : 1);
             return true;
         }
-        if (event.key() == GLFW.GLFW_KEY_DELETE)
-        {
+        if (event.key() == GLFW.GLFW_KEY_DELETE) {
             NodePos pos = canvas.getNodePos(lastMouseX, lastMouseY);
-            if (pos != null && canvas.getPartGrid().getPartNode(pos) != null)
-            {
+            if (pos != null && canvas.getPartGrid().getPartNode(pos) != null) {
                 canvas.getPartGrid().removePartNode(pos);
                 return true;
             }
-            if (pos != null && canvas.getWireGrid().removeWireAt(pos, Minecraft.getInstance().hasShiftDown()))
-            {
+            if (pos != null && canvas.getWireGrid().removeWireAt(pos, Minecraft.getInstance().hasShiftDown())) {
                 return true;
             }
         }
-        if ((event.isEscape() || ScreenUtils.isInventoryKey(event)) && !canvas.isEmpty())
-        {
+        if ((event.isEscape() || ScreenUtils.isInventoryKey(event)) && !canvas.isEmpty()) {
             DialogScreen.builder(DialogScreen.Type.CONFIRM)
                     .withTitle(TITLE_CONFIRM_CLOSE)
                     .withMessage(MESSAGE_CONFIRM_CLOSE_LINE_ONE)
@@ -402,10 +338,8 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    public boolean keyReleased(KeyEvent event)
-    {
-        if (activeArrowKey != null && ArrowKey.Direction.of(event.key()) == activeArrowKey.dir())
-        {
+    public boolean keyReleased(KeyEvent event) {
+        if (activeArrowKey != null && ArrowKey.Direction.of(event.key()) == activeArrowKey.dir()) {
             activeArrowKey = null;
             return true;
         }
@@ -413,93 +347,75 @@ public final class CircuitWorkbenchScreen extends AbstractContainerScreen<Circui
     }
 
     @Override
-    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY)
-    {
-        if (contextMenu.isOpen())
-        {
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
+        if (contextMenu.isOpen()) {
             Optional<GuiEventListener> child = contextMenu.getChildAt(mouseX, mouseY);
-            if (child.isPresent()) return child;
+            if (child.isPresent()) {
+                return child;
+            }
         }
         return super.getChildAt(mouseX, mouseY);
     }
 
     @Override
-    protected void containerTick()
-    {
-        if (activeArrowKey != null)
-        {
+    protected void containerTick() {
+        if (activeArrowKey != null) {
             long diff = System.currentTimeMillis() - activeArrowKey.startTime();
-            if (diff > ARROW_REPEAT_DELAY_INITIAL)
-            {
+            if (diff > ARROW_REPEAT_DELAY_INITIAL) {
                 canvas.drag(activeArrowKey.dir());
             }
         }
     }
 
-    @Nullable
-    public FloatingNode getFloatingNode()
-    {
+    public @Nullable FloatingNode getFloatingNode() {
         return floatingNode;
     }
 
-    public boolean isNodeFloating(PlaceableNode node)
-    {
+    public boolean isNodeFloating(PlaceableNode node) {
         return floatingNode != null && floatingNode.node() == node;
     }
 
-    public boolean hasActiveEditAction()
-    {
+    public boolean hasActiveEditAction() {
         return floatingNode != null || canvas.isPullingWire();
     }
 
-    public Stream<ToggleableSlot> getSlots()
-    {
+    public Stream<ToggleableSlot> getSlots() {
         return menu.slots.stream()
                 .filter(ToggleableSlot.class::isInstance)
                 .map(ToggleableSlot.class::cast);
     }
 
-    @Nullable
-    private ContextMenuProvider getContextMenuProviderAt(double mouseX, double mouseY)
-    {
+    private @Nullable ContextMenuProvider getContextMenuProviderAt(double mouseX, double mouseY) {
         Optional<GuiEventListener> child = getChildAt(mouseX, mouseY);
-        if (child.isPresent())
-        {
+        if (child.isPresent()) {
             GuiEventListener listener = child.get();
-            if (listener instanceof ContextMenuProvider provider)
-            {
+            if (listener instanceof ContextMenuProvider provider) {
                 return provider;
             }
-            if (listener instanceof ContextMenuProviderProxy proxy)
-            {
+            if (listener instanceof ContextMenuProviderProxy proxy) {
                 return proxy.getContextMenuProvider();
             }
             return null;
         }
         ContextMenuProvider provider = toolPane.getContextMenuProviderAt(mouseX, mouseY);
-        if (provider != null)
-        {
+        if (provider != null) {
             return provider;
         }
-        if (canvas.isMouseOver(mouseX, mouseY))
-        {
+        if (canvas.isMouseOver(mouseX, mouseY)) {
             return canvas.getContextMenuProvider(mouseX, mouseY);
         }
         return null;
     }
 
-    public CircuitCanvas getCanvas()
-    {
+    public CircuitCanvas getCanvas() {
         return canvas;
     }
 
-    public ToolPane getToolPane()
-    {
+    public ToolPane getToolPane() {
         return toolPane;
     }
 
-    public ImportExportHandler getImportExportHandler()
-    {
+    public ImportExportHandler getImportExportHandler() {
         return importExportHandler;
     }
 }

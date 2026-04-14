@@ -9,50 +9,42 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class SimpleTransientContainerWidget extends AbstractContainerEventHandler implements Renderable, NarratableEntry
-{
+public abstract class SimpleTransientContainerWidget extends AbstractContainerEventHandler implements Renderable, NarratableEntry {
     protected int x = 0;
     protected int y = 0;
     protected int width = 0;
     protected int height = 0;
     protected boolean open = false;
 
-    public int getWidth()
-    {
+    public int getWidth() {
         return width;
     }
 
-    public int getHeight()
-    {
+    public int getHeight() {
         return height;
     }
 
-    public final boolean isOpen()
-    {
+    public final boolean isOpen() {
         return open;
     }
 
     @Override
-    public final ScreenRectangle getRectangle()
-    {
+    public final ScreenRectangle getRectangle() {
         return open ? new ScreenRectangle(x, y, width, height) : ScreenRectangle.empty();
     }
 
     @Override
-    public final boolean isActive()
-    {
+    public final boolean isActive() {
         return open;
     }
 
     @Override
-    public final NarrationPriority narrationPriority()
-    {
+    public final NarrationPriority narrationPriority() {
         return NarrationPriority.NONE;
     }
 
     @Override
-    public final Collection<? extends NarratableEntry> getNarratables()
-    {
+    public final Collection<? extends NarratableEntry> getNarratables() {
         return List.of();
     }
 

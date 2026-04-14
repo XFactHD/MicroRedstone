@@ -11,45 +11,37 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public abstract class BaseBlockEntity extends BlockEntity
-{
+public abstract class BaseBlockEntity extends BlockEntity {
     // Keep around the chunk holding this BE to avoid having to look it up every tick to mark it as unsaved
     @Nullable
     private LevelChunk owningChunk = null;
 
-    protected BaseBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
-    {
+    protected BaseBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-    protected final void setChangedWithoutSignalUpdate()
-    {
-        if (owningChunk != null)
-        {
+    protected final void setChangedWithoutSignalUpdate() {
+        if (owningChunk != null) {
             owningChunk.markUnsaved();
         }
     }
 
-    protected final void sendClientUpdate()
-    {
+    protected final void sendClientUpdate() {
         level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
     }
 
-    protected final Level level()
-    {
+    protected final Level level() {
         return Objects.requireNonNull(level, "Level accessed before it was set");
     }
 
     @Override
-    public void clearRemoved()
-    {
+    public void clearRemoved() {
         super.clearRemoved();
         owningChunk = level().getChunkAt(worldPosition);
     }
 
     @Override
-    public void setRemoved()
-    {
+    public void setRemoved() {
         super.setRemoved();
         owningChunk = null;
     }

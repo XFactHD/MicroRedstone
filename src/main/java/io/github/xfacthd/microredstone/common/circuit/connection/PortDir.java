@@ -13,8 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Locale;
 import java.util.function.IntFunction;
 
-public enum PortDir implements StringRepresentable
-{
+public enum PortDir implements StringRepresentable {
     INPUT,
     OUTPUT;
 
@@ -27,18 +26,15 @@ public enum PortDir implements StringRepresentable
     private final Component title = Utils.translate("label", "port_dir." + name);
 
     @Override
-    public String getSerializedName()
-    {
+    public String getSerializedName() {
         return name;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
-    public Component getTitle()
-    {
+    public Component getTitle() {
         return title;
     }
 }

@@ -15,63 +15,49 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-public final class CircuitWorkbenchMenu extends AbstractContainerMenu
-{
+public final class CircuitWorkbenchMenu extends AbstractContainerMenu {
     private static final int CIRCUIT_SLOT_COUNT = 1;
 
     private final ContainerLevelAccess levelAccess;
     private final Slot circuitSlot;
 
-    public static CircuitWorkbenchMenu createServer(int containerId, Inventory inventory, BlockPos pos)
-    {
+    public static CircuitWorkbenchMenu createServer(int containerId, Inventory inventory, BlockPos pos) {
         ContainerLevelAccess levelAccess = ContainerLevelAccess.create(inventory.player.level(), pos);
         return new CircuitWorkbenchMenu(containerId, inventory, levelAccess);
     }
 
-    public static CircuitWorkbenchMenu createClient(int containerId, Inventory inventory)
-    {
+    public static CircuitWorkbenchMenu createClient(int containerId, Inventory inventory) {
         return new CircuitWorkbenchMenu(containerId, inventory, ContainerLevelAccess.NULL);
     }
 
-    private CircuitWorkbenchMenu(int containerId, Inventory inventory, ContainerLevelAccess levelAccess)
-    {
+    private CircuitWorkbenchMenu(int containerId, Inventory inventory, ContainerLevelAccess levelAccess) {
         super(MRContent.MENU_TYPE_CIRCUIT_WORKBENCH.value(), containerId);
         this.levelAccess = levelAccess;
         // Slot positions are configured by the screen
         this.circuitSlot = addSlot(new WorkbenchCircuitSlot(new SingleItemContainer(), 0, 0, 0));
-        for (int idx = 0; idx < 4 * 9; idx++)
-        {
+        for (int idx = 0; idx < 4 * 9; idx++) {
             addSlot(new ToggleableSlot(inventory, idx, 0, 0));
         }
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index)
-    {
+    public ItemStack quickMoveStack(Player player, int index) {
         ItemStack remainder = ItemStack.EMPTY;
         Slot slot = slots.get(index);
-        if (slot.hasItem())
-        {
+        if (slot.hasItem()) {
             ItemStack stack = slot.getItem();
             remainder = stack.copy();
-            if (index < CIRCUIT_SLOT_COUNT)
-            {
-                if (!moveItemStackTo(stack, CIRCUIT_SLOT_COUNT, slots.size(), true))
-                {
+            if (index < CIRCUIT_SLOT_COUNT) {
+                if (!moveItemStackTo(stack, CIRCUIT_SLOT_COUNT, slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            }
-            else if (!moveItemStackTo(stack, 0, CIRCUIT_SLOT_COUNT, false))
-            {
+            } else if (!moveItemStackTo(stack, 0, CIRCUIT_SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
 
-            if (stack.isEmpty())
-            {
+            if (stack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
-            }
-            else
-            {
+            } else {
                 slot.setChanged();
             }
         }
@@ -80,31 +66,25 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
     }
 
     @Override
-    public boolean stillValid(Player player)
-    {
+    public boolean stillValid(Player player) {
         return stillValid(levelAccess, player, MRContent.BLOCK_CIRCUIT_WORKBENCH.value());
     }
 
     @Override
-    public void removed(Player player)
-    {
+    public void removed(Player player) {
         super.removed(player);
         levelAccess.execute((level, pos) -> clearContainer(player, circuitSlot.container));
     }
 
-    public Slot getCircuitSlot()
-    {
+    public Slot getCircuitSlot() {
         return circuitSlot;
     }
 
-    public ClientboundWorkbenchWriteCircuitResultPayload applyCircuitToItem(CompoundCircuitNode circuitNode)
-    {
-        if (!CircuitValidator.validate(circuitNode))
-        {
+    public ClientboundWorkbenchWriteCircuitResultPayload applyCircuitToItem(CompoundCircuitNode circuitNode) {
+        if (!CircuitValidator.validate(circuitNode)) {
             return result(false);
         }
-        if (!circuitSlot.hasItem())
-        {
+        if (!circuitSlot.hasItem()) {
             return result(false);
         }
 
@@ -112,8 +92,7 @@ public final class CircuitWorkbenchMenu extends AbstractContainerMenu
         return result(true);
     }
 
-    private ClientboundWorkbenchWriteCircuitResultPayload result(boolean success)
-    {
+    private ClientboundWorkbenchWriteCircuitResultPayload result(boolean success) {
         return new ClientboundWorkbenchWriteCircuitResultPayload(containerId, success);
     }
 }

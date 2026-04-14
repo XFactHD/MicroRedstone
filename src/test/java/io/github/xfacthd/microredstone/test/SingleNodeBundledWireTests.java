@@ -21,11 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(DebugExportConfigExtension.class)
-public final class SingleNodeBundledWireTests
-{
+public final class SingleNodeBundledWireTests {
     @Test
-    void testDirectWire()
-    {
+    void testDirectWire() {
         TestBuilder builder = new TestBuilder();
 
         Wire wire = builder.addWire(WireType.BUNDLED);
@@ -46,14 +44,12 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i < 32; i++)
-        {
+        for (int i = 0; i < 32; i++) {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b1111, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Interpreted WIRE input " + i);
         }
-        for (int i = 0; i < 32; i++)
-        {
+        for (int i = 0; i < 32; i++) {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b1111, 4));
             circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(left, adapter.getValue(Port.RIGHT), "Compiled WIRE input " + i);
@@ -68,8 +64,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testBufferBundled()
-    {
+    void testBufferBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireIn = builder.addWire(WireType.BUNDLED);
@@ -95,16 +90,14 @@ public final class SingleNodeBundledWireTests
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
         int lastInput = 0;
-        for (int i = 0; i < 16; i++)
-        {
+        for (int i = 0; i < 16; i++) {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b11, 2));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(lastInput, adapter.getValue(Port.RIGHT), "Interpreted BUFFER last cycle input " + lastInput);
             lastInput = left;
         }
         lastInput = 0;
-        for (int i = 0; i < 16; i++)
-        {
+        for (int i = 0; i < 16; i++) {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i & 0b11, 2));
             circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(lastInput, adapter.getValue(Port.RIGHT), "Compiled BUFFER last cycle input " + lastInput);
@@ -120,8 +113,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testNotBundled()
-    {
+    void testNotBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireIn = builder.addWire(WireType.BUNDLED);
@@ -146,14 +138,12 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111; i++)
-        {
+        for (int i = 0; i <= 0b1111; i++) {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~left & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NOT input " + i);
         }
-        for (int i = 0; i <= 0b1111; i++)
-        {
+        for (int i = 0; i <= 0b1111; i++) {
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort(i, 4));
             circuitCompiled.evaluate(adapter, null);
             Assertions.assertEquals(~left & 0xFFFF, adapter.getValue(Port.RIGHT), "Compiled NOT input " + i);
@@ -168,8 +158,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testAndTwoBundled()
-    {
+    void testAndTwoBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -198,15 +187,13 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up & down, adapter.getValue(Port.RIGHT), "Interpreted AND input " + up + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitCompiled.evaluate(adapter, null);
@@ -222,8 +209,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testAndThreeBundled()
-    {
+    void testAndThreeBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -256,16 +242,14 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up & left & down, adapter.getValue(Port.RIGHT), "Interpreted AND input " + up + "," + left + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
@@ -282,8 +266,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testOrTwoBundled()
-    {
+    void testOrTwoBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -312,15 +295,13 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up | down, adapter.getValue(Port.RIGHT), "Interpreted OR input " + up + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitCompiled.evaluate(adapter, null);
@@ -336,8 +317,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testOrThreeBundled()
-    {
+    void testOrThreeBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -370,16 +350,14 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up | left | down, adapter.getValue(Port.RIGHT), "Interpreted OR input " + up + "," + left + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
@@ -396,8 +374,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testXorTwoBundled()
-    {
+    void testXorTwoBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -426,15 +403,13 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up ^ down, adapter.getValue(Port.RIGHT), "Interpreted XOR input " + up + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitCompiled.evaluate(adapter, null);
@@ -450,8 +425,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testXorThreeBundled()
-    {
+    void testXorThreeBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -484,16 +458,14 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(up ^ left ^ down, adapter.getValue(Port.RIGHT), "Interpreted XOR input " + up + "," + left + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
@@ -510,8 +482,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testNandTwoBundled()
-    {
+    void testNandTwoBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -540,15 +511,13 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NAND input " + up + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitCompiled.evaluate(adapter, null);
@@ -564,8 +533,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testNandThreeBundled()
-    {
+    void testNandThreeBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -598,16 +566,14 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up & left & down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NAND input " + up + "," + left + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
@@ -624,8 +590,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testNorTwoBundled()
-    {
+    void testNorTwoBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -654,15 +619,13 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NOR input " + up + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitCompiled.evaluate(adapter, null);
@@ -678,8 +641,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testNorThreeBundled()
-    {
+    void testNorThreeBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -712,16 +674,14 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up | left | down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted NOR input " + up + "," + left + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
@@ -738,8 +698,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testXnorTwoBundled()
-    {
+    void testXnorTwoBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -768,15 +727,13 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted XNOR input " + up + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             circuitCompiled.evaluate(adapter, null);
@@ -792,8 +749,7 @@ public final class SingleNodeBundledWireTests
     }
 
     @Test
-    void testXnorThreeBundled()
-    {
+    void testXnorThreeBundled() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.BUNDLED);
@@ -826,16 +782,14 @@ public final class SingleNodeBundledWireTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(~(up ^ left ^ down) & 0xFFFF, adapter.getValue(Port.RIGHT), "Interpreted XNOR input " + up + "," + left + "," + down);
         }
-        for (int i = 0; i <= 0b1111_1111_1111; i++)
-        {
+        for (int i = 0; i <= 0b1111_1111_1111; i++) {
             int up = adapter.setValue(Port.UP, TestUtils.expandToShort(i & 0xF, 4));
             int left = adapter.setValue(Port.LEFT, TestUtils.expandToShort((i >> 4) & 0xF, 4));
             int down = adapter.setValue(Port.DOWN, TestUtils.expandToShort((i >> 8) & 0xF, 4));

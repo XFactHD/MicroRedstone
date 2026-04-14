@@ -40,16 +40,13 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
 
-public final class MRLanguageProvider extends LanguageProvider
-{
-    public MRLanguageProvider(PackOutput output)
-    {
+public final class MRLanguageProvider extends LanguageProvider {
+    public MRLanguageProvider(PackOutput output) {
         super(output, MicroRedstone.MOD_ID, "en_us");
     }
 
     @Override
-    protected void addTranslations()
-    {
+    protected void addTranslations() {
         addBlockTranslations();
         addItemTranslations();
         addScreenTranslations();
@@ -58,27 +55,23 @@ public final class MRLanguageProvider extends LanguageProvider
         addSpecialTranslations();
     }
 
-    private void addBlockTranslations()
-    {
+    private void addBlockTranslations() {
         add(MRContent.BLOCK_MICROCHIP.value(), "Microchip");
     }
 
-    private void addItemTranslations()
-    {
+    private void addItemTranslations() {
         add(MRContent.ITEM_INTEGRATED_CIRCUIT.value(), "Integrated Circuit");
 
         add(StoredCircuit.LABEL_CIRCUIT, "Circuit: %s");
     }
 
-    private void addScreenTranslations()
-    {
+    private void addScreenTranslations() {
         add(MicrochipBlockEntity.MENU_TITLE, "Microchip");
         add(MicrochipCircuitScreen.TITLE_WITH_CIRCUIT, "%s - %s");
         add(MicrochipCircuitScreen.TITLE_WITH_CIRCUIT_DEBUG, "%s - %s (%s)");
     }
 
-    private void addWorkbenchScreenTranslations()
-    {
+    private void addWorkbenchScreenTranslations() {
         add(CircuitWorkbenchBlock.MENU_TITLE, "Circuit Workbench");
         add(CircuitWorkbenchScreen.TITLE_CONFIRM_CLOSE, "Confirm Close");
         add(CircuitWorkbenchScreen.MESSAGE_CONFIRM_CLOSE_LINE_ONE, "Are you sure you want to close the %s?");
@@ -189,8 +182,7 @@ public final class MRLanguageProvider extends LanguageProvider
         add(LocalCircuitStorage.FILE_TYPE_DESCRIPTION, "Circuit Design");
     }
 
-    private void addPartTranslations()
-    {
+    private void addPartTranslations() {
         addPart("connection_single", "Connector", "Single", "");
         addPart("connection_bundled", "Connector", "Bundled", "");
         addPart("constant_single", "Constant Value", "Single", "");
@@ -229,15 +221,12 @@ public final class MRLanguageProvider extends LanguageProvider
         addPart("unpacker", "Bundle Unpacker", null, "");
     }
 
-    private void addSpecialTranslations()
-    {
+    private void addSpecialTranslations() {
         add(MRContent.CREATIVE_TAB_MAIN.value().getDisplayName(), "MicroRedstone");
 
-        for (DyeColor color : DyeColor.values())
-        {
+        for (DyeColor color : DyeColor.values()) {
             StringBuilder name = new StringBuilder();
-            for (String part : color.getName().split("_"))
-            {
+            for (String part : color.getName().split("_")) {
                 name.append(StringUtils.capitalize(part)).append(" ");
             }
             add(ColorNames.getName(color), name.toString().trim());
@@ -261,26 +250,20 @@ public final class MRLanguageProvider extends LanguageProvider
     }
 
     // TODO: add descriptions
-    private void addPart(String partName, String title, @Nullable String subTitle, String description)
-    {
+    private void addPart(String partName, String title, @Nullable String subTitle, String description) {
         LogicGateList.Entry entry = LogicGateList.getEntryByName(partName);
         add(entry.title(), title);
-        if (entry.subTitle() != null && subTitle != null)
-        {
+        if (entry.subTitle() != null && subTitle != null) {
             add(entry.subTitle(), subTitle);
         }
         add(entry.description(), description);
     }
 
-    private void add(Component key, String value)
-    {
+    private void add(Component key, String value) {
         ComponentContents contents = key.getContents();
-        if (contents instanceof TranslatableContents translatable)
-        {
+        if (contents instanceof TranslatableContents translatable) {
             add(translatable.getKey(), value);
-        }
-        else
-        {
+        } else {
             add(key.getString(), value);
         }
     }

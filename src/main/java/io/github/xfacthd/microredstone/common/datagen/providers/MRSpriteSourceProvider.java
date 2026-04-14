@@ -22,16 +22,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public final class MRSpriteSourceProvider extends SpriteSourceProvider
-{
-    public MRSpriteSourceProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
-    {
+public final class MRSpriteSourceProvider extends SpriteSourceProvider {
+    public MRSpriteSourceProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
         super(output, lookupProvider, MicroRedstone.MOD_ID);
     }
 
     @Override
-    protected void gather()
-    {
+    protected void gather() {
         atlas(AtlasIds.BLOCKS)
                 .addSource(new AreaMaskSource(
                         Identifier.withDefaultNamespace("block/moss_block"),

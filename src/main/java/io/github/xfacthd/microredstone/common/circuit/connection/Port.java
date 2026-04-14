@@ -12,8 +12,7 @@ import net.minecraft.util.StringRepresentable;
 import java.util.Locale;
 import java.util.function.IntFunction;
 
-public enum Port implements StringRepresentable
-{
+public enum Port implements StringRepresentable {
     UP,
     RIGHT,
     DOWN,
@@ -26,10 +25,8 @@ public enum Port implements StringRepresentable
 
     private final String name = toString().toLowerCase(Locale.ROOT);
 
-    public Port getOpposite()
-    {
-        return switch (this)
-        {
+    public Port getOpposite() {
+        return switch (this) {
             case UP -> DOWN;
             case RIGHT -> LEFT;
             case DOWN -> UP;
@@ -37,15 +34,12 @@ public enum Port implements StringRepresentable
         };
     }
 
-    public Port rotate(int rot)
-    {
+    public Port rotate(int rot) {
         return VALUES[Mth.positiveModulo(ordinal() + rot, VALUES.length)];
     }
 
-    public int getLengthAlong(NodePos diff)
-    {
-        return switch (this)
-        {
+    public int getLengthAlong(NodePos diff) {
+        return switch (this) {
             case UP -> -diff.y();
             case RIGHT -> diff.x();
             case DOWN -> diff.y();
@@ -53,45 +47,36 @@ public enum Port implements StringRepresentable
         };
     }
 
-    public <T> T select(T ifHor, T ifVert)
-    {
+    public <T> T select(T ifHor, T ifVert) {
         return this == UP || this == DOWN ? ifVert : ifHor;
     }
 
     @Override
-    public String getSerializedName()
-    {
+    public String getSerializedName() {
         return name;
     }
 
-    public int toPartRotation()
-    {
+    public int toPartRotation() {
         return Mth.positiveModulo(ordinal() + 1, VALUES.length);
     }
 
-    public int appendMask(int mask, WireType type)
-    {
+    public int appendMask(int mask, WireType type) {
         int offset = ordinal() + (type.ordinal() * VALUES.length);
         return mask | (1 << offset);
     }
 
-    public static Port ofCross(double fracX, double fracY)
-    {
+    public static Port ofCross(double fracX, double fracY) {
         fracX -= .5D;
         fracY -= .5D;
 
-        if (Math.max(Math.abs(fracX), Math.abs(fracY)) == Math.abs(fracX))
-        {
+        if (Math.max(Math.abs(fracX), Math.abs(fracY)) == Math.abs(fracX)) {
             return fracX > 0 ? RIGHT : LEFT;
-        }
-        else
-        {
+        } else {
             return fracY > 0 ? DOWN : UP;
         }
     }
 
-    public static Port ofPartRotation(int rotation)
-    {
+    public static Port ofPartRotation(int rotation) {
         return VALUES[Mth.positiveModulo(rotation - 1, VALUES.length)];
     }
 }

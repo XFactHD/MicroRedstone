@@ -13,8 +13,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.function.IntSupplier;
 
-public final class Scrollbar implements GuiEventListener, Renderable
-{
+public final class Scrollbar implements GuiEventListener, Renderable {
     private static final Identifier BACKGROUND = Utils.rl("node_list_background");
     private static final Identifier SCROLLER = Utils.rl("minecraft", "container/villager/scroller");
     public static final int BACKGROUND_WIDTH = 8;
@@ -47,8 +46,7 @@ public final class Scrollbar implements GuiEventListener, Renderable
             IntSupplier contentHeightGetter,
             HoverTest listHoverCheck,
             @Nullable Scrollbar oldScrollbar
-    )
-    {
+    ) {
         this.x = withBackground ? (x + 1) : x;
         this.y = withBackground ? (y + 1) : y;
         this.barWidth = withBackground ? BACKGROUND_WIDTH : SCROLLER_WIDTH;
@@ -62,56 +60,48 @@ public final class Scrollbar implements GuiEventListener, Renderable
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
-    {
-        if (!visible) return;
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        if (!visible) {
+            return;
+        }
 
-        if (withBackground)
-        {
+        if (withBackground) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND, x - 1, y - 1, BACKGROUND_WIDTH, barHeight + 2);
         }
-        if (active)
-        {
+        if (active) {
             float scrollFactor = (float) offset / (contentHeight - listHeight);
             int scrollerY = y + (int) (scrollFactor * (barHeight - SCROLLER_HEIGHT));
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER, x, scrollerY, SCROLLER_WIDTH, SCROLLER_HEIGHT);
         }
     }
 
-    public void update()
-    {
+    public void update() {
         contentHeight = contentHeightGetter.getAsInt();
         offset = Math.clamp(offset, 0, Math.max(contentHeight - listHeight, 0));
         active = contentHeight > listHeight;
         visible = !hideWhenSmaller || active;
     }
 
-    public boolean isVisible()
-    {
+    public boolean isVisible() {
         return visible;
     }
 
-    public int getWidth()
-    {
+    public int getWidth() {
         return barWidth;
     }
 
-    public int getOffset()
-    {
+    public int getOffset() {
         return offset;
     }
 
-    public void setPosition(int x, int y)
-    {
+    public void setPosition(int x, int y) {
         this.x = withBackground ? (x + 1) : x;
         this.y = withBackground ? (y + 1) : y;
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY)
-    {
-        if (active && event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && (dragging || isMouseOver(event.x(), event.y())))
-        {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (active && event.button() == GLFW.GLFW_MOUSE_BUTTON_1 && (dragging || isMouseOver(event.x(), event.y()))) {
             int maxOffset = contentHeight - listHeight;
             double offset = (event.y() - y - (SCROLLER_HEIGHT / 2F)) / (barHeight - SCROLLER_HEIGHT);
             this.offset = (int) Mth.clamp(offset * maxOffset, 0, maxOffset);
@@ -122,10 +112,8 @@ public final class Scrollbar implements GuiEventListener, Renderable
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event)
-    {
-        if (active && dragging && event.button() == GLFW.GLFW_MOUSE_BUTTON_1)
-        {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (active && dragging && event.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             dragging = false;
             return true;
         }
@@ -133,19 +121,16 @@ public final class Scrollbar implements GuiEventListener, Renderable
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
-        if (active && listHoverCheck.test(mouseX, mouseY))
-        {
-            offset = Math.clamp((int)(offset - (scrollY * SCROLL_SPEED)), 0, contentHeight - listHeight);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (active && listHoverCheck.test(mouseX, mouseY)) {
+            offset = Math.clamp((int) (offset - (scrollY * SCROLL_SPEED)), 0, contentHeight - listHeight);
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean isMouseOver(double mouseX, double mouseY)
-    {
+    public boolean isMouseOver(double mouseX, double mouseY) {
         return mouseX >= x && mouseX < x + SCROLLER_WIDTH && mouseY >= y && mouseY < y + barHeight;
     }
 
@@ -153,14 +138,12 @@ public final class Scrollbar implements GuiEventListener, Renderable
     public void setFocused(boolean focused) { }
 
     @Override
-    public boolean isFocused()
-    {
+    public boolean isFocused() {
         return false;
     }
 
     @FunctionalInterface
-    public interface HoverTest
-    {
+    public interface HoverTest {
         boolean test(double mouseX, double mouseY);
     }
 }

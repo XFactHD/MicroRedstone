@@ -33,8 +33,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<PartsList.Mode>
-{
+public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<PartsList.Mode> {
     public static final Component LABEL_MODE = Utils.translate("label", "circuit_workbench.parts_list.mode");
     public static final Component LABEL_FILTER = Utils.translate("label", "circuit_workbench.parts_list.filter");
     public static final Component MSG_DROP_TO_DELETE = Utils.translate("msg", "circuit_workbench.parts_list.drop_to_delete");
@@ -63,8 +62,7 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     private Mode mode = Mode.GATES;
     private boolean wasModeLibrary = true;
 
-    public PartsList(CircuitWorkbenchScreen owner, ToolPane toolPane)
-    {
+    public PartsList(CircuitWorkbenchScreen owner, ToolPane toolPane) {
         super(owner, toolPane);
         this.modeBtnGates = new ModeButton<>(this, Mode.GATES, 0, 0);
         this.modeBtnLibrary = new ModeButton<>(this, Mode.LIBRARY, 0, 0);
@@ -76,23 +74,19 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     }
 
     @Override
-    protected void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
-    {
+    protected void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.text(owner.getFont(), LABEL_MODE, paneX + LABEL_X, paneY + MODE_LABEL_Y, 0xFF404040, false);
 
-        switch (mode)
-        {
+        switch (mode) {
             case GATES -> partListWidget.extractRenderState(graphics, mouseX, mouseY);
-            case LIBRARY ->
-            {
+            case LIBRARY -> {
                 graphics.text(owner.getFont(), LABEL_FILTER, paneX + LABEL_X, paneY + FILTER_LABEL_Y, 0xFF404040, false);
                 importListWidget.extractRenderState(graphics, mouseX, mouseY);
             }
         }
 
         FloatingNode floating = owner.getFloatingNode();
-        if (floating != null && floating.lastPos() != null)
-        {
+        if (floating != null && floating.lastPos() != null) {
             ScrollableWidget scrollable = getScrollableWidget();
             int minX = scrollable.getInnerX();
             int minY = scrollable.getInnerY();
@@ -105,66 +99,52 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
             int iconY = minY + (height / 2) - (ICON_DELETE_SIZE / 2);
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, ICON_DELETE, iconX, iconY, ICON_DELETE_SIZE, ICON_DELETE_SIZE, DELETE_ICON_TINT);
 
-            if (scrollable.isMouseOver(mouseX, mouseY))
-            {
+            if (scrollable.isMouseOver(mouseX, mouseY)) {
                 graphics.setTooltipForNextFrame(MSG_DROP_TO_DELETE, mouseX, mouseY);
             }
         }
     }
 
-    @Nullable
-    public DragStart getClickedPartIdx(double mouseY)
-    {
-        return switch (mode)
-        {
+    public @Nullable DragStart getClickedPartIdx(double mouseY) {
+        return switch (mode) {
             case GATES -> partListWidget.getClickedEntryIdx(mouseY, DragStart::partsList);
             case LIBRARY -> importListWidget.getClickedEntryIdx(mouseY, DragStart::library);
         };
     }
 
     @Override
-    public ScrollableWidget getScrollableWidget()
-    {
-        return switch (mode)
-        {
+    public ScrollableWidget getScrollableWidget() {
+        return switch (mode) {
             case GATES -> partListWidget;
             case LIBRARY -> importListWidget;
         };
     }
 
-    @Nullable
-    public PlaceableNode instantiateLibraryNode(int slot)
-    {
+    public @Nullable PlaceableNode instantiateLibraryNode(int slot) {
         return slot >= 0 && slot < importEntries.size() ? importEntries.get(slot).instantiate() : null;
     }
 
     @Override
-    public Mode getMode()
-    {
+    public Mode getMode() {
         return mode;
     }
 
     @Override
-    public void setMode(Mode mode)
-    {
-        if (this.mode != mode)
-        {
+    public void setMode(Mode mode) {
+        if (this.mode != mode) {
             this.mode = mode;
             updateWidgetVisibility(true);
         }
     }
 
-    public void setFilter(ShareType filter, boolean exclusive)
-    {
-        if (WorkbenchConfig.INSTANCE.setFilter(filter, exclusive))
-        {
+    public void setFilter(ShareType filter, boolean exclusive) {
+        if (WorkbenchConfig.INSTANCE.setFilter(filter, exclusive)) {
             filterButtons.forEach(FilterToggleButton::updateTooltip);
             updateImportList();
         }
     }
 
-    public void updateImportList()
-    {
+    public void updateImportList() {
         importEntries.clear();
         ClientCircuitLibrary.getFilteredEntries(
                 WorkbenchConfig.INSTANCE::isImportFilterEnabled,
@@ -173,16 +153,14 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     }
 
     @Override
-    public void initContent(Consumer<AbstractWidget> widgetAdder)
-    {
+    public void initContent(Consumer<AbstractWidget> widgetAdder) {
         widgetAdder.accept(modeBtnGates);
         widgetAdder.accept(modeBtnLibrary);
         filterButtons.forEach(widgetAdder);
     }
 
     @Override
-    public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight)
-    {
+    public void computeLayout(int screenX, int screenY, int screenWidth, int screenHeight, int toolPaneX, int toolPaneY, int windowHeight) {
         super.computeLayout(screenX, screenY, screenWidth, screenHeight, toolPaneX, toolPaneY, windowHeight);
 
         modeBtnGates.setPosition(paneX + MODE_BTN_GATES_X, paneY + MODE_BTN_Y);
@@ -190,8 +168,7 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
         partListWidget.computeLayout(height - GATE_LIST_Y, paneX, paneY + GATE_LIST_Y);
         importListWidget.computeLayout(height - IMPORT_LIST_Y, paneX, paneY + IMPORT_LIST_Y);
 
-        for (int i = 0; i < filterButtons.size(); i++)
-        {
+        for (int i = 0; i < filterButtons.size(); i++) {
             int btnX = paneX + FILTER_BTN_X + FilterToggleButton.SIZE * i;
             filterButtons.get(i).setPosition(btnX, paneY + FILTER_BTN_Y);
         }
@@ -202,27 +179,23 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
     }
 
     @Override
-    public void updateWidgetVisibility(boolean active)
-    {
+    public void updateWidgetVisibility(boolean active) {
         modeBtnGates.visible = active;
         modeBtnLibrary.visible = active;
 
         boolean isModeLibrary = active && mode == Mode.LIBRARY;
-        if (isModeLibrary != wasModeLibrary)
-        {
+        if (isModeLibrary != wasModeLibrary) {
             filterButtons.forEach(btn -> btn.visible = isModeLibrary);
             wasModeLibrary = isModeLibrary;
         }
     }
 
     @Override
-    public ToolPaneTab getType()
-    {
+    public ToolPaneTab getType() {
         return ToolPaneTab.PARTS;
     }
 
-    public enum Mode implements MultiModeTab.Mode
-    {
+    public enum Mode implements MultiModeTab.Mode {
         GATES,
         LIBRARY;
 
@@ -230,36 +203,29 @@ public final class PartsList extends ToolPaneTabWidget implements MultiModeTab<P
         private final Component title = Utils.translate("label", "circuit_workbench.parts_list.mode." + name);
 
         @Override
-        public Component getTitle()
-        {
+        public Component getTitle() {
             return title;
         }
     }
 
-    public record LibraryEntry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry
-    {
-        private static LibraryEntry create(CircuitLibraryEntry entry)
-        {
+    public record LibraryEntry(UUID id, CompoundCircuitNode node, IconConfig icon, Component title) implements NodeListWidget.Entry {
+        private static LibraryEntry create(CircuitLibraryEntry entry) {
             IconConfig icon = ReferencePrototypeNode.makeIconConfig(entry.circuitNode());
             return new LibraryEntry(entry.id(), entry.circuitNode(), icon, Component.literal(entry.name()));
         }
 
-        @Nullable
         @Override
-        public Component subTitle()
-        {
+        public @Nullable Component subTitle() {
             return null;
         }
 
         @Override
-        public PlaceableNode instantiate()
-        {
+        public PlaceableNode instantiate() {
             return ReferencePrototypeNode.create(node, icon);
         }
 
         @Override
-        public ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner)
-        {
+        public ContextMenuProvider getContextMenuProvider(CircuitWorkbenchScreen owner) {
             return new ImportEntryContextMenuProvider(owner, this);
         }
     }

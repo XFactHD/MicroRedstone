@@ -11,8 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public final class Wire
-{
+public final class Wire {
     public static final Codec<Wire> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             WireType.CODEC.fieldOf("type").forGetter(Wire::getWireType),
             DyeColor.CODEC.optionalFieldOf("color").forGetter(Wire::getColorForSerialization),
@@ -32,61 +31,50 @@ public final class Wire
     private final DyeColor color;
     private final List<WireNode> nodes = new ArrayList<>();
 
-    public Wire(WireType wireType, DyeColor color)
-    {
+    public Wire(WireType wireType, DyeColor color) {
         this.wireType = wireType;
         this.color = wireType.getColor(color);
     }
 
-    private Wire(WireType wireType, DyeColor color, List<WireNode> nodes)
-    {
+    private Wire(WireType wireType, DyeColor color, List<WireNode> nodes) {
         this(wireType, color);
         this.nodes.addAll(nodes);
     }
 
-    private static Wire deserialize(WireType wireType, Optional<DyeColor> color, List<WireNode> nodes)
-    {
+    private static Wire deserialize(WireType wireType, Optional<DyeColor> color, List<WireNode> nodes) {
         return new Wire(wireType, color.orElse(wireType.getDefaultColor()), nodes);
     }
 
-    public WireType getWireType()
-    {
+    public WireType getWireType() {
         return wireType;
     }
 
-    public DyeColor getColor()
-    {
+    public DyeColor getColor() {
         return color;
     }
 
-    private Optional<DyeColor> getColorForSerialization()
-    {
+    private Optional<DyeColor> getColorForSerialization() {
         return color == wireType.getDefaultColor() ? Optional.empty() : Optional.of(color);
     }
 
-    public void addNodes(List<WireNode> nodes)
-    {
+    public void addNodes(List<WireNode> nodes) {
         this.nodes.addAll(nodes);
     }
 
-    public List<WireNode> getNodes()
-    {
+    public List<WireNode> getNodes() {
         return nodes;
     }
 
-    public Wire copy()
-    {
+    public Wire copy() {
         List<WireNode> copiedNodes = new ArrayList<>(nodes.size());
-        for (WireNode node : nodes)
-        {
+        for (WireNode node : nodes) {
             copiedNodes.add(node.copy());
         }
         return new Wire(wireType, color, copiedNodes);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Wire[type=" + wireType + ",color=" + color + "]";
     }
 }

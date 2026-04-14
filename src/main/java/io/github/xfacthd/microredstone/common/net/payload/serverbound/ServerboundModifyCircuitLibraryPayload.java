@@ -12,8 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record ServerboundModifyCircuitLibraryPayload(Either<CircuitLibraryEntry, String> entry) implements CustomPacketPayload
-{
+public record ServerboundModifyCircuitLibraryPayload(Either<CircuitLibraryEntry, String> entry) implements CustomPacketPayload {
     public static final Type<ServerboundModifyCircuitLibraryPayload> TYPE = Utils.payloadType("serverbound_modify_circuit_library");
     public static final StreamCodec<ByteBuf, ServerboundModifyCircuitLibraryPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.either(CircuitLibraryEntry.STREAM_CODEC, ByteBufCodecs.STRING_UTF8),
@@ -21,9 +20,8 @@ public record ServerboundModifyCircuitLibraryPayload(Either<CircuitLibraryEntry,
             ServerboundModifyCircuitLibraryPayload::new
     );
 
-    public void handle(IPayloadContext ctx)
-    {
-        if (!(ctx.player() instanceof ServerPlayer player)) throw new IllegalStateException("");
+    public void handle(IPayloadContext ctx) {
+        if (!(ctx.player() instanceof ServerPlayer player)) { throw new IllegalStateException(""); }
 
         ServerCircuitLibrary library = ServerCircuitLibrary.get(player.level().getServer());
         boolean success = entry.map(
@@ -34,8 +32,7 @@ public record ServerboundModifyCircuitLibraryPayload(Either<CircuitLibraryEntry,
     }
 
     @Override
-    public Type<ServerboundModifyCircuitLibraryPayload> type()
-    {
+    public Type<ServerboundModifyCircuitLibraryPayload> type() {
         return TYPE;
     }
 }

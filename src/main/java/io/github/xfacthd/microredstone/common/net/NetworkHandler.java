@@ -12,12 +12,10 @@ import io.github.xfacthd.microredstone.common.net.task.SyncCircuitLibraryTask;
 import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-public final class NetworkHandler
-{
+public final class NetworkHandler {
     private static final String VERSION = "1";
 
-    public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event)
-    {
+    public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
         event.registrar(VERSION)
                 .configurationToClient(
                         ClientboundCircuitLibraryPayload.TYPE,
@@ -55,10 +53,9 @@ public final class NetworkHandler
                 );
     }
 
-    public static void onRegisterConfigTasks(RegisterConfigurationTasksEvent event)
-    {
+    public static void onRegisterConfigTasks(RegisterConfigurationTasksEvent event) {
         event.register(new SyncCircuitLibraryTask(event.getListener()));
     }
 
-    private NetworkHandler() {}
+    private NetworkHandler() { }
 }

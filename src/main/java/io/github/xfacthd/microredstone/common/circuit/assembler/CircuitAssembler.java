@@ -44,67 +44,60 @@ import java.util.Set;
 import java.util.function.BiFunction;
 
 @SuppressWarnings("UnstableApiUsage")
-public final class CircuitAssembler
-{
+public final class CircuitAssembler {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Port[] PORTS = Port.values();
 
-    @Nullable
-    public static CompoundCircuitNode assemble(String name, CompoundPrototypeNode node, CircuitErrorCollector errors)
-    {
-        try
-        {
+    public @Nullable static CompoundCircuitNode assemble(String name, CompoundPrototypeNode node, CircuitErrorCollector errors) {
+        try {
             node.validate(errors);
-        }
-        catch (Throwable t)
-        {
+        } catch (Throwable t) {
             errors.submit(new RootError.UnexpectedError(t));
             LOGGER.error("Encountered an unexpected error validating the circuit prototype. This is a bug!", t);
         }
-        if (errors.hasErrors()) return null;
+        if (errors.hasErrors()) {
+            return null;
+        }
 
         List<ClockPrototypeNode> clockProtoNodes = new ArrayList<>();
         List<BufferPrototypeNode> bufferProtoNodes = new ArrayList<>();
         Graph<PrototypeNode> nodeGraph = buildNodeGraph(node, clockProtoNodes, bufferProtoNodes, errors);
-        if (nodeGraph == null) return null;
+        if (nodeGraph == null) {
+            return null;
+        }
 
         List<PrototypeNode> childProtoNodes = buildSortedNodeList(nodeGraph, errors);
-        if (errors.hasErrors()) return null;
+        if (errors.hasErrors()) {
+            return null;
+        }
 
         WireMapper wireMapper = new WireMapper();
 
         List<NodeEntry<ClockCircuitNode>> clockNodes = new ArrayList<>(clockProtoNodes.size());
-        for (ClockPrototypeNode clock : clockProtoNodes)
-        {
+        for (ClockPrototypeNode clock : clockProtoNodes) {
             buildPrimitiveNode(clockNodes, clock, wireMapper, ClockPrototypeNode::assemble);
         }
         List<NodeEntry<BufferCircuitNode>> bufferNodes = new ArrayList<>(bufferProtoNodes.size());
-        for (BufferPrototypeNode buffer : bufferProtoNodes)
-        {
+        for (BufferPrototypeNode buffer : bufferProtoNodes) {
             buildPrimitiveNode(bufferNodes, buffer, wireMapper, BufferPrototypeNode::assemble);
         }
 
         List<NodeEntry<CircuitNode>> childNodes = new ArrayList<>();
-        for (PrototypeNode childNode : childProtoNodes)
-        {
-            switch (childNode)
-            {
+        for (PrototypeNode childNode : childProtoNodes) {
+            switch (childNode) {
                 case ClockPrototypeNode ignored -> throw new IllegalStateException();
                 case BufferPrototypeNode ignored -> throw new IllegalStateException();
-                case ReferencePrototypeNode reference ->
-                {
+                case ReferencePrototypeNode reference -> {
                     CompoundCircuitNode assembled = reference.assemble(wireMapper);
                     WirePair[] inputs = Arrays.stream(assembled.getInputs())
-                            .map(con ->
-                            {
+                            .map(con -> {
                                 Wire wire = reference.getWireOrThrow(con.port());
                                 int resolved = wireMapper.resolveWire(wire);
                                 return new WirePair(resolved, con.wire());
                             })
                             .toArray(WirePair[]::new);
                     WirePair[] outputs = Arrays.stream(assembled.getOutputs())
-                            .map(con ->
-                            {
+                            .map(con -> {
                                 Wire wire = reference.getWireOrThrow(con.port());
                                 int resolved = wireMapper.resolveWire(wire);
                                 return new WirePair(resolved, con.wire());
@@ -117,10 +110,8 @@ public final class CircuitAssembler
         }
 
         Int2ObjectMap<List<BundlePackerCircuitNode>> packersPerWire = new Int2ObjectOpenHashMap<>();
-        for (NodeEntry<?> childNode : childNodes)
-        {
-            if (childNode.node() instanceof BundlePackerCircuitNode packer)
-            {
+        for (NodeEntry<?> childNode : childNodes) {
+            if (childNode.node() instanceof BundlePackerCircuitNode packer) {
                 int wire = packer.getOutputs()[0].wire();
                 packersPerWire.computeIfAbsent(wire, _ -> new ArrayList<>()).add(packer);
             }
@@ -129,20 +120,19 @@ public final class CircuitAssembler
         List<Connector> inputs = new ArrayList<>();
         List<Connector> outputs = new ArrayList<>();
         @Nullable Connection[] connections = node.getConnections();
-        for (Port port : PORTS)
-        {
+        for (Port port : PORTS) {
             Connection connection = connections[port.ordinal()];
-            if (connection == null) continue;
+            if (connection == null) {
+                continue;
+            }
 
             Connector connector = connection.toConnector(port, wireMapper);
-            switch (connection.getPortDir())
-            {
+            switch (connection.getPortDir()) {
                 case INPUT -> inputs.add(connector);
                 case OUTPUT -> outputs.add(connector);
             }
         }
-        if (wireMapper.size() != node.getWireCount())
-        {
+        if (wireMapper.size() != node.getWireCount()) {
             errors.submit(new RootError.WireCountMismatch(node.getWireCount(), wireMapper.size()));
             return null;
         }
@@ -153,10 +143,11 @@ public final class CircuitAssembler
 
     private static <P extends PrototypeNode, C extends CircuitNode> void buildPrimitiveNode(
             List<NodeEntry<C>> output, P protoNode, WireMapper wireMapper, BiFunction<P, WireMapper, @Nullable C> assembler
-    )
-    {
+    ) {
         C assembled = assembler.apply(protoNode, wireMapper);
-        if (assembled == null) return;
+        if (assembled == null) {
+            return;
+        }
 
         WirePair[] inputs = Arrays.stream(assembled.getInputs())
                 .map(con -> new WirePair(con.wire(), con.port().ordinal()))
@@ -167,50 +158,40 @@ public final class CircuitAssembler
         output.add(new NodeEntry<>(assembled, protoNode.getPos(), protoNode.getRotation(), inputs, outputs));
     }
 
-    @Nullable
-    private static Graph<PrototypeNode> buildNodeGraph(
+    private static @Nullable Graph<PrototypeNode> buildNodeGraph(
             CompoundPrototypeNode node,
             List<ClockPrototypeNode> clockProtoNodes,
             List<BufferPrototypeNode> bufferProtoNodes,
             CircuitErrorCollector errors
-    )
-    {
+    ) {
         MutableGraph<PrototypeNode> graph = GraphBuilder.directed().nodeOrder(ElementOrder.insertion()).build();
         Map<Wire, PrototypeNode> drivers = new IdentityHashMap<>();
         Multimap<Wire, PrototypeNode> readers = HashMultimap.create();
 
-        for (PrototypeNode childNode : node.getChildNodes())
-        {
-            if (childNode instanceof ClockPrototypeNode clock)
-            {
+        for (PrototypeNode childNode : node.getChildNodes()) {
+            if (childNode instanceof ClockPrototypeNode clock) {
                 clockProtoNodes.add(clock);
                 continue;
             }
-            if (childNode instanceof BufferPrototypeNode buffer)
-            {
+            if (childNode instanceof BufferPrototypeNode buffer) {
                 bufferProtoNodes.add(buffer);
                 continue;
             }
 
             graph.addNode(childNode);
-            for (Wire input : childNode.getConnectedWires(PortDir.INPUT))
-            {
+            for (Wire input : childNode.getConnectedWires(PortDir.INPUT)) {
                 readers.put(input, childNode);
             }
-            for (Wire output : childNode.getConnectedWires(PortDir.OUTPUT))
-            {
+            for (Wire output : childNode.getConnectedWires(PortDir.OUTPUT)) {
                 drivers.put(output, childNode);
             }
         }
 
-        for (Map.Entry<Wire, PrototypeNode> driver : drivers.entrySet())
-        {
+        for (Map.Entry<Wire, PrototypeNode> driver : drivers.entrySet()) {
             Wire wire = driver.getKey();
             PrototypeNode driverNode = driver.getValue();
-            for (PrototypeNode readerNode : readers.get(wire))
-            {
-                if (driverNode == readerNode)
-                {
+            for (PrototypeNode readerNode : readers.get(wire)) {
+                if (driverNode == readerNode) {
                     errors.submit(new NodeError.DirectCycle(driverNode));
                     return null;
                 }
@@ -220,16 +201,11 @@ public final class CircuitAssembler
         return graph;
     }
 
-    private static List<PrototypeNode> buildSortedNodeList(Graph<PrototypeNode> nodeGraph, CircuitErrorCollector errors)
-    {
-        try
-        {
+    private static List<PrototypeNode> buildSortedNodeList(Graph<PrototypeNode> nodeGraph, CircuitErrorCollector errors) {
+        try {
             return TopologicalSort.topologicalSort(nodeGraph, null);
-        }
-        catch (CyclePresentException e)
-        {
-            for (Set<PrototypeNode> cycle : e.<PrototypeNode>getCycles())
-            {
+        } catch (CyclePresentException e) {
+            for (Set<PrototypeNode> cycle : e.<PrototypeNode>getCycles()) {
                 errors.submit(new NodeError.IndirectCycle(cycle));
             }
             return List.of();

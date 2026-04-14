@@ -10,8 +10,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.util.CommonColors;
 
-public final class ToolPaneTabButton extends SimpleButton implements DropFocusAfterClick
-{
+public final class ToolPaneTabButton extends SimpleButton implements DropFocusAfterClick {
     public static final int WIDTH = ToolPaneTabWidget.TOOL_PANE_WIDTH / ToolPaneTab.TAB_COUNT;
     public static final int HEIGHT = 18;
     private static final WidgetSprites SPRITES_UNSELECTED = sprites(Utils.rl("tab/tab_unselected"));
@@ -23,40 +22,31 @@ public final class ToolPaneTabButton extends SimpleButton implements DropFocusAf
     private final ToolPaneTab tab;
     private final WidgetSprites selectedSprites;
 
-    public ToolPaneTabButton(ToolPane owner, ToolPaneTab tab, int x, int y)
-    {
+    public ToolPaneTabButton(ToolPane owner, ToolPaneTab tab, int x, int y) {
         super(x, y, WIDTH, HEIGHT, tab.getTitle().copy().withColor(CommonColors.DARK_GRAY).withoutShadow());
         this.owner = owner;
         this.tab = tab;
-        if (tab.ordinal() == 0)
-        {
+        if (tab.ordinal() == 0) {
             this.selectedSprites = SPRITES_LEFT;
-        }
-        else if (tab.ordinal() == ToolPaneTab.MAX_TAB_IDX)
-        {
+        } else if (tab.ordinal() == ToolPaneTab.MAX_TAB_IDX) {
             this.selectedSprites = SPRITES_RIGHT;
-        }
-        else
-        {
+        } else {
             this.selectedSprites = SPRITES_CENTER;
         }
     }
 
     @Override
-    protected WidgetSprites getSprites()
-    {
+    protected WidgetSprites getSprites() {
         return owner.getActiveTab() == tab ? selectedSprites : SPRITES_UNSELECTED;
     }
 
     @Override
-    protected void extractDefaultLabel(ActiveTextCollector textCollector)
-    {
+    protected void extractDefaultLabel(ActiveTextCollector textCollector) {
         textCollector.accept(getX() + 5, getY() + 5, getMessage());
     }
 
     @Override
-    public void onPress(InputWithModifiers input)
-    {
+    public void onPress(InputWithModifiers input) {
         owner.setActiveTab(tab);
     }
 }

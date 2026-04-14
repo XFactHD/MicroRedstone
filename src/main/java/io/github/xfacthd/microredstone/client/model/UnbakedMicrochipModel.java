@@ -13,8 +13,7 @@ import net.minecraft.client.resources.model.SimpleModelWrapper;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 
-public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
-{
+public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel {
     public static final MapCodec<UnbakedMicrochipModel> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Identifier.CODEC.fieldOf("model").forGetter(model -> model.baseModel),
             Variant.SimpleModelState.MAP_CODEC.forGetter(model -> model.variantState)
@@ -32,8 +31,7 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
     private final ModelState modelState;
     private final boolean up;
 
-    UnbakedMicrochipModel(Identifier baseModel, Variant.SimpleModelState variantState)
-    {
+    UnbakedMicrochipModel(Identifier baseModel, Variant.SimpleModelState variantState) {
         this.baseModel = baseModel;
         this.variantState = variantState;
         this.modelState = variantState.asModelState();
@@ -41,13 +39,11 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
     }
 
     @Override
-    public BlockStateModel bake(ModelBaker baker)
-    {
+    public BlockStateModel bake(ModelBaker baker) {
         BlockStateModel[] singleModels = new BlockStateModel[4];
         BlockStateModel[] bundledModels = new BlockStateModel[4];
 
-        for (int edge = 0; edge < 4; edge++)
-        {
+        for (int edge = 0; edge < 4; edge++) {
             int outEdge = (edge + (up ? 1 : 2)) % 4;
             singleModels[outEdge] = bakePart(baker, LOCATIONS_SINGLE[edge], modelState);
             bundledModels[outEdge] = bakePart(baker, LOCATIONS_BUNDLED[edge], modelState);
@@ -56,25 +52,21 @@ public final class UnbakedMicrochipModel implements CustomUnbakedBlockStateModel
         return new MicrochipBlockStateModel(bakePart(baker, baseModel, modelState), singleModels, bundledModels);
     }
 
-    private static BlockStateModel bakePart(ModelBaker baker, Identifier model, ModelState modelState)
-    {
+    private static BlockStateModel bakePart(ModelBaker baker, Identifier model, ModelState modelState) {
         return new SingleVariant(SimpleModelWrapper.bake(baker, model, modelState));
     }
 
     @Override
-    public void resolveDependencies(Resolver resolver)
-    {
+    public void resolveDependencies(Resolver resolver) {
         resolver.markDependency(baseModel);
-        for (int edge = 0; edge < 4; edge++)
-        {
+        for (int edge = 0; edge < 4; edge++) {
             resolver.markDependency(LOCATIONS_SINGLE[edge]);
             resolver.markDependency(LOCATIONS_BUNDLED[edge]);
         }
     }
 
     @Override
-    public MapCodec<? extends CustomUnbakedBlockStateModel> codec()
-    {
+    public MapCodec<? extends CustomUnbakedBlockStateModel> codec() {
         return CODEC;
     }
 }

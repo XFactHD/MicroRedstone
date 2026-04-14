@@ -20,13 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(DebugExportConfigExtension.class)
-public final class SingleNodeBundlePackUnpackTests
-{
+public final class SingleNodeBundlePackUnpackTests {
     @Test
-    void testBundlePack()
-    {
-        for (int bit = 0; bit < 16; bit++)
-        {
+    void testBundlePack() {
+        for (int bit = 0; bit < 16; bit++) {
             TestBuilder builder = new TestBuilder();
 
             Wire wireIn = builder.addWire(WireType.SINGLE);
@@ -52,14 +49,12 @@ public final class SingleNodeBundlePackUnpackTests
             Circuit circuitCompiled = new Circuit(compiled);
             TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-            for (int i = 0; i <= 0b11; i++)
-            {
+            for (int i = 0; i <= 0b11; i++) {
                 int left = adapter.setValue(Port.LEFT, i & 1);
                 circuitInterp.evaluate(adapter, null);
                 Assertions.assertEquals(left << bit, adapter.getValue(Port.RIGHT), "Interpreted PACK bit " + bit + " input " + left);
             }
-            for (int i = 0; i <= 0b11; i++)
-            {
+            for (int i = 0; i <= 0b11; i++) {
                 int left = adapter.setValue(Port.LEFT, i & 1);
                 circuitCompiled.evaluate(adapter, null);
                 Assertions.assertEquals(left << bit, adapter.getValue(Port.RIGHT), "Compiled PACK bit " + bit + " input " + left);
@@ -75,8 +70,7 @@ public final class SingleNodeBundlePackUnpackTests
     }
 
     @Test
-    void testBundleMultiPack()
-    {
+    void testBundleMultiPack() {
         TestBuilder builder = new TestBuilder();
 
         Wire wireInOne = builder.addWire(WireType.SINGLE);
@@ -110,15 +104,13 @@ public final class SingleNodeBundlePackUnpackTests
         Circuit circuitCompiled = new Circuit(compiled);
         TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-        for (int i = 0; i <= 0b11; i++)
-        {
+        for (int i = 0; i <= 0b11; i++) {
             int up = adapter.setValue(Port.UP, i & 1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 1);
             circuitInterp.evaluate(adapter, null);
             Assertions.assertEquals(i, adapter.getValue(Port.RIGHT), "Interpreted PACK_MULTI input " + up + ", " + down);
         }
-        for (int i = 0; i <= 0b11; i++)
-        {
+        for (int i = 0; i <= 0b11; i++) {
             int up = adapter.setValue(Port.UP, i & 1);
             int down = adapter.setValue(Port.DOWN, (i >> 1) & 1);
             circuitCompiled.evaluate(adapter, null);
@@ -127,10 +119,8 @@ public final class SingleNodeBundlePackUnpackTests
     }
 
     @Test
-    void testBundleUnpack()
-    {
-        for (int bit = 0; bit < 16; bit++)
-        {
+    void testBundleUnpack() {
+        for (int bit = 0; bit < 16; bit++) {
             TestBuilder builder = new TestBuilder();
 
             Wire wireIn = builder.addWire(WireType.BUNDLED);
@@ -156,14 +146,12 @@ public final class SingleNodeBundlePackUnpackTests
             Circuit circuitCompiled = new Circuit(compiled);
             TestInterfaceAdapter adapter = new TestInterfaceAdapter();
 
-            for (int i = 0; i <= 16; i++)
-            {
+            for (int i = 0; i <= 16; i++) {
                 int left = adapter.setValue(Port.LEFT, (1 << i) & 0xFFFF);
                 circuitInterp.evaluate(adapter, null);
                 Assertions.assertEquals(i == bit ? 1 : 0, adapter.getValue(Port.RIGHT), "Interpreted UNPACK bit " + bit + " input " + left);
             }
-            for (int i = 0; i <= 16; i++)
-            {
+            for (int i = 0; i <= 16; i++) {
                 int left = adapter.setValue(Port.LEFT, (1 << i) & 0xFFFF);
                 circuitCompiled.evaluate(adapter, null);
                 Assertions.assertEquals(i == bit ? 1 : 0, adapter.getValue(Port.RIGHT), "Compiled UNPACK bit " + bit + " input " + left);

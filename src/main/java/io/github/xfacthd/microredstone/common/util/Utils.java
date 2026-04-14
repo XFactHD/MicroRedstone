@@ -41,95 +41,79 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class Utils
-{
+public final class Utils {
     private static final Identifier RL_TEMPLATE = Identifier.fromNamespaceAndPath(MicroRedstone.MOD_ID, "");
     private static final Long2ObjectMap<Direction> DIRECTION_BY_NORMAL = Arrays.stream(Direction.values())
             .collect(Collectors.toMap(
                     side -> new BlockPos(side.getUnitVec3i()).asLong(),
                     Function.identity(),
-                    (sideA, sideB) -> { throw new IllegalArgumentException("Duplicate keys"); },
+                    (_, _) -> { throw new IllegalArgumentException("Duplicate keys"); },
                     Long2ObjectOpenHashMap::new
             ));
     private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss");
     public static final boolean PRODUCTION = FMLEnvironment.isProduction();
 
-    public static Direction getDirection(BlockPos srcPos, BlockPos destPos)
-    {
+    public static Direction getDirection(BlockPos srcPos, BlockPos destPos) {
         return dirByNormal(destPos.getX() - srcPos.getX(), destPos.getY() - srcPos.getY(), destPos.getZ() - srcPos.getZ());
     }
 
-    public static Direction dirByNormal(int x, int y, int z)
-    {
+    public static Direction dirByNormal(int x, int y, int z) {
         return DIRECTION_BY_NORMAL.get(BlockPos.asLong(x, y, z));
     }
 
-    public static Identifier rl(String path)
-    {
+    public static Identifier rl(String path) {
         return RL_TEMPLATE.withPath(path);
     }
 
-    public static Identifier rl(String namespace, String path)
-    {
+    public static Identifier rl(String namespace, String path) {
         return Identifier.fromNamespaceAndPath(namespace, path);
     }
 
-    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String path)
-    {
+    public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String path) {
         return new CustomPacketPayload.Type<>(Utils.rl(path));
     }
 
-    public static ConfigurationTask.Type configTaskType(String path)
-    {
+    public static ConfigurationTask.Type configTaskType(String path) {
         return new ConfigurationTask.Type(Utils.rl(path));
     }
 
-    public static <T> ResourceKey<T> getKeyOrThrow(Holder<T> holder)
-    {
+    public static <T> ResourceKey<T> getKeyOrThrow(Holder<T> holder) {
         return holder.unwrapKey().orElseThrow(
                 () -> new IllegalArgumentException("Direct holders and unbound reference holders are not supported")
         );
     }
 
-    public static MutableComponent translate(@Nullable String prefix, @Nullable String postfix, Object... arguments)
-    {
+    public static MutableComponent translate(@Nullable String prefix, @Nullable String postfix, Object... arguments) {
         return Component.translatable(translationKey(prefix, postfix), arguments);
     }
 
-    public static MutableComponent translate(@Nullable String prefix, @Nullable String postfix)
-    {
+    public static MutableComponent translate(@Nullable String prefix, @Nullable String postfix) {
         return Component.translatable(translationKey(prefix, postfix));
     }
 
-    public static String translationKey(@Nullable String prefix, @Nullable String postfix)
-    {
+    public static String translationKey(@Nullable String prefix, @Nullable String postfix) {
         String key = "";
-        if (prefix != null)
-        {
+        if (prefix != null) {
             key = prefix + ".";
         }
         key += MicroRedstone.MOD_ID;
-        if (postfix != null)
-        {
+        if (postfix != null) {
             key += "." + postfix;
         }
         return key;
     }
 
-    public static Direction getDirFromCross(Vec3 hitVec, Direction hitFace)
-    {
+    public static Direction getDirFromCross(Vec3 hitVec, Direction hitFace) {
         hitVec = fraction(hitVec).subtract(.5, .5, .5);
 
-        return switch (hitFace.getAxis())
-        {
+        return switch (hitFace.getAxis()) {
             case X -> Direction.getApproximateNearest(0, hitVec.y, hitVec.z);
             case Y -> Direction.getApproximateNearest(hitVec.x, 0, hitVec.z);
             case Z -> Direction.getApproximateNearest(hitVec.x, hitVec.y, 0);
         };
     }
 
-    public static Vec3 fraction(Vec3 vec)
-    {
+    public static Vec3 fraction(Vec3 vec) {
         return new Vec3(
                 vec.x() - Math.floor(vec.x()),
                 vec.y() - Math.floor(vec.y()),
@@ -137,38 +121,31 @@ public final class Utils
         );
     }
 
-    public static <T> T[] fillArray(T[] arr, IntFunction<T> initializer)
-    {
-        for (int i = 0; i < arr.length; i++)
-        {
+    public static <T> T[] fillArray(T[] arr, IntFunction<T> initializer) {
+        for (int i = 0; i < arr.length; i++) {
             arr[i] = initializer.apply(i);
         }
         return arr;
     }
 
-    public static <T> T[] concatArrays(T[] arrOne, T[] arrTwo)
-    {
+    public static <T> T[] concatArrays(T[] arrOne, T[] arrTwo) {
         T[] arrNew = Arrays.copyOf(arrOne, arrOne.length + arrTwo.length);
         System.arraycopy(arrTwo, 0, arrNew, arrOne.length, arrTwo.length);
         return arrNew;
     }
 
-    public static Rotation getRotationFromFacingOrientation(Direction facing, Direction orientation)
-    {
+    public static Rotation getRotationFromFacingOrientation(Direction facing, Direction orientation) {
         int idx = MappingArrays.dirPairToRotIndex(facing, orientation);
         return Objects.requireNonNull(MappingArrays.DIR_PAIR_TO_ROT[idx]);
     }
 
-    public static Direction getSideFromFacingRotation(Direction facing, Rotation rotation)
-    {
+    public static Direction getSideFromFacingRotation(Direction facing, Rotation rotation) {
         int idx = MappingArrays.dirRotToSideIndex(facing, rotation);
         return MappingArrays.DIR_ROT_TO_SIDE[idx];
     }
 
-    public static Rotation invertRotation(Rotation rotation)
-    {
-        return switch (rotation)
-        {
+    public static Rotation invertRotation(Rotation rotation) {
+        return switch (rotation) {
             case NONE -> Rotation.NONE;
             case CLOCKWISE_90 -> Rotation.COUNTERCLOCKWISE_90;
             case CLOCKWISE_180 -> Rotation.CLOCKWISE_180;
@@ -176,36 +153,30 @@ public final class Utils
         };
     }
 
-    @Nullable
-    public static <E extends BlockEntity, A extends BlockEntity>BlockEntityTicker<A> createBlockEntityTicker(
+    public static <E extends BlockEntity, A extends BlockEntity> @Nullable BlockEntityTicker<A> createBlockEntityTicker(
             BlockEntityType<A> actualType, DeferredBlockEntity<E> expectedType, Consumer<? super E> instTicker
-    )
-    {
-        BlockEntityTicker<? super E> ticker = (level, pos, state, be) -> instTicker.accept(be);
+    ) {
+        BlockEntityTicker<? super E> ticker = (_, _, _, be) -> instTicker.accept(be);
         return BaseEntityBlock.createTickerHelper(actualType, expectedType.value(), ticker);
     }
 
-    public static <T, R> Function<T, R> uncheckIO(IOFunction<T, R> function)
-    {
+    public static <T, R> Function<T, R> uncheckIO(IOFunction<T, R> function) {
         return function.asFunction();
     }
 
-    public static Component formatInstant(Instant instant)
-    {
+    public static Component formatInstant(Instant instant) {
         ZonedDateTime dateTime = instant.atZone(ZoneId.systemDefault());
         return Component.literal(INSTANT_FORMATTER.format(dateTime));
     }
 
-    public static Supplier<Component> resolvePlayerName(ProfileResolver resolver, UUID playerId, Executor mainThread)
-    {
+    public static Supplier<Component> resolvePlayerName(ProfileResolver resolver, UUID playerId, Executor mainThread) {
         MutableObject<Component> playerName = new MutableObject<>();
         CompletableFuture.supplyAsync(() -> resolver.fetchById(playerId))
-                .thenAcceptAsync(profile ->
-                {
+                .thenAcceptAsync(profile -> {
                     String name = profile.map(GameProfile::name).orElseGet(playerId::toString);
                     playerName.setValue(Component.literal(name));
                 }, mainThread);
-        return playerName::getValue;
+        return playerName;
     }
 
     private Utils() { }
