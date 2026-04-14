@@ -762,7 +762,8 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "neoforge:white"
+      "resource": "neoforge:white",
+      "sprite": "microredstone:wire_white"
     },
     {
       "type": "microredstone:stacking",

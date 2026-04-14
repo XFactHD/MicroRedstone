@@ -36,7 +36,7 @@ public record CircuitCanvasContentRenderState(
         @Nullable ScreenRectangle bounds,
         @Nullable ScreenRectangle scissorArea
 ) implements GuiElementRenderState {
-    static final Identifier WHITE_SPRITE = Utils.rl("neoforge", "white");
+    public static final Identifier WHITE_SPRITE = Utils.rl("wire_white");
 
     public static CircuitCanvasContentRenderState create(
             List<PartRenderState> parts,

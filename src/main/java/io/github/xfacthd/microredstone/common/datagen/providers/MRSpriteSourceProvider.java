@@ -1,6 +1,7 @@
 package io.github.xfacthd.microredstone.common.datagen.providers;
 
 import io.github.xfacthd.microredstone.MicroRedstone;
+import io.github.xfacthd.microredstone.client.screen.workbench.element.CircuitCanvasContentRenderState;
 import io.github.xfacthd.microredstone.client.texture.AreaMaskSource;
 import io.github.xfacthd.microredstone.client.texture.PortOverlaySource;
 import io.github.xfacthd.microredstone.client.texture.StackingSource;
@@ -90,7 +91,10 @@ public final class MRSpriteSourceProvider extends SpriteSourceProvider {
                         Map.of(Port.RIGHT, WireType.BUNDLED),
                         Optional.of("border")
                 ));
-        guiAtlas.addSource(new SingleFile(Utils.rl("neoforge", "white")));
+        guiAtlas.addSource(new SingleFile(
+                Utils.rl("neoforge", "white"),
+                Optional.of(CircuitCanvasContentRenderState.WHITE_SPRITE)
+        ));
         guiAtlas.addSource(new StackingSource(
                 LampPrototypeNode.ICON_BG.icon().withPrefix("gui/sprites/"),
                 List.of(LampPrototypeNode.ICON_FG.icon().withPrefix("gui/sprites/")),
