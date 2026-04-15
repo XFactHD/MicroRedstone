@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.players.ProfileResolver;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -171,7 +172,7 @@ public final class Utils {
 
     public static Supplier<Component> resolvePlayerName(ProfileResolver resolver, UUID playerId, Executor mainThread) {
         MutableObject<Component> playerName = new MutableObject<>();
-        CompletableFuture.supplyAsync(() -> resolver.fetchById(playerId))
+        CompletableFuture.supplyAsync(() -> resolver.fetchById(playerId), Util.nonCriticalIoPool())
                 .thenAcceptAsync(profile -> {
                     String name = profile.map(GameProfile::name).orElseGet(playerId::toString);
                     playerName.setValue(Component.literal(name));
