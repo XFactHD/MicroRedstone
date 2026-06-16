@@ -34,25 +34,25 @@ public final class ClientNetworkHandler {
     }
 
     private static void handleCircuitWriteResult(ClientboundWorkbenchWriteCircuitResultPayload payload, IPayloadContext ctx) {
-        if (Minecraft.getInstance().screen instanceof CircuitWorkbenchScreen screen && screen.getMenu().containerId == payload.containerId()) {
+        if (Minecraft.getInstance().gui.screen() instanceof CircuitWorkbenchScreen screen && screen.getMenu().containerId == payload.containerId()) {
             ImportExportHandler.displayExportResult(ImportExportHandler.ExportResult.ofServerResponse(payload.success(), ExportTarget.CIRCUIT_ITEM));
         }
     }
 
     private static void handleModifyCircuitLibraryResult(ClientboundModifyCircuitLibraryResultPayload payload, IPayloadContext ctx) {
-        if (Minecraft.getInstance().screen instanceof CircuitWorkbenchScreen screen && screen.getImportExportHandler().isWaitingForExportResult()) {
+        if (Minecraft.getInstance().gui.screen() instanceof CircuitWorkbenchScreen screen && screen.getImportExportHandler().isWaitingForExportResult()) {
             ImportExportHandler.displayExportResult(ImportExportHandler.ExportResult.ofServerResponse(payload.success(), ExportTarget.LIBRARY));
         }
     }
 
     private static void handleMicrochipChangeCircuit(ClientboundMicrochipChangeCircuitPayload payload, IPayloadContext ctx) {
-        if (Minecraft.getInstance().screen instanceof MicrochipCircuitScreen screen && screen.getMenu().containerId == payload.containerId()) {
+        if (Minecraft.getInstance().gui.screen() instanceof MicrochipCircuitScreen screen && screen.getMenu().containerId == payload.containerId()) {
             screen.handleCircuitUpdate(payload.rootNode().orElse(null), payload.nodeClassName().orElse(null));
         }
     }
 
     private static void handleMicrochipUpdateWireStates(ClientboundMicrochipUpdateWireStatesPayload payload, IPayloadContext ctx) {
-        if (Minecraft.getInstance().screen instanceof MicrochipCircuitScreen screen && screen.getMenu().containerId == payload.containerId()) {
+        if (Minecraft.getInstance().gui.screen() instanceof MicrochipCircuitScreen screen && screen.getMenu().containerId == payload.containerId()) {
             screen.handleWireStateUpdate(payload.wireStates());
         }
     }

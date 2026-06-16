@@ -194,7 +194,7 @@ public final class CircuitCanvas extends AbstractCircuitCanvas implements Circui
                 formatCellCoord(hovered, NodePos::x),
                 formatCellCoord(hovered, NodePos::y)
         ).withStyle(style -> style.withFont(MONOSPACE_FONT));
-        int y = owner.getGuiTop() + owner.getYSize() - CELL_COORD_TEXT_OFF_Y;
+        int y = owner.getTopPos() + owner.getImageHeight() - CELL_COORD_TEXT_OFF_Y;
         graphics.text(owner.getFont(), cellText, x, y, 0xFF404040, false);
     }
 

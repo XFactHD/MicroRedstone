@@ -76,6 +76,6 @@ public final class DialogScreenBuilder {
     }
 
     public void show() {
-        Minecraft.getInstance().pushGuiLayer(build());
+        Minecraft.getInstance().gui.pushScreenLayer(build());
     }
 }

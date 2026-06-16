@@ -91,7 +91,7 @@ public final class ClientCircuitLibrary {
         }
 
         Minecraft.getInstance().schedule(() -> {
-            if (Minecraft.getInstance().screen instanceof CircuitWorkbenchScreen workbench) {
+            if (Minecraft.getInstance().gui.screen() instanceof CircuitWorkbenchScreen workbench) {
                 workbench.getToolPane().getPartsList().updateImportList();
             }
         });

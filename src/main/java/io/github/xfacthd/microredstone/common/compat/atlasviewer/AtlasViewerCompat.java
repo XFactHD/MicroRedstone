@@ -1,5 +1,6 @@
 package io.github.xfacthd.microredstone.common.compat.atlasviewer;
 
+import io.github.xfacthd.atlasviewer.client.api.RegisterSpriteSourceDetailsEvent;
 import io.github.xfacthd.microredstone.client.texture.AreaMaskSource;
 import io.github.xfacthd.microredstone.client.texture.PortOverlaySource;
 import io.github.xfacthd.microredstone.client.texture.StackingSource;
@@ -8,7 +9,6 @@ import io.github.xfacthd.microredstone.common.util.Utils;
 import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
-import xfacthd.atlasviewer.client.api.RegisterSpriteSourceDetailsEvent;
 
 public final class AtlasViewerCompat {
     public static final Component LABEL_MASK_TEXTURE = Utils.translate("label", "source_tooltip.area_mask.texture");
